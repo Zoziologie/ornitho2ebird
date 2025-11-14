@@ -207,7 +207,7 @@ import marker_color from "/data/marker_color.json";
 
     <Import v-else @exportData="importData" @exportForm="createForm" :language="language" />
 
-    <b-row class="my-3 p-3 bg-white rounded shadow-sm" v-if="count_forms != null">
+    <b-row class="my-3 p-3 bg-white rounded shadow-sm" v-if="false && count_forms != null">
       <b-col lg="12">
         <h2 class="border-bottom pb-2 mb-3">2. Assign individual sightings to checklists</h2>
       </b-col>
@@ -379,7 +379,10 @@ import marker_color from "/data/marker_color.json";
       </template>
     </b-row>
 
-    <b-row class="my-3 p-3 bg-white rounded shadow-sm align-items-center" v-if="forms.length > 0">
+    <b-row
+      class="my-3 p-3 bg-white rounded shadow-sm align-items-center"
+      v-if="false && forms.length > 0"
+    >
       <b-col lg="12">
         <h2 class="border-bottom pb-2 mb-3">3. Provide checklist details</h2>
       </b-col>
