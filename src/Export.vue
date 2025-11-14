@@ -19,6 +19,17 @@ export default {
       return this.forms.filter((f) => f.exportable);
     },
   },
+  watch: {
+    $props: {
+      handler() {
+        if (this.prepare_status !== null) {
+          this.prepare_status = this.prepareFile();
+        }
+      },
+      deep: true,
+      immediate: false,
+    },
+  },
   methods: {
     prepareFile() {
       this.prepare_status = 0;
