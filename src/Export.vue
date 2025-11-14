@@ -22,9 +22,7 @@ export default {
   watch: {
     $props: {
       handler() {
-        if (this.prepare_status !== null) {
-          this.prepare_status = this.prepareFile();
-        }
+        this.prepare_status = this.prepareFile();
       },
       deep: true,
       immediate: false,
