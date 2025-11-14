@@ -101,7 +101,7 @@ export default {
           // Return in console species with tax issue
           console.log(s.species);
           common_name = s.species.name;
-          if (this.taxonomic_issues.indexOf(s.species)) {
+          if (!this.taxonomic_issues.find((t) => t.id === s.species["@id"])) {
             this.taxonomic_issues.push({
               id: s.species["@id"],
               biolovision_common: s.species.name,
