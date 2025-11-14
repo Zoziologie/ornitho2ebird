@@ -7,8 +7,8 @@ import marker_color from "/data/marker_color.json";
   <b-container>
     <b-row class="d-flex p-3 my-3 text-white rounded shadow-sm bg-secondary">
       <div>
-        <h1 class="mb-0">Biolovision2eBird</h1>
-        <h6>Convert biolovision data to eBird</h6>
+        <h1 class="mb-0">Ornitho2eBird</h1>
+        <h6>Convert quickly and automatically biolovision data to eBird</h6>
       </div>
       <b-button size="sm" class="ml-auto my-auto p" v-b-modal.modal-settings variant="light">
         <b-icon icon="gear-fill" aria-hidden="true" /> Settings
