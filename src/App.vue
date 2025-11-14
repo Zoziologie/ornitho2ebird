@@ -987,9 +987,7 @@ import marker_color from "/data/marker_color.json";
       </b-col>
       <b-col>
         <div class="d-flex justify-content-center align-items-center">
-          <small class="text-muted">
-            Biolovision2eBird v{{ version }} &middot; {{ license }}.
-          </small>
+          <small class="text-muted"> Ornitho2eBird v{{ version }} &middot; {{ license }}. </small>
           <span class="mx-2">Powered by</span>
           <b-link
             class="d-flex align-items-center text-decoration-none"
