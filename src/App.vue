@@ -49,6 +49,21 @@ import marker_color from "/data/marker_color.json";
         </template>
       </b-form-group>
       <hr />
+      <h4>Automatic assignment</h4>
+      <b-form-group label="Distance" label-cols-lg="4">
+        <b-input type="number" min="0.1" step="0.5" v-model="auto_assign_distance" />
+        <template #description>
+          (km) Distance threshold used for automatic checklist creation. Sightings within this
+          distance on the same day will be grouped together.
+        </template>
+      </b-form-group>
+      <b-form-group label="Party size" label-cols-lg="4">
+        <b-input type="number" min="1" v-model="default_number_observer" />
+        <template #description>
+          Default number of observers for newly created checklists.
+        </template>
+      </b-form-group>
+      <hr />
       <h4>Mapbox & static map</h4>
       <small class="text-danger">Only apply for new import.</small>
       <b-input-group>
@@ -1205,6 +1220,8 @@ export default {
       map_sightings_bounds: null,
       assign_distance: 0.5,
       assign_duration: 1,
+      auto_assign_distance: 5,
+      default_number_observer: 1,
       map_draw_rectangle: null,
       map_draw_marker: null,
       map_card_polyline: null,
@@ -1257,6 +1274,20 @@ export default {
         },
         hotspots: [],
       };
+
+      // Overwrite number of observer
+      if (fnew.number_observer === "") {
+        fnew.number_observer = this.default_number_observer;
+      }
+
+      // Overwrite distance
+      if (fnew.distance === "") {
+        fnew.distance = 0;
+      }
+
+      // Overwrite exportable
+      fnew.exportable = true;
+
       this.forms.push(fnew);
       return fnew;
     },
@@ -1274,6 +1305,8 @@ export default {
       this.map_sightings_bounds = L.latLngBounds(
         [...this.sightings, ...this.forms].map((s) => L.latLng(s.lat, s.lon))
       ).pad(0.05);
+
+      this.assignAuto();
     },
     async onMapCardReady() {
       await this.$nextTick();
@@ -1434,6 +1467,75 @@ export default {
 
       for (var i = this.count_forms + 1; i < form_id; i++) {
         const sightings2 = sightings.filter((s) => s.form_id == i);
+        const fnew = this.createForm(
+          {
+            location_name: this.mathMode(sightings2.map((s) => s.location_name)),
+            date: sightings2[0].date,
+            time: sightings2[0].time,
+            lat: sightings2.reduce((a, b) => a + b.lat, 0) / sightings2.length,
+            lon: sightings2.reduce((a, b) => a + b.lon, 0) / sightings2.length,
+            species_comment_template: this.website.species_comment_template,
+          },
+          this.count_forms + 1
+        );
+        this.count_forms++;
+        this.assign_form_id = fnew.id;
+        this.form_card = fnew;
+      }
+    },
+    assignAuto() {
+      let sightings = this.sightings.filter((s) => s.form_id == 0);
+
+      // Stop if no sightings
+      if (sightings.length == 0) {
+        return;
+      }
+
+      // Group sightings by calendar day
+      const sightingsByDay = {};
+      sightings.forEach((s) => {
+        const dateKey = s.date; // date is already in YYYY-MM-DD format
+        if (!sightingsByDay[dateKey]) {
+          sightingsByDay[dateKey] = [];
+        }
+        sightingsByDay[dateKey].push(s);
+      });
+
+      var form_id = this.count_forms + 1;
+
+      // Process each day
+      Object.keys(sightingsByDay).forEach((dateKey) => {
+        const daySightings = sightingsByDay[dateKey];
+
+        // Cluster sightings within 1km of each other
+        for (var i = 0; i < daySightings.length; i++) {
+          if (daySightings[i].form_id !== 0) continue;
+
+          // Start a new cluster
+          daySightings[i].form_id = form_id;
+
+          // Find all sightings within 1km and add to same cluster
+          for (var j = i + 1; j < daySightings.length; j++) {
+            if (daySightings[j].form_id !== 0) continue;
+
+            var km =
+              L.latLng([daySightings[i].lat, daySightings[i].lon]).distanceTo(
+                L.latLng([daySightings[j].lat, daySightings[j].lon])
+              ) / 1000;
+
+            if (km < this.auto_assign_distance) {
+              daySightings[j].form_id = form_id;
+            }
+          }
+
+          form_id++;
+        }
+      });
+
+      // Create forms for each cluster
+      for (var i = this.count_forms + 1; i < form_id; i++) {
+        const sightings2 = sightings.filter((s) => s.form_id == i);
+        if (sightings2.length === 0) continue; // Skip empty clusters
         const fnew = this.createForm(
           {
             location_name: this.mathMode(sightings2.map((s) => s.location_name)),
@@ -1616,6 +1718,10 @@ export default {
       this.language = JSON.parse(this.$cookie.get("language"));
     if (JSON.parse(this.$cookie.get("global_static_map")))
       this.global_static_map = JSON.parse(this.$cookie.get("global_static_map"));
+    if (this.$cookie.get("auto_assign_distance"))
+      this.auto_assign_distance = parseFloat(this.$cookie.get("auto_assign_distance"));
+    if (this.$cookie.get("default_number_observer"))
+      this.default_number_observer = parseInt(this.$cookie.get("default_number_observer"));
     if (this.$cookie.get("gitub_token")) this.gitub_token = this.$cookie.get("gitub_token");
     if (this.$cookie.get("mapbox_token")) this.mapbox_token = this.$cookie.get("mapbox_token");
 
@@ -1659,6 +1765,12 @@ export default {
         this.$cookie.set("global_static_map", JSON.stringify(this.global_static_map), 365);
       },
       deep: true,
+    },
+    auto_assign_distance() {
+      this.$cookie.set("auto_assign_distance", this.auto_assign_distance, 365);
+    },
+    default_number_observer() {
+      this.$cookie.set("default_number_observer", this.default_number_observer, 365);
     },
     gitub_token() {
       if (this.gitub_token.length == 0) {
