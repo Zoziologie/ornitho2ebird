@@ -31,6 +31,7 @@ export default {
   methods: {
     prepareFile() {
       this.prepare_status = 0;
+      this.sightings_error = [];
       const fid = this.forms_exportable.map((f) => f.id);
 
       const all_sightings = [
