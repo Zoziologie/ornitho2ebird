@@ -35,6 +35,11 @@ import marker_color from "/data/marker_color.json";
           Skip introduction on future visit
         </b-form-checkbox>
       </b-form-group>
+      <b-form-group>
+        <b-form-checkbox v-model="debug_show_checklist_details" switch>
+          Show step 3 (Provide checklist details)
+        </b-form-checkbox>
+      </b-form-group>
       <b-form-group description="">
         <template #label>
           Select the language used in
@@ -63,144 +68,147 @@ import marker_color from "/data/marker_color.json";
           Default number of observers for newly created checklists.
         </template>
       </b-form-group>
-      <hr />
-      <h4>Mapbox & static map</h4>
-      <small class="text-danger">Only apply for new import.</small>
-      <b-input-group>
-        <b-input
-          type="text"
-          v-model="mapbox_token"
-          :state="mapbox_token_state"
-          placeholder="Enter your Mapbox token here..."
-        />
-        <p>
-          In order to use mapbox tile and static map, you will need to
-          <b-link
-            href="https://docs.mapbox.com/help/tutorials/get-started-tokens-api/"
-            target="_blank"
-            >create a public token</b-link
-          >
-          with at the scope <code>styles:tiles</code> and paste it below.
-        </p>
-      </b-input-group>
-      <small v-if="mapbox_token_msg" class="text-danger">{{ mapbox_token_msg }}</small>
-      <b-form-group>
-        <b-form-checkbox
-          v-model="global_static_map.show"
-          switch
-          :disabled="mapbox_token_state != true"
-        >
-          Include static map in checklist comment
-        </b-form-checkbox>
-      </b-form-group>
-      <b-form-group label="Background style: " label-cols-lg="4">
-        <b-form-select
-          v-model="global_static_map.style"
-          :options="map_layers.filter((l) => l.mapbox)"
-        />
-      </b-form-group>
-      <b-form-group label="Path style:" label-cols-lg="4">
+      <div v-if="debug_show_checklist_details">
+        <hr />
+        <h4>Mapbox & static map</h4>
+        <small class="text-danger">Only apply for new import.</small>
         <b-input-group>
           <b-input
-            type="number"
-            min="1"
-            v-model="global_static_map.path_style.strokeWidth"
-            v-b-tooltip.hover.bottom
-            title="line width"
+            type="text"
+            v-model="mapbox_token"
+            :state="mapbox_token_state"
+            placeholder="Enter your Mapbox token here..."
           />
-          <b-input
-            type="color"
-            v-model="global_static_map.path_style.strokeColor"
-            v-b-tooltip.hover.bottom
-            title="line color"
-          />
-          <b-input
-            type="number"
-            min="0"
-            max="1"
-            step=".1"
-            v-model="global_static_map.path_style.strokeOpacity"
-            v-b-tooltip.hover.bottom
-            title="line opacity"
-          />
+          <p>
+            In order to use mapbox tile and static map, you will need to
+            <b-link
+              href="https://docs.mapbox.com/help/tutorials/get-started-tokens-api/"
+              target="_blank"
+              >create a public token</b-link
+            >
+            with at the scope <code>styles:tiles</code> and paste it below.
+          </p>
         </b-input-group>
-      </b-form-group>
-      <b-form-group label="Markers style:" label-cols-lg="4">
-        <b-input-group>
+        <small v-if="mapbox_token_msg" class="text-danger">{{ mapbox_token_msg }}</small>
+        <b-form-group>
+          <b-form-checkbox
+            v-model="global_static_map.show"
+            switch
+            :disabled="mapbox_token_state != true"
+          >
+            Include static map in checklist comment
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group label="Background style: " label-cols-lg="4">
           <b-form-select
-            v-model="global_static_map.marker_style['marker-size']"
-            v-b-tooltip.hover.bottom
-            title="marker size"
-          >
-            <b-form-select-option value="small">Small</b-form-select-option>
-            <b-form-select-option value="medium">Medium</b-form-select-option>
-            <b-form-select-option value="large">Large</b-form-select-option>
-          </b-form-select>
-          <b-select
-            v-model="global_static_map.marker_style['marker-symbol']"
-            :options="maki_icon_list"
-            v-b-tooltip.hover.bottom
-            title="marker symbol"
+            v-model="global_static_map.style"
+            :options="map_layers.filter((l) => l.mapbox)"
           />
+        </b-form-group>
+        <b-form-group label="Path style:" label-cols-lg="4">
+          <b-input-group>
+            <b-input
+              type="number"
+              min="1"
+              v-model="global_static_map.path_style.strokeWidth"
+              v-b-tooltip.hover.bottom
+              title="line width"
+            />
+            <b-input
+              type="color"
+              v-model="global_static_map.path_style.strokeColor"
+              v-b-tooltip.hover.bottom
+              title="line color"
+            />
+            <b-input
+              type="number"
+              min="0"
+              max="1"
+              step=".1"
+              v-model="global_static_map.path_style.strokeOpacity"
+              v-b-tooltip.hover.bottom
+              title="line opacity"
+            />
+          </b-input-group>
+        </b-form-group>
+        <b-form-group label="Markers style:" label-cols-lg="4">
+          <b-input-group>
+            <b-form-select
+              v-model="global_static_map.marker_style['marker-size']"
+              v-b-tooltip.hover.bottom
+              title="marker size"
+            >
+              <b-form-select-option value="small">Small</b-form-select-option>
+              <b-form-select-option value="medium">Medium</b-form-select-option>
+              <b-form-select-option value="large">Large</b-form-select-option>
+            </b-form-select>
+            <b-select
+              v-model="global_static_map.marker_style['marker-symbol']"
+              :options="maki_icon_list"
+              v-b-tooltip.hover.bottom
+              title="marker symbol"
+            />
+            <b-input
+              type="color"
+              v-model="global_static_map.marker_style['marker-color']"
+              v-b-tooltip.hover.bottom
+              title="marker color"
+            />
+          </b-input-group>
+        </b-form-group>
+        <hr />
+        <h4>Interactive Map</h4>
+        <p>
+          Viewing the sightings of a checklist on a map is currently not possible on eBird nor
+          biolovision, but sometimes it can be useful to visualize where you saw certain species.
+          For instance, this checklist
+          <b-link href="https://ebird.org/checklist/S88143525" target="_blank">S88143525</b-link>
+          can be viewed as
+          <b-link
+            href="https://zoziologie.raphaelnussbaumer.com/view-geojson/?https%3A%2F%2Fgist.githubusercontent.com%2FRafnuss%2Fae093a0e750e68b2a7f09a4bc7445b0d%2Fraw%2Fe24e3b2f2f5e21fb7573cc8ecce189bd1e7bc823%2Fmont-sur-rolle__515_146_-2021-05-15.geojson"
+            target="_blank"
+          >
+            this interactive map </b-link
+          >.
+        </p>
+        <p>
+          You can easily generate this map with Biolovision2eBird, but the geospatial data must be
+          stored online. I suggest using a
+          <b-link
+            href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists"
+            target="_blank"
+          >
+            public Github gist
+          </b-link>
+          (<b-link
+            href="https://gist.github.com/Rafnuss/65b1cf1a539d4b87ec90c23c395ab216"
+            target="_blank"
+            >see previous example</b-link
+          >), which requires to
+          <b-link
+            href="https://docs.github.com/en/enterprise-server@3.4/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+            target="_blank"
+          >
+            create a Github token
+          </b-link>
+          and enter it below:
+        </p>
+        <b-input-group>
           <b-input
-            type="color"
-            v-model="global_static_map.marker_style['marker-color']"
-            v-b-tooltip.hover.bottom
-            title="marker color"
+            type="text"
+            v-model="gitub_token"
+            :state="gitub_token_state"
+            placeholder="Enter your Github token here..."
           />
         </b-input-group>
-      </b-form-group>
-      <hr />
-      <h4>Interactive Map</h4>
-      <p>
-        Viewing the sightings of a checklist on a map is currently not possible on eBird nor
-        biolovision, but sometimes it can be useful to visualize where you saw certain species. For
-        instance, this checklist
-        <b-link href="https://ebird.org/checklist/S88143525" target="_blank">S88143525</b-link> can
-        be viewed as
-        <b-link
-          href="https://zoziologie.raphaelnussbaumer.com/view-geojson/?https%3A%2F%2Fgist.githubusercontent.com%2FRafnuss%2Fae093a0e750e68b2a7f09a4bc7445b0d%2Fraw%2Fe24e3b2f2f5e21fb7573cc8ecce189bd1e7bc823%2Fmont-sur-rolle__515_146_-2021-05-15.geojson"
-          target="_blank"
-        >
-          this interactive map </b-link
-        >.
-      </p>
-      <p>
-        You can easily generate this map with Biolovision2eBird, but the geospatial data must be
-        stored online. I suggest using a
-        <b-link
-          href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists"
-          target="_blank"
-        >
-          public Github gist
-        </b-link>
-        (<b-link
-          href="https://gist.github.com/Rafnuss/65b1cf1a539d4b87ec90c23c395ab216"
-          target="_blank"
-          >see previous example</b-link
-        >), which requires to
-        <b-link
-          href="https://docs.github.com/en/enterprise-server@3.4/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
-          target="_blank"
-        >
-          create a Github token
-        </b-link>
-        and enter it below:
-      </p>
-      <b-input-group>
-        <b-input
-          type="text"
-          v-model="gitub_token"
-          :state="gitub_token_state"
-          placeholder="Enter your Github token here..."
-        />
-      </b-input-group>
-      <small> Note that you need to select the "gist" scope. </small>
-      <p>
-        Adding a token will enable the button "Add interactive map" in each checklist. Click on each
-        checklist for which you want to create the interactive map. The link of the interactive map
-        will be added on your static map image in the checklist comment on your eBird checklist.
-      </p>
+        <small> Note that you need to select the "gist" scope. </small>
+        <p>
+          Adding a token will enable the button "Add interactive map" in each checklist. Click on
+          each checklist for which you want to create the interactive map. The link of the
+          interactive map will be added on your static map image in the checklist comment on your
+          eBird checklist.
+        </p>
+      </div>
     </b-modal>
 
     <Intro v-if="!skip_intro" @skipIntro="skip_intro = true" />
@@ -381,7 +389,7 @@ import marker_color from "/data/marker_color.json";
 
     <b-row
       class="my-3 p-3 bg-white rounded shadow-sm align-items-center"
-      v-if="false && forms.length > 0"
+      v-if="debug_show_checklist_details && forms.length > 0"
     >
       <b-col lg="12">
         <h2 class="border-bottom pb-2 mb-3">3. Provide checklist details</h2>
@@ -1194,6 +1202,7 @@ export default {
       version: __APP_VERSION__,
       license: __APP_LICENSE__,
       skip_intro: false,
+      debug_show_checklist_details: false,
       language: "en",
       global_static_map: {
         show: false,
@@ -1727,6 +1736,10 @@ export default {
   mounted() {
     if (JSON.parse(this.$cookie.get("skip_intro")))
       this.skip_intro = JSON.parse(this.$cookie.get("skip_intro"));
+    if (JSON.parse(this.$cookie.get("debug_show_checklist_details")))
+      this.debug_show_checklist_details = JSON.parse(
+        this.$cookie.get("debug_show_checklist_details")
+      );
     if (JSON.parse(this.$cookie.get("language")))
       this.language = JSON.parse(this.$cookie.get("language"));
     if (JSON.parse(this.$cookie.get("global_static_map")))
@@ -1769,6 +1782,13 @@ export default {
     },
     skip_intro() {
       this.$cookie.set("skip_intro", JSON.stringify(this.skip_intro), 365);
+    },
+    debug_show_checklist_details() {
+      this.$cookie.set(
+        "debug_show_checklist_details",
+        JSON.stringify(this.debug_show_checklist_details),
+        365
+      );
     },
     language() {
       this.$cookie.set("language", JSON.stringify(this.language), 365);
