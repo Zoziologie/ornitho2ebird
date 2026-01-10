@@ -232,11 +232,17 @@ export default {
 
           this.website.species_comment_template = {
             short:
-              '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - <a href="http://maps.google.com?q=${s.lat},${s.lon}&t=k">${ s.lat }, ${ s.lon }</a> - <a href="' +
+              '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - <a href="' +
               this.website.website +
               'index.php?m_id=54&id=${ s.id }">' +
               this.website_name +
               '</a>${ s.comment ? " - " + s.comment : "" }',
+            // Previous (with map link) for reference:
+            // '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - <a href="http://maps.google.com?q=${s.lat},${s.lon}&t=k">${ s.lat }, ${ s.lon }</a> - <a href="' +
+            // this.website.website +
+            // 'index.php?m_id=54&id=${ s.id }">' +
+            // this.website_name +
+            // '</a>${ s.comment ? " - " + s.comment : "" }',
             long:
               '${ s.count_precision }${ s.count } - <a href="' +
               this.website.website +
