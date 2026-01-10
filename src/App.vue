@@ -26,10 +26,6 @@ import marker_color from "/data/marker_color.json";
     </b-row>
 
     <b-modal id="modal-settings" title="Global settings" hide-footer>
-      <b-alert show>
-        These settings are saved in your browser's coockies so that they can be re-used in future
-        visit.
-      </b-alert>
       <b-form-group>
         <b-form-checkbox v-model="skip_intro" switch>
           Skip introduction on future visit
@@ -58,8 +54,8 @@ import marker_color from "/data/marker_color.json";
       <b-form-group label="Distance" label-cols-lg="4">
         <b-input type="number" min="0.1" step="0.5" v-model="auto_assign_distance" />
         <template #description>
-          (km) Distance threshold used for automatic checklist creation. Sightings within this
-          distance on the same day will be grouped together.
+          (km) Distance to the first observation used to automatically group sightings into
+          checklists on the same day.
         </template>
       </b-form-group>
       <b-form-group label="Party size" label-cols-lg="4">
@@ -209,6 +205,10 @@ import marker_color from "/data/marker_color.json";
           eBird checklist.
         </p>
       </div>
+      <b-alert show>
+        These settings are saved in your browser's coockies so that they can be re-used in future
+        visit.
+      </b-alert>
     </b-modal>
 
     <Intro v-if="!skip_intro" @skipIntro="skip_intro = true" />
@@ -1324,9 +1324,13 @@ export default {
       // Define the default form_card with the latest forms of the list
       this.form_card = this.count_forms > 0 ? this.forms[this.count_forms - 1] : null;
 
-      const points = [...this.sightings, ...this.forms].filter((s) => s?.lat != null && s?.lon != null);
+      const points = [...this.sightings, ...this.forms].filter(
+        (s) => s?.lat != null && s?.lon != null
+      );
       this.map_sightings_bounds =
-        points.length > 0 ? L.latLngBounds(points.map((s) => L.latLng(s.lat, s.lon))).pad(0.05) : null;
+        points.length > 0
+          ? L.latLngBounds(points.map((s) => L.latLng(s.lat, s.lon))).pad(0.05)
+          : null;
 
       this.assignAuto();
     },
