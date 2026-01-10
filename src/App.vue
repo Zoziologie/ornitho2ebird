@@ -1230,7 +1230,7 @@ export default {
       map_sightings_bounds: null,
       assign_distance: 0.5,
       assign_duration: 1,
-      auto_assign_distance: 5,
+      auto_assign_distance: 3,
       default_number_observer: 1,
       map_draw_rectangle: null,
       map_draw_marker: null,
