@@ -1,7 +1,7 @@
 import fs from "fs";
 import Papa from "papaparse";
 
-const csvData = fs.readFileSync("./data/biolovision_species_list_full.csv", "utf8");
+const csvData = fs.readFileSync("./data/ornitho_species_list_full.csv", "utf8");
 
 const parsedData = Papa.parse(csvData, {
   header: true,
@@ -15,7 +15,7 @@ parsedData.data.forEach((row) => {
 });
 
 fs.writeFileSync(
-  "./data/biolovision_species_list_short.json",
+  "./data/ornitho_species_list_short.json",
   JSON.stringify(species_list, null, 2)
 );
 

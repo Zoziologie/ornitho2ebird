@@ -1,101 +1,101 @@
 [
   {
-    "category": "Main Biolovision",
-    "osm_level": "country",
-    "osm_region": "France",
-    "extension": ".json",
-    "name": "faune-france.org",
-    "system": "biolovision",
-    "website": "https://www.faune-france.org/"
-  },
-  {
-    "category": "Main Biolovision",
-    "osm_level": "country",
-    "osm_region": "Austria",
-    "extension": ".json",
-    "name": "ornitho.at",
-    "system": "biolovision",
-    "website": "https://www.ornitho.at/"
-  },
-  {
-    "category": "Main Biolovision",
-    "osm_level": "state",
-    "osm_region": "Catalonia",
-    "extension": ".json",
-    "name": "ornitho.cat",
-    "system": "biolovision",
-    "website": "https://www.ornitho.cat/"
-  },
-  {
-    "category": "Main Biolovision",
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Switzerland",
     "extension": ".json",
     "name": "ornitho.ch",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://www.ornitho.ch/"
   },
   {
-    "category": "Main Biolovision",
+    "category": "ornitho",
+    "osm_level": "state",
+    "osm_region": "Catalonia",
+    "extension": ".json",
+    "name": "ornitho.cat",
+    "system": "ornitho",
+    "website": "https://www.ornitho.cat/"
+  },
+  {
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Germany",
     "extension": ".json",
     "name": "ornitho.de",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://www.ornitho.de/"
   },
   {
-    "category": "Main Biolovision",
-    "osm_level": "",
-    "osm_region": "",
-    "extension": ".json",
-    "name": "ornitho.eus",
-    "system": "biolovision",
-    "website": "https://www.ornitho.eus/"
-  },
-  {
-    "category": "Main Biolovision",
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Italy",
     "extension": ".json",
     "name": "ornitho.it",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://www.ornitho.it/"
   },
   {
-    "category": "Main Biolovision",
+    "category": "ornitho",
+    "osm_level": "country",
+    "osm_region": "France",
+    "extension": ".json",
+    "name": "faune-france.org",
+    "system": "ornitho",
+    "website": "https://www.faune-france.org/"
+  },
+  {
+    "category": "ornitho",
+    "osm_level": "country",
+    "osm_region": "Austria",
+    "extension": ".json",
+    "name": "ornitho.at",
+    "system": "ornitho",
+    "website": "https://www.ornitho.at/"
+  },
+  {
+    "category": "ornitho",
+    "osm_level": "",
+    "osm_region": "",
+    "extension": ".json",
+    "name": "ornitho.eus",
+    "system": "ornitho",
+    "website": "https://www.ornitho.eus/"
+  },
+  {
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Luxembourg",
     "extension": ".json",
     "name": "ornitho.lu",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://www.ornitho.lu/"
   },
   {
-    "category": "Main Biolovision",
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Poland",
     "extension": ".json",
     "name": "ornitho.pl",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://www.ornitho.pl/"
   },
   {
-    "category": "Main Biolovision",
+    "category": "ornitho",
     "osm_level": "country",
     "osm_region": "Latvia",
     "extension": ".json",
     "name": "ornitho.lv",
-    "system": "biolovision",
+    "system": "ornitho",
     "website": "https://dabasdati.ornitho.lv/"
   },
   {
-    "category": "Main Biolovision",
+    "category": "ornitho",
     "osm_level": "world",
     "osm_region": "",
     "extension": ".txt",
-    "name": "biolovision.net",
-    "system": "biolovision.net",
+    "name": "data.biolovision.net",
+    "system": "ornitho.net",
     "website": "https://data.biolovision.net/"
   },
   {
@@ -103,7 +103,7 @@
     "osm_level": "world",
     "osm_region": "",
     "extension": ".csv",
-    "name": "Birdlasser",
+    "name": "birdlasser",
     "system": "birdlasser",
     "website": "https://www.birdlasser.com/"
   },
