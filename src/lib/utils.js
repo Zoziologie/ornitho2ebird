@@ -71,6 +71,8 @@ export function distanceFromPath(path) {
 }
 
 export function protocol(form) {
+  const stationaryDistanceThresholdKm = 0.03;
+
   if (!form?.date || Number(form?.duration) >= 1440) {
     return {
       name: "Invalid",
@@ -87,13 +89,20 @@ export function protocol(form) {
     };
   }
 
+  const hasDistance =
+    form.distance !== "" &&
+    form.distance !== null &&
+    form.distance !== undefined &&
+    Number.isFinite(Number(form.distance)) &&
+    Number(form.distance) >= 0;
+
   if (
     form.time &&
-    Number(form.distance) >= 0 &&
+    hasDistance &&
     Number(form.duration) > 0 &&
     Number(form.number_observer) > 0
   ) {
-    return Number(form.distance) > 0
+    return Number(form.distance) > stationaryDistanceThresholdKm
       ? { name: "Traveling", letter: "T", variant: "success" }
       : { name: "Stationary", letter: "S", variant: "success" };
   }
@@ -161,15 +170,9 @@ export function buildSpeciesCommentTemplate(website) {
   if (website.system === "ornitho") {
     return {
       short:
-        '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - <a href="' +
-        website.website +
-        'index.php?m_id=54&id=${ s.id }">' +
-        website.name +
-        '</a>${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       long:
-        '${ s.count_precision }${ s.count } - <a href="' +
-        website.website +
-        'index.php?m_id=54&id=${ s.id }">${ s.time }</a>${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       limit: 5,
     };
   }
@@ -177,9 +180,9 @@ export function buildSpeciesCommentTemplate(website) {
   if (website.system === "birdlasser") {
     return {
       short:
-        '${ s.count_precision }${ s.count } ind. - ${ s.time } - <a href="http://maps.google.com?q=${s.lat},${s.lon}&t=k">${ s.lat }, ${ s.lon }</a>${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       long:
-        '${ s.count_precision }${ s.count } ind. - ${ s.time } - ${ s.lat }, ${ s.lon }${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       limit: 20,
     };
   }
@@ -187,13 +190,9 @@ export function buildSpeciesCommentTemplate(website) {
   if (website.system === "observation") {
     return {
       short:
-        '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - <a href="https://maps.google.com?q=${s.lat},${s.lon}&t=k">${ s.lat }, ${ s.lon }</a> - <a href="' +
-        website.website +
-        'observation/${ s.id }">' +
-        website.name +
-        '</a>${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       long:
-        '${ s.count_precision }${ s.count } ind. ${ s.time ? " - " + s.time : "" } - ${ s.lat }, ${ s.lon }${ s.comment ? " - " + s.comment : "" }',
+        '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
       limit: 20,
     };
   }
@@ -255,10 +254,12 @@ export function applyDefaultAutomaticAssignment({
 
   const assignDurationHours = Number(autoAssignDuration) || 1;
   const assignDistanceKm = Number(autoAssignDistance) || 3;
+  const newSightingsByFormId = new Map();
   const datetimes = unassigned.map((sighting) => {
     return sighting.time ? new Date(`${sighting.date}T${sighting.time}`) : new Date(`${sighting.date}T00:00:00`);
   });
-  let nextFormId = Math.max(0, ...forms.map((form) => Number(form.id) || 0)) + 1;
+  const firstGeneratedFormId = Math.max(0, ...forms.map((form) => Number(form.id) || 0)) + 1;
+  let nextFormId = firstGeneratedFormId;
 
   for (let index = 0; index < unassigned.length; index += 1) {
     for (let compare = index - 1; compare >= 0; compare -= 1) {
@@ -287,14 +288,14 @@ export function applyDefaultAutomaticAssignment({
       unassigned[index].form_id = nextFormId;
       nextFormId += 1;
     }
+
+    const groupedSightings = newSightingsByFormId.get(unassigned[index].form_id) || [];
+    groupedSightings.push(unassigned[index]);
+    newSightingsByFormId.set(unassigned[index].form_id, groupedSightings);
   }
 
-  for (
-    let formId = Math.max(0, ...forms.map((form) => Number(form.id) || 0)) + 1;
-    formId < nextFormId;
-    formId += 1
-  ) {
-    const matchedSightings = sightings.filter((sighting) => sighting.form_id === formId);
+  for (let formId = firstGeneratedFormId; formId < nextFormId; formId += 1) {
+    const matchedSightings = newSightingsByFormId.get(formId) || [];
     if (!matchedSightings.length) {
       continue;
     }
@@ -335,18 +336,33 @@ export function buildForm(form, id, options = {}) {
     checklist_comment: form.checklist_comment || "",
     species_comment_template: template,
     path: form.path || null,
+    hotspots: form.hotspots || [],
+    hotspot_key: form.hotspot_key || "",
   };
 
   return builtForm;
 }
 
 export function createSighting(raw) {
+  const roundedLat = mathRound(raw.lat, 6);
+  const roundedLon = mathRound(raw.lon, 6);
+  const hasCoordinates = Number.isFinite(Number(roundedLat)) && Number.isFinite(Number(roundedLon));
+  const coordinates = hasCoordinates ? `${roundedLat}, ${roundedLon}` : "";
+  const googleMapsUrl = hasCoordinates ? `https://maps.google.com/?q=${roundedLat},${roundedLon}` : "";
+
   return {
     id: raw.id,
     form_id: raw.form_id,
+    website: raw.website || "",
+    system: raw.system || "",
+    permalink: raw.permalink || "",
+    source_website_name: raw.source_website_name || raw.website || "",
+    source_record_url: raw.source_record_url || raw.permalink || "",
     location_name: normalizeName(raw.location_name),
-    lat: mathRound(raw.lat, 6),
-    lon: mathRound(raw.lon, 6),
+    lat: roundedLat,
+    lon: roundedLon,
+    coordinates,
+    google_maps_url: googleMapsUrl,
     date: raw.date,
     time: raw.time ? raw.time.substring(0, 5) : "",
     common_name: raw.common_name || "",

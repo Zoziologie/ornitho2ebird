@@ -4,6 +4,20 @@ import { useI18n } from "vue-i18n";
 import L from "leaflet";
 import "leaflet-draw/dist/leaflet.draw-src.js";
 import markerColors from "/data/marker_color.json";
+import hotspotMarkerUrl from "../assets/map-marker-hotspot.png";
+import {
+  addBaseLayerControl,
+  buildAssignmentOptions,
+  buildReviewOptions,
+  checklistColor,
+  checklistMarkerHtml,
+  escapeHtml,
+  formatSightingPopup,
+  protocolBadgeClass,
+  requiredNumberStateClass,
+  requiredStateClass,
+  requiredTimeStateClass,
+} from "../lib/advancedPanel";
 import {
   applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
@@ -47,6 +61,7 @@ let reviewMap = null;
 let reviewSightingsLayer = null;
 let reviewMarkerLayer = null;
 let reviewPathLayer = null;
+let reviewHotspotLayer = null;
 let reviewDrawPolyline = null;
 
 const unassignedColor = "#6c757d";
@@ -75,36 +90,26 @@ const assignableForms = computed(() => {
 });
 
 const assignmentOptions = computed(() => {
-  return [
-    {
-      value: 0,
-      label: t("nonAssigned"),
-      color: checklistColor(0),
-      textClass: optionTextClass(0),
-    },
-    ...assignableForms.value.map((form) => ({
-      value: form.id,
-      label: `${form.id}. ${form.location_name}`,
-      color: checklistColor(form.id),
-      textClass: optionTextClass(form.id),
-    })),
-  ];
+  return buildAssignmentOptions(assignableForms.value, t, checklistColors, unassignedColor);
 });
 
 const selectedAssignmentOption = computed(() => {
-  return assignmentOptions.value.find((option) => option.value === assignFormId.value) || assignmentOptions.value[0];
+  return (
+    assignmentOptions.value.find((option) => option.value === assignFormId.value) ||
+    assignmentOptions.value[0]
+  );
 });
 
 const reviewOptions = computed(() => {
-  return props.forms.map((form) => ({
-    value: form.id,
-    label: `${form.id}. ${form.location_name}`,
-    color: checklistColor(form.id),
-  }));
+  return buildReviewOptions(props.forms, checklistColors, unassignedColor);
 });
 
 const selectedReviewOption = computed(() => {
-  return reviewOptions.value.find((option) => option.value === props.selectedFormId) || reviewOptions.value[0] || null;
+  return (
+    reviewOptions.value.find((option) => option.value === props.selectedFormId) ||
+    reviewOptions.value[0] ||
+    null
+  );
 });
 
 const orderedSightings = computed(() => {
@@ -128,8 +133,11 @@ const computedDuration = computed(() => {
 });
 
 const spansMultipleDays = computed(() => {
-  return new Set(selectedSightings.value.filter((sighting) => sighting.date).map((sighting) => sighting.date))
-    .size > 1;
+  return (
+    new Set(
+      selectedSightings.value.filter((sighting) => sighting.date).map((sighting) => sighting.date),
+    ).size > 1
+  );
 });
 
 const selectedProtocol = computed(() => {
@@ -140,36 +148,9 @@ const isInvalid = computed(() => {
   return selectedProtocol.value?.name === "Invalid";
 });
 
-function protocolBadgeClass(form) {
-  const state = protocol(form);
+function selectStyle() {
   return {
-    danger: "bg-danger",
-    warning: "bg-warning text-dark",
-    success: "bg-success",
-  }[state.variant] || "bg-secondary";
-}
-
-function checklistColor(formId) {
-  if (Number(formId) === 0) {
-    return unassignedColor;
-  }
-
-  return checklistColors[((Number(formId) - 1) % checklistColors.length + checklistColors.length) % checklistColors.length];
-}
-
-function optionTextClass(formId) {
-  return checklistColor(formId) === "#ffff33" ? "text-dark" : "";
-}
-
-function checklistMarkerHtml(formId) {
-  const color = checklistColor(formId);
-  const textColor = color === "#ffff33" ? "#212529" : "#ffffff";
-  return `<span style="background:${color};color:${textColor};border-color:${color}">${formId}</span>`;
-}
-
-function selectStyle(formId) {
-  return {
-    borderColor: "#ced4da",
+    borderColor: "var(--ebird-blue)",
     color: "#212529",
   };
 }
@@ -182,27 +163,6 @@ function selectFormByOffset(offset) {
   const index = props.forms.findIndex((form) => form.id === selectedForm.value.id);
   const nextIndex = Math.min(props.forms.length - 1, Math.max(0, index + offset));
   emit("update:selectedFormId", props.forms[nextIndex]?.id || selectedForm.value.id);
-}
-
-function requiredStateClass(value) {
-  return String(value || "").trim() ? "is-valid" : "is-invalid";
-}
-
-function optionalNumberStateClass(value, min, max) {
-  if (value === "" || value === null || value === undefined) {
-    return "";
-  }
-
-  const number = Number(value);
-  return Number.isFinite(number) && number >= min && number <= max ? "is-valid" : "is-invalid";
-}
-
-function optionalTimeStateClass(value) {
-  if (!value) {
-    return "";
-  }
-
-  return /^\d{2}:\d{2}$/.test(value) ? "is-valid" : "is-invalid";
 }
 
 function earliestSighting() {
@@ -237,34 +197,28 @@ function computeDurationFromSightings() {
   selectedForm.value.duration = computedDuration.value || "";
 }
 
-function applyObserversToEmpty() {
-  if (!selectedForm.value) {
+async function loadHotspotsForSelectedForm() {
+  if (!selectedForm.value?.lat || !selectedForm.value?.lon) {
     return;
   }
 
-  const targetForms = props.forms.filter(
-    (form) => form.id !== selectedForm.value.id && !(Number(form.number_observer) > 0)
-  );
-
-  if (!targetForms.length) {
-    window.alert(t("applyObserversNone"));
+  const hotspotKey = `${Number(selectedForm.value.lat).toFixed(3)},${Number(selectedForm.value.lon).toFixed(3)}`;
+  if (selectedForm.value.hotspot_key === hotspotKey && Array.isArray(selectedForm.value.hotspots)) {
     return;
   }
 
-  if (
-    !window.confirm(
-      t("applyObserversConfirm", {
-        count: targetForms.length,
-        value: selectedForm.value.number_observer,
-      })
-    )
-  ) {
-    return;
+  try {
+    const response = await fetch(
+      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${selectedForm.value.lat}&lng=${selectedForm.value.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
+    );
+    const json = await response.json();
+    selectedForm.value.hotspots = Array.isArray(json) ? json : [];
+    selectedForm.value.hotspot_key = hotspotKey;
+    refreshReviewMap();
+  } catch {
+    selectedForm.value.hotspots = [];
+    selectedForm.value.hotspot_key = hotspotKey;
   }
-
-  targetForms.forEach((form) => {
-    form.number_observer = selectedForm.value.number_observer;
-  });
 }
 
 function focusReviewMap() {
@@ -273,7 +227,10 @@ function focusReviewMap() {
   }
 
   reviewMapElement.value?.scrollIntoView({ behavior: "smooth", block: "center" });
-  reviewMap.flyTo([selectedForm.value.lat, selectedForm.value.lon], Math.max(reviewMap.getZoom(), 13));
+  reviewMap.flyTo(
+    [selectedForm.value.lat, selectedForm.value.lon],
+    Math.max(reviewMap.getZoom(), 13),
+  );
 }
 
 function startPathDraw() {
@@ -297,7 +254,7 @@ function updatePath(path) {
   const confirmed = window.confirm(
     currentDistance !== null
       ? t("updatePathConfirmReplace", { previous: currentDistance, next: newDistance })
-      : t("updatePathConfirm", { next: newDistance })
+      : t("updatePathConfirm", { next: newDistance }),
   );
 
   if (!confirmed) {
@@ -350,7 +307,7 @@ watch(
       emit("update:selectedFormId", forms[0].id);
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 watch(
@@ -359,7 +316,7 @@ watch(
     assignFormId.value = assignableForms.value.some((form) => form.id === value) ? value : 0;
     nextTick(() => refreshReviewMap());
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -368,7 +325,7 @@ watch(
     if (value > 0) {
       assignDuration.value = value;
     }
-  }
+  },
 );
 
 watch(
@@ -377,7 +334,7 @@ watch(
     if (value > 0) {
       assignDistance.value = value;
     }
-  }
+  },
 );
 
 watch(
@@ -387,22 +344,27 @@ watch(
     refreshAssignmentMap();
     refreshReviewMap();
   },
-  { deep: true }
+  { deep: true },
 );
 
 function buildNewChecklist(payload) {
   const nextId = Math.max(0, ...props.forms.map((form) => form.id)) + 1;
+  const speciesCommentTemplate = {
+    short: props.defaultSpeciesCommentTemplate?.short || "",
+    long: props.defaultSpeciesCommentTemplate?.long || "",
+    limit: Number(props.defaultSpeciesCommentTemplate?.limit) || 5,
+  };
   const form = buildForm(
     {
       ...payload,
       imported: false,
       exportable: true,
-      species_comment_template: structuredClone(props.defaultSpeciesCommentTemplate),
+      species_comment_template: speciesCommentTemplate,
       primary_purpose: true,
       full_form: false,
     },
     nextId,
-    { defaultNumberObserver: props.defaultNumberObserver }
+    { defaultNumberObserver: props.defaultNumberObserver },
   );
   props.forms.push(form);
   emit("update:selectedFormId", form.id);
@@ -419,7 +381,9 @@ function createChecklistFromSightings(targetSightings) {
 }
 
 function assignClean() {
-  const usedFormIds = new Set(props.sightings.map((sighting) => sighting.form_id).filter((id) => id > 0));
+  const usedFormIds = new Set(
+    props.sightings.map((sighting) => sighting.form_id).filter((id) => id > 0),
+  );
   for (let index = props.forms.length - 1; index >= 0; index -= 1) {
     const form = props.forms[index];
     if (!form.imported && !usedFormIds.has(form.id)) {
@@ -485,7 +449,7 @@ function onAssignmentDrawCreated(event) {
 
   const bounds = event.layer.getBounds();
   const matchedSightings = props.sightings.filter((sighting) =>
-    bounds.contains(L.latLng(sighting.lat, sighting.lon))
+    bounds.contains(L.latLng(sighting.lat, sighting.lon)),
   );
 
   if (!matchedSightings.length) {
@@ -515,7 +479,49 @@ function onAssignmentDrawCreated(event) {
 }
 
 function markerColor(formId) {
-  return checklistColor(formId);
+  return checklistColor(formId, checklistColors, unassignedColor);
+}
+
+function hotspotPopupContent(hotspot) {
+  const container = document.createElement("div");
+  container.className = "map-popup";
+
+  const title = document.createElement("a");
+  title.href = `https://ebird.org/hotspot/${hotspot.locId}`;
+  title.target = "_blank";
+  title.rel = "noopener";
+  title.className = "fw-semibold d-inline-block mb-2";
+  title.textContent = hotspot.locName;
+  container.appendChild(title);
+
+  const species = document.createElement("div");
+  species.innerHTML = `<strong>${t("hotspotSpeciesCount")}:</strong> ${escapeHtml(hotspot.numSpeciesAllTime ?? "—")}`;
+  container.appendChild(species);
+
+  const latest = document.createElement("div");
+  latest.innerHTML = `<strong>${t("hotspotLatestChecklist")}:</strong> ${escapeHtml(hotspot.latestObsDt ?? "—")}`;
+  container.appendChild(latest);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-primary btn-sm mt-2";
+  button.textContent = t("useHotspotLocation");
+  button.addEventListener("click", () => {
+    if (!selectedForm.value) {
+      return;
+    }
+
+    selectedForm.value.location_name = hotspot.locName;
+    selectedForm.value.lat = hotspot.lat;
+    selectedForm.value.lon = hotspot.lng;
+    selectedForm.value.hotspot_key = "";
+    reviewMap?.closePopup();
+    loadHotspotsForSelectedForm();
+    refreshReviewMap();
+  });
+  container.appendChild(button);
+
+  return container;
 }
 
 function refreshAssignmentMap({ refit = false } = {}) {
@@ -534,9 +540,7 @@ function refreshAssignmentMap({ refit = false } = {}) {
       fillOpacity: 0.85,
       weight: 1,
     });
-    marker.bindPopup(
-      `<strong>${sighting.common_name || t("records")}</strong><br>${sighting.location_name}<br>${sighting.date} ${sighting.time || ""}`
-    );
+    marker.bindPopup(formatSightingPopup(sighting, t));
     assignmentSightingsLayer.addLayer(marker);
   });
 
@@ -547,7 +551,7 @@ function refreshAssignmentMap({ refit = false } = {}) {
         draggable: true,
         icon: L.divIcon({
           className: "assignment-checklist-icon",
-          html: checklistMarkerHtml(form.id),
+          html: checklistMarkerHtml(form.id, checklistColors, unassignedColor),
           iconSize: [28, 28],
           iconAnchor: [14, 14],
         }),
@@ -580,9 +584,7 @@ function initializeAssignmentMap() {
   }
 
   assignmentMap = L.map(assignmentMapElement.value);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(assignmentMap);
+  addBaseLayerControl(assignmentMap);
 
   assignmentSightingsLayer = L.layerGroup().addTo(assignmentMap);
   assignmentFormsLayer = L.layerGroup().addTo(assignmentMap);
@@ -601,13 +603,20 @@ function initializeAssignmentMap() {
 }
 
 function refreshReviewMap() {
-  if (!reviewMap || !selectedForm.value || !reviewSightingsLayer || !reviewMarkerLayer || !reviewPathLayer) {
+  if (
+    !reviewMap ||
+    !selectedForm.value ||
+    !reviewSightingsLayer ||
+    !reviewMarkerLayer ||
+    !reviewPathLayer
+  ) {
     return;
   }
 
   reviewSightingsLayer.clearLayers();
   reviewMarkerLayer.clearLayers();
   reviewPathLayer.clearLayers();
+  reviewHotspotLayer?.clearLayers();
 
   selectedSightings.value.forEach((sighting) => {
     const marker = L.circleMarker([sighting.lat, sighting.lon], {
@@ -617,20 +626,18 @@ function refreshReviewMap() {
       fillOpacity: 0.85,
       weight: 1,
     });
-    marker.bindPopup(
-      `<strong>${sighting.common_name || t("records")}</strong><br>${sighting.location_name}<br>${sighting.date} ${sighting.time || ""}`
-    );
+    marker.bindPopup(formatSightingPopup(sighting, t));
     reviewSightingsLayer.addLayer(marker);
   });
 
   const checklistMarker = L.marker([selectedForm.value.lat, selectedForm.value.lon], {
     draggable: true,
-        icon: L.divIcon({
-          className: "assignment-checklist-icon",
-          html: checklistMarkerHtml(selectedForm.value.id),
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-        }),
+    icon: L.divIcon({
+      className: "assignment-checklist-icon",
+      html: checklistMarkerHtml(selectedForm.value.id, checklistColors, unassignedColor),
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    }),
   });
   checklistMarker.on("dragend", (drawEvent) => {
     const latlng = drawEvent.target.getLatLng();
@@ -639,19 +646,34 @@ function refreshReviewMap() {
   });
   reviewMarkerLayer.addLayer(checklistMarker);
 
+  (selectedForm.value.hotspots || []).forEach((hotspot) => {
+    const marker = L.marker([hotspot.lat, hotspot.lng], {
+      zIndexOffset: 999,
+      icon: L.divIcon({
+        className: "hotspot-marker-icon",
+        html: `<img src="${hotspotMarkerUrl}" alt="" />`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -32],
+      }),
+    });
+    marker.bindPopup(hotspotPopupContent(hotspot));
+    reviewHotspotLayer?.addLayer(marker);
+  });
+
   if (Array.isArray(selectedForm.value.path) && selectedForm.value.path.length > 1) {
     reviewPathLayer.addLayer(
       L.polyline(selectedForm.value.path, {
         color: "#8b5e3c",
         weight: 4,
-      })
+      }),
     );
   }
 
   const points = [
     ...selectedSightings.value.map((sighting) => [sighting.lat, sighting.lon]),
     [selectedForm.value.lat, selectedForm.value.lon],
-    ...((selectedForm.value.path || []).map((point) => [point[0], point[1]])),
+    ...(selectedForm.value.path || []).map((point) => [point[0], point[1]]),
   ];
 
   if (points.length) {
@@ -665,13 +687,12 @@ function initializeReviewMap() {
   }
 
   reviewMap = L.map(reviewMapElement.value);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(reviewMap);
+  addBaseLayerControl(reviewMap);
 
   reviewSightingsLayer = L.layerGroup().addTo(reviewMap);
   reviewMarkerLayer = L.layerGroup().addTo(reviewMap);
   reviewPathLayer = L.layerGroup().addTo(reviewMap);
+  reviewHotspotLayer = L.layerGroup().addTo(reviewMap);
 
   reviewDrawPolyline = new L.Draw.Polyline(reviewMap, {
     repeatMode: false,
@@ -697,6 +718,17 @@ function initializeReviewMap() {
 }
 
 watch(
+  () => [selectedForm.value?.id, selectedForm.value?.lat, selectedForm.value?.lon],
+  async () => {
+    if (!selectedForm.value) {
+      return;
+    }
+    await loadHotspotsForSelectedForm();
+  },
+  { immediate: true },
+);
+
+watch(
   assignmentMapElement,
   async (value) => {
     if (!value) {
@@ -705,7 +737,7 @@ watch(
     await nextTick();
     initializeAssignmentMap();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -717,7 +749,7 @@ watch(
     await nextTick();
     initializeReviewMap();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onBeforeUnmount(() => {
@@ -740,7 +772,7 @@ onMounted(() => {
 
 <template>
   <div class="d-flex flex-column gap-3">
-    <section class="card border-0 shadow-sm rounded-3">
+    <section v-if="sightings.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
         <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
         <p class="mb-3">
@@ -756,8 +788,15 @@ onMounted(() => {
           ></div>
 
           <div class="assignment-map-controls">
-            <button class="btn btn-success w-100 mb-2" type="button" @click="startRectangleDraw('create')">
-              {{ t("createChecklist") }}
+            <button
+              class="btn btn-success w-100 mb-2 d-inline-flex align-items-center justify-content-center gap-2"
+              type="button"
+              v-tooltip:top="t('createChecklistTooltip')"
+              :aria-label="t('createChecklistTooltip')"
+              @click="startRectangleDraw('create')"
+            >
+              <i class="bi bi-plus-square" aria-hidden="true"></i>
+              <span>{{ t("createChecklist") }}</span>
             </button>
             <div class="input-group mb-2">
               <div ref="assignSelectorRef" class="custom-checklist-select flex-grow-1">
@@ -769,9 +808,18 @@ onMounted(() => {
                 >
                   <span class="checklist-option-label">
                     <span
-                    class="checklist-color-dot"
-                      :style="{ backgroundColor: selectedAssignmentOption?.color || checklistColor(0) }"
+                      class="checklist-color-dot"
+                      :style="{
+                        backgroundColor: selectedAssignmentOption?.color || checklistColor(0),
+                      }"
                     ></span>
+                    <span
+                      v-if="selectedAssignmentOption?.protocolCode"
+                      class="checklist-protocol-badge badge"
+                      :class="selectedAssignmentOption.protocolClass"
+                    >
+                      {{ selectedAssignmentOption.protocolCode }}
+                    </span>
                     <span>{{ selectedAssignmentOption?.label }}</span>
                   </span>
                   <span class="custom-checklist-caret" aria-hidden="true">▾</span>
@@ -785,32 +833,65 @@ onMounted(() => {
                     @click="selectAssignmentForm(option.value)"
                   >
                     <span class="checklist-option-label">
-                      <span class="checklist-color-dot" :style="{ backgroundColor: option.color }"></span>
+                      <span
+                        class="checklist-color-dot"
+                        :style="{ backgroundColor: option.color }"
+                      ></span>
+                      <span
+                        v-if="option.protocolCode"
+                        class="checklist-protocol-badge badge"
+                        :class="option.protocolClass"
+                      >
+                        {{ option.protocolCode }}
+                      </span>
                       <span>{{ option.label }}</span>
                     </span>
                   </button>
                 </div>
               </div>
-              <button class="btn btn-primary" type="button" @click="startRectangleDraw('assign')">
-                {{ t("assignToChecklist") }}
+              <button
+                class="btn btn-primary btn-icon"
+                type="button"
+                v-tooltip:top="t('assignToChecklistTooltip')"
+                :aria-label="t('assignToChecklistTooltip')"
+                @click="startRectangleDraw('assign')"
+              >
+                <i class="bi bi-bounding-box-circles" aria-hidden="true"></i>
               </button>
             </div>
             <div class="btn-group w-100">
-              <button class="btn btn-outline-warning" type="button" @click="assignClean">
-                {{ t("assignCleanShort") }}
+              <button
+                class="btn btn-outline-warning btn-icon"
+                type="button"
+                v-tooltip:top="t('assignCleanTooltip')"
+                :aria-label="t('assignCleanTooltip')"
+                @click="assignClean"
+              >
+                <i class="bi bi-eraser" aria-hidden="true"></i>
               </button>
-              <button class="btn btn-outline-danger" type="button" @click="assignReset">
-                {{ t("assignResetShort") }}
+              <button
+                class="btn btn-outline-danger btn-icon"
+                type="button"
+                v-tooltip:top="t('assignResetTooltip')"
+                :aria-label="t('assignResetTooltip')"
+                @click="assignReset"
+              >
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
               </button>
             </div>
           </div>
         </div>
 
         <div class="p-3 text-white rounded shadow-sm bg-secondary">
-          <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+          <div class="d-flex align-items-center gap-2 mb-3">
             <h3 class="h5 mb-0">{{ t("assignmentMagicTitle") }}</h3>
-            <button class="btn btn-outline-light btn-sm" type="button" @click="emit('open-info')">
-              i
+            <button
+              class="btn btn-outline-light btn-sm btn-icon"
+              type="button"
+              :aria-label="t('assignmentMagicInfoTooltip')"
+              @click="emit('open-info')"
+            >
+              <i class="bi bi-journal-text" aria-hidden="true"></i>
             </button>
           </div>
           <div class="row g-2 align-items-end">
@@ -837,8 +918,15 @@ onMounted(() => {
               />
             </div>
             <div class="col-sm-4">
-              <button class="btn btn-primary w-100" type="button" @click="assignMagic">
-                {{ t("assignmentMagicAction") }}
+              <button
+                class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                type="button"
+                v-tooltip:top="t('assignmentMagicTooltip')"
+                :aria-label="t('assignmentMagicTooltip')"
+                @click="assignMagic"
+              >
+                <i class="bi bi-magic" aria-hidden="true"></i>
+                <span>{{ t("assignmentMagicAction") }}</span>
               </button>
             </div>
           </div>
@@ -859,7 +947,11 @@ onMounted(() => {
           </div>
           <div class="col-lg-6">
             <div class="input-group input-group-lg">
-              <button class="btn btn-outline-secondary" type="button" @click="selectFormByOffset(-1)">
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                @click="selectFormByOffset(-1)"
+              >
                 &lsaquo;
               </button>
               <div ref="reviewSelectorRef" class="custom-checklist-select flex-grow-1">
@@ -874,6 +966,13 @@ onMounted(() => {
                       class="checklist-color-dot"
                       :style="{ backgroundColor: selectedReviewOption?.color || checklistColor(0) }"
                     ></span>
+                    <span
+                      v-if="selectedReviewOption?.protocolCode"
+                      class="checklist-protocol-badge badge"
+                      :class="selectedReviewOption.protocolClass"
+                    >
+                      {{ selectedReviewOption.protocolCode }}
+                    </span>
                     <span>{{ selectedReviewOption?.label }}</span>
                   </span>
                   <span class="custom-checklist-caret" aria-hidden="true">▾</span>
@@ -887,13 +986,27 @@ onMounted(() => {
                     @click="selectReviewForm(option.value)"
                   >
                     <span class="checklist-option-label">
-                      <span class="checklist-color-dot" :style="{ backgroundColor: option.color }"></span>
+                      <span
+                        class="checklist-color-dot"
+                        :style="{ backgroundColor: option.color }"
+                      ></span>
+                      <span
+                        v-if="option.protocolCode"
+                        class="checklist-protocol-badge badge"
+                        :class="option.protocolClass"
+                      >
+                        {{ option.protocolCode }}
+                      </span>
                       <span>{{ option.label }}</span>
                     </span>
                   </button>
                 </div>
               </div>
-              <button class="btn btn-outline-secondary" type="button" @click="selectFormByOffset(1)">
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                @click="selectFormByOffset(1)"
+              >
                 &rsaquo;
               </button>
             </div>
@@ -912,171 +1025,197 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="selectedForm" class="card border">
-          <div class="card-body">
-            <div v-if="selectedSightings.length === 0 || isInvalid || spansMultipleDays" class="mb-3">
-              <div v-if="spansMultipleDays" class="alert alert-danger mb-3">
-                <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
-                <p class="mb-0">{{ t("warningMultipleDays") }}</p>
-              </div>
-              <div v-if="selectedSightings.length === 0 || isInvalid" class="alert alert-danger mb-0">
-                <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
-                <p v-if="selectedSightings.length === 0">{{ t("warningNoSightings") }}</p>
-                <p v-if="isInvalid" class="mb-0">{{ t("warningInvalid") }}</p>
-              </div>
+        <section v-if="selectedForm" class="border rounded-3 p-3 p-md-4 mt-3">
+          <div v-if="selectedSightings.length === 0 || isInvalid || spansMultipleDays" class="mb-3">
+            <div v-if="spansMultipleDays" class="alert alert-danger mb-3">
+              <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
+              <p class="mb-0">{{ t("warningMultipleDays") }}</p>
             </div>
-
-            <div class="row g-3">
-              <div class="col-lg-5 col-sm-6">
-                <label class="form-label">{{ t("locationName") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model="selectedForm.location_name"
-                    class="form-control"
-                    :class="requiredStateClass(selectedForm.location_name)"
-                    type="text"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="focusReviewMap">
-                    {{ t("mapButtonLabel") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-4 col-sm-6">
-                <label class="form-label">{{ t("date") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model="selectedForm.date"
-                    class="form-control"
-                    :class="requiredStateClass(selectedForm.date)"
-                    type="date"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="computeDateFromSightings">
-                    {{ t("autoShort") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-3 col-sm-6">
-                <label class="form-label">{{ t("observers") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model.number="selectedForm.number_observer"
-                    class="form-control"
-                    :class="optionalNumberStateClass(selectedForm.number_observer, 1, 100)"
-                    type="number"
-                    min="1"
-                    max="100"
-                    step="1"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="applyObserversToEmpty">
-                    {{ t("applyAllShort") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-3 col-sm-6">
-                <label class="form-label">{{ t("time") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model="selectedForm.time"
-                    class="form-control"
-                    :class="optionalTimeStateClass(selectedForm.time)"
-                    type="time"
-                    step="60"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="computeTimeFromSightings">
-                    {{ t("autoShort") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-3 col-sm-6">
-                <label class="form-label">{{ t("durationMinutes") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model.number="selectedForm.duration"
-                    class="form-control"
-                    :class="optionalNumberStateClass(selectedForm.duration, 1, 1440)"
-                    type="number"
-                    min="1"
-                    max="1440"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="computeDurationFromSightings">
-                    {{ t("autoShort") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-3 col-sm-6">
-                <label class="form-label">{{ t("checklistDistance") }}</label>
-                <div class="input-group">
-                  <input
-                    v-model.number="selectedForm.distance"
-                    class="form-control"
-                    :class="optionalNumberStateClass(selectedForm.distance, 0, 80)"
-                    type="number"
-                    min="0"
-                    max="80"
-                    step="0.1"
-                  />
-                  <button class="btn btn-outline-secondary" type="button" @click="startPathDraw">
-                    {{ t("drawPath") }}
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-3 col-sm-12">
-                <label class="form-label">{{ t("effort") }}</label>
-                <div class="border rounded p-2 h-100 bg-light">
-                  <div class="form-check form-switch">
-                    <input
-                      id="primary-purpose"
-                      v-model="selectedForm.primary_purpose"
-                      class="form-check-input"
-                      type="checkbox"
-                    />
-                    <label class="form-check-label" for="primary-purpose">{{ t("primaryPurpose") }}</label>
-                  </div>
-                  <div class="form-check form-switch mt-2">
-                    <input
-                      id="complete-checklist"
-                      v-model="selectedForm.full_form"
-                      class="form-check-input"
-                      type="checkbox"
-                    />
-                    <label class="form-check-label" for="complete-checklist">{{ t("completeChecklist") }}</label>
-                  </div>
-                </div>
-              </div>
+            <div v-if="selectedSightings.length === 0 || isInvalid" class="alert alert-danger mb-0">
+              <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
+              <p v-if="selectedSightings.length === 0">{{ t("warningNoSightings") }}</p>
+              <p v-if="isInvalid" class="mb-0">{{ t("warningInvalid") }}</p>
             </div>
-
-            <div class="row g-3 mt-1">
-              <div class="col-lg-8">
-                <div class="review-map-shell">
-                  <div ref="reviewMapElement" class="review-map rounded border"></div>
-                  <div class="review-map-controls">
-                    <button class="btn btn-primary btn-sm" type="button" @click="startPathDraw">
-                      {{ t("drawPath") }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="card bg-light h-100">
-                  <div class="card-body">
-                    <h3 class="h5">{{ t("checklistSummary") }}</h3>
-                    <ul class="mb-0 ps-3">
-                      <li>{{ selectedSightings.length }} {{ t("records") }}</li>
-                      <li>{{ selectedProtocol.name }}</li>
-                      <li>{{ selectedForm.lat }}, {{ selectedForm.lon }}</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-3 mt-3">
-              <label class="form-label">{{ t("checklistComment") }}</label>
-              <textarea v-model="selectedForm.checklist_comment" class="form-control" rows="4" />
-            </div>
-
           </div>
-        </div>
+
+          <div class="row g-3">
+            <div class="col-lg-5 col-sm-6">
+              <label class="form-label">{{ t("locationName") }}</label>
+              <div class="input-group">
+                <input
+                  v-model="selectedForm.location_name"
+                  class="form-control"
+                  :class="requiredStateClass(selectedForm.location_name)"
+                  type="text"
+                />
+                <button
+                  class="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  v-tooltip:top="t('focusMapTooltip')"
+                  :aria-label="t('focusMapTooltip')"
+                  @click="focusReviewMap"
+                >
+                  <i class="bi bi-map" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+              <label class="form-label">{{ t("date") }}</label>
+              <div class="input-group">
+                <input
+                  v-model="selectedForm.date"
+                  class="form-control"
+                  :class="requiredStateClass(selectedForm.date)"
+                  type="date"
+                />
+                <button
+                  class="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  v-tooltip:top="t('computeDateTooltip')"
+                  :aria-label="t('computeDateTooltip')"
+                  @click="computeDateFromSightings"
+                >
+                  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <label class="form-label">{{ t("observers") }}</label>
+              <input
+                v-model.number="selectedForm.number_observer"
+                class="form-control"
+                :class="requiredNumberStateClass(selectedForm.number_observer, 1, 100)"
+                type="number"
+                min="1"
+                max="100"
+                step="1"
+              />
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <label class="form-label">{{ t("time") }}</label>
+              <div class="input-group">
+                <input
+                  v-model="selectedForm.time"
+                  class="form-control"
+                  :class="requiredTimeStateClass(selectedForm.time)"
+                  type="time"
+                  step="60"
+                />
+                <button
+                  class="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  v-tooltip:top="t('computeTimeTooltip')"
+                  :aria-label="t('computeTimeTooltip')"
+                  @click="computeTimeFromSightings"
+                >
+                  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <label class="form-label">{{ t("durationMinutes") }}</label>
+              <div class="input-group">
+                <input
+                  v-model.number="selectedForm.duration"
+                  class="form-control"
+                  :class="requiredNumberStateClass(selectedForm.duration, 1, 1440)"
+                  type="number"
+                  min="1"
+                  max="1440"
+                />
+                <button
+                  class="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  v-tooltip:top="t('computeDurationTooltip')"
+                  :aria-label="t('computeDurationTooltip')"
+                  @click="computeDurationFromSightings"
+                >
+                  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <label class="form-label">{{ t("checklistDistance") }}</label>
+              <div class="input-group">
+                <input
+                  v-model.number="selectedForm.distance"
+                  class="form-control"
+                  :class="requiredNumberStateClass(selectedForm.distance, 0, 80)"
+                  type="number"
+                  min="0"
+                  max="80"
+                  step="0.1"
+                />
+                <button
+                  class="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  v-tooltip:top="t('drawPathTooltip')"
+                  :aria-label="t('drawPathTooltip')"
+                  @click="startPathDraw"
+                >
+                  <i class="bi bi-bezier" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-12">
+              <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0">{{ t("effort") }}</label>
+                <a
+                  href="https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists"
+                  target="_blank"
+                  rel="noopener"
+                  class="d-inline-flex align-items-center text-primary text-decoration-none"
+                  aria-label="eBird effort help"
+                  v-tooltip:top="'eBird effort help'"
+                >
+                  <i class="bi bi-question-circle-fill" aria-hidden="true"></i>
+                </a>
+              </div>
+              <div class="form-check form-switch mb-0">
+                <input
+                  id="primary-purpose"
+                  v-model="selectedForm.primary_purpose"
+                  class="form-check-input"
+                  type="checkbox"
+                />
+                <label class="form-check-label" for="primary-purpose">{{
+                  t("primaryPurpose")
+                }}</label>
+              </div>
+              <div class="form-check form-switch mb-0">
+                <input
+                  id="complete-checklist"
+                  v-model="selectedForm.full_form"
+                  class="form-check-input"
+                  type="checkbox"
+                />
+                <label class="form-check-label" for="complete-checklist">{{
+                  t("completeChecklist")
+                }}</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-12">
+              <div class="review-map-shell">
+                <div ref="reviewMapElement" class="review-map rounded border"></div>
+                <div class="review-map-controls">
+                  <button
+                    class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+                    type="button"
+                    v-tooltip:left="t('drawPathTooltip')"
+                    :aria-label="t('drawPathTooltip')"
+                    @click="startPathDraw"
+                  >
+                    <i class="bi bi-bezier" aria-hidden="true"></i>
+                    <span>{{ t("drawPath") }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   </div>

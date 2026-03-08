@@ -1,14 +1,10 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
-import SettingsPanel from "./components/SettingsPanel.vue";
 import AppFooter from "./components/AppFooter.vue";
-import InfoPanel from "./components/InfoPanel.vue";
 import ImportPanel from "./components/ImportPanel.vue";
-import AdvancedPanel from "./components/AdvancedPanel.vue";
-import ExportPanel from "./components/ExportPanel.vue";
 import {
   APP_STORAGE_PREFIX,
   DEFAULT_SETTINGS,
@@ -20,6 +16,11 @@ import {
 } from "./lib/constants";
 import { readCookie, readStorage, writeCookie, writeStorage } from "./lib/storage";
 import { applyDefaultAutomaticAssignment, buildForm } from "./lib/utils";
+
+const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
+const InfoPanel = defineAsyncComponent(() => import("./components/InfoPanel.vue"));
+const AdvancedPanel = defineAsyncComponent(() => import("./components/AdvancedPanel.vue"));
+const ExportPanel = defineAsyncComponent(() => import("./components/ExportPanel.vue"));
 
 function normalizeSpeciesCommentTemplate(template) {
   return {
@@ -45,6 +46,11 @@ function sameSpeciesCommentTemplate(left, right) {
 }
 
 const supportedLanguages = new Set(UI_LANGUAGES.map((language) => language.value));
+const LEGACY_EBIRD_LANGUAGE_CODES = {
+  id: "in",
+  pa: "pa_IN",
+  en_HAW: "haw",
+};
 
 function normalizeLanguage(value) {
   if (typeof value !== "string" || value.length === 0) {
@@ -60,6 +66,14 @@ function defaultWebsiteForLanguage(language) {
   return DEFAULT_WEBSITE_BY_LANGUAGE[language] || DEFAULT_WEBSITE_BY_LANGUAGE.en;
 }
 
+function normalizeEbirdLanguage(value) {
+  if (typeof value !== "string" || value.length === 0) {
+    return null;
+  }
+
+  return LEGACY_EBIRD_LANGUAGE_CODES[value] || value;
+}
+
 const savedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, DEFAULT_SETTINGS);
 const queryLanguage = normalizeLanguage(
   typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : ""
@@ -72,10 +86,12 @@ const browserLanguage = normalizeLanguage(
 const resolvedUiLanguage =
   queryLanguage || cookieLanguage || savedUiLanguage || browserLanguage || "en";
 const supportedEbirdLanguages = new Set(EBIRD_LANGUAGES.map((language) => language.value));
-const resolvedEbirdLanguage = supportedEbirdLanguages.has(savedSettings.ebirdLanguage)
-  ? savedSettings.ebirdLanguage
-  : supportedEbirdLanguages.has(savedSettings.language)
-    ? savedSettings.language
+const savedEbirdLanguage = normalizeEbirdLanguage(savedSettings.ebirdLanguage);
+const legacySavedLanguage = normalizeEbirdLanguage(savedSettings.language);
+const resolvedEbirdLanguage = supportedEbirdLanguages.has(savedEbirdLanguage)
+  ? savedEbirdLanguage
+  : supportedEbirdLanguages.has(legacySavedLanguage)
+    ? legacySavedLanguage
     : "en";
 const initialWebsiteName =
   queryLanguage || !savedSettings.websiteName
@@ -100,8 +116,33 @@ const infoOpen = ref(false);
 const infoSection = ref("");
 const settingsOpen = ref(false);
 const version = __APP_VERSION__;
-const { locale } = useI18n({ useScope: "global" });
+const { locale, t } = useI18n({ useScope: "global" });
 locale.value = settings.uiLanguage;
+
+function updateDocumentMetadata(language) {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  const title = `${t("appTitle")} | ${t("appSubtitle")}`;
+  const description = t("infoDescription");
+
+  document.documentElement.lang = language || "en";
+  document.title = title;
+
+  const updateMeta = (selector, attribute, content) => {
+    const element = document.head.querySelector(selector);
+    if (element) {
+      element.setAttribute(attribute, content);
+    }
+  };
+
+  updateMeta('meta[name="description"]', "content", description);
+  updateMeta('meta[property="og:title"]', "content", title);
+  updateMeta('meta[property="og:description"]', "content", description);
+  updateMeta('meta[name="twitter:title"]', "content", title);
+  updateMeta('meta[name="twitter:description"]', "content", description);
+}
 
 watch(
   settings,
@@ -116,6 +157,7 @@ watch(
   (value, previousValue) => {
     locale.value = value;
     writeCookie(LANGUAGE_COOKIE_NAME, value);
+    updateDocumentMetadata(value);
 
     const previousDefault = defaultWebsiteForLanguage(previousValue || value);
     if (!settings.websiteName || settings.websiteName === previousDefault) {
@@ -136,7 +178,7 @@ function importData(payload) {
   const nextForms = (payload.forms || []).map((form, index) =>
     buildForm(form, index + 1, { defaultNumberObserver: settings.defaultNumberObserver })
   );
-  const nextFormsSightings = payload.forms_sightings || [];
+  const nextFormsSightings = payload.formsSightings || [];
 
   if (
     !speciesCommentTemplateHasContent(settings.speciesCommentTemplate) ||
@@ -172,10 +214,6 @@ watch(
   }
 );
 
-const selectedLanguage = computed(() => {
-  return settings.ebirdLanguage;
-});
-
 function openInfo(section = "") {
   infoSection.value = section;
   infoOpen.value = true;
@@ -191,12 +229,20 @@ function openInfo(section = "") {
       @open-settings="settingsOpen = true"
     />
 
-    <SettingsPanel :open="settingsOpen" :settings="settings" @close="settingsOpen = false" />
+    <SettingsPanel
+      :open="settingsOpen"
+      :settings="settings"
+      @close="settingsOpen = false"
+      @open-info="openInfo($event)"
+    />
     <div v-if="infoOpen" class="modal-backdrop" @click.self="infoOpen = false">
       <section class="modal-panel card border-0 shadow">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">{{ $t("infoTitle") }}</h2>
+            <h2 class="mb-0 d-inline-flex align-items-center gap-2">
+              <i class="bi bi-journal-text" aria-hidden="true"></i>
+              <span>{{ $t("infoTitle") }}</span>
+            </h2>
             <button class="btn btn-outline-secondary btn-sm" type="button" @click="infoOpen = false">
               {{ $t("close") }}
             </button>
@@ -208,7 +254,7 @@ function openInfo(section = "") {
 
     <main class="main-stack">
       <ImportPanel
-        :selected-language="selectedLanguage"
+        :selected-ebird-language="settings.ebirdLanguage"
         :selected-website-name="settings.websiteName"
         @update:selected-website-name="settings.websiteName = $event"
         @import-data="importData"

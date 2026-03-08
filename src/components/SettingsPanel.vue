@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { EBIRD_LANGUAGES } from "../lib/constants";
+import { DEFAULT_SPECIES_COMMENT_TEMPLATE, EBIRD_LANGUAGES } from "../lib/constants";
 import { speciesComment } from "../lib/utils";
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "open-info"]);
 const { t } = useI18n();
 const staticMapStyleOptions = [
   { value: "satellite-v9", label: "Satellite" },
@@ -29,9 +29,13 @@ const markerSymbolOptions = ["circle", "triangle", "square", "star"];
 const previewSightings = [
   {
     id: 21724328,
+    source_website_name: "ornitho.ch",
+    source_record_url: "https://www.ornitho.ch/index.php?m_id=54&id=21724328",
     location_name: "La Dullive",
     lat: 46.42315,
     lon: 6.292591,
+    coordinates: "46.42315, 6.292591",
+    google_maps_url: "https://maps.google.com/?q=46.42315,6.292591",
     date: "2020-12-23",
     time: "14:53",
     common_name: "Ring-necked Duck",
@@ -41,21 +45,40 @@ const previewSightings = [
     comment: "",
   },
 ];
+const repeatedPreviewSightings = Array.from({ length: 10 }, (_, index) => ({
+  ...previewSightings[0],
+  id: 21724328 + index,
+  time: `1${4 + Math.floor(index / 4)}:${String((53 + index * 7) % 60).padStart(2, "0")}`,
+  comment: ["", "shoreline", "with Tufted Duck", "flying north", "resting", "calling", "close view"][index % 7],
+}));
 
-const speciesCommentPreview = computed(() => {
-  return speciesComment(props.settings.speciesCommentTemplate, previewSightings);
+const shortPreviewSightings = computed(() => {
+  const limit = Math.max(1, Number(props.settings.speciesCommentTemplate.limit) || 5);
+  return repeatedPreviewSightings.slice(0, Math.max(1, Math.min(limit - 1, repeatedPreviewSightings.length - 1)));
 });
 
-const repeatedSightingsLimit = computed(() => {
-  const singleLength = speciesCommentPreview.value.length || 1;
-  return Math.floor(8000 / (singleLength + 5));
+const longPreviewSightings = computed(() => {
+  const limit = Math.max(1, Number(props.settings.speciesCommentTemplate.limit) || 5);
+  return repeatedPreviewSightings.slice(0, Math.min(limit + 1, repeatedPreviewSightings.length));
+});
+
+const speciesCommentPreview = computed(() => {
+  return speciesComment(props.settings.speciesCommentTemplate, shortPreviewSightings.value);
+});
+
+const speciesCommentLongPreview = computed(() => {
+  return speciesComment(props.settings.speciesCommentTemplate, longPreviewSightings.value);
 });
 
 const propertyRows = [
   ["id", "21724328"],
+  ["source_website_name", "ornitho.ch"],
+  ["source_record_url", "https://www.ornitho.ch/index.php?m_id=54&id=21724328"],
   ["location_name", "La Dullive"],
   ["lat", "46.42315"],
   ["lon", "6.292591"],
+  ["coordinates", "46.42315, 6.292591"],
+  ["google_maps_url", "https://maps.google.com/?q=46.42315,6.292591"],
   ["date", "2020-12-23"],
   ["time", "14:53"],
   ["common_name", "Ring-necked Duck"],
@@ -64,6 +87,60 @@ const propertyRows = [
   ["count_precision", "="],
   ["comment", ""],
 ];
+
+const shortTemplatePresets = [
+  {
+    key: "basic",
+    labelKey: "templatePresetBasic",
+    short: DEFAULT_SPECIES_COMMENT_TEMPLATE.short,
+    long: DEFAULT_SPECIES_COMMENT_TEMPLATE.long,
+  },
+  {
+    key: "source",
+    labelKey: "templatePresetOrnitho",
+    short:
+      '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
+    long:
+      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
+  },
+  {
+    key: "map",
+    labelKey: "templatePresetMap",
+    short:
+      '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
+    long:
+      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
+  },
+];
+
+const longTemplatePresets = [
+  {
+    key: "basic",
+    labelKey: "templatePresetBasic",
+    long: DEFAULT_SPECIES_COMMENT_TEMPLATE.long,
+  },
+  {
+    key: "map",
+    labelKey: "templatePresetMap",
+    long:
+      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
+  },
+];
+
+const speciesCommentLimitError = computed(() => {
+  const limit = Number(props.settings.speciesCommentTemplate.limit);
+
+  if (!Number.isInteger(limit) || limit < 1) {
+    return t("switchLimitError");
+  }
+
+  return "";
+});
+
+function applyTemplatePreset(field, preset) {
+  const property = field === "long" ? "long" : "short";
+  props.settings.speciesCommentTemplate[property] = preset[property];
+}
 </script>
 
 <template>
@@ -96,9 +173,9 @@ const propertyRows = [
 
         <div class="mt-3">
           <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-            <label class="form-label mb-0 flex-shrink-0" for="party-size-input">{{ t("partySize") }}</label>
+            <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
             <input
-              id="party-size-input"
+              id="default-observers-input"
               v-model.number="settings.defaultNumberObserver"
               class="form-control"
               type="number"
@@ -111,68 +188,184 @@ const propertyRows = [
 
         <div class="mt-4">
           <h3 class="h5">{{ t("advancedOptionsTitle") }}</h3>
-          <div class="row g-3 mt-1">
-            <div class="col-md-6">
-              <button
-                class="btn w-100 text-start h-100 p-3 border"
-                :class="settings.advancedEnabled ? 'btn-outline-secondary' : 'btn-secondary'"
-                type="button"
-                @click="settings.advancedEnabled = false"
-              >
-                <h4 class="h6 mb-1">{{ t("advancedModeSimpleTitle") }}</h4>
-                <p class="mb-0 small">{{ t("advancedModeSimpleBody") }}</p>
-              </button>
-            </div>
-            <div class="col-md-6">
-              <button
-                class="btn w-100 text-start h-100 p-3 border"
-                :class="settings.advancedEnabled ? 'btn-secondary' : 'btn-outline-secondary'"
-                type="button"
-                @click="settings.advancedEnabled = true"
-              >
-                <h4 class="h6 mb-1">{{ t("advancedModeCustomTitle") }}</h4>
-                <p class="mb-0 small">{{ t("advancedModeCustomBody") }}</p>
-              </button>
-            </div>
+          <div class="d-grid gap-3 mt-1">
+            <button
+              class="btn w-100 text-start p-3 border"
+              :class="settings.advancedEnabled ? 'btn-outline-secondary' : 'btn-secondary'"
+              type="button"
+              @click="settings.advancedEnabled = false"
+            >
+              <h4 class="h6 mb-1">{{ t("advancedModeSimpleTitle") }}</h4>
+              <p class="mb-0 small">{{ t("advancedModeSimpleBody") }}</p>
+            </button>
+            <button
+              class="btn w-100 text-start p-3 border"
+              :class="settings.advancedEnabled ? 'btn-secondary' : 'btn-outline-secondary'"
+              type="button"
+              @click="settings.advancedEnabled = true"
+            >
+              <h4 class="h6 mb-1">{{ t("advancedModeCustomTitle") }}</h4>
+              <p class="mb-0 small">{{ t("advancedModeCustomBody") }}</p>
+            </button>
           </div>
         </div>
 
         <div class="mt-4">
           <h3 class="h5">{{ t("advancedSettingsTitle") }}</h3>
+          <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
+          <button
+            class="btn btn-link btn-sm p-0 mb-3"
+            type="button"
+            @click="emit('open-info', 'auto-assignment')"
+          >
+            {{ t("aggregationSettingsLearnMore") }}
+          </button>
 
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label" for="duration-input">{{ t("autoAssignDuration") }}</label>
-              <input
-                id="duration-input"
-                v-model.number="settings.autoAssignDuration"
-                class="form-control"
-                type="number"
-                min="0.1"
-                max="24"
-                step="0.5"
-              />
+          <div class="d-flex flex-column gap-3">
+            <div>
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="duration-input">{{ t("autoAssignDuration") }}</label>
+                <input
+                  id="duration-input"
+                  v-model.number="settings.autoAssignDuration"
+                  class="form-control"
+                  type="number"
+                  min="0.1"
+                  max="24"
+                  step="0.5"
+                />
+              </div>
               <div class="form-text">{{ t("autoAssignDurationHelp") }}</div>
             </div>
 
-            <div class="col-md-6">
-              <label class="form-label" for="distance-input">{{ t("distance") }}</label>
-              <input
-                id="distance-input"
-                v-model.number="settings.autoAssignDistance"
-                class="form-control"
-                type="number"
-                min="0.1"
-                step="0.5"
-              />
+            <div>
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="distance-input">{{ t("distance") }}</label>
+                <input
+                  id="distance-input"
+                  v-model.number="settings.autoAssignDistance"
+                  class="form-control"
+                  type="number"
+                  min="0.1"
+                  step="0.5"
+                />
+              </div>
               <div class="form-text">{{ t("distanceHelp") }}</div>
             </div>
           </div>
         </div>
 
         <div class="mt-4">
+          <h3 class="h5">{{ t("speciesCommentTemplate") }}</h3>
+          <div class="form-check form-switch mb-3">
+            <input
+              id="customized-species-comments"
+              v-model="settings.customizedSpeciesComments"
+              class="form-check-input"
+              type="checkbox"
+            />
+            <label class="form-check-label" for="customized-species-comments">
+              {{ t("speciesCommentTemplateHelp") }}
+            </label>
+          </div>
+
+          <div v-if="settings.customizedSpeciesComments">
+            <p class="small text-muted mb-3">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
+            <div class="mb-3">
+              <label class="form-label">{{ t("template") }}</label>
+              <div class="d-flex flex-wrap gap-1 mb-2">
+                <button
+                  v-for="preset in shortTemplatePresets"
+                  :key="`short-${preset.key}`"
+                  class="btn btn-outline-secondary btn-sm py-1 px-2"
+                  type="button"
+                  @click="applyTemplatePreset('short', preset)"
+                >
+                  {{ t(preset.labelKey) }}
+                </button>
+              </div>
+              <textarea v-model="settings.speciesCommentTemplate.short" class="form-control" rows="4" />
+            </div>
+
+            <div class="form-text mb-2">
+              {{ t("multipleSightingsBody") }}
+            </div>
+            <div class="card bg-light border-0 mb-4">
+              <div class="card-body">
+                <h4 class="h6">{{ t("preview") }}</h4>
+                <div class="html-preview" v-html="speciesCommentPreview"></div>
+              </div>
+            </div>
+
+            <div class="form-text mb-2">
+              {{ t("longTemplateHelp") }}
+            </div>
+            <div class="mb-3">
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="switch-limit-input">{{ t("switchLimit") }}</label>
+                <input
+                  id="switch-limit-input"
+                  v-model.number="settings.speciesCommentTemplate.limit"
+                  class="form-control"
+                  :class="{ 'is-invalid': speciesCommentLimitError }"
+                  type="number"
+                  min="1"
+                  step="1"
+                />
+              </div>
+              <div v-if="speciesCommentLimitError" class="invalid-feedback d-block">
+                {{ speciesCommentLimitError }}
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">{{ t("longTemplate") }}</label>
+              <div class="d-flex flex-wrap gap-1 mb-2">
+                <button
+                  v-for="preset in longTemplatePresets"
+                  :key="`long-${preset.key}`"
+                  class="btn btn-outline-secondary btn-sm py-1 px-2"
+                  type="button"
+                  @click="applyTemplatePreset('long', preset)"
+                >
+                  {{ t(preset.labelKey) }}
+                </button>
+              </div>
+              <textarea v-model="settings.speciesCommentTemplate.long" class="form-control" rows="4" />
+            </div>
+
+            <div class="card bg-light border-0 mb-4">
+              <div class="card-body">
+                <h4 class="h6">{{ t("longTemplatePreview") }}</h4>
+                <div class="html-preview" v-html="speciesCommentLongPreview"></div>
+              </div>
+            </div>
+
+            <div class="card bg-light border-0">
+              <div class="card-body">
+                <h4 class="h6">{{ t("propertiesTitle") }}</h4>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>{{ t("property") }}</th>
+                        <th>{{ t("value") }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="[property, value] in propertyRows" :key="property">
+                        <td><code>{{ property }}</code></td>
+                        <td>{{ value }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
           <h3 class="h5">{{ t("staticMapTitle") }}</h3>
-          <p class="small text-muted mb-3">{{ t("staticMapHelp") }}</p>
           <div class="form-check form-switch mb-3">
             <input
               id="static-map-enabled"
@@ -186,7 +379,17 @@ const propertyRows = [
           </div>
 
           <div v-if="settings.globalStaticMap.show">
-            <label class="form-label">{{ t("mapboxToken") }}</label>
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <label class="form-label mb-0">{{ t("mapboxToken") }}</label>
+              <a
+                class="small"
+                href="https://account.mapbox.com/access-tokens/"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ t("mapboxTokenLink") }}
+              </a>
+            </div>
             <input
               v-model.trim="settings.mapboxToken"
               class="form-control"
@@ -279,84 +482,6 @@ const propertyRows = [
               placeholder="github_pat_..."
             />
             <div class="form-text">{{ t("githubTokenHelp") }}</div>
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <h3 class="h5">{{ t("speciesCommentTemplate") }}</h3>
-          <p class="small text-muted mb-3">{{ t("speciesCommentTemplateHelp") }}</p>
-          <div class="form-check form-switch mb-3">
-            <input
-              id="customized-species-comments"
-              v-model="settings.customizedSpeciesComments"
-              class="form-check-input"
-              type="checkbox"
-            />
-            <label class="form-check-label" for="customized-species-comments">
-              {{ t("customizedSpeciesComments") }}
-            </label>
-          </div>
-
-          <div v-if="settings.customizedSpeciesComments">
-            <div class="mb-3">
-              <label class="form-label">{{ t("template") }}</label>
-              <textarea v-model="settings.speciesCommentTemplate.short" class="form-control" rows="5" />
-            </div>
-
-            <h4 class="h6">{{ t("multipleSightingsTitle") }}</h4>
-            <p>{{ t("multipleSightingsBody") }}</p>
-            <p>{{ t("multipleSightingsLimitText", { count: repeatedSightingsLimit }) }}</p>
-
-            <p class="mb-2">{{ t("longTemplateHelp") }}</p>
-            <div class="mb-3">
-              <label class="form-label">{{ t("longTemplate") }}</label>
-              <textarea v-model="settings.speciesCommentTemplate.long" class="form-control" rows="5" />
-            </div>
-            <div class="mb-4">
-              <label class="form-label">{{ t("switchLimit") }}</label>
-              <input
-                v-model.number="settings.speciesCommentTemplate.limit"
-                class="form-control"
-                type="number"
-                min="1"
-                step="1"
-              />
-            </div>
-
-            <div class="row g-4 align-items-start">
-              <div class="col-lg-7">
-                <div class="card bg-light border-0 h-100">
-                  <div class="card-body">
-                    <h4 class="h6">{{ t("preview") }}</h4>
-                    <div class="html-preview" v-html="speciesCommentPreview"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-lg-5">
-                <div class="card bg-light border-0 h-100">
-                  <div class="card-body">
-                    <h4 class="h6">{{ t("propertiesTitle") }}</h4>
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0">
-                        <thead>
-                          <tr>
-                            <th>{{ t("property") }}</th>
-                            <th>{{ t("value") }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="[property, value] in propertyRows" :key="property">
-                            <td><code>{{ property }}</code></td>
-                            <td>{{ value }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 

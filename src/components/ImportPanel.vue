@@ -7,13 +7,14 @@ import websitesList from "/data/websites_list.json";
 import ornithoSpeciesList from "/data/ornitho_species_list_short.json";
 import {
   buildSpeciesCommentTemplate,
+  copyClipboard,
   createSighting,
   distanceFromPath,
   mathMode,
 } from "../lib/utils";
 
 const props = defineProps({
-  selectedLanguage: {
+  selectedEbirdLanguage: {
     type: String,
     required: true,
   },
@@ -65,22 +66,22 @@ const website = computed(() => {
   return websitesList.find((item) => item.name === websiteName.value) || null;
 });
 
-const expectedFileKey = computed(() => {
+const importFileLabelKey = computed(() => {
   if (!website.value) {
     return "";
   }
 
   if (website.value.system === "ornitho") {
-    return "importExpectedFileOrnitho";
+    return "importFileOrnitho";
   }
   if (website.value.system === "observation") {
-    return "importExpectedFileObservation";
+    return "importFileObservation";
   }
   if (website.value.system === "birdlasser") {
-    return "importExpectedFileBirdlasser";
+    return "importFileBirdlasser";
   }
   if (website.value.system === "ornitho.net") {
-    return "importExpectedFileOrnithoNet";
+    return "importFileOrnithoNet";
   }
 
   return "";
@@ -92,6 +93,15 @@ const taxonomicIssuesStringify = computed(() => {
     null,
     2,
   );
+});
+
+const importSuccessText = computed(() => {
+  const listCount = Number(numberImportedForms.value) || 0;
+  const sightingCount = Number(numberImportedSightings.value) || 0;
+  const listLabel = listCount === 1 ? "list" : "lists";
+  const sightingLabel = sightingCount === 1 ? "incidental sighting" : "incidental sightings";
+
+  return `Data loaded successfully: ${listCount} ${listLabel} and ${sightingCount} ${sightingLabel}`;
 });
 
 const exportLink = computed(() => {
@@ -110,7 +120,7 @@ const exportLink = computed(() => {
 });
 
 watch(
-  () => props.selectedLanguage,
+  () => props.selectedEbirdLanguage,
   async (language) => {
     try {
       const response = await fetch(
@@ -163,7 +173,7 @@ watch(file, async (nextFile) => {
   }
 });
 
-function ornithoSightingsTransformation(sightings, formId) {
+function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
   return sightings.map((sighting) => {
     const datetime = sighting.observers[0].timing["@ISO8601"].split("+")[0];
 
@@ -204,6 +214,11 @@ function ornithoSightingsTransformation(sightings, formId) {
     return createSighting({
       id: sighting.observers[0].id_sighting,
       form_id: formId,
+      website: selectedWebsite.name,
+      source_website_name: selectedWebsite.name,
+      source_record_url: `${selectedWebsite.website}index.php?m_id=54&id=${sighting.observers[0].id_sighting}`,
+      system: selectedWebsite.system,
+      permalink: `${selectedWebsite.website}index.php?m_id=54&id=${sighting.observers[0].id_sighting}`,
       date: datetime.split("T")[0],
       time: sighting.observers[0].timing["@notime"] === "1" ? "" : datetime.split("T")[1],
       lat: Number.parseFloat(sighting.observers[0].coord_lat),
@@ -223,7 +238,7 @@ function parseImportFile(rawText, selectedWebsite) {
   const exportData = {
     forms: [],
     sightings: [],
-    forms_sightings: [],
+    formsSightings: [],
   };
 
   if (selectedWebsite.system === "ornitho") {
@@ -237,7 +252,7 @@ function parseImportFile(rawText, selectedWebsite) {
     data.forms = data.forms || [];
     data.sightings = data.sightings || [];
 
-    exportData.sightings = ornithoSightingsTransformation(data.sightings, 0);
+    exportData.sightings = ornithoSightingsTransformation(data.sightings, 0, selectedWebsite);
     exportData.forms = data.forms.map((form, index) => {
       const date = form.sightings[0].observers[0].timing["@ISO8601"].split("T")[0];
       const timeStart = `${date}T${form.time_start}`;
@@ -291,8 +306,8 @@ function parseImportFile(rawText, selectedWebsite) {
       };
     });
 
-    exportData.forms_sightings = data.forms.map((form, index) => {
-      return ornithoSightingsTransformation(form.sightings, index + 1);
+    exportData.formsSightings = data.forms.map((form, index) => {
+      return ornithoSightingsTransformation(form.sightings, index + 1, selectedWebsite);
     });
   } else if (selectedWebsite.system === "birdlasser") {
     exportData.sightings = Papa.parse(rawText, {
@@ -302,6 +317,9 @@ function parseImportFile(rawText, selectedWebsite) {
       return createSighting({
         id: `s${index}`,
         form_id: 0,
+        website: selectedWebsite.name,
+        source_website_name: selectedWebsite.name,
+        system: selectedWebsite.system,
         date: sighting.Date.replaceAll("/", "-"),
         time: sighting.Time,
         lat: Number.parseFloat(sighting.Latitude),
@@ -325,6 +343,11 @@ function parseImportFile(rawText, selectedWebsite) {
       return createSighting({
         id: sighting.id,
         form_id: 0,
+        website: selectedWebsite.name,
+        source_website_name: selectedWebsite.name,
+        source_record_url: `${selectedWebsite.website}observation/${sighting.id}`,
+        system: selectedWebsite.system,
+        permalink: `${selectedWebsite.website}observation/${sighting.id}`,
         date: sighting.date,
         time: sighting.time,
         lat: Number.parseFloat(sighting.lat),
@@ -352,6 +375,9 @@ function parseImportFile(rawText, selectedWebsite) {
       return createSighting({
         id: sighting["Universal observation ID"],
         form_id: 0,
+        website: selectedWebsite.name,
+        source_website_name: selectedWebsite.name,
+        system: selectedWebsite.system,
         date: `${dateSplit[2]}-${dateSplit[0]}-${dateSplit[1]}`,
         time: sighting.Timing,
         lat: Number.parseFloat(sighting["Latitude (N)"]),
@@ -382,7 +408,7 @@ async function checkWebsite(exportData, selectedWebsite) {
   }
 
   const firstRecord =
-    exportData.sightings.length > 0 ? exportData.sightings[0] : exportData.forms_sightings[0]?.[0];
+    exportData.sightings.length > 0 ? exportData.sightings[0] : exportData.formsSightings[0]?.[0];
 
   if (!firstRecord) {
     return "";
@@ -409,12 +435,7 @@ async function checkWebsite(exportData, selectedWebsite) {
 
 async function copyIssueBlock() {
   const payload = `\`\`\`\n${taxonomicIssuesStringify.value}\n\`\`\``;
-  try {
-    await navigator.clipboard.writeText(payload);
-    clipboardLabel.value = "copied";
-  } catch {
-    clipboardLabel.value = "failed";
-  }
+  clipboardLabel.value = (await copyClipboard(payload)) ? "copied" : "failed";
 }
 </script>
 
@@ -434,17 +455,13 @@ async function copyIssueBlock() {
           </div>
 
           <div v-if="website" class="mb-3">
-            <label class="form-label">{{ t("importFile") }}</label>
+            <label class="form-label">{{ t(importFileLabelKey) }}</label>
             <input
               class="form-control form-control-lg"
               type="file"
               :accept="website.extension"
               @change="file = $event.target.files?.[0] || null"
             />
-            <div class="form-text mt-2">
-              <strong>{{ t("expectedFile") }}:</strong>
-              {{ t(expectedFileKey) }}
-            </div>
           </div>
 
           <div v-if="loadingStatus === 0" class="alert alert-warning d-flex align-items-center gap-2">
@@ -452,79 +469,29 @@ async function copyIssueBlock() {
             <span>{{ t("loadingData") }}</span>
           </div>
           <div v-else-if="loadingStatus === 1" class="alert alert-success d-flex align-items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path
-                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.97 11.03l5-5-.94-.94L6.5 9.62 4.97 8.09l-.94.94z"
-              />
-            </svg>
-            <span>
-              {{
-                t("formsAndSightings", {
-                  forms: numberImportedForms,
-                  sightings: numberImportedSightings,
-                })
-              }}
-            </span>
+            <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+            <span>{{ importSuccessText }}</span>
           </div>
           <div v-else-if="loadingStatus === -1" class="alert alert-danger d-flex align-items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path
-                d="M11.46 14.697a1 1 0 0 0 .753-1.659L8.753 8l3.46-5.038A1 1 0 0 0 11.46 1.3H4.54a1 1 0 0 0-.753 1.659L7.247 8l-3.46 5.038A1 1 0 0 0 4.54 14.7zM5.43 2h5.14L7.787 6.053a1 1 0 0 0 0 1.894L10.57 12H5.43l2.783-4.053a1 1 0 0 0 0-1.894z"
-              />
-            </svg>
+            <i class="bi bi-exclamation-octagon-fill flex-shrink-0" aria-hidden="true"></i>
             <span><strong>{{ t("error") }}.</strong> {{ errorMessage }}</span>
           </div>
           <div v-if="verificationWarning" class="alert alert-warning d-flex align-items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path
-                d="M7.938 2.016A.13.13 0 0 1 8 2c.028 0 .058.006.082.016a.15.15 0 0 1 .054.04l6.857 11.667c.036.06.047.13.03.198a.16.16 0 0 1-.094.11.13.13 0 0 1-.06.015H1.13a.13.13 0 0 1-.06-.015.16.16 0 0 1-.093-.11.2.2 0 0 1 .03-.198L7.864 2.056a.15.15 0 0 1 .054-.04M8 4.5a.5.5 0 0 0-.5.5v3.25a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5m0 6.25a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5"
-              />
-            </svg>
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
             <span>{{ verificationWarning }}</span>
           </div>
         </div>
 
         <div class="col-lg-6">
-          <div v-if="website" class="alert alert-info text-body border-0 shadow-sm mb-0">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                aria-hidden="true"
-                class="text-primary flex-shrink-0"
-              >
-                <path
-                  d="M8 0a5.5 5.5 0 0 1 4.473 8.7l2.413 2.413a1 1 0 0 1-1.414 1.414L11.06 10.11A5.5 5.5 0 1 1 8 0m0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8"
-                />
-              </svg>
-              <h3 class="h6 fw-bold mb-0">{{ t("importHelperTitle") }}</h3>
+          <div v-if="website" class="feature-panel feature-panel-helper mb-0">
+            <div class="feature-panel-header mb-3">
+              <span class="feature-panel-icon" aria-hidden="true">
+                <i class="bi bi-search"></i>
+              </span>
+              <div>
+                <div class="feature-panel-eyebrow">{{ t("importTitle") }}</div>
+                <h3 class="h6 fw-bold mb-0">{{ t("importHelperTitle") }}</h3>
+              </div>
             </div>
 
             <template v-if="website.system === 'ornitho'">
@@ -590,7 +557,7 @@ async function copyIssueBlock() {
               </div>
               <div class="d-flex justify-content-center mt-3">
                 <a class="btn btn-primary" :href="exportLink" target="_blank" rel="noopener">
-                  {{ t("openExportPage") }}
+                  {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>
             </template>
@@ -599,7 +566,7 @@ async function copyIssueBlock() {
               <p class="mb-3">{{ t("importHelpObservation") }}</p>
               <div class="d-flex justify-content-center">
                 <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage") }}
+                  {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>
             </template>
@@ -608,7 +575,7 @@ async function copyIssueBlock() {
               <p class="mb-3">{{ t("importHelpBirdlasser") }}</p>
               <div class="d-flex justify-content-center">
                 <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage") }}
+                  {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>
             </template>
@@ -617,7 +584,7 @@ async function copyIssueBlock() {
               <p class="mb-3">{{ t("importHelpOrnithoNet") }}</p>
               <div class="d-flex justify-content-center">
                 <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage") }}
+                  {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>
             </template>
