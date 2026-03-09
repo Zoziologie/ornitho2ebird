@@ -163,7 +163,7 @@
   "speciesCommentTemplate": "Artenkommentar",
   "template": "Vorlage",
   "speciesCommentTemplateHelp": "Beobachtungsspezifische Informationen zu den eBird-Artenkommentaren hinzufügen, zum Beispiel Anzahl, genaue Position, Beobachtungszeit oder einen Link zur ursprünglichen ornitho-Plattform.",
-  "speciesCommentTemplateAdvancedHelp": "Verwende HTML/JS-Code in der Vorlage, um den Kommentar anzupassen. Nutze die Schreibweise ${ javascript code }, um dynamische Informationen für jede Beobachtung einzufügen. Auf Werte auf Beobachtungsebene kannst du mit ${ s.property } zugreifen, anhand der unten aufgeführten Eigenschaften.",
+  "speciesCommentTemplateAdvancedHelp": "Verwende HTML/JS-Code in der Vorlage, um den Kommentar anzupassen. Nutze die Schreibweise ${'{'} javascript code {'}'}, um dynamische Informationen für jede Beobachtung einzufügen. Auf Werte auf Beobachtungsebene kannst du mit ${'{'} s.property {'}'} zugreifen, anhand der unten aufgeführten Eigenschaften.",
   "longTemplate": "Lange Vorlage",
   "longTemplateHelp": "Wenn du viele Beobachtungen derselben Art hast, empfehlen wir die lange Vorlage, um den Platz besser zu nutzen. Lege den Schwellwert unten fest.",
   "switchLimit": "Schwellwert für lange Vorlage",

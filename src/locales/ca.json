@@ -163,7 +163,7 @@
   "speciesCommentTemplate": "Comentari d'espècie",
   "template": "Plantilla",
   "speciesCommentTemplateHelp": "Afegeix informació específica de l'observació als comentaris d'espècie d'eBird, com ara el nombre d'individus, la posició exacta, l'hora d'observació o un enllaç a la plataforma ornitho original.",
-  "speciesCommentTemplateAdvancedHelp": "Fes servir codi HTML/JS dins de la plantilla per personalitzar el comentari. Utilitza la notació ${ javascript code } per inserir informació dinàmica de cada observació. Pots accedir als valors del nivell d'observació amb ${ s.property }, fent servir les propietats llistades a la taula de sota.",
+  "speciesCommentTemplateAdvancedHelp": "Fes servir codi HTML/JS dins de la plantilla per personalitzar el comentari. Utilitza la notació ${'{'} javascript code {'}'} per inserir informació dinàmica de cada observació. Pots accedir als valors del nivell d'observació amb ${'{'} s.property {'}'}, fent servir les propietats llistades a la taula de sota.",
   "longTemplate": "Plantilla llarga",
   "longTemplateHelp": "Quan tens moltes observacions de la mateixa espècie, recomanem fer servir la plantilla llarga per optimitzar l'espai. Defineix el llindar a sota.",
   "switchLimit": "Llindar per a la plantilla llarga",

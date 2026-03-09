@@ -163,7 +163,7 @@
   "speciesCommentTemplate": "Commentaire d'espèce",
   "template": "Modèle",
   "speciesCommentTemplateHelp": "Ajouter des informations propres à l'observation dans les commentaires d'espèce eBird, comme le nombre d'individus, la position exacte, l'heure d'observation ou un lien vers la plateforme ornitho d'origine.",
-  "speciesCommentTemplateAdvancedHelp": "Utilisez du code HTML/JS dans le modèle pour personnaliser le commentaire. Utilisez la notation ${ javascript code } pour insérer des informations dynamiques pour chaque observation. Vous pouvez accéder aux valeurs au niveau de l'observation avec ${ s.property }, en utilisant les propriétés listées dans le tableau ci-dessous.",
+  "speciesCommentTemplateAdvancedHelp": "Utilisez du code HTML/JS dans le modèle pour personnaliser le commentaire. Utilisez la notation ${'{'} javascript code {'}'} pour insérer des informations dynamiques pour chaque observation. Vous pouvez accéder aux valeurs au niveau de l'observation avec ${'{'} s.property {'}'}, en utilisant les propriétés listées dans le tableau ci-dessous.",
   "longTemplate": "Modèle long",
   "longTemplateHelp": "Lorsque vous avez de nombreuses observations de la même espèce, nous recommandons d'utiliser le modèle long afin d'optimiser l'espace. Définissez le seuil ci-dessous.",
   "switchLimit": "Seuil pour le modèle long",

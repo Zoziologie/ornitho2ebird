@@ -163,7 +163,7 @@
   "speciesCommentTemplate": "Species comment",
   "template": "Template",
   "speciesCommentTemplateHelp": "Add sighting-specific information to the eBird species comments, such as group size, exact position, time of observation, or a link to the original ornitho platform.",
-  "speciesCommentTemplateAdvancedHelp": "Use HTML/JS code in the template to customize the comment. Use the notation ${ javascript code } to insert dynamic information for each sighting. You can access sighting-level values with ${ s.property }, using the properties listed in the table below.",
+  "speciesCommentTemplateAdvancedHelp": "Use HTML/JS code in the template to customize the comment. Use the notation ${'{'} javascript code {'}'} to insert dynamic information for each sighting. You can access sighting-level values with ${'{'} s.property {'}'}, using the properties listed in the table below.",
   "longTemplate": "Long template",
   "longTemplateHelp": "When you have many sightings of the same species, we recommend using the long template to optimise space use. Set your threshold below.",
   "switchLimit": "Threshold for long template",
