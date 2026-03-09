@@ -4,6 +4,73 @@ Convert exports from ornitho, ornitho network sites, Observation websites, and B
 
 `ornitho2ebird` is a client-side Vue application for turning bird observation exports into the eBird Record Format (Extended). It is designed for people who already have data in regional ornithology platforms and want a faster path into eBird without hand-editing a spreadsheet.
 
+## Tech stack
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="center">
+        Vue<br/>
+        <sub>UI framework</sub>
+      </th>
+      <th align="center">
+        Vite<br/>
+        <sub>Build & dev tooling</sub>
+      </th>
+      <th align="center">
+        Bootstrap<br/>
+        <sub>Layout & components</sub>
+      </th>
+      <th align="center">
+        Leaflet<br/>
+        <sub>Interactive maps</sub>
+      </th>
+      <th align="center">
+        Node.js<br/>
+        <sub>Local runtime</sub>
+      </th>
+      <th align="center">
+        npm<br/>
+        <sub>Package manager</sub>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://vuejs.org/">
+          <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/vuejs/vuejs-original.svg" height="40"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://vite.dev/">
+          <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/vitejs/vitejs-original.svg" height="40"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://getbootstrap.com/">
+          <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/bootstrap/bootstrap-original.svg" height="40"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://leafletjs.com/">
+          <img src="https://leafletjs.com/docs/images/logo.png" height="40"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://nodejs.org/">
+          <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original.svg" height="40"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://www.npmjs.com/">
+          <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/npm/npm-original-wordmark.svg" height="40"/>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ## What it does
 
 - Imports exported files from supported source websites
@@ -136,7 +203,7 @@ npm run preview
 
 ## Deployment note
 
-[`vite.config.js`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/vite.config.js) uses `base: "/ornitho2ebird/"`, which is suitable for deployment under that subpath, such as a GitHub Pages project site. Change that value if you deploy elsewhere.
+The app now builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/vite.config.js).
 
 ## Contributing
 

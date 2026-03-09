@@ -615,6 +615,15 @@ h6 {
 .support-card-placeholder {
   background: rgba(255, 255, 255, 0.05);
   border-style: dashed;
+  cursor: default;
+}
+
+.support-card-placeholder:hover,
+.support-card-placeholder:focus-visible {
+  transform: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
 }
 
 .support-card-placeholder-mark {

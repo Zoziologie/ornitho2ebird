@@ -23,7 +23,7 @@ const supporters = [
   {
     id: "placeholder",
     name: "More partners coming soon",
-    href: "#",
+    href: "",
     logo: null,
   },
 ];
@@ -34,14 +34,15 @@ const supporters = [
     <div class="support-strip">
       <div class="support-strip-label">{{ t("supportedBy") }}</div>
       <div class="support-strip-list">
-        <a
+        <component
           v-for="supporter in supporters"
           :key="supporter.id"
-          :href="supporter.href"
-          target="_blank"
-          rel="noopener"
+          :is="supporter.href ? 'a' : 'div'"
+          :href="supporter.href || undefined"
+          :target="supporter.href ? '_blank' : undefined"
+          :rel="supporter.href ? 'noopener' : undefined"
           class="support-card text-decoration-none"
-          :aria-label="supporter.name"
+          :aria-label="supporter.href ? supporter.name : undefined"
           :class="{ 'support-card-placeholder': !supporter.logo }"
         >
           <img v-if="supporter.logo" :src="supporter.logo" :alt="supporter.name" class="support-card-logo" />
@@ -49,7 +50,7 @@ const supporters = [
             <i class="bi bi-plus-lg"></i>
           </span>
           <span class="support-card-name">{{ supporter.name }}</span>
-        </a>
+        </component>
       </div>
     </div>
 

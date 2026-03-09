@@ -352,7 +352,7 @@ function downloadFile() {
             </div>
             <p>
               {{ t("finalStepsImportPrefix") }}
-              <a href="http://ebird.org/ebird/import/upload.form?theme=ebird" target="_blank" rel="noopener">
+              <a href="https://ebird.org/ebird/import/upload.form?theme=ebird" target="_blank" rel="noopener">
                 {{ t("finalStepsImportLink") }}
               </a>
               {{ t("finalStepsImportMiddle") }}
