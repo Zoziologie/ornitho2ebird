@@ -2,8 +2,6 @@
 
 Convert exports from ornitho, ornitho network sites, Observation websites, and BirdLasser into eBird-ready CSV checklists.
 
-![Ornitho2eBird demo](public/b2e.gif)
-
 `ornitho2ebird` is a client-side Vue application for turning bird observation exports into the eBird Record Format (Extended). It is designed for people who already have data in regional ornithology platforms and want a faster path into eBird without hand-editing a spreadsheet.
 
 ## What it does
