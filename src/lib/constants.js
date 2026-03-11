@@ -40,6 +40,7 @@ export const DEFAULT_SETTINGS = {
   githubToken: "",
   globalStaticMap: {
     show: false,
+    interactive: false,
     style: "satellite-v9",
     pathStyle: {
       strokeWidth: 5,

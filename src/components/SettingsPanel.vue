@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { DEFAULT_SPECIES_COMMENT_TEMPLATE, EBIRD_LANGUAGES } from "../lib/constants";
 import { speciesComment } from "../lib/utils";
@@ -13,6 +13,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  focusSection: {
+    type: String,
+    default: "",
+  },
 });
 
 const emit = defineEmits(["close", "open-info"]);
@@ -22,34 +26,38 @@ const staticMapStyleOptions = [
   { value: "streets-v11", label: "Street" },
   { value: "outdoors-v12", label: "Outdoor" },
   { value: "satellite-streets-v12", label: "Satellite-Street" },
-  { value: "light-v11", label: "Light" },
-  { value: "dark-v11", label: "Dark" },
 ];
 const markerSymbolOptions = ["circle", "triangle", "square", "star"];
+const PERSONALIZED_PRESET_KEY = "personalized";
+
 const previewSightings = [
   {
-    id: 21724328,
+    id: 36150841,
+    source_species_id: "408",
+    ebird_species_code: "eurbla",
     source_website_name: "ornitho.ch",
-    source_record_url: "https://www.ornitho.ch/index.php?m_id=54&id=21724328",
-    location_name: "La Dullive",
-    lat: 46.42315,
-    lon: 6.292591,
-    coordinates: "46.42315, 6.292591",
-    google_maps_url: "https://maps.google.com/?q=46.42315,6.292591",
-    date: "2020-12-23",
-    time: "14:53",
-    common_name: "Ring-necked Duck",
-    scientific_name: "",
-    count: 1,
+    source_record_url: "https://www.ornitho.ch/index.php?m_id=54&id=36150841",
+    location_name: "Leuzigen [602/224]",
+    lat: 47.168486,
+    lon: 7.465799,
+    coordinates: "47.168486, 7.465799",
+    google_maps_url: "https://maps.google.com/?q=47.168486,7.465799",
+    date: "2026-03-10",
+    time: "08:23",
+    common_name: "Merle noir",
+    scientific_name: "Turdus merula",
+    count: 4,
     count_precision: "=",
-    comment: "",
+    atlas_code: "5",
+    auditory_contact: "1",
+    comment: "Ceci est une remarque<br>1x male 1re annee, 2x type femelle",
   },
 ];
-const repeatedPreviewSightings = Array.from({ length: 10 }, (_, index) => ({
+const repeatedPreviewSightings = Array.from({ length: 12 }, (_, index) => ({
   ...previewSightings[0],
-  id: 21724328 + index,
-  time: `1${4 + Math.floor(index / 4)}:${String((53 + index * 7) % 60).padStart(2, "0")}`,
-  comment: ["", "shoreline", "with Tufted Duck", "flying north", "resting", "calling", "close view"][index % 7],
+  id: 36150841 + index,
+  time: `${String(8 + Math.floor(index / 3)).padStart(2, "0")}:${String((23 + index * 7) % 60).padStart(2, "0")}`,
+  comment: ["Ceci est une remarque", "chante", "1x male 1re annee", "2x type femelle", ""][index % 5],
 }));
 
 const shortPreviewSightings = computed(() => {
@@ -71,24 +79,28 @@ const speciesCommentLongPreview = computed(() => {
 });
 
 const propertyRows = [
-  ["id", "21724328"],
+  ["id", "36150841"],
+  ["source_species_id", "408"],
+  ["ebird_species_code", "eurbla"],
   ["source_website_name", "ornitho.ch"],
-  ["source_record_url", "https://www.ornitho.ch/index.php?m_id=54&id=21724328"],
-  ["location_name", "La Dullive"],
-  ["lat", "46.42315"],
-  ["lon", "6.292591"],
-  ["coordinates", "46.42315, 6.292591"],
-  ["google_maps_url", "https://maps.google.com/?q=46.42315,6.292591"],
-  ["date", "2020-12-23"],
-  ["time", "14:53"],
-  ["common_name", "Ring-necked Duck"],
-  ["scientific_name", ""],
-  ["count", "1"],
+  ["source_record_url", "https://www.ornitho.ch/index.php?m_id=54&id=36150841"],
+  ["location_name", "Leuzigen [602/224]"],
+  ["lat", "47.168486"],
+  ["lon", "7.465799"],
+  ["coordinates", "47.168486, 7.465799"],
+  ["google_maps_url", "https://maps.google.com/?q=47.168486,7.465799"],
+  ["date", "2026-03-10"],
+  ["time", "08:23"],
+  ["common_name", "Merle noir"],
+  ["scientific_name", "Turdus merula"],
+  ["count", "4"],
   ["count_precision", "="],
-  ["comment", ""],
+  ["atlas_code", "5"],
+  ["auditory_contact", "1"],
+  ["comment", "Ceci est une remarque<br>1x male 1re annee, 2x type femelle"],
 ];
 
-const shortTemplatePresets = [
+const speciesCommentPresets = [
   {
     key: "basic",
     labelKey: "templatePresetBasic",
@@ -111,21 +123,42 @@ const shortTemplatePresets = [
     long:
       '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
   },
+  {
+    key: "auditory-atlas",
+    labelKey: "templatePresetAuditoryAtlas",
+    short:
+      '${ s.auditory_contact !== "" ? "Auditory contact: " + s.auditory_contact : "" }${ s.auditory_contact !== "" && s.atlas_code !== "" ? " - " : "" }${ s.atlas_code !== "" ? "Atlas: " + s.atlas_code : "" }${ s.auditory_contact !== "" || s.atlas_code !== "" ? " - " : "" }${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+    long:
+      '${ s.auditory_contact !== "" ? "Auditory contact: " + s.auditory_contact : "" }${ s.auditory_contact !== "" && s.atlas_code !== "" ? " - " : "" }${ s.atlas_code !== "" ? "Atlas: " + s.atlas_code : "" }${ s.auditory_contact !== "" || s.atlas_code !== "" ? " - " : "" }${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+  },
 ];
 
-const longTemplatePresets = [
-  {
-    key: "basic",
-    labelKey: "templatePresetBasic",
-    long: DEFAULT_SPECIES_COMMENT_TEMPLATE.long,
-  },
-  {
-    key: "map",
-    labelKey: "templatePresetMap",
-    long:
-      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
-  },
-];
+const shortTemplatePresetOptions = computed(() => {
+  return [...speciesCommentPresets, { key: PERSONALIZED_PRESET_KEY, labelKey: "templatePresetPersonalized" }];
+});
+
+const longTemplatePresetOptions = computed(() => {
+  return [...speciesCommentPresets, { key: PERSONALIZED_PRESET_KEY, labelKey: "templatePresetPersonalized" }];
+});
+
+function templatePresetKeyFor(field) {
+  const property = field === "long" ? "long" : "short";
+  const matchedPreset = speciesCommentPresets.find(
+    (preset) => preset[property] === props.settings.speciesCommentTemplate[property]
+  );
+  return matchedPreset?.key || PERSONALIZED_PRESET_KEY;
+}
+
+const selectedShortTemplatePresetKey = ref(templatePresetKeyFor("short"));
+const selectedLongTemplatePresetKey = ref(templatePresetKeyFor("long"));
+const shortTemplateIsPersonalized = computed(() => selectedShortTemplatePresetKey.value === PERSONALIZED_PRESET_KEY);
+const longTemplateIsPersonalized = computed(() => selectedLongTemplatePresetKey.value === PERSONALIZED_PRESET_KEY);
+const hasPersonalizedTemplate = computed(() => {
+  return shortTemplateIsPersonalized.value || longTemplateIsPersonalized.value;
+});
+
+const advancedOptionsRef = ref(null);
+const speciesCommentRef = ref(null);
 
 const speciesCommentLimitError = computed(() => {
   const limit = Number(props.settings.speciesCommentTemplate.limit);
@@ -137,10 +170,65 @@ const speciesCommentLimitError = computed(() => {
   return "";
 });
 
-function applyTemplatePreset(field, preset) {
+function applyTemplatePreset(field, presetKey) {
+  if (field === "long") {
+    selectedLongTemplatePresetKey.value = presetKey;
+  } else {
+    selectedShortTemplatePresetKey.value = presetKey;
+  }
+
+  if (presetKey === PERSONALIZED_PRESET_KEY) {
+    return;
+  }
+
   const property = field === "long" ? "long" : "short";
+  const preset = speciesCommentPresets.find((entry) => entry.key === presetKey);
+  if (!preset) {
+    return;
+  }
+
   props.settings.speciesCommentTemplate[property] = preset[property];
 }
+
+watch(
+  () => props.settings.speciesCommentTemplate.short,
+  () => {
+    const matchedPreset = speciesCommentPresets.find(
+      (preset) => preset.short === props.settings.speciesCommentTemplate.short
+    );
+    if (selectedShortTemplatePresetKey.value !== PERSONALIZED_PRESET_KEY || !matchedPreset) {
+      selectedShortTemplatePresetKey.value = matchedPreset?.key || PERSONALIZED_PRESET_KEY;
+    }
+  }
+);
+
+watch(
+  () => props.settings.speciesCommentTemplate.long,
+  () => {
+    const matchedPreset = speciesCommentPresets.find(
+      (preset) => preset.long === props.settings.speciesCommentTemplate.long
+    );
+    if (selectedLongTemplatePresetKey.value !== PERSONALIZED_PRESET_KEY || !matchedPreset) {
+      selectedLongTemplatePresetKey.value = matchedPreset?.key || PERSONALIZED_PRESET_KEY;
+    }
+  }
+);
+
+watch(
+  () => [props.open, props.focusSection],
+  async ([isOpen, section]) => {
+    if (!isOpen || !section) {
+      return;
+    }
+
+    await nextTick();
+    const sectionMap = {
+      "advanced-options": advancedOptionsRef.value,
+      "species-comment-template": speciesCommentRef.value,
+    };
+    sectionMap[section]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+);
 </script>
 
 <template>
@@ -168,7 +256,12 @@ function applyTemplatePreset(field, preset) {
               </option>
             </select>
           </div>
-          <div class="form-text">{{ t("ebirdLanguageHelp") }}</div>
+          <div class="form-text">
+            {{ t("ebirdLanguageHelp") }}
+            <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
+              t("ebirdLanguagePrefsLink")
+            }}</a>
+          </div>
         </div>
 
         <div class="mt-3">
@@ -186,7 +279,7 @@ function applyTemplatePreset(field, preset) {
           <div class="form-text">{{ t("partySizeHelp") }}</div>
         </div>
 
-        <div class="mt-4">
+        <div ref="advancedOptionsRef" class="mt-4">
           <h3 class="h5">{{ t("advancedOptionsTitle") }}</h3>
           <div class="d-grid gap-3 mt-1">
             <button
@@ -255,7 +348,7 @@ function applyTemplatePreset(field, preset) {
           </div>
         </div>
 
-        <div class="mt-4">
+        <div ref="speciesCommentRef" class="mt-4">
           <h3 class="h5">{{ t("speciesCommentTemplate") }}</h3>
           <div class="form-check form-switch mb-3">
             <input
@@ -270,26 +363,24 @@ function applyTemplatePreset(field, preset) {
           </div>
 
           <div v-if="settings.customizedSpeciesComments">
-            <p class="small text-muted mb-3">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
             <div class="mb-3">
-              <label class="form-label">{{ t("template") }}</label>
-              <div class="d-flex flex-wrap gap-1 mb-2">
-                <button
-                  v-for="preset in shortTemplatePresets"
-                  :key="`short-${preset.key}`"
-                  class="btn btn-outline-secondary btn-sm py-1 px-2"
-                  type="button"
-                  @click="applyTemplatePreset('short', preset)"
-                >
+              <label class="form-label" for="short-template-preset">{{ t("template") }}</label>
+              <select
+                id="short-template-preset"
+                class="form-select"
+                :value="selectedShortTemplatePresetKey"
+                @change="applyTemplatePreset('short', $event.target.value)"
+              >
+                <option v-for="preset in shortTemplatePresetOptions" :key="`short-${preset.key}`" :value="preset.key">
                   {{ t(preset.labelKey) }}
-                </button>
-              </div>
+                </option>
+              </select>
+            </div>
+            <div v-if="shortTemplateIsPersonalized" class="mb-3">
+              <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
               <textarea v-model="settings.speciesCommentTemplate.short" class="form-control" rows="4" />
             </div>
 
-            <div class="form-text mb-2">
-              {{ t("multipleSightingsBody") }}
-            </div>
             <div class="card bg-light border-0 mb-4">
               <div class="card-body">
                 <h4 class="h6">{{ t("preview") }}</h4>
@@ -297,9 +388,7 @@ function applyTemplatePreset(field, preset) {
               </div>
             </div>
 
-            <div class="form-text mb-2">
-              {{ t("longTemplateHelp") }}
-            </div>
+            <div class="form-text mb-2">{{ t("longTemplateHelp") }}</div>
             <div class="mb-3">
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="switch-limit-input">{{ t("switchLimit") }}</label>
@@ -318,18 +407,20 @@ function applyTemplatePreset(field, preset) {
               </div>
             </div>
             <div class="mb-4">
-              <label class="form-label">{{ t("longTemplate") }}</label>
-              <div class="d-flex flex-wrap gap-1 mb-2">
-                <button
-                  v-for="preset in longTemplatePresets"
-                  :key="`long-${preset.key}`"
-                  class="btn btn-outline-secondary btn-sm py-1 px-2"
-                  type="button"
-                  @click="applyTemplatePreset('long', preset)"
-                >
+              <label class="form-label" for="long-template-preset">{{ t("longTemplate") }}</label>
+              <select
+                id="long-template-preset"
+                class="form-select"
+                :value="selectedLongTemplatePresetKey"
+                @change="applyTemplatePreset('long', $event.target.value)"
+              >
+                <option v-for="preset in longTemplatePresetOptions" :key="`long-${preset.key}`" :value="preset.key">
                   {{ t(preset.labelKey) }}
-                </button>
-              </div>
+                </option>
+              </select>
+            </div>
+            <div v-if="longTemplateIsPersonalized" class="mb-4">
+              <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
               <textarea v-model="settings.speciesCommentTemplate.long" class="form-control" rows="4" />
             </div>
 
@@ -340,7 +431,7 @@ function applyTemplatePreset(field, preset) {
               </div>
             </div>
 
-            <div class="card bg-light border-0">
+            <div v-if="hasPersonalizedTemplate" class="card bg-light border-0">
               <div class="card-body">
                 <h4 class="h6">{{ t("propertiesTitle") }}</h4>
                 <div class="table-responsive">
@@ -399,7 +490,7 @@ function applyTemplatePreset(field, preset) {
             <div class="form-text mb-3">{{ t("mapboxTokenHelp") }}</div>
 
             <div class="mb-3">
-              <label class="form-label">{{ t("staticMapStyle") }}</label>
+              <label class="form-label mb-0">{{ t("staticMapStyle") }}</label>
               <select v-model="settings.globalStaticMap.style" class="form-select">
                 <option
                   v-for="option in staticMapStyleOptions"
@@ -411,9 +502,9 @@ function applyTemplatePreset(field, preset) {
               </select>
             </div>
 
-            <div class="row g-3 mb-3">
+            <div class="row g-2 mb-2">
               <div class="col-12">
-                <label class="form-label">{{ t("pathStyle") }}</label>
+                <label class="form-label mb-0">{{ t("pathStyle") }}</label>
               </div>
               <div class="col-md-4">
                 <input
@@ -446,9 +537,9 @@ function applyTemplatePreset(field, preset) {
               </div>
             </div>
 
-            <div class="row g-3 mb-4">
+            <div class="row g-2 mb-3">
               <div class="col-12">
-                <label class="form-label">{{ t("markerStyle") }}</label>
+                <label class="form-label mb-0">{{ t("markerStyle") }}</label>
               </div>
               <div class="col-md-4">
                 <select v-model="settings.globalStaticMap.markerStyle.markerSize" class="form-select">
@@ -473,15 +564,40 @@ function applyTemplatePreset(field, preset) {
               </div>
             </div>
 
-            <h4 class="h6">{{ t("interactiveMapTitle") }}</h4>
-            <label class="form-label">{{ t("githubToken") }}</label>
-            <input
-              v-model.trim="settings.githubToken"
-              class="form-control"
-              type="text"
-              placeholder="github_pat_..."
-            />
-            <div class="form-text">{{ t("githubTokenHelp") }}</div>
+            <h4 class="h6 mb-2">{{ t("interactiveMapTitle") }}</h4>
+            <div class="form-check form-switch mb-2">
+              <input
+                id="interactive-map-enabled"
+                v-model="settings.globalStaticMap.interactive"
+                class="form-check-input"
+                type="checkbox"
+              />
+              <label class="form-check-label" for="interactive-map-enabled">
+                {{ t("interactiveMapEnabled") }}
+              </label>
+            </div>
+
+            <div v-if="settings.globalStaticMap.interactive">
+              <div class="form-text mb-3">{{ t("interactiveMapHelp") }}</div>
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <label class="form-label mb-0">{{ t("githubToken") }}</label>
+                <a
+                  class="small"
+                  href="https://github.com/settings/tokens/new?scopes=gist&description=ornitho2ebird"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {{ t("githubTokenLink") }}
+                </a>
+              </div>
+              <input
+                v-model.trim="settings.githubToken"
+                class="form-control"
+                type="text"
+                placeholder="github_pat_..."
+              />
+              <div class="form-text">{{ t("githubTokenHelp") }}</div>
+            </div>
           </div>
         </div>
 

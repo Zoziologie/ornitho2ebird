@@ -115,6 +115,7 @@ const selectedFormId = ref(null);
 const infoOpen = ref(false);
 const infoSection = ref("");
 const settingsOpen = ref(false);
+const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
 const { locale, t } = useI18n({ useScope: "global" });
 locale.value = settings.uiLanguage;
@@ -218,6 +219,23 @@ function openInfo(section = "") {
   infoSection.value = section;
   infoOpen.value = true;
 }
+
+function openSettings(section = "") {
+  settingsFocusSection.value = section;
+  settingsOpen.value = true;
+}
+
+function closeSettings() {
+  settingsOpen.value = false;
+  settingsFocusSection.value = "";
+}
+
+function openSettingsForSection(section) {
+  if (section === "advanced-options") {
+    settings.advancedEnabled = true;
+  }
+  openSettings(section);
+}
 </script>
 
 <template>
@@ -226,13 +244,14 @@ function openInfo(section = "") {
       :ui-language="settings.uiLanguage"
       @update:ui-language="settings.uiLanguage = $event"
       @open-info="openInfo()"
-      @open-settings="settingsOpen = true"
+      @open-settings="openSettings()"
     />
 
     <SettingsPanel
       :open="settingsOpen"
       :settings="settings"
-      @close="settingsOpen = false"
+      :focus-section="settingsFocusSection"
+      @close="closeSettings"
       @open-info="openInfo($event)"
     />
     <div v-if="infoOpen" class="modal-backdrop" @click.self="infoOpen = false">
@@ -254,7 +273,6 @@ function openInfo(section = "") {
 
     <main class="main-stack">
       <ImportPanel
-        :selected-ebird-language="settings.ebirdLanguage"
         :selected-website-name="settings.websiteName"
         @update:selected-website-name="settings.websiteName = $event"
         @import-data="importData"
@@ -265,6 +283,8 @@ function openInfo(section = "") {
         :forms="forms"
         :sightings="sightings"
         :forms-sightings="formsSightings"
+        :mapbox-token="settings.mapboxToken"
+        :global-static-map="settings.globalStaticMap"
         :selected-form-id="selectedFormId"
         :default-species-comment-template="settings.speciesCommentTemplate"
         :default-number-observer="settings.defaultNumberObserver"
@@ -279,8 +299,12 @@ function openInfo(section = "") {
         :forms="forms"
         :sightings="sightings"
         :forms-sightings="formsSightings"
+        :selected-ebird-language="settings.ebirdLanguage"
+        :mapbox-token="settings.mapboxToken"
+        :global-static-map="settings.globalStaticMap"
         :species-comment-template="settings.speciesCommentTemplate"
         :customized-species-comments="settings.customizedSpeciesComments"
+        @open-settings-section="openSettingsForSection"
       />
     </main>
 

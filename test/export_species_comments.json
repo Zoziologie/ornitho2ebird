@@ -1,0 +1,101 @@
+{
+  "data": {
+    "sightings": [
+      {
+        "date": {
+          "@timestamp": "1773097200",
+          "@notime": "1",
+          "@offset": "3600",
+          "@ISO8601": "2026-03-10T00:00:00+01:00",
+          "#text": "mardi, 10. mars 2026"
+        },
+        "species": {
+          "@id": "408",
+          "sys_order": "6530",
+          "taxonomy": "1",
+          "rarity": "verycommon",
+          "name": "Merle noir",
+          "latin_name": "Turdus merula",
+          "category": "C",
+          "atlas_13_16": { "@id": "V", "#text": "V" }
+        },
+        "place": {
+          "@id": "23356",
+          "name": "Leuzigen [602\/224]",
+          "altitude": "522",
+          "place_type": "square",
+          "loc_precision": "750",
+          "coord_lat": "47.171454000625",
+          "coord_lon": "7.4716125797094",
+          "municipality": "Leuzigen",
+          "county": "BE",
+          "country": ""
+        },
+        "observers": [
+          {
+            "@id": "11346",
+            "@uid": "61856",
+            "@vowa_id": "4035",
+            "code": "3afd90058a79",
+            "name": "Rapha\u00ebl Nussbaumer",
+            "anonymous": "0",
+            "anonymous_in_export": "0",
+            "second_hand": "0",
+            "traid": "11346",
+            "id_sighting": "36150841",
+            "id_universal": "1_36150841",
+            "timing": {
+              "@timestamp": "1773127380",
+              "@notime": "0",
+              "@offset": "3600",
+              "@ISO8601": "2026-03-10T08:23:00+01:00",
+              "#text": "mardi, 10. mars 2026, 08:23:00"
+            },
+            "coord_lat": "47.168485685969",
+            "coord_lon": "7.4657989294365",
+            "altitude": "522",
+            "atlas_grid_name": "60 22 (Solothurn)",
+            "precision": "precise",
+            "estimation_code": "EXACT_VALUE",
+            "count": "4",
+            "flight_number": "1",
+            "comment": "Ceci est une remarque",
+            "hidden_comment": "Et ca une remarque prot\u00e9g\u00e9!",
+            "source": "WEB",
+            "insert_date": {
+              "@timestamp": "1773140083",
+              "@notime": "0",
+              "@offset": "3600",
+              "@ISO8601": "2026-03-10T11:54:43+01:00",
+              "#text": "mardi, 10. mars 2026, 11:54:43"
+            },
+            "update_date": {
+              "@timestamp": "1773216555",
+              "@notime": "0",
+              "@offset": "3600",
+              "@ISO8601": "2026-03-11T09:09:15+01:00",
+              "#text": "mercredi, 11. mars 2026, 09:09:15"
+            },
+            "atlas_code": { "@id": "3_5", "#text": "5" },
+            "details": [
+              {
+                "count": "1",
+                "sex": { "@id": "M", "#text": "m\u00e2le" },
+                "age": { "@id": "1Y", "#text": "1re ann\u00e9e" }
+              },
+              {
+                "count": "2",
+                "sex": { "@id": "FT", "#text": "type femelle" },
+                "age": { "@id": "U", "#text": "inconnu" }
+              }
+            ],
+            "has_death": "1",
+            "has_ring": "2",
+            "auditory_contact": "1",
+            "extended_info": { "ring": { "type": "", "type_param": "" } }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 function normalizeName(value) {
-  return (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return String(value || "").normalize("NFC").trim();
 }
 
 export function formatNumber(value) {
@@ -153,9 +153,14 @@ export function speciesComment(speciesCommentTemplate, sightings) {
     .join(separator);
 }
 
-export function checklistComment(form, sightings, importedWithText) {
+export function checklistComment(form, sightings, importedWithText, options = {}) {
   const comment = form.checklist_comment || "";
-  return `${comment}${comment ? "<br/>" : ""}<small>${importedWithText}</small>`;
+  const staticMapUrl = options.staticMapUrl || "";
+  const staticMapImage = staticMapUrl
+    ? `<img src="${staticMapUrl}" alt="Checklist static map" style="max-width:300px;width:100%;display:block;margin-top:0.5rem;">`
+    : "";
+  const importedWithLink = `<a href="https://ornitho2ebird.com/" target="_blank" rel="noopener">${importedWithText}</a>`;
+  return `${comment}${staticMapImage}${comment || staticMapImage ? "<br/>" : ""}<small>${importedWithLink}</small>`;
 }
 
 export function buildSpeciesCommentTemplate(website) {
@@ -216,7 +221,7 @@ export function buildChecklistPayloadFromSightings(sightings, options = {}) {
     lat: sightings.reduce((sum, sighting) => sum + sighting.lat, 0) / sightings.length,
     lon: sightings.reduce((sum, sighting) => sum + sighting.lon, 0) / sightings.length,
     species_comment_template: options.speciesCommentTemplate,
-    primary_purpose: true,
+    primary_purpose: false,
     full_form: false,
   };
 }
@@ -367,8 +372,12 @@ export function createSighting(raw) {
     time: raw.time ? raw.time.substring(0, 5) : "",
     common_name: raw.common_name || "",
     scientific_name: raw.scientific_name || "",
+    source_species_id: raw.source_species_id || "",
+    ebird_species_code: raw.ebird_species_code || "",
     count: raw.count || null,
     count_precision: raw.count_precision || "",
+    atlas_code: raw.atlas_code ?? "",
+    auditory_contact: raw.auditory_contact ?? "",
     comment: raw.comment ? raw.comment.replace(/\r\n/g, "<br>") : "",
   };
 }

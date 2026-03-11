@@ -1,0 +1,54 @@
+{
+  "data": {
+    "sightings": [],
+    "forms": [
+      {
+        "@id": "999001",
+        "id_form_universal": "1_999001",
+        "time_start": "08:00:00",
+        "time_stop": "09:00:00",
+        "full_form": "1",
+        "lat": "46.5197",
+        "lon": "6.6323",
+        "protocol": {
+          "protocol_name": "TEST_GPS_ANOMALY",
+          "wkt": "LINESTRING(6.6323 46.5197, -73.9857 40.7484)"
+        },
+        "comment": "Synthetic test checklist with impossible GPS jump.",
+        "sightings": [
+          {
+            "date": {
+              "@ISO8601": "2026-03-10T00:00:00+01:00"
+            },
+            "species": {
+              "@id": "146",
+              "name": "Milan noir",
+              "latin_name": "Milvus migrans"
+            },
+            "place": {
+              "name": "Test location GPS anomaly"
+            },
+            "observers": [
+              {
+                "id_sighting": "9991001",
+                "timing": {
+                  "@notime": "0",
+                  "@ISO8601": "2026-03-10T08:15:00+01:00"
+                },
+                "coord_lat": "46.5197",
+                "coord_lon": "6.6323",
+                "estimation_code": "EXACT_VALUE",
+                "count": "1",
+                "auditory_contact": "0",
+                "atlas_code": {
+                  "@id": "3_5",
+                  "#text": "5"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

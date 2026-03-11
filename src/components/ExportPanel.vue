@@ -1,7 +1,16 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { checklistComment, formatDate, formatNumber, mathRound, protocol, speciesComment } from "../lib/utils";
+import {
+  checklistComment,
+  formatDate,
+  formatNumber,
+  mathRound,
+  protocol,
+  speciesComment,
+} from "../lib/utils";
+import { buildStaticMapUrl } from "../lib/staticMap";
+import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
 
 const props = defineProps({
   forms: {
@@ -16,6 +25,18 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  selectedEbirdLanguage: {
+    type: String,
+    required: true,
+  },
+  mapboxToken: {
+    type: String,
+    default: "",
+  },
+  globalStaticMap: {
+    type: Object,
+    default: () => ({}),
+  },
   speciesCommentTemplate: {
     type: Object,
     required: true,
@@ -25,7 +46,18 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(["open-settings-section"]);
 const { t } = useI18n();
+const DISTANCE_WARNING_THRESHOLD_KM = 20;
+const DISTANCE_WARNING_LIST_LIMIT = 10;
+const TAXONOMY_WARNING_LIST_LIMIT = 12;
+const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues/new";
+const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
+const EBIRD_MAP_URL = "https://ebird.org/map/";
+const taxonomyCommonNameByCode = ref(new Map());
+const taxonomyStatus = ref("idle");
+const taxonomyReportCodeByIssue = ref({});
+let taxonomyRequestId = 0;
 
 const exportableForms = computed(() => {
   return props.forms
@@ -35,6 +67,67 @@ const exportableForms = computed(() => {
 
 const activeSpeciesCommentTemplate = computed(() => {
   return props.customizedSpeciesComments ? props.speciesCommentTemplate : null;
+});
+
+watch(
+  () => props.selectedEbirdLanguage,
+  async (language) => {
+    const requestId = taxonomyRequestId + 1;
+    taxonomyRequestId = requestId;
+    taxonomyStatus.value = "loading";
+
+    try {
+      const commonNameByCode = await getCommonNameBySpeciesCode(language);
+      if (requestId !== taxonomyRequestId) {
+        return;
+      }
+
+      taxonomyCommonNameByCode.value = commonNameByCode;
+      taxonomyStatus.value = "ready";
+    } catch {
+      if (requestId !== taxonomyRequestId) {
+        return;
+      }
+
+      taxonomyCommonNameByCode.value = new Map();
+      taxonomyStatus.value = "error";
+    }
+  },
+  { immediate: true }
+);
+
+function taxonomyMatchedCommonName(sighting) {
+  const speciesCode = sighting?.ebird_species_code || "";
+  if (!speciesCode) {
+    return sighting?.common_name || "";
+  }
+
+  return taxonomyCommonNameByCode.value.get(speciesCode) || sighting?.common_name || "";
+}
+
+const exportableSightingsByFormId = computed(() => {
+  const formIds = new Set(exportableForms.value.map(({ form }) => form.id));
+  const sightingsByFormId = new Map();
+
+  const appendSighting = (sighting) => {
+    if (!formIds.has(sighting.form_id)) {
+      return;
+    }
+
+    const groupedSightings = sightingsByFormId.get(sighting.form_id) || [];
+    groupedSightings.push(sighting);
+    sightingsByFormId.set(sighting.form_id, groupedSightings);
+  };
+
+  props.sightings.forEach(appendSighting);
+  props.formsSightings.forEach((formSightings) => formSightings.forEach(appendSighting));
+  return sightingsByFormId;
+});
+
+const taxonomyNeededForExport = computed(() => {
+  return [...exportableSightingsByFormId.value.values()].some((group) => {
+    return group.some((sighting) => sighting.system === "ornitho");
+  });
 });
 
 function escapeCsvValue(value) {
@@ -68,29 +161,23 @@ function buildExportFilename() {
 
 const exportState = computed(() => {
   const errors = [];
-  const formIds = new Set(exportableForms.value.map(({ form }) => form.id));
-  const sightingsByFormId = new Map();
-
-  const appendSighting = (sighting) => {
-    if (!formIds.has(sighting.form_id)) {
-      return;
-    }
-
-    const groupedSightings = sightingsByFormId.get(sighting.form_id) || [];
-    groupedSightings.push(sighting);
-    sightingsByFormId.set(sighting.form_id, groupedSightings);
-  };
-
-  props.sightings.forEach(appendSighting);
-  props.formsSightings.forEach((formSightings) => formSightings.forEach(appendSighting));
+  const sightingsByFormId = exportableSightingsByFormId.value;
 
   const rows = exportableForms.value.flatMap(({ form, protocolState }) => {
     const formSightings = sightingsByFormId.get(form.id) || [];
-    const mergedComment = checklistComment(form, formSightings, t("importedWith"));
+    const staticMapUrl = buildStaticMapUrl({
+      form,
+      sightings: formSightings,
+      token: props.mapboxToken,
+      settings: props.globalStaticMap,
+      width: 640,
+      height: 420,
+    }).url;
+    const mergedComment = checklistComment(form, formSightings, t("importedWith"), { staticMapUrl });
     const speciesGroups = new Map();
 
     formSightings.forEach((sighting) => {
-      const key = sighting.common_name || "";
+      const key = sighting.ebird_species_code || sighting.common_name || "";
       const groupedSightings = speciesGroups.get(key) || [];
       groupedSightings.push(sighting);
       speciesGroups.set(key, groupedSightings);
@@ -112,7 +199,7 @@ const exportState = computed(() => {
 
       const count = hasNonNumericCount ? "X" : numericCount;
       const row = {
-        common_name: duplicates[0]?.common_name || "",
+        common_name: taxonomyMatchedCommonName(duplicates[0]),
         Genus: "",
         Species: "",
         count,
@@ -173,6 +260,74 @@ const exportState = computed(() => {
   };
 });
 
+const unmatchedTaxonomy = computed(() => {
+  if (!taxonomyNeededForExport.value || taxonomyStatus.value !== "ready") {
+    return [];
+  }
+
+  const issuesByKey = new Map();
+  [...exportableSightingsByFormId.value.values()].forEach((group) => {
+    group
+      .filter((sighting) => sighting.system === "ornitho")
+      .forEach((sighting) => {
+        const speciesCode = sighting.ebird_species_code || "";
+        const hasMatch = speciesCode && taxonomyCommonNameByCode.value.has(speciesCode);
+        if (hasMatch) {
+          return;
+        }
+
+        const speciesId = sighting.source_species_id || "";
+        const key =
+          speciesId ||
+          speciesCode ||
+          `name:${sighting.common_name || "?"}|scientific:${sighting.scientific_name || "?"}`;
+        if (!issuesByKey.has(key)) {
+          issuesByKey.set(key, {
+            sourceName: sighting.common_name || "?",
+            scientificName: sighting.scientific_name || "-",
+            speciesId,
+            speciesCode,
+          });
+        }
+      });
+  });
+
+  return [...issuesByKey.values()].sort((left, right) => {
+    if (left.sourceName !== right.sourceName) {
+      return left.sourceName.localeCompare(right.sourceName);
+    }
+    return left.scientificName.localeCompare(right.scientificName);
+  });
+});
+
+const displayedUnmatchedTaxonomy = computed(() => {
+  return unmatchedTaxonomy.value.slice(0, TAXONOMY_WARNING_LIST_LIMIT);
+});
+
+const hiddenUnmatchedTaxonomyCount = computed(() => {
+  return Math.max(0, unmatchedTaxonomy.value.length - displayedUnmatchedTaxonomy.value.length);
+});
+
+function taxonomyIssueKey(issue) {
+  return `${issue.speciesId || issue.speciesCode || issue.sourceName}::${issue.scientificName}`;
+}
+
+const taxonomyReportRows = computed(() => {
+  return unmatchedTaxonomy.value.map((issue) => ({
+    ...issue,
+    reportKey: taxonomyIssueKey(issue),
+  }));
+});
+
+watch(unmatchedTaxonomy, (issues) => {
+  const nextCodeByIssue = {};
+  issues.forEach((issue) => {
+    const key = taxonomyIssueKey(issue);
+    nextCodeByIssue[key] = taxonomyReportCodeByIssue.value[key] || "";
+  });
+  taxonomyReportCodeByIssue.value = nextCodeByIssue;
+}, { immediate: true });
+
 const exportSummaryStats = computed(() => {
   const protocolCounts = new Map();
 
@@ -212,6 +367,25 @@ const exportSummaryStats = computed(() => {
   };
 });
 
+const distanceWarningForms = computed(() => {
+  return exportableForms.value
+    .map(({ form, protocolState }) => ({
+      form,
+      protocolState,
+      distanceKm: Number(form.distance),
+    }))
+    .filter(({ distanceKm }) => Number.isFinite(distanceKm) && distanceKm > DISTANCE_WARNING_THRESHOLD_KM)
+    .sort((left, right) => right.distanceKm - left.distanceKm);
+});
+
+const displayedDistanceWarningForms = computed(() => {
+  return distanceWarningForms.value.slice(0, DISTANCE_WARNING_LIST_LIMIT);
+});
+
+const hiddenDistanceWarningCount = computed(() => {
+  return Math.max(0, distanceWarningForms.value.length - displayedDistanceWarningForms.value.length);
+});
+
 function protocolSummaryIcon(name) {
   return (
     {
@@ -223,8 +397,52 @@ function protocolSummaryIcon(name) {
   );
 }
 
+function openCustomizedMode() {
+  emit("open-settings-section", "advanced-options");
+}
+
+function updateTaxonomyReportCode(reportKey, rawValue) {
+  taxonomyReportCodeByIssue.value[reportKey] = String(rawValue || "").trim();
+}
+
+const taxonomyReportTemplate = computed(() => {
+  if (!taxonomyReportRows.value.length) {
+    return "";
+  }
+
+  const normalizeCell = (value) => String(value || "").replaceAll("|", "\\|");
+  const lines = taxonomyReportRows.value.map((issue) => {
+    const ebirdCode = taxonomyReportCodeByIssue.value[issue.reportKey] || "";
+    return `| ${normalizeCell(issue.speciesId || "?")} | ${normalizeCell(issue.sourceName)} | ${normalizeCell(issue.scientificName)} | ${normalizeCell(ebirdCode)} |`;
+  });
+
+  return [
+    "| ornitho_id | ornitho_common_name | ornitho_scientific_name | ebird_species_code |",
+    "| --- | --- | --- | --- |",
+    ...lines,
+  ].join("\n");
+});
+
+const githubReportUrl = computed(() => {
+  const params = new URLSearchParams({
+    title: t("exportTaxonomyReportIssueTitle", { count: taxonomyReportRows.value.length }),
+    body: taxonomyReportTemplate.value,
+    labels: TAXONOMY_REPORT_LABEL,
+  });
+  return `${TAXONOMY_NEW_ISSUE_URL}?${params.toString()}`;
+});
+
+function openTaxonomyIssue() {
+  window.open(githubReportUrl.value, "_blank", "noopener");
+}
+
 function downloadFile() {
   if (!exportState.value.csv) {
+    return;
+  }
+
+  if (taxonomyNeededForExport.value && taxonomyStatus.value === "loading") {
+    window.alert(t("exportTaxonomyLoading"));
     return;
   }
 
@@ -249,6 +467,131 @@ function downloadFile() {
       </div>
 
       <div v-else>
+        <div v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'" class="alert alert-secondary mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            <span>{{ t("exportTaxonomyLoading") }}</span>
+          </div>
+        </div>
+        <div v-else-if="taxonomyNeededForExport && taxonomyStatus === 'error'" class="alert alert-warning mb-3">
+          {{ t("exportTaxonomyLoadFailed") }}
+        </div>
+        <div v-else-if="unmatchedTaxonomy.length > 0" class="alert alert-warning export-warning-box mb-3">
+          <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
+            <span class="export-warning-icon" aria-hidden="true">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </span>
+            <span>{{ t("exportTaxonomyWarningTitle") }}</span>
+          </h4>
+          <p class="mb-2">{{ t("exportTaxonomyWarningBody") }}</p>
+          <ul class="list-unstyled mb-2 export-warning-list">
+            <li
+              v-for="issue in displayedUnmatchedTaxonomy"
+              :key="`${issue.speciesId || issue.speciesCode || issue.sourceName}-${issue.scientificName}`"
+              class="export-warning-item"
+            >
+              <div>
+                <div class="fw-semibold">{{ issue.sourceName }}</div>
+                <div class="small text-muted fst-italic">{{ issue.scientificName }}</div>
+              </div>
+            </li>
+            <li v-if="hiddenUnmatchedTaxonomyCount > 0" class="small text-muted">
+              {{ t("exportTaxonomyWarningMore", { count: hiddenUnmatchedTaxonomyCount }) }}
+            </li>
+          </ul>
+          <p class="mb-0">{{ t("exportTaxonomyWarningContinue") }}</p>
+          <details class="mt-2">
+            <summary class="small fw-semibold export-report-summary">
+              {{ t("exportTaxonomyReportSummary") }}
+            </summary>
+            <div class="mt-2 small">
+              <p class="mb-2">{{ t("exportTaxonomyReportBody") }}</p>
+              <ol class="ps-3 mb-2">
+                <li>
+                  {{ t("exportTaxonomyReportStepMapPrefix") }}
+                  <a :href="EBIRD_MAP_URL" target="_blank" rel="noopener">eBird Map</a>
+                  {{ t("exportTaxonomyReportStepMapSuffix") }}
+                </li>
+                <li>
+                  {{ t("exportTaxonomyReportStepFillTable") }}
+                  <div class="table-responsive mt-2">
+                    <table class="table table-sm table-striped align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th>{{ t("exportTaxonomyReportTableOrnithoId") }}</th>
+                          <th>{{ t("exportTaxonomyReportTableEbirdCode") }}</th>
+                          <th>{{ t("exportTaxonomyReportTableCommonName") }}</th>
+                          <th>{{ t("exportTaxonomyReportTableScientificName") }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="issue in taxonomyReportRows" :key="issue.reportKey">
+                          <td><code>{{ issue.speciesId || "?" }}</code></td>
+                          <td>
+                            <input
+                              class="form-control form-control-sm"
+                              :class="
+                                (taxonomyReportCodeByIssue[issue.reportKey] || '').trim()
+                                  ? 'is-valid'
+                                  : 'is-invalid'
+                              "
+                              :value="taxonomyReportCodeByIssue[issue.reportKey] || ''"
+                              :placeholder="t('speciesCodePrompt')"
+                              @input="updateTaxonomyReportCode(issue.reportKey, $event.target.value)"
+                            />
+                          </td>
+                          <td>{{ issue.sourceName }}</td>
+                          <td><em>{{ issue.scientificName }}</em></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </li>
+                <li>
+                  {{ t("exportTaxonomyReportStepIssuePrefix") }}
+                  <button class="btn btn-outline-danger btn-sm ms-1" type="button" @click="openTaxonomyIssue">
+                    {{ t("exportTaxonomyReportCreateIssueAll") }}
+                  </button>{{ t("exportTaxonomyReportStepIssueSuffix") }}
+                </li>
+              </ol>
+            </div>
+          </details>
+        </div>
+        <div v-if="distanceWarningForms.length > 0" class="alert alert-warning export-warning-box mb-3">
+          <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
+            <span class="export-warning-icon" aria-hidden="true">
+              <i class="bi bi-sign-turn-right-fill"></i>
+            </span>
+            {{ t("exportDistanceWarningTitle") }}
+          </h4>
+          <p class="mb-2">
+            {{ t("exportDistanceWarningBodyPrefix") }}
+            {{ " " }}
+            <button class="btn btn-link btn-sm p-0 align-baseline" type="button" @click="openCustomizedMode">
+              {{ t("advancedModeCustomTitle") }}
+            </button>
+            :
+          </p>
+          <ul class="list-unstyled mb-2 export-warning-list">
+            <li
+              v-for="{ form, distanceKm } in displayedDistanceWarningForms"
+              :key="`distance-${form.id}`"
+              class="export-warning-item"
+            >
+              <div>
+                <div class="fw-semibold">{{ t("exportDistanceWarningChecklist", { id: form.id }) }}</div>
+                <div class="small text-muted">{{ form.date || "-" }} · {{ form.location_name || "-" }}</div>
+              </div>
+              <span class="badge rounded-pill text-bg-danger export-warning-distance">
+                {{ mathRound(distanceKm, 2) }} km
+              </span>
+            </li>
+            <li v-if="hiddenDistanceWarningCount > 0" class="small text-muted">
+              {{ t("exportDistanceWarningMore", { count: hiddenDistanceWarningCount }) }}
+            </li>
+          </ul>
+        </div>
+
         <div class="export-overview mb-3">
           <section class="export-panel export-panel-protocol">
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
@@ -308,7 +651,7 @@ function downloadFile() {
             <button
               class="btn btn-primary btn-lg export-download-btn"
               type="button"
-              :disabled="exportState.errors.length > 0"
+              :disabled="exportState.errors.length > 0 || (taxonomyNeededForExport && taxonomyStatus === 'loading')"
               @click="downloadFile"
             >
               {{ t("downloadCsv") }}
@@ -354,9 +697,10 @@ function downloadFile() {
               {{ t("finalStepsImportPrefix") }}
               <a href="https://ebird.org/ebird/import/upload.form?theme=ebird" target="_blank" rel="noopener">
                 {{ t("finalStepsImportLink") }}
-              </a>
+              </a>,
               {{ t("finalStepsImportMiddle") }}
               <strong>{{ t("openEbirdImport") }}</strong>
+              ,
               {{ t("finalStepsImportSuffix") }}
             </p>
             <p>
@@ -367,7 +711,7 @@ function downloadFile() {
                 rel="noopener"
               >
                 {{ t("finalStepsProcessingLink") }}
-              </a>
+              </a>,
               {{ t("finalStepsProcessingMiddle") }}
               <a
                 href="https://support.ebird.org/en/support/solutions/articles/48000907878-upload-spreadsheet-data-to-ebird#anchorCleanData"

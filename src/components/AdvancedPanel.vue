@@ -25,11 +25,14 @@ import {
   distanceFromPath,
   protocol,
 } from "../lib/utils";
+import { buildStaticMapUrl } from "../lib/staticMap";
 
 const props = defineProps({
   forms: { type: Array, required: true },
   sightings: { type: Array, required: true },
   formsSightings: { type: Array, required: true },
+  mapboxToken: { type: String, default: "" },
+  globalStaticMap: { type: Object, default: () => ({}) },
   selectedFormId: { type: Number, default: null },
   defaultSpeciesCommentTemplate: { type: Object, required: true },
   defaultNumberObserver: { type: Number, default: 1 },
@@ -146,6 +149,25 @@ const selectedProtocol = computed(() => {
 
 const isInvalid = computed(() => {
   return selectedProtocol.value?.name === "Invalid";
+});
+
+const showStaticMapPanel = computed(() => {
+  return Boolean(props.globalStaticMap?.show);
+});
+
+const staticMapPreview = computed(() => {
+  if (!selectedForm.value) {
+    return { url: "", reason: "no_coordinates" };
+  }
+
+  return buildStaticMapUrl({
+    form: selectedForm.value,
+    sightings: selectedSightings.value,
+    token: props.mapboxToken,
+    settings: props.globalStaticMap,
+    width: 640,
+    height: 420,
+  });
 });
 
 function selectStyle() {
@@ -360,7 +382,7 @@ function buildNewChecklist(payload) {
       imported: false,
       exportable: true,
       species_comment_template: speciesCommentTemplate,
-      primary_purpose: true,
+      primary_purpose: false,
       full_form: false,
     },
     nextId,
@@ -1197,7 +1219,7 @@ onMounted(() => {
           </div>
 
           <div class="row g-3 mt-1">
-            <div class="col-12">
+            <div :class="showStaticMapPanel ? 'col-xl-8 col-lg-7' : 'col-12'">
               <div class="review-map-shell">
                 <div ref="reviewMapElement" class="review-map rounded border"></div>
                 <div class="review-map-controls">
@@ -1213,6 +1235,49 @@ onMounted(() => {
                   </button>
                 </div>
               </div>
+            </div>
+            <div v-if="showStaticMapPanel" class="col-xl-4 col-lg-5">
+              <article class="card h-100 static-map-preview-card">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                    <h3 class="h6 mb-0">{{ t("staticMapPreviewTitle") }}</h3>
+                    <a
+                      v-if="staticMapPreview.url"
+                      class="small text-decoration-none"
+                      :href="staticMapPreview.url"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {{ t("openInNewTab") }}
+                    </a>
+                  </div>
+                  <p class="small text-body-secondary mb-2">{{ t("staticMapPreviewHint") }}</p>
+                  <a
+                    v-if="staticMapPreview.url"
+                    class="d-block"
+                    :href="staticMapPreview.url"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      class="img-fluid rounded border static-map-preview-image"
+                      :src="staticMapPreview.url"
+                      :alt="t('staticMapPreviewAlt')"
+                    />
+                  </a>
+                  <div v-else class="alert alert-warning small mb-0">
+                    <span v-if="staticMapPreview.reason === 'token_missing'">
+                      {{ t("staticMapPreviewTokenMissing") }}
+                    </span>
+                    <span v-else-if="staticMapPreview.reason === 'url_too_long'">
+                      {{ t("staticMapPreviewTooLarge") }}
+                    </span>
+                    <span v-else>
+                      {{ t("staticMapPreviewUnavailable") }}
+                    </span>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </section>

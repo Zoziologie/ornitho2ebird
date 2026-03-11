@@ -4,20 +4,15 @@ import { useI18n } from "vue-i18n";
 import Papa from "papaparse/papaparse.js";
 import Wkt from "wicket/wicket.js";
 import websitesList from "/data/websites_list.json";
-import ornithoSpeciesList from "/data/ornitho_species_list_short.json";
 import {
   buildSpeciesCommentTemplate,
-  copyClipboard,
   createSighting,
   distanceFromPath,
   mathMode,
 } from "../lib/utils";
+import { getOrnithoEbirdSpeciesCode } from "../lib/taxonomy";
 
 const props = defineProps({
-  selectedEbirdLanguage: {
-    type: String,
-    required: true,
-  },
   selectedWebsiteName: {
     type: String,
     default: "",
@@ -46,16 +41,16 @@ const precisionMatchObservation = {
 const loadingStatus = ref(null);
 const numberImportedForms = ref(0);
 const numberImportedSightings = ref(0);
-const taxonomicIssues = ref([]);
-const clipboardLabel = ref("copy");
 const errorMessage = ref("");
 const verificationWarning = ref("");
 const file = ref(null);
+const fileInput = ref(null);
+const dragCounter = ref(0);
+const isDragActive = ref(false);
 const importQueryDate = ref("offset");
 const importQueryDateOffset = ref(1);
 const importQueryDateRangeFrom = ref("");
 const importQueryDateRangeTo = ref("");
-const taxonomyLookup = ref({ ...ornithoSpeciesList });
 
 const websiteName = computed({
   get: () => props.selectedWebsiteName,
@@ -87,14 +82,6 @@ const importFileLabelKey = computed(() => {
   return "";
 });
 
-const taxonomicIssuesStringify = computed(() => {
-  return JSON.stringify(
-    taxonomicIssues.value.filter((issue) => issue.ebird_species_code.length > 0),
-    null,
-    2,
-  );
-});
-
 const importSuccessText = computed(() => {
   const listCount = Number(numberImportedForms.value) || 0;
   const sightingCount = Number(numberImportedSightings.value) || 0;
@@ -119,38 +106,15 @@ const exportLink = computed(() => {
   return `${website.value.website}index.php?m_id=31&sp_DChoice=${importQueryDate.value}&sp_DFrom=${rangeFrom}&sp_DTo=${rangeTo}&sp_DOffset=${importQueryDateOffset.value}&sp_SChoice=all&sp_PChoice=all&sp_OnlyMyData=1`;
 });
 
-watch(
-  () => props.selectedEbirdLanguage,
-  async (language) => {
-    try {
-      const response = await fetch(
-        `https://api.ebird.org/v2/ref/taxonomy/ebird?key=vcs68p4j67pt&fmt=json&locale=${language}`,
-      );
-      const json = await response.json();
-      taxonomyLookup.value = Object.fromEntries(
-        Object.entries(ornithoSpeciesList).map(([id, speciesCode]) => {
-          const found = json.find((entry) => entry.speciesCode === speciesCode);
-          return [id, found ? found.comName : ""];
-        }),
-      );
-    } catch {
-      taxonomyLookup.value = { ...ornithoSpeciesList };
-    }
-  },
-  { immediate: true },
-);
-
 watch(file, async (nextFile) => {
   if (!nextFile || !website.value) {
     return;
   }
 
-  taxonomicIssues.value = [];
   numberImportedForms.value = 0;
   numberImportedSightings.value = 0;
   errorMessage.value = "";
   verificationWarning.value = "";
-  clipboardLabel.value = "copy";
   loadingStatus.value = 0;
 
   try {
@@ -173,62 +137,111 @@ watch(file, async (nextFile) => {
   }
 });
 
+function updateSelectedFile(nextFile) {
+  file.value = nextFile || null;
+}
+
+function openFilePicker() {
+  fileInput.value?.click();
+}
+
+function onFileInputChange(event) {
+  updateSelectedFile(event.target.files?.[0]);
+}
+
+function hasFilesPayload(event) {
+  return Array.from(event.dataTransfer?.types || []).includes("Files");
+}
+
+function onDragEnter(event) {
+  if (!website.value || !hasFilesPayload(event)) {
+    return;
+  }
+
+  dragCounter.value += 1;
+  isDragActive.value = true;
+}
+
+function onDragOver(event) {
+  if (!website.value || !hasFilesPayload(event)) {
+    return;
+  }
+
+  event.dataTransfer.dropEffect = "copy";
+}
+
+function onDragLeave(event) {
+  if (!website.value || !hasFilesPayload(event)) {
+    return;
+  }
+
+  dragCounter.value = Math.max(0, dragCounter.value - 1);
+  if (dragCounter.value === 0) {
+    isDragActive.value = false;
+  }
+}
+
+function onFileDrop(event) {
+  if (!website.value) {
+    return;
+  }
+
+  dragCounter.value = 0;
+  isDragActive.value = false;
+  updateSelectedFile(event.dataTransfer?.files?.[0]);
+}
+
+function formatOrnithoDetails(details) {
+  if (!Array.isArray(details) || details.length === 0) {
+    return "";
+  }
+
+  return details
+    .map((detail) => {
+      const count = String(detail.count || "x").trim();
+      const sex = detail.sex?.["@id"] !== "U" ? String(detail.sex?.["#text"] || "").trim() : "";
+      const age = detail.age?.["@id"] !== "U" ? String(detail.age?.["#text"] || "").trim() : "";
+      return [`${count}x`, sex, age].filter(Boolean).join(" ").trim();
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
 function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
   return sightings.map((sighting) => {
-    const datetime = sighting.observers[0].timing["@ISO8601"].split("+")[0];
+    const observer = sighting.observers[0];
+    const datetime = observer.timing["@ISO8601"].split("+")[0];
 
-    let comment = sighting.observers[0].comment
-      ? sighting.observers[0].comment.replace(/\r\n/g, "<br>")
-      : "";
+    const baseComment = observer.comment ? observer.comment.replace(/\r\n/g, "<br>") : "";
+    const detailsComment = formatOrnithoDetails(observer.details);
+    const comment = baseComment && detailsComment
+      ? `${baseComment} - ${detailsComment}`
+      : baseComment || detailsComment;
 
-    if (sighting.observers[0].details) {
-      comment += sighting.observers[0].details
-        .map((detail) => {
-          return (
-            detail.count +
-            "x " +
-            (detail.sex["@id"] !== "U" ? `${detail.sex["#text"]} ` : "") +
-            (detail.age["@id"] !== "U" ? `${detail.age["#text"]} ` : "")
-          );
-        })
-        .join(", ");
-    }
-
-    let commonName = "";
     const speciesId = sighting.species["@id"];
-
-    if (taxonomyLookup.value[speciesId]) {
-      commonName = taxonomyLookup.value[speciesId];
-    } else {
-      commonName = sighting.species.name;
-      if (!taxonomicIssues.value.find((issue) => issue.id === speciesId)) {
-        taxonomicIssues.value.push({
-          id: speciesId,
-          ornitho_common: sighting.species.name,
-          ornitho_latin: sighting.species.latin_name,
-          ebird_species_code: "",
-        });
-      }
-    }
+    const commonName = sighting.species.name || "";
 
     return createSighting({
-      id: sighting.observers[0].id_sighting,
+      id: observer.id_sighting,
       form_id: formId,
       website: selectedWebsite.name,
       source_website_name: selectedWebsite.name,
-      source_record_url: `${selectedWebsite.website}index.php?m_id=54&id=${sighting.observers[0].id_sighting}`,
+      source_record_url: `${selectedWebsite.website}index.php?m_id=54&id=${observer.id_sighting}`,
       system: selectedWebsite.system,
-      permalink: `${selectedWebsite.website}index.php?m_id=54&id=${sighting.observers[0].id_sighting}`,
+      permalink: `${selectedWebsite.website}index.php?m_id=54&id=${observer.id_sighting}`,
       date: datetime.split("T")[0],
-      time: sighting.observers[0].timing["@notime"] === "1" ? "" : datetime.split("T")[1],
-      lat: Number.parseFloat(sighting.observers[0].coord_lat),
-      lon: Number.parseFloat(sighting.observers[0].coord_lon),
+      time: observer.timing["@notime"] === "1" ? "" : datetime.split("T")[1],
+      lat: Number.parseFloat(observer.coord_lat),
+      lon: Number.parseFloat(observer.coord_lon),
       location_name: sighting.place.name,
       common_name: commonName,
-      scientific_name: "",
-      count:
-        sighting.observers[0].estimation_code === "NO_VALUE" ? "x" : sighting.observers[0].count,
-      count_precision: precisionMatchOrnitho[sighting.observers[0].estimation_code],
+      scientific_name: sighting.species.latin_name || "",
+      source_species_id: speciesId || "",
+      ebird_species_code: getOrnithoEbirdSpeciesCode(speciesId),
+      count: observer.estimation_code === "NO_VALUE" ? "x" : observer.count,
+      count_precision: precisionMatchOrnitho[observer.estimation_code],
+      atlas_code: observer.atlas_code?.["#text"] || "",
+      auditory_contact: observer.auditory_contact,
       comment,
     });
   });
@@ -432,11 +445,6 @@ async function checkWebsite(exportData, selectedWebsite) {
 
   return "";
 }
-
-async function copyIssueBlock() {
-  const payload = `\`\`\`\n${taxonomicIssuesStringify.value}\n\`\`\``;
-  clipboardLabel.value = (await copyClipboard(payload)) ? "copied" : "failed";
-}
 </script>
 
 <template>
@@ -456,12 +464,41 @@ async function copyIssueBlock() {
 
           <div v-if="website" class="mb-3">
             <label class="form-label">{{ t(importFileLabelKey) }}</label>
-            <input
-              class="form-control form-control-lg"
-              type="file"
-              :accept="website.extension"
-              @change="file = $event.target.files?.[0] || null"
-            />
+            <div
+              class="import-dropzone"
+              :class="{ 'is-drag-active': isDragActive, 'is-compact': file }"
+              role="button"
+              tabindex="0"
+              @click="openFilePicker"
+              @keydown.enter.prevent="openFilePicker"
+              @keydown.space.prevent="openFilePicker"
+              @dragenter.prevent="onDragEnter"
+              @dragover.prevent="onDragOver"
+              @dragleave.prevent="onDragLeave"
+              @drop.prevent="onFileDrop"
+            >
+              <input
+                ref="fileInput"
+                class="visually-hidden"
+                type="file"
+                :accept="website.extension"
+                @change="onFileInputChange"
+              />
+              <div class="import-dropzone-body">
+                <div class="import-dropzone-main">
+                  <div class="import-dropzone-meta">
+                    <i class="bi bi-cloud-arrow-up import-dropzone-icon text-secondary" aria-hidden="true"></i>
+                    <div class="import-dropzone-text">
+                      <div class="fw-semibold">{{ t("importDropzoneTitle") }}</div>
+                      <div class="small text-muted">{{ t("importDropzoneHint") }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="file" class="small text-break import-dropzone-selected">
+                  {{ t("importDropzoneSelected", { name: file.name }) }}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div v-if="loadingStatus === 0" class="alert alert-warning d-flex align-items-center gap-2">
@@ -589,40 +626,6 @@ async function copyIssueBlock() {
               </div>
             </template>
           </div>
-        </div>
-      </div>
-
-      <div v-if="taxonomicIssues.length > 0" class="alert alert-warning mt-4 mb-0">
-        <h4 class="alert-heading">{{ t("taxonomicIssueTitle") }}</h4>
-        <p>{{ t("taxonomicIssueBody") }}</p>
-        <p>
-          <a href="https://ebird.org/map/" target="_blank" rel="noopener">{{ t("ebirdMap") }}</a>
-        </p>
-        <div class="row g-3">
-          <div v-for="issue in taxonomicIssues" :key="issue.id" class="col-12">
-            <div class="row g-2 align-items-center">
-              <div class="col-md-6">
-                <strong>{{ issue.ornitho_common }}</strong>
-                <div>
-                  <em>{{ issue.ornitho_latin }}</em>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <input
-                  v-model="issue.ebird_species_code"
-                  class="form-control"
-                  type="text"
-                  :placeholder="t('speciesCodePrompt')"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="taxonomicIssuesStringify.length > 6" class="mt-4">
-          <textarea class="form-control mb-2" :value="taxonomicIssuesStringify" readonly rows="6" />
-          <button class="btn btn-secondary" type="button" @click="copyIssueBlock">
-            {{ t("copyIssueBlock") }} ({{ clipboardLabel }})
-          </button>
         </div>
       </div>
     </div>
