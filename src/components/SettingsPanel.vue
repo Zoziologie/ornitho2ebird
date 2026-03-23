@@ -44,20 +44,20 @@ const previewSightings = [
     google_maps_url: "https://maps.google.com/?q=47.168486,7.465799",
     date: "2026-03-10",
     time: "08:23",
-    common_name: "Merle noir",
+    common_name: "Common Blackbird",
     scientific_name: "Turdus merula",
     count: 4,
     count_precision: "=",
     atlas_code: "5",
     auditory_contact: "1",
-    comment: "Ceci est une remarque<br>1x male 1re annee, 2x type femelle",
+    comment: "This is a note<br>1x first-year male, 2x female-type",
   },
 ];
 const repeatedPreviewSightings = Array.from({ length: 12 }, (_, index) => ({
   ...previewSightings[0],
   id: 36150841 + index,
   time: `${String(8 + Math.floor(index / 3)).padStart(2, "0")}:${String((23 + index * 7) % 60).padStart(2, "0")}`,
-  comment: ["Ceci est une remarque", "chante", "1x male 1re annee", "2x type femelle", ""][index % 5],
+  comment: ["This is a note", "singing", "1x first-year male", "2x female-type", ""][index % 5],
 }));
 
 const shortPreviewSightings = computed(() => {
@@ -91,13 +91,13 @@ const propertyRows = [
   ["google_maps_url", "https://maps.google.com/?q=47.168486,7.465799"],
   ["date", "2026-03-10"],
   ["time", "08:23"],
-  ["common_name", "Merle noir"],
+  ["common_name", "Common Blackbird"],
   ["scientific_name", "Turdus merula"],
   ["count", "4"],
   ["count_precision", "="],
   ["atlas_code", "5"],
   ["auditory_contact", "1"],
-  ["comment", "Ceci est une remarque<br>1x male 1re annee, 2x type femelle"],
+  ["comment", "This is a note<br>1x first-year male, 2x female-type"],
 ];
 
 const speciesCommentPresets = [
