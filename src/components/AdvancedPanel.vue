@@ -46,7 +46,7 @@ const { t } = useI18n();
 const assignDuration = ref(props.defaultAssignDuration || 1);
 const assignDistance = ref(props.defaultAssignDistance || 3);
 const assignFormId = ref(0);
-const creatingChecklist = ref(false);
+let creatingChecklist = false;
 const assignmentMapElement = ref(null);
 const reviewMapElement = ref(null);
 const assignSelectorOpen = ref(false);
@@ -57,8 +57,12 @@ const reviewSelectorRef = ref(null);
 let assignmentMap = null;
 let assignmentSightingsLayer = null;
 let assignmentFormsLayer = null;
-let assignmentDrawRectangle = null;
 let assignmentMapHasInitialView = false;
+let assignmentDrawCaptureEnabled = false;
+let assignmentSelectionActive = false;
+let assignmentSelectionStart = null;
+let assignmentSelectionLayer = null;
+let assignmentSelectionDragging = false;
 
 let reviewMap = null;
 let reviewSightingsLayer = null;
@@ -289,12 +293,156 @@ function updatePath(path) {
 }
 
 function startRectangleDraw(mode) {
-  if (!assignmentDrawRectangle) {
+  if (!assignmentMap) {
     return;
   }
 
-  creatingChecklist.value = mode === "create";
-  assignmentDrawRectangle.enable();
+  creatingChecklist = mode === "create";
+  assignmentSelectionActive = true;
+  assignmentSelectionStart = null;
+  assignmentSelectionDragging = false;
+  clearAssignmentSelectionLayer();
+  setAssignmentDrawCaptureMode(true);
+  setAssignmentSelectionInteraction(true);
+}
+
+function stopRectangleDraw() {
+  assignmentSelectionActive = false;
+  assignmentSelectionStart = null;
+  assignmentSelectionDragging = false;
+  clearAssignmentSelectionLayer();
+  setAssignmentSelectionInteraction(false);
+  setAssignmentDrawCaptureMode(false);
+  creatingChecklist = false;
+}
+
+function clearAssignmentSelectionLayer() {
+  if (assignmentSelectionLayer && assignmentMap?.hasLayer(assignmentSelectionLayer)) {
+    assignmentMap.removeLayer(assignmentSelectionLayer);
+  }
+  assignmentSelectionLayer = null;
+}
+
+function setAssignmentSelectionInteraction(enabled) {
+  if (!assignmentMap) {
+    return;
+  }
+
+  const container = assignmentMap.getContainer();
+  container.style.cursor = enabled ? "crosshair" : "";
+
+  if (enabled) {
+    assignmentMap.dragging?.disable();
+    assignmentMap.doubleClickZoom?.disable();
+  } else {
+    assignmentMap.dragging?.enable();
+    assignmentMap.doubleClickZoom?.enable();
+  }
+}
+
+function setAssignmentDrawCaptureMode(enabled) {
+  if (!assignmentMap || assignmentDrawCaptureEnabled === enabled) {
+    return;
+  }
+
+  const markerPane = assignmentMap.getPane("markerPane");
+  const overlayPane = assignmentMap.getPane("overlayPane");
+  const panePointerEvents = enabled ? "none" : "";
+
+  if (markerPane) {
+    markerPane.style.pointerEvents = panePointerEvents;
+  }
+  if (overlayPane) {
+    overlayPane.style.pointerEvents = panePointerEvents;
+  }
+
+  assignmentDrawCaptureEnabled = enabled;
+}
+
+function updateAssignmentSelectionLayer(bounds) {
+  if (!assignmentMap) {
+    return;
+  }
+
+  if (!assignmentSelectionLayer) {
+    assignmentSelectionLayer = L.rectangle(bounds, {
+      color: "#0d6efd",
+      weight: 2,
+      fillOpacity: 0.08,
+      interactive: false,
+    }).addTo(assignmentMap);
+    return;
+  }
+
+  assignmentSelectionLayer.setBounds(bounds);
+}
+
+function applyAssignmentSelection(bounds) {
+  const isCreateMode = creatingChecklist;
+  const matchedSightings = props.sightings.filter((sighting) =>
+    bounds.contains(L.latLng(sighting.lat, sighting.lon)),
+  );
+
+  stopRectangleDraw();
+
+  if (!matchedSightings.length) {
+    window.alert(t("assignNoSightingsInSelection"));
+    return;
+  }
+
+  if (isCreateMode) {
+    const newForm = createChecklistFromSightings(matchedSightings);
+    if (newForm) {
+      matchedSightings.forEach((sighting) => {
+        sighting.form_id = newForm.id;
+      });
+    }
+    return;
+  }
+
+  matchedSightings.forEach((sighting) => {
+    sighting.form_id = assignFormId.value;
+  });
+}
+
+function onAssignmentSelectionMouseDown(event) {
+  if (!assignmentSelectionActive) {
+    return;
+  }
+
+  const button = event?.originalEvent?.button;
+  if (typeof button === "number" && button !== 0) {
+    return;
+  }
+
+  assignmentSelectionDragging = true;
+  assignmentSelectionStart = event.latlng;
+  updateAssignmentSelectionLayer(L.latLngBounds(event.latlng, event.latlng));
+}
+
+function onAssignmentSelectionMouseMove(event) {
+  if (!assignmentSelectionActive || !assignmentSelectionDragging || !assignmentSelectionStart) {
+    return;
+  }
+
+  updateAssignmentSelectionLayer(L.latLngBounds(assignmentSelectionStart, event.latlng));
+}
+
+function onAssignmentSelectionMouseUp(event) {
+  if (!assignmentSelectionActive || !assignmentSelectionDragging || !assignmentSelectionStart) {
+    return;
+  }
+
+  assignmentSelectionDragging = false;
+  const startPoint = assignmentMap?.latLngToContainerPoint(assignmentSelectionStart);
+  const endPoint = assignmentMap?.latLngToContainerPoint(event.latlng);
+
+  if (!startPoint || !endPoint || startPoint.distanceTo(endPoint) < 4) {
+    stopRectangleDraw();
+    return;
+  }
+
+  applyAssignmentSelection(L.latLngBounds(assignmentSelectionStart, event.latlng));
 }
 
 function selectAssignmentForm(value) {
@@ -464,42 +612,6 @@ function assignMagic() {
   });
 }
 
-function onAssignmentDrawCreated(event) {
-  if (event.layerType !== "rectangle") {
-    return;
-  }
-
-  const bounds = event.layer.getBounds();
-  const matchedSightings = props.sightings.filter((sighting) =>
-    bounds.contains(L.latLng(sighting.lat, sighting.lon)),
-  );
-
-  if (!matchedSightings.length) {
-    creatingChecklist.value = false;
-    window.alert(t("assignNoSightingsInSelection"));
-    return;
-  }
-
-  if (event.layer && assignmentMap?.hasLayer(event.layer)) {
-    assignmentMap.removeLayer(event.layer);
-  }
-
-  if (creatingChecklist.value) {
-    const newForm = createChecklistFromSightings(matchedSightings);
-    if (newForm) {
-      matchedSightings.forEach((sighting) => {
-        sighting.form_id = newForm.id;
-      });
-    }
-  } else {
-    matchedSightings.forEach((sighting) => {
-      sighting.form_id = assignFormId.value;
-    });
-  }
-
-  creatingChecklist.value = false;
-}
-
 function markerColor(formId) {
   return checklistColor(formId, checklistColors, unassignedColor);
 }
@@ -611,15 +723,9 @@ function initializeAssignmentMap() {
   assignmentSightingsLayer = L.layerGroup().addTo(assignmentMap);
   assignmentFormsLayer = L.layerGroup().addTo(assignmentMap);
 
-  assignmentDrawRectangle = new L.Draw.Rectangle(assignmentMap, {
-    repeatMode: false,
-    shapeOptions: {
-      color: "#0d6efd",
-      weight: 2,
-    },
-  });
-
-  assignmentMap.on(L.Draw.Event.CREATED, onAssignmentDrawCreated);
+  assignmentMap.on("mousedown", onAssignmentSelectionMouseDown);
+  assignmentMap.on("mousemove", onAssignmentSelectionMouseMove);
+  assignmentMap.on("mouseup", onAssignmentSelectionMouseUp);
   refreshAssignmentMap({ refit: true });
   setTimeout(() => assignmentMap?.invalidateSize(), 100);
 }
@@ -776,6 +882,7 @@ watch(
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
+  stopRectangleDraw();
   if (assignmentMap) {
     assignmentMap.off();
     assignmentMap.remove();
@@ -825,7 +932,7 @@ onMounted(() => {
                 <button
                   class="custom-checklist-select-toggle"
                   type="button"
-                  :style="selectStyle(assignFormId)"
+                  :style="selectStyle()"
                   @click="assignSelectorOpen = !assignSelectorOpen"
                 >
                   <span class="checklist-option-label">
@@ -980,7 +1087,7 @@ onMounted(() => {
                 <button
                   class="custom-checklist-select-toggle custom-checklist-select-toggle-lg"
                   type="button"
-                  :style="selectStyle(selectedFormId ?? 0)"
+                  :style="selectStyle()"
                   @click="reviewSelectorOpen = !reviewSelectorOpen"
                 >
                   <span class="checklist-option-label">
