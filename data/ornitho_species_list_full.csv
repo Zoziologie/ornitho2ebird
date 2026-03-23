@@ -220,7 +220,7 @@
 219,Kentish Plover,Charadrius alexandrinus,kenplo1
 220,Killdeer,Charadrius vociferus,killde
 221,Eurasian Dotterel,Charadrius morinellus,eurdot
-222,Whimbrel,Numenius phaeopus,whimbr
+222,Whimbrel,Numenius phaeopus,whimbr5
 223,Slender-billed Curlew,Numenius tenuirostris,slbcur
 224,Eurasian Curlew,Numenius arquata,eurcur
 225,Black-tailed Godwit,Limosa limosa,bktgod
@@ -288,7 +288,7 @@
 288,Whiskered Tern,Chlidonias hybrida,whiter2
 289,White-winged Tern,Chlidonias leucopterus,whwter
 290,Black Tern,Chlidonias niger,blkter
-291,Gull-billed Tern,Gelochelidon nilotica,gubter1
+291,Gull-billed Tern,Gelochelidon nilotica,gubter2
 292,Caspian Tern,Hydroprogne caspia,caster1
 293,Common Tern,Sterna hirundo,comter
 294,Arctic Tern,Sterna paradisaea,arcter
@@ -1024,7 +1024,7 @@
 1623,Yellow-throated Vireo,Vireo flavifrons,yetvir
 1624,Grey-necked Bunting,Emberiza buchanani,gyhbun1
 1626,"Swan hybrid, unidentified",Cygnus sp. x Cygnus sp.,
-1627,Hybrid Canada x Barnacle Goose,Branta canadensis x leucopsis,
+1627,Hybrid Canada x Barnacle Goose,Branta canadensis x leucopsis,x00417
 1628,Hybrid Canada Goose x ?,Branta canadensis x ?,
 1629,Hybrid Barnacle Goose x ?,Branta leucopsis x ?,
 1630,"Goose hybrid, unidentified",Anser / Branta hybrid,
@@ -1032,7 +1032,7 @@
 1632,"Anas hybrid, unidentified",Anas sp. x Anas sp.,
 1633,"Aythya hybrid, unidentified",Aythya sp. x Aythya sp.,
 1634,"Duck hybrid, unidentified",Anatinae sp. x Anatinae sp.,
-1635,Black Grouse x Capercaillie,Tetrao tetrix x urogallus,pheasa1
+1635,Black Grouse x Capercaillie,Tetrao tetrix x urogallus,
 1636,"Godwit, unidentified",Limosa sp.,godwit1
 1637,Collared Finchbill,Spizixos semitorques,colfin1
 1638,Fringillidae x Fringillidae sp.,Fringillidae x Fringillidae sp.,
