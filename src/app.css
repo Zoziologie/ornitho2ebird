@@ -852,6 +852,27 @@ h6 {
   background: #f8f9fa;
 }
 
+.static-map-preview-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.static-map-preview-control {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+}
+
+.static-map-preview-controls-with-zoom .static-map-preview-control-zoom {
+  flex: 0 0 98px;
+}
+
+.static-map-preview-note {
+  max-width: 360px;
+}
+
 .hotspot-marker-icon {
   background: transparent;
   border: 0;

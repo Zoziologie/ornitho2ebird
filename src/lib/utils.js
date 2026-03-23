@@ -340,6 +340,8 @@ export function buildForm(form, id, options = {}) {
     primary_purpose: form.primary_purpose !== false,
     checklist_comment: form.checklist_comment || "",
     species_comment_template: template,
+    static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",
+    static_map_zoom: Number.isFinite(Number(form.static_map_zoom)) ? Number(form.static_map_zoom) : 12,
     path: form.path || null,
     hotspots: form.hotspots || [],
     hotspot_key: form.hotspot_key || "",

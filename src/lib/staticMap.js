@@ -1,6 +1,7 @@
 const STATIC_MAP_BASE_URL = "https://api.mapbox.com/styles/v1/mapbox";
 const STATIC_MAP_MAX_URL_LENGTH = 8192;
 const DEFAULT_PADDING = 32;
+const DEFAULT_MANUAL_ZOOM = 12;
 
 function clampInteger(value, minimum, maximum) {
   const parsed = Number.parseInt(value, 10);
@@ -126,6 +127,8 @@ function buildStaticMapUrl({
   const clampedWidth = clampInteger(width, 1, 1280);
   const clampedHeight = clampInteger(height, 1, 1280);
   const padding = clampInteger(DEFAULT_PADDING, 0, 128);
+  const zoomMode = form?.static_map_zoom_mode === "manual" ? "manual" : "auto";
+  const manualZoom = clampNumber(form?.static_map_zoom, 0, 22, DEFAULT_MANUAL_ZOOM);
 
   const rawMarkers = sightings
     .map((sighting) => [Number(sighting.lat), Number(sighting.lon)])
@@ -146,6 +149,13 @@ function buildStaticMapUrl({
     return { url: "", reason: "no_coordinates" };
   }
 
+  const fallbackCenter = sanitizedMarkers[0] || sanitizedPath[0] || null;
+  const centerPoint = isFiniteLatLon(form?.lat, form?.lon)
+    ? [Number(form.lat), Number(form.lon)]
+    : fallbackCenter;
+  const useManualZoom = zoomMode === "manual" && Boolean(centerPoint);
+  const camera = useManualZoom ? `${centerPoint[1]},${centerPoint[0]},${manualZoom}` : "auto";
+
   // Iteratively reduce point count until the URL fits Static Images API limits.
   const budgets = [240, 180, 120, 80, 50, 30, 15, 8];
   for (const budget of budgets) {
@@ -155,11 +165,13 @@ function buildStaticMapUrl({
     const overlay = encodeURIComponent(JSON.stringify(featureCollection));
     const query = new URLSearchParams({
       access_token: token,
-      padding: String(padding),
     });
+    if (!useManualZoom) {
+      query.set("padding", String(padding));
+    }
 
     const url =
-      `${STATIC_MAP_BASE_URL}/${encodeURIComponent(style)}/static/geojson(${overlay})/auto/` +
+      `${STATIC_MAP_BASE_URL}/${encodeURIComponent(style)}/static/geojson(${overlay})/${camera}/` +
       `${clampedWidth}x${clampedHeight}?${query.toString()}`;
 
     if (url.length <= STATIC_MAP_MAX_URL_LENGTH) {

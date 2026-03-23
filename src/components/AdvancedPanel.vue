@@ -1346,32 +1346,17 @@ onMounted(() => {
             <div v-if="showStaticMapPanel" class="col-xl-4 col-lg-5">
               <article class="card h-100 static-map-preview-card">
                 <div class="card-body p-3">
-                  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                  <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                     <h3 class="h6 mb-0">{{ t("staticMapPreviewTitle") }}</h3>
-                    <a
-                      v-if="staticMapPreview.url"
-                      class="small text-decoration-none"
-                      :href="staticMapPreview.url"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {{ t("openInNewTab") }}
-                    </a>
                   </div>
-                  <p class="small text-body-secondary mb-2">{{ t("staticMapPreviewHint") }}</p>
-                  <a
-                    v-if="staticMapPreview.url"
-                    class="d-block"
-                    :href="staticMapPreview.url"
-                    target="_blank"
-                    rel="noopener"
-                  >
+
+                  <div v-if="staticMapPreview.url" class="d-block">
                     <img
                       class="img-fluid rounded border static-map-preview-image"
                       :src="staticMapPreview.url"
                       :alt="t('staticMapPreviewAlt')"
                     />
-                  </a>
+                  </div>
                   <div v-else class="alert alert-warning small mb-0">
                     <span v-if="staticMapPreview.reason === 'token_missing'">
                       {{ t("staticMapPreviewTokenMissing") }}
@@ -1383,6 +1368,37 @@ onMounted(() => {
                       {{ t("staticMapPreviewUnavailable") }}
                     </span>
                   </div>
+
+                  <div
+                    class="static-map-preview-controls mt-3"
+                    :class="{ 'static-map-preview-controls-with-zoom': selectedForm.static_map_zoom_mode === 'manual' }"
+                  >
+                    <div class="static-map-preview-control">
+                      <label class="form-label mb-1">{{ t("staticMapZoomMode") }}</label>
+                      <select v-model="selectedForm.static_map_zoom_mode" class="form-select form-select-sm">
+                        <option value="auto">{{ t("staticMapZoomModeAuto") }}</option>
+                        <option value="manual">{{ t("staticMapZoomModeManual") }}</option>
+                      </select>
+                    </div>
+
+                    <div
+                      v-if="selectedForm.static_map_zoom_mode === 'manual'"
+                      class="static-map-preview-control static-map-preview-control-zoom"
+                    >
+                      <label class="form-label mb-1">{{ t("staticMapZoom") }}</label>
+                      <input
+                        v-model.number="selectedForm.static_map_zoom"
+                        class="form-control form-control-sm"
+                        type="number"
+                        min="0"
+                        max="22"
+                        step="0.5"
+                      />
+                    </div>
+                  </div>
+                  <p class="small text-body-secondary mt-2 mb-0 static-map-preview-note">
+                    {{ t("staticMapCenterHint") }}
+                  </p>
                 </div>
               </article>
             </div>

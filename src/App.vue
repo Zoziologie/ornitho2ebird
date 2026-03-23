@@ -45,6 +45,25 @@ function sameSpeciesCommentTemplate(left, right) {
   );
 }
 
+function normalizeGlobalStaticMap(settings) {
+  const defaults = DEFAULT_SETTINGS.globalStaticMap;
+  const normalized = settings && typeof settings === "object" ? settings : {};
+
+  return {
+    show: Boolean(normalized.show),
+    interactive: Boolean(normalized.interactive),
+    style: typeof normalized.style === "string" && normalized.style ? normalized.style : defaults.style,
+    pathStyle: {
+      ...defaults.pathStyle,
+      ...(normalized.pathStyle || {}),
+    },
+    markerStyle: {
+      ...defaults.markerStyle,
+      ...(normalized.markerStyle || {}),
+    },
+  };
+}
+
 const supportedLanguages = new Set(UI_LANGUAGES.map((language) => language.value));
 const LEGACY_EBIRD_LANGUAGE_CODES = {
   id: "in",
@@ -105,6 +124,7 @@ const settings = reactive({
   ebirdLanguage: resolvedEbirdLanguage,
   websiteName: initialWebsiteName,
   speciesCommentTemplate: normalizeSpeciesCommentTemplate(savedSettings.speciesCommentTemplate),
+  globalStaticMap: normalizeGlobalStaticMap(savedSettings.globalStaticMap),
 });
 
 const website = ref(null);
