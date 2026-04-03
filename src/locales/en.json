@@ -106,6 +106,7 @@
   "importantRuleThree": "For pre-eBird life list imports that do not meet current eBird checklist rules, consolidate data carefully and review the import afterward.",
   "importTitle": "Import",
   "websiteSelect": "Select the source website",
+  "websiteChangeConfirm": "You already loaded data from {currentWebsite}.\n\nIf you switch to {nextWebsite}, the current imported checklists and sightings will be cleared so you can start again.\n\nDo you want to continue?",
   "importFileOrnitho": "Import the JSON file exported from ornitho.ch",
   "importFileObservation": "Import the exported CSV file",
   "importFileBirdlasser": "Import the exported CSV file",

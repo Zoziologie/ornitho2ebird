@@ -106,6 +106,7 @@
   "importantRuleThree": "Für den Import alter Lebenslisten, die die heutigen eBird-Regeln nicht erfüllen, sollten die Daten sorgfältig zusammengefasst und anschließend geprüft werden.",
   "importTitle": "Import",
   "websiteSelect": "Quellwebsite auswählen",
+  "websiteChangeConfirm": "Du hast bereits Daten von {currentWebsite} geladen.\n\nWenn du zu {nextWebsite} wechselst, werden die aktuell importierten Checklisten und Beobachtungen gelöscht, damit du neu starten kannst.\n\nMöchtest du fortfahren?",
   "importFileOrnitho": "Die von ornitho.ch exportierte JSON-Datei importieren",
   "importFileObservation": "Exportierte CSV-Datei importieren",
   "importFileBirdlasser": "Exportierte CSV-Datei importieren",

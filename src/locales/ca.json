@@ -106,6 +106,7 @@
   "importantRuleThree": "Per importar una llista de vida pre-eBird que no compleix les regles actuals, consolida les dades amb cura i revisa la importació final.",
   "importTitle": "Importació",
   "websiteSelect": "Selecciona el web d'origen",
+  "websiteChangeConfirm": "Ja has carregat dades des de {currentWebsite}.\n\nSi canvies a {nextWebsite}, s'esborraran les checklistes i observacions importades actualment per tornar a començar.\n\nVols continuar?",
   "importFileOrnitho": "Importa el fitxer JSON exportat des d'ornitho.ch",
   "importFileObservation": "Importa el fitxer CSV exportat",
   "importFileBirdlasser": "Importa el fitxer CSV exportat",

@@ -52,6 +52,20 @@ const importQueryDateOffset = ref(1);
 const importQueryDateRangeFrom = ref("");
 const importQueryDateRangeTo = ref("");
 
+function resetImportState() {
+  loadingStatus.value = null;
+  numberImportedForms.value = 0;
+  numberImportedSightings.value = 0;
+  errorMessage.value = "";
+  verificationWarning.value = "";
+  file.value = null;
+  dragCounter.value = 0;
+  isDragActive.value = false;
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+}
+
 const websiteName = computed({
   get: () => props.selectedWebsiteName,
   set: (value) => emit("update:selectedWebsiteName", value),
@@ -60,6 +74,15 @@ const websiteName = computed({
 const website = computed(() => {
   return websitesList.find((item) => item.name === websiteName.value) || null;
 });
+
+watch(
+  () => props.selectedWebsiteName,
+  (nextValue, previousValue) => {
+    if (nextValue !== previousValue) {
+      resetImportState();
+    }
+  }
+);
 
 const importFileLabelKey = computed(() => {
   if (!website.value) {

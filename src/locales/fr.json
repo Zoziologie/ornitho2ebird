@@ -106,6 +106,7 @@
   "importantRuleThree": "Pour importer une liste de vie pre-eBird qui ne respecte pas les règles actuelles, consolidez les données avec soin puis relisez l'import.",
   "importTitle": "Import",
   "websiteSelect": "Sélectionner le site source",
+  "websiteChangeConfirm": "Vous avez déjà chargé des données depuis {currentWebsite}.\n\nSi vous passez à {nextWebsite}, les checklistes et observations importées actuellement seront supprimées pour recommencer.\n\nVoulez-vous continuer ?",
   "importFileOrnitho": "Importer le fichier JSON exporté depuis ornitho.ch",
   "importFileObservation": "Importer le fichier CSV exporté",
   "importFileBirdlasser": "Importer le fichier CSV exporté",

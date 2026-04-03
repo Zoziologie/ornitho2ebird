@@ -188,7 +188,17 @@ watch(
   { immediate: true }
 );
 
-const hasImportedData = computed(() => forms.value.length > 0 || sightings.value.length > 0);
+const hasImportedData = computed(() => {
+  return forms.value.length > 0 || sightings.value.length > 0 || formsSightings.value.length > 0;
+});
+
+function clearImportedData() {
+  website.value = null;
+  sightings.value = [];
+  forms.value = [];
+  formsSightings.value = [];
+  selectedFormId.value = null;
+}
 
 function importData(payload) {
   const nextWebsite = payload.website || null;
@@ -222,6 +232,31 @@ function importData(payload) {
   forms.value = nextForms;
   formsSightings.value = nextFormsSightings;
   selectedFormId.value = forms.value[0]?.id || null;
+}
+
+function updateSelectedWebsiteName(nextWebsiteName) {
+  const normalizedName = String(nextWebsiteName || "").trim();
+  if (!normalizedName || normalizedName === settings.websiteName) {
+    return;
+  }
+
+  if (!hasImportedData.value) {
+    settings.websiteName = normalizedName;
+    return;
+  }
+
+  const confirmed = window.confirm(
+    t("websiteChangeConfirm", {
+      currentWebsite: settings.websiteName,
+      nextWebsite: normalizedName,
+    })
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  clearImportedData();
+  settings.websiteName = normalizedName;
 }
 
 watch(
@@ -294,7 +329,7 @@ function openSettingsForSection(section) {
     <main class="main-stack">
       <ImportPanel
         :selected-website-name="settings.websiteName"
-        @update:selected-website-name="settings.websiteName = $event"
+        @update:selected-website-name="updateSelectedWebsiteName"
         @import-data="importData"
       />
 
