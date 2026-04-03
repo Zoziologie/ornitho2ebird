@@ -21,10 +21,10 @@ const supporters = [
     logo: `${baseUrl}logo_ico.png`,
   },
   {
-    id: "placeholder",
-    name: "More partners coming soon",
-    href: "",
-    logo: null,
+    id: "ebird",
+    name: "eBird",
+    href: "https://ebird.org/",
+    logo: `${baseUrl}logo_ebird.svg`,
   },
 ];
 </script>
