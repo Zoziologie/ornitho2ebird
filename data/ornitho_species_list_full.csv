@@ -499,9 +499,9 @@
 501,Eurasian Siskin,Carduelis spinus,eursis
 502,Common Linnet,Carduelis cannabina,eurlin1
 503,Twite,Carduelis flavirostris,twite1
-504,Lesser Redpoll,Carduelis cabaret,lesred1
-505,Common Redpoll,Carduelis flammea,comred
-506,Arctic Redpoll,Carduelis hornemanni,
+504,Lesser Redpoll,Carduelis cabaret,lesred
+505,Common Redpoll,Carduelis flammea,redpol1
+506,Arctic Redpoll,Carduelis hornemanni,hoared
 507,Citril Finch,Serinus citrinella,citfin1
 508,European Serin,Serinus serinus,eurser1
 509,Yellow-fronted Canary,Crithagra mozambica,yefcan
@@ -1049,7 +1049,7 @@
 1649,Indian Yellow-nosed Albatross,Thalassarche carteri,yenalb3
 1656,Crab-plover,Dromas ardeola,craplo1
 1663,Gallinula chloropus pyrrhorrhoa,Gallinula chloropus pyrrhorrhoa,
-1706,Mealy Redpoll (C.f.flammea),Carduelis flammea flammea,comred3
+1706,Mealy Redpoll (C.f.flammea),Carduelis flammea flammea,comred
 1707,Long-toed Stint,Calidris subminuta,lotsti
 2000,Species not listed,Species ignota,bird1
 2370,Anax ephippiger,,
@@ -3868,7 +3868,7 @@
 48712,Ruddy Shelduck x Egyptian Goose,Tadorna ferruginea x Alopochen aegyptiacus,x00367
 48713,Greylag x Domestic Goose,Anser anser x anser f. domestica,
 48714,Greylag x Bar-headed Goose,Anser anser x indicus,
-48715,Hybrid Common Goldeneye x Smew,Bucephala clangula x Mergus albellus,
+48715,Hybrid Common Goldeneye x Smew,Bucephala clangula x Mergus albellus,x00378
 48719,Eurasian Treecreeper (ssp. familiaris),Certhia familiaris familiaris,
 48726,Phasmatodea sp.,,
 49081,Common Chaffinch (Canaries Is.),Fringilla coelebs canariensis,
