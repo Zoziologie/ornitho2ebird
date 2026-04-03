@@ -114,6 +114,7 @@ function buildStaticMapUrl({
   settings = {},
   width = 300,
   height = 200,
+  maxUrlLength = STATIC_MAP_MAX_URL_LENGTH,
 }) {
   if (!settings?.show) {
     return { url: "", reason: "disabled" };
@@ -126,6 +127,7 @@ function buildStaticMapUrl({
   const style = settings?.style || "satellite-v9";
   const clampedWidth = clampInteger(width, 1, 1280);
   const clampedHeight = clampInteger(height, 1, 1280);
+  const clampedMaxUrlLength = clampInteger(maxUrlLength, 1, STATIC_MAP_MAX_URL_LENGTH);
   const padding = clampInteger(DEFAULT_PADDING, 0, 128);
   const zoomMode = form?.static_map_zoom_mode === "manual" ? "manual" : "auto";
   const manualZoom = clampNumber(form?.static_map_zoom, 0, 22, DEFAULT_MANUAL_ZOOM);
@@ -174,7 +176,7 @@ function buildStaticMapUrl({
       `${STATIC_MAP_BASE_URL}/${encodeURIComponent(style)}/static/geojson(${overlay})/${camera}/` +
       `${clampedWidth}x${clampedHeight}?${query.toString()}`;
 
-    if (url.length <= STATIC_MAP_MAX_URL_LENGTH) {
+    if (url.length <= clampedMaxUrlLength) {
       return { url, reason: "" };
     }
   }

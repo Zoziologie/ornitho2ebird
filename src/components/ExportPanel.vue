@@ -54,6 +54,7 @@ const TAXONOMY_WARNING_LIST_LIMIT = 12;
 const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues/new";
 const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
 const EBIRD_MAP_URL = "https://ebird.org/map/";
+const EBIRD_COMMENT_MAX_LENGTH = 8000;
 const taxonomyCommonNameByCode = ref(new Map());
 const taxonomyStatus = ref("idle");
 const taxonomyReportCodeByIssue = ref({});
@@ -159,20 +160,35 @@ function buildExportFilename() {
   return `ornitho2ebird_${year}${month}${day}_${hours}${minutes}${seconds}.csv`;
 }
 
+function maxStaticMapUrlLengthForComment(form, sightings, importedWithText) {
+  const commentWithoutMap = checklistComment(form, sightings, importedWithText, { staticMapUrl: "" });
+  const placeholderUrl = "x";
+  const commentWithPlaceholderMap = checklistComment(form, sightings, importedWithText, {
+    staticMapUrl: placeholderUrl,
+  });
+  const staticMapWrapperLength = commentWithPlaceholderMap.length - commentWithoutMap.length - placeholderUrl.length;
+  return Math.max(0, EBIRD_COMMENT_MAX_LENGTH - commentWithoutMap.length - staticMapWrapperLength);
+}
+
 const exportState = computed(() => {
   const errors = [];
   const sightingsByFormId = exportableSightingsByFormId.value;
 
   const rows = exportableForms.value.flatMap(({ form, protocolState }) => {
     const formSightings = sightingsByFormId.get(form.id) || [];
-    const staticMapUrl = buildStaticMapUrl({
-      form,
-      sightings: formSightings,
-      token: props.mapboxToken,
-      settings: props.globalStaticMap,
-      width: 640,
-      height: 420,
-    }).url;
+    const maxStaticMapUrlLength = maxStaticMapUrlLengthForComment(form, formSightings, t("importedWith"));
+    const staticMapUrl =
+      maxStaticMapUrlLength > 0
+        ? buildStaticMapUrl({
+            form,
+            sightings: formSightings,
+            token: props.mapboxToken,
+            settings: props.globalStaticMap,
+            width: 640,
+            height: 420,
+            maxUrlLength: maxStaticMapUrlLength,
+          }).url
+        : "";
     const mergedComment = checklistComment(form, formSightings, t("importedWith"), { staticMapUrl });
     const speciesGroups = new Map();
 
@@ -229,7 +245,10 @@ const exportState = computed(() => {
       if (row.count !== "X" && Number(row.count) < 0) {
         errors.push(row);
       }
-      if ((row.species_comment || "").length > 8000) {
+      if ((row.species_comment || "").length > EBIRD_COMMENT_MAX_LENGTH) {
+        errors.push(row);
+      }
+      if ((row.checklist_comment || "").length > EBIRD_COMMENT_MAX_LENGTH) {
         errors.push(row);
       }
       if (!row.date) {
@@ -675,7 +694,7 @@ function downloadFile() {
                 <tr v-for="(row, index) in exportState.errors" :key="`${row.common_name}-${index}`">
                   <td>{{ row.common_name || "Missing species" }}</td>
                   <td>{{ row.date || "Missing date" }}</td>
-                  <td>{{ (row.species_comment || "").length }}</td>
+                  <td>{{ Math.max((row.species_comment || "").length, (row.checklist_comment || "").length) }}</td>
                 </tr>
               </tbody>
             </table>
