@@ -133,9 +133,9 @@ const taxonomyNeededForExport = computed(() => {
 
 function escapeCsvValue(value) {
   const normalized = value ?? "";
-  const stringValue = String(normalized);
+  const stringValue = String(normalized).replace(/\r\n|\r|\n/g, " ");
   const escaped = stringValue.replaceAll('"', '""');
-  return /[",\n\r]/.test(escaped) ? `"${escaped}"` : escaped;
+  return /[",]/.test(escaped) ? `"${escaped}"` : escaped;
 }
 
 function rowsToCsv(rows) {
