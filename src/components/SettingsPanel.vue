@@ -1,7 +1,11 @@
 <script setup>
 import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { DEFAULT_SPECIES_COMMENT_TEMPLATE, EBIRD_LANGUAGES } from "../lib/constants";
+import {
+  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
+  DEFAULT_SPECIES_COMMENT_TEMPLATE,
+  EBIRD_LANGUAGES,
+} from "../lib/constants";
 import { speciesComment } from "../lib/utils";
 
 const props = defineProps({
@@ -27,6 +31,7 @@ const staticMapStyleOptions = [
   { value: "outdoors-v12", label: "Outdoor" },
   { value: "satellite-streets-v12", label: "Satellite-Street" },
 ];
+const assignmentMapBaseLayerOptions = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS;
 const markerSymbolOptions = ["circle", "triangle", "square", "star"];
 const PERSONALIZED_PRESET_KEY = "personalized";
 
@@ -344,6 +349,24 @@ watch(
                 />
               </div>
               <div class="form-text">{{ t("distanceHelp") }}</div>
+            </div>
+
+            <div>
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="assignment-map-base-layer-input">
+                  {{ t("assignmentMapBaseLayer") }}
+                </label>
+                <select
+                  id="assignment-map-base-layer-input"
+                  v-model="settings.assignmentMapBaseLayer"
+                  class="form-select"
+                >
+                  <option v-for="option in assignmentMapBaseLayerOptions" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-text">{{ t("assignmentMapBaseLayerHelp") }}</div>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
 import ImportPanel from "./components/ImportPanel.vue";
 import {
+  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
   APP_STORAGE_PREFIX,
   DEFAULT_SETTINGS,
   DEFAULT_SPECIES_COMMENT_TEMPLATE,
@@ -64,6 +65,12 @@ function normalizeGlobalStaticMap(settings) {
   };
 }
 
+function normalizeAssignmentMapBaseLayer(value) {
+  return ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(value)
+    ? value
+    : DEFAULT_SETTINGS.assignmentMapBaseLayer;
+}
+
 const supportedLanguages = new Set(UI_LANGUAGES.map((language) => language.value));
 const LEGACY_EBIRD_LANGUAGE_CODES = {
   id: "in",
@@ -116,13 +123,15 @@ const initialWebsiteName =
   queryLanguage || !savedSettings.websiteName
     ? defaultWebsiteForLanguage(resolvedUiLanguage)
     : savedSettings.websiteName;
+const { assignmentMap: _legacyAssignmentMap, ...savedSettingsWithoutAssignmentMap } = savedSettings;
 
 const settings = reactive({
   ...DEFAULT_SETTINGS,
-  ...savedSettings,
+  ...savedSettingsWithoutAssignmentMap,
   uiLanguage: resolvedUiLanguage,
   ebirdLanguage: resolvedEbirdLanguage,
   websiteName: initialWebsiteName,
+  assignmentMapBaseLayer: normalizeAssignmentMapBaseLayer(savedSettings.assignmentMapBaseLayer),
   speciesCommentTemplate: normalizeSpeciesCommentTemplate(savedSettings.speciesCommentTemplate),
   globalStaticMap: normalizeGlobalStaticMap(savedSettings.globalStaticMap),
 });
@@ -334,7 +343,7 @@ function openSettingsForSection(section) {
       />
 
       <AdvancedPanel
-        v-if="settings.advancedEnabled && forms.length > 0"
+        v-if="settings.advancedEnabled && (forms.length > 0 || sightings.length > 0)"
         :forms="forms"
         :sightings="sightings"
         :forms-sightings="formsSightings"
@@ -345,7 +354,9 @@ function openSettingsForSection(section) {
         :default-number-observer="settings.defaultNumberObserver"
         :default-assign-duration="settings.autoAssignDuration"
         :default-assign-distance="settings.autoAssignDistance"
+        :assignment-map-base-layer="settings.assignmentMapBaseLayer"
         @update:selected-form-id="selectedFormId = $event"
+        @update:assignment-map-base-layer="settings.assignmentMapBaseLayer = $event"
         @open-info="openInfo('auto-assignment')"
       />
 

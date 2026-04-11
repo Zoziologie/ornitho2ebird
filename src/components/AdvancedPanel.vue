@@ -3,6 +3,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n";
 import L from "leaflet";
 import "leaflet-draw/dist/leaflet.draw-src.js";
+import "leaflet.markercluster/dist/leaflet.markercluster.js";
+import "leaflet.markercluster/dist/MarkerCluster.css";
 import markerColors from "/data/marker_color.json";
 import hotspotMarkerUrl from "../assets/map-marker-hotspot.png";
 import {
@@ -17,12 +19,14 @@ import {
   requiredNumberStateClass,
   requiredStateClass,
   requiredTimeStateClass,
+  sightingMarkerHtml,
 } from "../lib/advancedPanel";
 import {
   applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
   buildForm,
   distanceFromPath,
+  haversineDistanceKm,
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
@@ -38,9 +42,14 @@ const props = defineProps({
   defaultNumberObserver: { type: Number, default: 1 },
   defaultAssignDuration: { type: Number, default: 24 },
   defaultAssignDistance: { type: Number, default: 3 },
+  assignmentMapBaseLayer: { type: String, default: "OpenStreetMap" },
 });
 
-const emit = defineEmits(["update:selectedFormId", "open-info"]);
+const emit = defineEmits([
+  "update:selectedFormId",
+  "update:assignmentMapBaseLayer",
+  "open-info",
+]);
 const { t } = useI18n();
 
 const assignDuration = ref(props.defaultAssignDuration || 1);
@@ -57,12 +66,15 @@ const reviewSelectorRef = ref(null);
 let assignmentMap = null;
 let assignmentSightingsLayer = null;
 let assignmentFormsLayer = null;
+let assignmentBaseLayers = null;
+let assignmentActiveBaseLayer = null;
 let assignmentMapHasInitialView = false;
 let assignmentDrawCaptureEnabled = false;
 let assignmentSelectionActive = false;
 let assignmentSelectionStart = null;
 let assignmentSelectionLayer = null;
 let assignmentSelectionDragging = false;
+let assignmentClusterPopupLatLng = null;
 
 let reviewMap = null;
 let reviewSightingsLayer = null;
@@ -73,6 +85,11 @@ let reviewDrawPolyline = null;
 
 const unassignedColor = "#6c757d";
 const checklistColors = markerColors.slice(1).filter((color) => color.toLowerCase() !== "#999999");
+const ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS = 5;
+const EARTH_CIRCUMFERENCE_METERS = 40075016.686;
+const ASSIGNMENT_SIGHTINGS_PANE = "assignmentSightingsPane";
+const ASSIGNMENT_CLUSTER_PANE = "assignmentClusterPane";
+const ASSIGNMENT_CHECKLIST_PANE = "assignmentChecklistPane";
 
 const selectedForm = computed(() => {
   return props.forms.find((form) => form.id === props.selectedFormId) || null;
@@ -109,6 +126,19 @@ const selectedAssignmentOption = computed(() => {
 
 const reviewOptions = computed(() => {
   return buildReviewOptions(props.forms, checklistColors, unassignedColor);
+});
+
+const clusterAssignmentOptions = computed(() => {
+  return [
+    {
+      value: 0,
+      label: t("nonAssigned"),
+    },
+    ...reviewOptions.value.map((option) => ({
+      value: option.value,
+      label: option.label,
+    })),
+  ];
 });
 
 const selectedReviewOption = computed(() => {
@@ -517,6 +547,13 @@ watch(
   { deep: true },
 );
 
+watch(
+  () => props.assignmentMapBaseLayer,
+  (value) => {
+    applyAssignmentBaseLayer(value);
+  },
+);
+
 function buildNewChecklist(payload) {
   const nextId = Math.max(0, ...props.forms.map((form) => form.id)) + 1;
   const speciesCommentTemplate = {
@@ -616,6 +653,239 @@ function markerColor(formId) {
   return checklistColor(formId, checklistColors, unassignedColor);
 }
 
+function assignmentSightingIcon(formId) {
+  return L.divIcon({
+    className: "assignment-sighting-icon",
+    html: sightingMarkerHtml(formId, checklistColors, unassignedColor),
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+    popupAnchor: [0, -8],
+  });
+}
+
+function assignmentClusterIcon(cluster) {
+  const formIds = cluster
+    .getAllChildMarkers()
+    .map((marker) => Number(marker.options.formId))
+    .filter((value) => Number.isFinite(value));
+  const uniqueFormIds = [...new Set(formIds)];
+  const clusterColor =
+    uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
+  const clusterTextColor = clusterColor === "#ffff33" ? "#223846" : "#ffffff";
+
+  return L.divIcon({
+    className: "assignment-cluster-icon",
+    html: `<span class="assignment-cluster-icon-dot" style="background:${clusterColor};color:${clusterTextColor};border-color:${clusterColor}">+</span>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+}
+
+function pixelsForMetersAtZoom(meters, zoom) {
+  const latitude = assignmentMap?.getCenter?.().lat || 0;
+  const metersPerPixel =
+    (EARTH_CIRCUMFERENCE_METERS * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom + 8);
+
+  if (!Number.isFinite(metersPerPixel) || metersPerPixel <= 0) {
+    return 0.01;
+  }
+
+  return Math.max(0.01, meters / metersPerPixel);
+}
+
+function assignmentSightingsNearLatLng(latlng) {
+  return props.sightings
+    .filter((sighting) => {
+      return (
+        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) * 1000 <=
+        ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS
+      );
+    })
+    .sort((left, right) => {
+      const leftKey = `${left.date || ""} ${left.time || ""} ${left.common_name || ""}`;
+      const rightKey = `${right.date || ""} ${right.time || ""} ${right.common_name || ""}`;
+      return leftKey.localeCompare(rightKey);
+    });
+}
+
+function assignmentClusterPopupContent(latlng) {
+  const sameLocationSightings = assignmentSightingsNearLatLng(latlng);
+  if (sameLocationSightings.length <= 1) {
+    assignmentClusterPopupLatLng = null;
+    assignmentMap?.closePopup();
+    return null;
+  }
+
+  assignmentClusterPopupLatLng = latlng;
+
+  const container = document.createElement("div");
+  container.className = "map-popup map-popup-cluster";
+  L.DomEvent.disableClickPropagation(container);
+
+  const title = document.createElement("div");
+  title.className = "map-popup-heading";
+  title.textContent = t("assignmentClusterTitle", { count: sameLocationSightings.length });
+  container.appendChild(title);
+
+  const list = document.createElement("div");
+  list.className = "map-popup-stack";
+
+  sameLocationSightings.forEach((sighting) => {
+    const row = document.createElement("div");
+    row.className = "map-popup-card";
+
+    const details = document.createElement("div");
+    details.className = "map-popup-card-body";
+
+    const species = document.createElement("div");
+    species.className = "map-popup-card-title";
+    if (sighting.common_name || sighting.scientific_name) {
+      if (sighting.common_name) {
+        species.appendChild(document.createTextNode(sighting.common_name));
+      }
+      if (sighting.scientific_name) {
+        if (sighting.common_name) {
+          species.appendChild(document.createTextNode(" "));
+        }
+        const scientificName = document.createElement("span");
+        scientificName.className = "map-popup-species-scientific";
+        scientificName.textContent = sighting.scientific_name;
+        species.appendChild(scientificName);
+      }
+    } else {
+      species.textContent = t("records");
+    }
+    details.appendChild(species);
+
+    const meta = document.createElement("div");
+    meta.className = "map-popup-compact-meta";
+
+    const datetimeValue = document.createElement("span");
+    datetimeValue.className = "map-popup-compact-item";
+    datetimeValue.textContent = [sighting.date, sighting.time].filter(Boolean).join(" ") || "—";
+    meta.appendChild(datetimeValue);
+
+    const countValue = document.createElement("span");
+    countValue.className = "map-popup-compact-item";
+    const countParts = [sighting.count_precision, sighting.count].filter(
+      (value) => value !== null && value !== ""
+    );
+    countValue.textContent = countParts.length ? countParts.join("") : "—";
+    meta.appendChild(countValue);
+
+    const permalinkValue = document.createElement("span");
+    permalinkValue.className = "map-popup-compact-item";
+    if (sighting.permalink) {
+      const permalink = document.createElement("a");
+      permalink.href = sighting.permalink;
+      permalink.target = "_blank";
+      permalink.rel = "noopener";
+      permalink.textContent = String(sighting.id ?? "—");
+      permalinkValue.appendChild(permalink);
+    } else {
+      permalinkValue.textContent = String(sighting.id ?? "—");
+    }
+    meta.appendChild(permalinkValue);
+
+    details.appendChild(meta);
+
+    const select = document.createElement("select");
+    select.className = "form-select form-select-sm map-popup-select";
+    clusterAssignmentOptions.value.forEach((option) => {
+      const optionElement = document.createElement("option");
+      optionElement.value = String(option.value);
+      optionElement.textContent = option.label;
+      optionElement.selected = Number(option.value) === Number(sighting.form_id);
+      select.appendChild(optionElement);
+    });
+    select.addEventListener("change", (event) => {
+      sighting.form_id = Number(event.target.value);
+      refreshAssignmentMap();
+      openAssignmentClusterPopup(latlng);
+    });
+    details.appendChild(select);
+
+    row.appendChild(details);
+
+    list.appendChild(row);
+  });
+
+  container.appendChild(list);
+  return container;
+}
+
+function openAssignmentClusterPopup(latlng) {
+  if (!assignmentMap) {
+    return;
+  }
+
+  const content = assignmentClusterPopupContent(latlng);
+  if (!content) {
+    return;
+  }
+
+  L.popup({ maxWidth: 420 })
+    .setLatLng(latlng)
+    .setContent(content)
+    .openOn(assignmentMap);
+}
+
+function onAssignmentClusterClick(event) {
+  openAssignmentClusterPopup(event.layer.getLatLng());
+}
+
+function createAssignmentSightingsLayer() {
+  if (!assignmentMap) {
+    return null;
+  }
+
+  if (assignmentSightingsLayer && assignmentMap.hasLayer(assignmentSightingsLayer)) {
+    assignmentMap.removeLayer(assignmentSightingsLayer);
+  }
+
+  assignmentSightingsLayer = L.markerClusterGroup({
+    maxClusterRadius: (zoom) =>
+      pixelsForMetersAtZoom(ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS, zoom),
+    chunkedLoading: true,
+    zoomToBoundsOnClick: false,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    clusterPane: ASSIGNMENT_CLUSTER_PANE,
+    iconCreateFunction: assignmentClusterIcon,
+  });
+  assignmentSightingsLayer.on("clusterclick", onAssignmentClusterClick);
+
+  assignmentSightingsLayer.addTo(assignmentMap);
+  return assignmentSightingsLayer;
+}
+
+function applyAssignmentBaseLayer(layerName) {
+  if (!assignmentMap || !assignmentBaseLayers) {
+    return;
+  }
+
+  const nextLayer = assignmentBaseLayers[layerName] || assignmentBaseLayers.OpenStreetMap;
+  if (!nextLayer || assignmentActiveBaseLayer === nextLayer) {
+    return;
+  }
+
+  if (assignmentActiveBaseLayer && assignmentMap.hasLayer(assignmentActiveBaseLayer)) {
+    assignmentMap.removeLayer(assignmentActiveBaseLayer);
+  }
+
+  nextLayer.addTo(assignmentMap);
+  assignmentActiveBaseLayer = nextLayer;
+}
+
+function rebuildAssignmentSightingsLayer() {
+  if (!assignmentMap) {
+    return;
+  }
+
+  createAssignmentSightingsLayer();
+  refreshAssignmentMap();
+}
+
 function hotspotPopupContent(hotspot) {
   const container = document.createElement("div");
   container.className = "map-popup";
@@ -667,12 +937,10 @@ function refreshAssignmentMap({ refit = false } = {}) {
   assignmentFormsLayer.clearLayers();
 
   props.sightings.forEach((sighting) => {
-    const marker = L.circleMarker([sighting.lat, sighting.lon], {
-      radius: 8,
-      color: markerColor(sighting.form_id),
-      fillColor: markerColor(sighting.form_id),
-      fillOpacity: 0.85,
-      weight: 1,
+    const marker = L.marker([sighting.lat, sighting.lon], {
+      formId: sighting.form_id,
+      pane: ASSIGNMENT_SIGHTINGS_PANE,
+      icon: assignmentSightingIcon(sighting.form_id),
     });
     marker.bindPopup(formatSightingPopup(sighting, t));
     assignmentSightingsLayer.addLayer(marker);
@@ -683,6 +951,7 @@ function refreshAssignmentMap({ refit = false } = {}) {
     .forEach((form) => {
       const marker = L.marker([form.lat, form.lon], {
         draggable: true,
+        pane: ASSIGNMENT_CHECKLIST_PANE,
         icon: L.divIcon({
           className: "assignment-checklist-icon",
           html: checklistMarkerHtml(form.id, checklistColors, unassignedColor),
@@ -718,14 +987,29 @@ function initializeAssignmentMap() {
   }
 
   assignmentMap = L.map(assignmentMapElement.value);
-  addBaseLayerControl(assignmentMap);
+  const assignmentLayerControl = addBaseLayerControl(assignmentMap, props.assignmentMapBaseLayer);
+  assignmentBaseLayers = assignmentLayerControl.baseLayers;
+  assignmentActiveBaseLayer = assignmentLayerControl.activeLayer;
+  assignmentMap.createPane(ASSIGNMENT_SIGHTINGS_PANE);
+  assignmentMap.getPane(ASSIGNMENT_SIGHTINGS_PANE).style.zIndex = "610";
+  assignmentMap.createPane(ASSIGNMENT_CLUSTER_PANE);
+  assignmentMap.getPane(ASSIGNMENT_CLUSTER_PANE).style.zIndex = "620";
+  assignmentMap.createPane(ASSIGNMENT_CHECKLIST_PANE);
+  assignmentMap.getPane(ASSIGNMENT_CHECKLIST_PANE).style.zIndex = "650";
 
-  assignmentSightingsLayer = L.layerGroup().addTo(assignmentMap);
+  createAssignmentSightingsLayer();
   assignmentFormsLayer = L.layerGroup().addTo(assignmentMap);
 
   assignmentMap.on("mousedown", onAssignmentSelectionMouseDown);
   assignmentMap.on("mousemove", onAssignmentSelectionMouseMove);
   assignmentMap.on("mouseup", onAssignmentSelectionMouseUp);
+  assignmentMap.on("popupclose", () => {
+    assignmentClusterPopupLatLng = null;
+  });
+  assignmentMap.on("baselayerchange", (event) => {
+    assignmentActiveBaseLayer = event.layer;
+    emit("update:assignmentMapBaseLayer", event.name);
+  });
   refreshAssignmentMap({ refit: true });
   setTimeout(() => assignmentMap?.invalidateSize(), 100);
 }
@@ -1012,58 +1296,61 @@ onMounted(() => {
         </div>
 
         <div class="p-3 text-white rounded shadow-sm bg-secondary">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <h3 class="h5 mb-0">{{ t("assignmentMagicTitle") }}</h3>
-            <button
-              class="btn btn-outline-light btn-sm btn-icon"
-              type="button"
-              :aria-label="t('assignmentMagicInfoTooltip')"
-              @click="emit('open-info')"
-            >
-              <i class="bi bi-journal-text" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="row g-2 align-items-end">
-            <div class="col-sm-4">
-              <label class="form-label">{{ t("assignmentDurationHours") }}</label>
-              <input
-                v-model.number="assignDuration"
-                class="form-control"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="24"
-              />
-            </div>
-            <div class="col-sm-4">
-              <label class="form-label">{{ t("assignmentDistanceKm") }}</label>
-              <input
-                v-model.number="assignDistance"
-                class="form-control"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="80"
-              />
-            </div>
-            <div class="col-sm-4">
+          <div class="assignment-magic-row">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+              <h3 class="h5 mb-0">{{ t("assignmentMagicTitle") }}</h3>
               <button
-                class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                class="btn btn-outline-light btn-sm btn-icon"
                 type="button"
-                v-tooltip:top="t('assignmentMagicTooltip')"
-                :aria-label="t('assignmentMagicTooltip')"
-                @click="assignMagic"
+                :aria-label="t('assignmentMagicInfoTooltip')"
+                @click="emit('open-info')"
               >
-                <i class="bi bi-magic" aria-hidden="true"></i>
-                <span>{{ t("assignmentMagicAction") }}</span>
+                <i class="bi bi-journal-text" aria-hidden="true"></i>
               </button>
             </div>
+
+            <div class="assignment-magic-inputs">
+              <label class="assignment-magic-field">
+                <span class="assignment-magic-label">{{ t("assignmentDurationHours") }}</span>
+                <input
+                  v-model.number="assignDuration"
+                  class="form-control form-control-sm"
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="24"
+                />
+              </label>
+
+              <label class="assignment-magic-field">
+                <span class="assignment-magic-label">{{ t("assignmentDistanceKm") }}</span>
+                <input
+                  v-model.number="assignDistance"
+                  class="form-control form-control-sm"
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="80"
+                />
+              </label>
+            </div>
+
+            <button
+              class="btn btn-primary assignment-magic-action d-inline-flex align-items-center justify-content-center gap-2"
+              type="button"
+              v-tooltip:top="t('assignmentMagicTooltip')"
+              :aria-label="t('assignmentMagicTooltip')"
+              @click="assignMagic"
+            >
+              <i class="bi bi-magic" aria-hidden="true"></i>
+              <span>{{ t("assignmentMagicAction") }}</span>
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="card border-0 shadow-sm rounded-3">
+    <section v-if="forms.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
         <h2 class="border-bottom pb-2 mb-3">{{ t("advancedTitle") }}</h2>
         <p>{{ t("advancedIntro") }}</p>

@@ -1,4 +1,5 @@
 import L from "leaflet";
+import { ASSIGNMENT_MAP_BASE_LAYER_OPTIONS } from "./constants";
 import { protocol } from "./utils";
 
 export function createBaseLayers() {
@@ -41,10 +42,21 @@ export function createBaseLayers() {
   };
 }
 
-export function addBaseLayerControl(map) {
+export function addBaseLayerControl(map, initialLayerName = "OpenStreetMap") {
   const baseLayers = createBaseLayers();
-  baseLayers.OpenStreetMap.addTo(map);
-  L.control.layers(baseLayers, null, { position: "topleft" }).addTo(map);
+  const selectedLayerName = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(initialLayerName)
+    ? initialLayerName
+    : "OpenStreetMap";
+  const activeLayer = baseLayers[selectedLayerName];
+  activeLayer.addTo(map);
+  const control = L.control.layers(baseLayers, null, { position: "topleft" }).addTo(map);
+
+  return {
+    activeLayer,
+    baseLayers,
+    control,
+    selectedLayerName,
+  };
 }
 
 export function protocolBadgeClass(form) {
@@ -77,6 +89,11 @@ export function checklistMarkerHtml(formId, checklistColors, unassignedColor) {
   const color = checklistColor(formId, checklistColors, unassignedColor);
   const textColor = color === "#ffff33" ? "#212529" : "#ffffff";
   return `<span style="background:${color};color:${textColor};border-color:${color}">${formId}</span>`;
+}
+
+export function sightingMarkerHtml(formId, checklistColors, unassignedColor) {
+  const color = checklistColor(formId, checklistColors, unassignedColor);
+  return `<span style="background:${color};border-color:${color}"></span>`;
 }
 
 export function buildAssignmentOptions(forms, t, checklistColors, unassignedColor) {
@@ -136,24 +153,43 @@ export function escapeHtml(value) {
 
 export function formatSightingPopup(sighting, t) {
   const datetime = [sighting.date, sighting.time].filter(Boolean).join(" ").trim() || "—";
-  const speciesParts = [sighting.common_name, sighting.scientific_name].filter(Boolean);
-  const species = speciesParts.length ? speciesParts.join(" / ") : t("records");
-  const count =
-    [sighting.count_precision, sighting.count]
-      .filter((value) => value !== null && value !== "")
-      .join(" ") || "—";
-  const comment = sighting.comment || "—";
+  const commonName = sighting.common_name ? escapeHtml(sighting.common_name) : "";
+  const scientificName = sighting.scientific_name ? escapeHtml(sighting.scientific_name) : "";
+  const species = commonName || scientificName
+    ? `${commonName}${commonName && scientificName ? " " : ""}${
+        scientificName ? `<span class="map-popup-species-scientific">${scientificName}</span>` : ""
+      }`
+    : escapeHtml(t("records"));
+  const countParts = [sighting.count_precision, sighting.count].filter(
+    (value) => value !== null && value !== ""
+  );
+  const count = countParts.length ? countParts.join("") : "—";
+  const comment = sighting.comment || escapeHtml(t("popupNoComment"));
   const permalink = sighting.permalink
     ? `<a href="${escapeHtml(sighting.permalink)}" target="_blank" rel="noopener">${escapeHtml(String(sighting.id))}</a>`
     : escapeHtml(String(sighting.id ?? "—"));
 
   return `
-    <div class="map-popup">
-      <div><strong>${escapeHtml(t("popupDatetime"))}:</strong> ${escapeHtml(datetime)}</div>
-      <div><strong>${escapeHtml(t("popupSpecies"))}:</strong> ${escapeHtml(species)}</div>
-      <div><strong>${escapeHtml(t("popupCount"))}:</strong> ${escapeHtml(count)}</div>
-      <div><strong>${escapeHtml(t("popupComment"))}:</strong> ${comment}</div>
-      <div><strong>${escapeHtml(t("popupPermalink"))}:</strong> ${permalink}</div>
+    <div class="map-popup map-popup-sighting">
+      <div class="map-popup-heading">${species}</div>
+      <div class="map-popup-stack">
+        <div class="map-popup-data-row">
+          <span class="map-popup-data-label">${escapeHtml(t("popupDatetime"))}</span>
+          <span class="map-popup-data-value">${escapeHtml(datetime)}</span>
+        </div>
+        <div class="map-popup-data-row">
+          <span class="map-popup-data-label">${escapeHtml(t("popupCount"))}</span>
+          <span class="map-popup-data-value">${escapeHtml(count)}</span>
+        </div>
+        <div class="map-popup-data-row">
+          <span class="map-popup-data-label">${escapeHtml(t("popupComment"))}</span>
+          <span class="map-popup-data-value">${comment}</span>
+        </div>
+        <div class="map-popup-data-row">
+          <span class="map-popup-data-label">${escapeHtml(t("popupPermalink"))}</span>
+          <span class="map-popup-data-value">${permalink}</span>
+        </div>
+      </div>
     </div>
   `;
 }

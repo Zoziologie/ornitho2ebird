@@ -19,6 +19,14 @@ export const DEFAULT_WEBSITE_BY_LANGUAGE = {
   de: "ornitho.de",
 };
 
+export const ASSIGNMENT_MAP_BASE_LAYER_OPTIONS = [
+  "OpenStreetMap",
+  "Satellite",
+  "SwissTopo",
+  "France (IGN)",
+  "Germany (BKG)",
+];
+
 export const DEFAULT_SPECIES_COMMENT_TEMPLATE = {
   short:
     '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
@@ -32,6 +40,7 @@ export const DEFAULT_SETTINGS = {
   ebirdLanguage: "en",
   autoAssignDuration: 24,
   autoAssignDistance: 3,
+  assignmentMapBaseLayer: "OpenStreetMap",
   defaultNumberObserver: 1,
   customizedSpeciesComments: true,
   speciesCommentTemplate: DEFAULT_SPECIES_COMMENT_TEMPLATE,
