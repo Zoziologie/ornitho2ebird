@@ -1,3 +1,5 @@
+import { BASIC_SPECIES_COMMENT_TEMPLATE, DEFAULT_SPECIES_COMMENT_TEMPLATE } from "./constants";
+
 function normalizeName(value) {
   return String(value || "").normalize("NFC").trim();
 }
@@ -153,6 +155,39 @@ export function speciesComment(speciesCommentTemplate, sightings) {
     .join(separator);
 }
 
+export function buildSpeciesRows(sightings, speciesCommentTemplate, commonNameForSighting = (sighting) => sighting?.common_name || "") {
+  const speciesGroups = new Map();
+
+  sightings.forEach((sighting) => {
+    const key = sighting.ebird_species_code || sighting.common_name || "";
+    const groupedSightings = speciesGroups.get(key) || [];
+    groupedSightings.push(sighting);
+    speciesGroups.set(key, groupedSightings);
+  });
+
+  return [...speciesGroups.values()].map((duplicates) => {
+    let numericCount = 0;
+    let hasNonNumericCount = false;
+
+    duplicates.forEach((sighting) => {
+      const parsedCount = Number.parseInt(sighting.count, 10);
+      if (Number.isNaN(parsedCount)) {
+        hasNonNumericCount = true;
+        return;
+      }
+
+      numericCount += parsedCount;
+    });
+
+    return {
+      common_name: commonNameForSighting(duplicates[0]),
+      count: hasNonNumericCount ? "X" : numericCount,
+      species_comment: speciesComment(speciesCommentTemplate, duplicates),
+      sightings: duplicates,
+    };
+  });
+}
+
 export function checklistComment(form, sightings, importedWithText, options = {}) {
   const comment = form.checklist_comment || "";
   const staticMapUrl = options.staticMapUrl || "";
@@ -173,31 +208,21 @@ export function buildSpeciesCommentTemplate(website) {
   }
 
   if (website.system === "ornitho") {
-    return {
-      short:
-        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-      long:
-        '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-      limit: 5,
-    };
+    return { ...DEFAULT_SPECIES_COMMENT_TEMPLATE };
   }
 
   if (website.system === "birdlasser") {
     return {
-      short:
-        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-      long:
-        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+      short: BASIC_SPECIES_COMMENT_TEMPLATE.short,
+      long: BASIC_SPECIES_COMMENT_TEMPLATE.short,
       limit: 20,
     };
   }
 
   if (website.system === "observation") {
     return {
-      short:
-        '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-      long:
-        '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+      short: BASIC_SPECIES_COMMENT_TEMPLATE.short,
+      long: BASIC_SPECIES_COMMENT_TEMPLATE.long,
       limit: 20,
     };
   }

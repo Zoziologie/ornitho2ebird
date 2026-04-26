@@ -3,11 +3,11 @@ import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   checklistComment,
+  buildSpeciesRows,
   formatDate,
   formatNumber,
   mathRound,
   protocol,
-  speciesComment,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
 import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
@@ -190,36 +190,13 @@ const exportState = computed(() => {
           }).url
         : "";
     const mergedComment = checklistComment(form, formSightings, t("importedWith"), { staticMapUrl });
-    const speciesGroups = new Map();
-
-    formSightings.forEach((sighting) => {
-      const key = sighting.ebird_species_code || sighting.common_name || "";
-      const groupedSightings = speciesGroups.get(key) || [];
-      groupedSightings.push(sighting);
-      speciesGroups.set(key, groupedSightings);
-    });
-
-    return [...speciesGroups.values()].map((duplicates) => {
-      let numericCount = 0;
-      let hasNonNumericCount = false;
-
-      duplicates.forEach((sighting) => {
-        const parsedCount = Number.parseInt(sighting.count, 10);
-        if (Number.isNaN(parsedCount)) {
-          hasNonNumericCount = true;
-          return;
-        }
-
-        numericCount += parsedCount;
-      });
-
-      const count = hasNonNumericCount ? "X" : numericCount;
+    return buildSpeciesRows(formSightings, activeSpeciesCommentTemplate.value, taxonomyMatchedCommonName).map((speciesRow) => {
       const row = {
-        common_name: taxonomyMatchedCommonName(duplicates[0]),
+        common_name: speciesRow.common_name,
         Genus: "",
         Species: "",
-        count,
-        species_comment: speciesComment(activeSpeciesCommentTemplate.value, duplicates),
+        count: speciesRow.count,
+        species_comment: speciesRow.species_comment,
         location_name: form.location_name,
         latitude: form.lat ? Number.parseFloat(form.lat).toFixed(6) : "",
         longitude: form.lon ? Number.parseFloat(form.lon).toFixed(6) : "",

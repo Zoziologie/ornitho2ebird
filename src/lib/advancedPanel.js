@@ -15,7 +15,7 @@ export function createBaseLayers() {
         maxZoom: 19,
       },
     ),
-    "SwissTopo": L.tileLayer(
+    "Swiss (swisstopo)": L.tileLayer(
       "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
       {
         attribution: "&copy; swisstopo",

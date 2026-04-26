@@ -9,11 +9,15 @@ import {
   ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
   APP_STORAGE_PREFIX,
   DEFAULT_SETTINGS,
+  DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
   DEFAULT_SPECIES_COMMENT_TEMPLATE,
+  DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
   DEFAULT_WEBSITE_BY_LANGUAGE,
   LANGUAGE_COOKIE_NAME,
+  SPECIES_COMMENT_TEMPLATE_OPTION_KEYS,
   EBIRD_LANGUAGES,
   UI_LANGUAGES,
+  buildSpeciesCommentTemplateFromOptions,
 } from "./lib/constants";
 import { readCookie, readStorage, writeCookie, writeStorage } from "./lib/storage";
 import { applyDefaultAutomaticAssignment, buildForm } from "./lib/utils";
@@ -44,6 +48,48 @@ function sameSpeciesCommentTemplate(left, right) {
     normalizedLeft.long === normalizedRight.long &&
     normalizedLeft.limit === normalizedRight.limit
   );
+}
+
+function hasSpeciesCommentTemplateOptions(options) {
+  return (
+    options &&
+    typeof options === "object" &&
+    SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.some((key) => key in options)
+  );
+}
+
+function normalizeSpeciesCommentSettings(savedSettings) {
+  const savedOptions = savedSettings.speciesCommentTemplateOptions;
+  const savedLongOptions = savedSettings.speciesCommentLongTemplateOptions;
+  const hasSavedOptions = hasSpeciesCommentTemplateOptions(savedOptions);
+
+  if (!hasSavedOptions) {
+    return {
+      options: structuredClone(DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS),
+      longOptions: structuredClone(DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS),
+      template: structuredClone(DEFAULT_SPECIES_COMMENT_TEMPLATE),
+    };
+  }
+
+  const normalizeOptions = (value, defaults) =>
+    Object.fromEntries(
+      SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.map((key) => [
+        key,
+        key in (value || {}) ? Boolean(value[key]) : Boolean(defaults[key]),
+      ])
+    );
+  const options = normalizeOptions(savedOptions, DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS);
+  const longOptions = normalizeOptions(savedLongOptions, options);
+  longOptions.personalized = false;
+  const template = options.personalized
+    ? normalizeSpeciesCommentTemplate(savedSettings.speciesCommentTemplate)
+    : buildSpeciesCommentTemplateFromOptions(
+        options,
+        savedSettings.speciesCommentTemplate?.limit || DEFAULT_SPECIES_COMMENT_TEMPLATE.limit,
+        longOptions
+      );
+
+  return { options, longOptions, template };
 }
 
 function normalizeGlobalStaticMap(settings) {
@@ -124,6 +170,7 @@ const initialWebsiteName =
     ? defaultWebsiteForLanguage(resolvedUiLanguage)
     : savedSettings.websiteName;
 const { assignmentMap: _legacyAssignmentMap, ...savedSettingsWithoutAssignmentMap } = savedSettings;
+const normalizedSpeciesCommentSettings = normalizeSpeciesCommentSettings(savedSettings);
 
 const settings = reactive({
   ...DEFAULT_SETTINGS,
@@ -132,7 +179,9 @@ const settings = reactive({
   ebirdLanguage: resolvedEbirdLanguage,
   websiteName: initialWebsiteName,
   assignmentMapBaseLayer: normalizeAssignmentMapBaseLayer(savedSettings.assignmentMapBaseLayer),
-  speciesCommentTemplate: normalizeSpeciesCommentTemplate(savedSettings.speciesCommentTemplate),
+  speciesCommentTemplateOptions: normalizedSpeciesCommentSettings.options,
+  speciesCommentLongTemplateOptions: normalizedSpeciesCommentSettings.longOptions,
+  speciesCommentTemplate: normalizedSpeciesCommentSettings.template,
   globalStaticMap: normalizeGlobalStaticMap(savedSettings.globalStaticMap),
 });
 
@@ -220,11 +269,19 @@ function importData(payload) {
   );
   const nextFormsSightings = payload.formsSightings || [];
 
-  if (
-    !speciesCommentTemplateHasContent(settings.speciesCommentTemplate) ||
-    sameSpeciesCommentTemplate(settings.speciesCommentTemplate, website.value?.species_comment_template)
-  ) {
-    settings.speciesCommentTemplate = structuredClone(nextWebsiteSpeciesCommentTemplate);
+  if (settings.speciesCommentTemplateOptions.personalized) {
+    if (
+      !speciesCommentTemplateHasContent(settings.speciesCommentTemplate) ||
+      sameSpeciesCommentTemplate(settings.speciesCommentTemplate, website.value?.species_comment_template)
+    ) {
+      settings.speciesCommentTemplate = structuredClone(nextWebsiteSpeciesCommentTemplate);
+    }
+  } else {
+    settings.speciesCommentTemplate = buildSpeciesCommentTemplateFromOptions(
+      settings.speciesCommentTemplateOptions,
+      settings.speciesCommentTemplate.limit,
+      settings.speciesCommentLongTemplateOptions
+    );
   }
 
   applyDefaultAutomaticAssignment({
@@ -322,7 +379,7 @@ function openSettingsForSection(section) {
       <section class="modal-panel card border-0 shadow">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0 d-inline-flex align-items-center gap-2">
+            <h2 class="modal-title-heading">
               <i class="bi bi-journal-text" aria-hidden="true"></i>
               <span>{{ $t("infoTitle") }}</span>
             </h2>

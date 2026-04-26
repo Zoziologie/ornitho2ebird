@@ -15,8 +15,6 @@ const autoAssignmentRef = ref(null);
 const workflowSteps = [
   { id: "import", icon: "bi-box-arrow-down", labelKey: "introWorkflowImport" },
   { id: "load", icon: "bi-file-earmark-arrow-up", labelKey: "introWorkflowLoad" },
-  { id: "aggregation", icon: "bi-diagram-3", labelKey: "introWorkflowAggregation" },
-  { id: "metadata", icon: "bi-sliders", labelKey: "introWorkflowMetadata" },
   { id: "export", icon: "bi-filetype-csv", labelKey: "introWorkflowExport" },
   { id: "ebird", icon: "bi-cloud-arrow-up", labelKey: "introWorkflowEbirdImport" },
   { id: "review", icon: "bi-clipboard-check", labelKey: "introWorkflowReview" },
@@ -31,19 +29,46 @@ const checklistPoints = [
 
 const sightingsPoints = [
   { id: "aggregate", icon: "bi-collection", labelKey: "infoHowItWorksSightingsPointOne" },
-  { id: "adjust", icon: "bi-pencil-square", labelKey: "infoHowItWorksSightingsPointTwo" },
-  { id: "primary", icon: "bi-bullseye", labelKey: "infoHowItWorksSightingsPointThree" },
-  { id: "incomplete", icon: "bi-square", labelKey: "infoHowItWorksSightingsPointFour" },
+  {
+    id: "primary",
+    icon: "bi-bullseye",
+    labelKey: "infoHowItWorksSightingsPointThree",
+    linkText: "primary purpose",
+    href: "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists",
+  },
+  {
+    id: "incomplete",
+    icon: "bi-square",
+    labelKey: "infoHowItWorksSightingsPointFour",
+    linkText: "complete",
+    href: "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists",
+  },
 ];
 
 const autoAssignmentPoints = [
-  { id: "non-assigned", icon: "bi-box-arrow-in-down", labelKey: "infoAutoAssignPointOne" },
   { id: "same-day", icon: "bi-calendar-day", labelKey: "infoAutoAssignPointTwo" },
   { id: "transitive", icon: "bi-diagram-3", labelKey: "infoAutoAssignPointThree" },
   { id: "existing", icon: "bi-lock", labelKey: "infoAutoAssignPointFour" },
   { id: "default-time", icon: "bi-clock", labelKey: "infoAutoAssignPointFive" },
   { id: "settings", icon: "bi-sliders", labelKey: "infoAutoAssignPointSix" },
 ];
+
+function linkedLabelParts(item) {
+  const label = t(item.labelKey);
+  const linkText = item.linkText || "";
+  const index = label.toLowerCase().indexOf(linkText.toLowerCase());
+
+  if (!item.href || !linkText || index === -1) {
+    return { hasLink: false, label };
+  }
+
+  return {
+    hasLink: true,
+    before: label.slice(0, index),
+    link: label.slice(index, index + linkText.length),
+    after: label.slice(index + linkText.length),
+  };
+}
 
 const learnMoreLinks = [
   {
@@ -81,9 +106,8 @@ watch(
   <div>
     <p class="mb-4">{{ t("infoDescription") }}</p>
 
-    <section class="mb-4">
-      <h3 class="h5">{{ t("infoWorkflowTitle") }}</h3>
-      <p>{{ t("infoWorkflowIntro") }}</p>
+    <section class="instruction-section">
+      <h3 class="modal-section-title">{{ t("infoWorkflowTitle") }}</h3>
       <ol class="instruction-list">
         <li v-for="step in workflowSteps" :key="step.id" class="instruction-list-item">
           <span class="instruction-list-icon">
@@ -94,8 +118,8 @@ watch(
       </ol>
     </section>
 
-    <section class="mb-4">
-      <h3 class="h5">{{ t("infoHowItWorksTitle") }}</h3>
+    <section class="instruction-section">
+      <h3 class="modal-section-title">{{ t("infoHowItWorksTitle") }}</h3>
       <p>{{ t("infoHowItWorksIntro") }}</p>
       <div class="conversion-grid">
         <article class="conversion-card conversion-card-preferred">
@@ -123,15 +147,24 @@ watch(
               <span class="instruction-icon-list-icon">
                 <i :class="['bi', item.icon]" aria-hidden="true"></i>
               </span>
-              <span>{{ t(item.labelKey) }}</span>
+              <span>
+                <template v-if="linkedLabelParts(item).hasLink">
+                  {{ linkedLabelParts(item).before
+                  }}<a :href="item.href" target="_blank" rel="noopener">{{
+                    linkedLabelParts(item).link
+                  }}</a
+                  >{{ linkedLabelParts(item).after }}
+                </template>
+                <template v-else>{{ t(item.labelKey) }}</template>
+              </span>
             </li>
           </ul>
         </article>
       </div>
     </section>
 
-    <section ref="autoAssignmentRef">
-      <h3 class="h5">{{ t("infoAutoAssignTitle") }}</h3>
+    <section ref="autoAssignmentRef" class="instruction-section">
+      <h3 class="modal-section-title">{{ t("infoAutoAssignTitle") }}</h3>
       <p>{{ t("infoAutoAssignIntro") }}</p>
       <ul class="instruction-icon-list mb-0">
         <li
@@ -147,16 +180,24 @@ watch(
       </ul>
     </section>
 
-    <section class="alert alert-info border-0 shadow-sm mt-4 mb-0">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <i class="bi bi-bookmark-star-fill text-primary" aria-hidden="true"></i>
-        <h3 class="h6 mb-0">{{ t("infoLearnMoreTitle") }}</h3>
+    <section class="instruction-section">
+      <h3 class="modal-section-title">{{ t("infoCustomizeTitle") }}</h3>
+      <p>{{ t("infoCustomizeBody") }}</p>
+      <p class="mb-0">{{ t("infoCustomizeSpeciesComments") }}</p>
+    </section>
+
+    <section class="instruction-section instruction-section-alert">
+      <div class="alert alert-info border-0 shadow-sm mb-0">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="bi bi-bookmark-star-fill text-primary" aria-hidden="true"></i>
+          <h3 class="h6 mb-0">{{ t("infoLearnMoreTitle") }}</h3>
+        </div>
+        <ul class="mb-0">
+          <li v-for="item in learnMoreLinks" :key="item.id">
+            <a :href="item.href" target="_blank" rel="noopener">{{ t(item.labelKey) }}</a>
+          </li>
+        </ul>
       </div>
-      <ul class="mb-0">
-        <li v-for="item in learnMoreLinks" :key="item.id">
-          <a :href="item.href" target="_blank" rel="noopener">{{ t(item.labelKey) }}</a>
-        </li>
-      </ul>
     </section>
   </div>
 </template>

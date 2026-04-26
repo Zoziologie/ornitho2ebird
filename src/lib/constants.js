@@ -22,16 +22,98 @@ export const DEFAULT_WEBSITE_BY_LANGUAGE = {
 export const ASSIGNMENT_MAP_BASE_LAYER_OPTIONS = [
   "OpenStreetMap",
   "Satellite",
-  "SwissTopo",
+  "Swiss (swisstopo)",
   "France (IGN)",
   "Germany (BKG)",
 ];
 
-export const DEFAULT_SPECIES_COMMENT_TEMPLATE = {
+export const BASIC_SPECIES_COMMENT_TEMPLATE = {
   short:
     '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
   long:
     '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+  limit: 5,
+};
+
+export const SPECIES_COMMENT_TEMPLATE_OPTION_KEYS = [
+  "count",
+  "time",
+  "timeSourceLink",
+  "sourceLink",
+  "map",
+  "comment",
+  "atlas",
+  "auditory",
+  "personalized",
+];
+
+export const DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS = {
+  count: true,
+  time: true,
+  timeSourceLink: true,
+  sourceLink: false,
+  map: true,
+  comment: true,
+  atlas: false,
+  auditory: false,
+  personalized: false,
+};
+
+export const DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS = {
+  count: true,
+  time: true,
+  timeSourceLink: true,
+  sourceLink: false,
+  map: false,
+  comment: false,
+  atlas: false,
+  auditory: false,
+  personalized: false,
+};
+
+const SPECIES_COMMENT_TEMPLATE_EXPRESSIONS = {
+  count: ({ withCountUnit }) =>
+    `s.count !== "" && s.count != null ? (s.count_precision || "") + s.count${withCountUnit ? ' + " ind."' : ""} : ""`,
+  time: ({ options }) =>
+    options.timeSourceLink
+      ? "s.time ? (s.source_record_url ? '<a href=\"' + s.source_record_url + '\">' + s.time + '</a>' : s.time) : ''"
+      : "s.time || ''",
+  sourceLink: () =>
+    "s.source_record_url ? '<a href=\"' + s.source_record_url + '\">' + (s.source_website_name || 'Source') + '</a>' : ''",
+  map: () =>
+    "s.google_maps_url && s.coordinates ? '<a href=\"' + s.google_maps_url + '\">' + s.coordinates + '</a>' : ''",
+  comment: () => "s.comment || ''",
+  atlas: () => 's.atlas_code ? "Atlas: " + s.atlas_code : ""',
+  auditory: () => 'String(s.auditory_contact) === "1" || s.auditory_contact === true ? "Auditory contact" : ""',
+};
+
+function buildSpeciesCommentTemplateString(options, { withCountUnit = false } = {}) {
+  const expressions = Object.entries(SPECIES_COMMENT_TEMPLATE_EXPRESSIONS)
+    .filter(([key]) => options[key])
+    .map(([, buildExpression]) => buildExpression({ options, withCountUnit }));
+
+  return `\${ [${expressions.join(", ")}].filter(Boolean).join(" - ") }`;
+}
+
+export function buildSpeciesCommentTemplateFromOptions(options = {}, limit = 5, longOptions = options) {
+  const normalizedOptions = {
+    ...DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
+    ...options,
+  };
+  const normalizedLongOptions = {
+    ...DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
+    ...longOptions,
+  };
+
+  return {
+    short: buildSpeciesCommentTemplateString(normalizedOptions, { withCountUnit: true }),
+    long: buildSpeciesCommentTemplateString(normalizedLongOptions),
+    limit: Number(limit) || 5,
+  };
+}
+
+export const DEFAULT_SPECIES_COMMENT_TEMPLATE = {
+  ...buildSpeciesCommentTemplateFromOptions(DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS),
   limit: 5,
 };
 
@@ -43,6 +125,8 @@ export const DEFAULT_SETTINGS = {
   assignmentMapBaseLayer: "OpenStreetMap",
   defaultNumberObserver: 1,
   customizedSpeciesComments: true,
+  speciesCommentTemplateOptions: DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
+  speciesCommentLongTemplateOptions: DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
   speciesCommentTemplate: DEFAULT_SPECIES_COMMENT_TEMPLATE,
   advancedEnabled: false,
   mapboxToken: "",

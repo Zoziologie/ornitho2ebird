@@ -3,8 +3,8 @@ import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
-  DEFAULT_SPECIES_COMMENT_TEMPLATE,
   EBIRD_LANGUAGES,
+  buildSpeciesCommentTemplateFromOptions,
 } from "../lib/constants";
 import { speciesComment } from "../lib/utils";
 
@@ -33,35 +33,66 @@ const staticMapStyleOptions = [
 ];
 const assignmentMapBaseLayerOptions = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS;
 const markerSymbolOptions = ["circle", "triangle", "square", "star"];
-const PERSONALIZED_PRESET_KEY = "personalized";
-
-const previewSightings = [
+const speciesCommentOptionItems = [
   {
-    id: 36150841,
-    source_species_id: "408",
-    ebird_species_code: "eurbla",
-    source_website_name: "ornitho.ch",
-    source_record_url: "https://www.ornitho.ch/index.php?m_id=54&id=36150841",
-    location_name: "Leuzigen [602/224]",
-    lat: 47.168486,
-    lon: 7.465799,
-    coordinates: "47.168486, 7.465799",
-    google_maps_url: "https://maps.google.com/?q=47.168486,7.465799",
-    date: "2026-03-10",
-    time: "08:23",
-    common_name: "Common Blackbird",
-    scientific_name: "Turdus merula",
-    count: 4,
-    count_precision: "=",
-    atlas_code: "5",
-    auditory_contact: "1",
-    comment: "This is a note<br>1x first-year male, 2x female-type",
+    key: "count",
+    labelKey: "speciesCommentOptionCount",
+  },
+  {
+    key: "time",
+    labelKey: "speciesCommentOptionTime",
+    subKey: "timeSourceLink",
+    subLabelKey: "speciesCommentOptionTimeSourceLink",
+  },
+  {
+    key: "sourceLink",
+    labelKey: "speciesCommentOptionSourceLink",
+  },
+  {
+    key: "map",
+    labelKey: "speciesCommentOptionMap",
+  },
+  {
+    key: "comment",
+    labelKey: "speciesCommentOptionComment",
+  },
+  {
+    key: "atlas",
+    labelKey: "speciesCommentOptionAtlas",
+  },
+  {
+    key: "auditory",
+    labelKey: "speciesCommentOptionAuditory",
   },
 ];
+
+const previewSighting = {
+  id: 36150841,
+  source_species_id: "408",
+  ebird_species_code: "eurbla",
+  source_website_name: "ornitho.ch",
+  source_record_url: "https://www.ornitho.ch/index.php?m_id=54&id=36150841",
+  location_name: "Leuzigen [602/224]",
+  lat: 47.168486,
+  lon: 7.465799,
+  coordinates: "47.168486, 7.465799",
+  google_maps_url: "https://maps.google.com/?q=47.168486,7.465799",
+  date: "2026-03-10",
+  time: "08:23",
+  common_name: "Common Blackbird",
+  scientific_name: "Turdus merula",
+  count: 4,
+  count_precision: "=",
+  atlas_code: "5",
+  auditory_contact: "1",
+  comment: "This is a note<br>1x first-year male, 2x female-type",
+};
 const repeatedPreviewSightings = Array.from({ length: 12 }, (_, index) => ({
-  ...previewSightings[0],
+  ...previewSighting,
   id: 36150841 + index,
   time: `${String(8 + Math.floor(index / 3)).padStart(2, "0")}:${String((23 + index * 7) % 60).padStart(2, "0")}`,
+  atlas_code: ["5", "", "3", ""][index % 4],
+  auditory_contact: ["1", "", "0", "1"][index % 4],
   comment: ["This is a note", "singing", "1x first-year male", "2x female-type", ""][index % 5],
 }));
 
@@ -83,83 +114,10 @@ const speciesCommentLongPreview = computed(() => {
   return speciesComment(props.settings.speciesCommentTemplate, longPreviewSightings.value);
 });
 
-const propertyRows = [
-  ["id", "36150841"],
-  ["source_species_id", "408"],
-  ["ebird_species_code", "eurbla"],
-  ["source_website_name", "ornitho.ch"],
-  ["source_record_url", "https://www.ornitho.ch/index.php?m_id=54&id=36150841"],
-  ["location_name", "Leuzigen [602/224]"],
-  ["lat", "47.168486"],
-  ["lon", "7.465799"],
-  ["coordinates", "47.168486, 7.465799"],
-  ["google_maps_url", "https://maps.google.com/?q=47.168486,7.465799"],
-  ["date", "2026-03-10"],
-  ["time", "08:23"],
-  ["common_name", "Common Blackbird"],
-  ["scientific_name", "Turdus merula"],
-  ["count", "4"],
-  ["count_precision", "="],
-  ["atlas_code", "5"],
-  ["auditory_contact", "1"],
-  ["comment", "This is a note<br>1x first-year male, 2x female-type"],
-];
+const propertyRows = Object.entries(previewSighting).map(([property, value]) => [property, String(value)]);
 
-const speciesCommentPresets = [
-  {
-    key: "basic",
-    labelKey: "templatePresetBasic",
-    short: DEFAULT_SPECIES_COMMENT_TEMPLATE.short,
-    long: DEFAULT_SPECIES_COMMENT_TEMPLATE.long,
-  },
-  {
-    key: "source",
-    labelKey: "templatePresetOrnitho",
-    short:
-      '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
-    long:
-      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
-  },
-  {
-    key: "map",
-    labelKey: "templatePresetMap",
-    short:
-      '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
-    long:
-      '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.google_maps_url ? \' - <a href="\' + s.google_maps_url + \'">\' + s.coordinates + "</a>" : "" }${ s.source_record_url ? \' - <a href="\' + s.source_record_url + \'">\' + s.source_website_name + "</a>" : (s.source_website_name ? " - " + s.source_website_name : "") }${ s.comment ? " - " + s.comment : "" }',
-  },
-  {
-    key: "auditory-atlas",
-    labelKey: "templatePresetAuditoryAtlas",
-    short:
-      '${ s.auditory_contact !== "" ? "Auditory contact: " + s.auditory_contact : "" }${ s.auditory_contact !== "" && s.atlas_code !== "" ? " - " : "" }${ s.atlas_code !== "" ? "Atlas: " + s.atlas_code : "" }${ s.auditory_contact !== "" || s.atlas_code !== "" ? " - " : "" }${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-    long:
-      '${ s.auditory_contact !== "" ? "Auditory contact: " + s.auditory_contact : "" }${ s.auditory_contact !== "" && s.atlas_code !== "" ? " - " : "" }${ s.atlas_code !== "" ? "Atlas: " + s.atlas_code : "" }${ s.auditory_contact !== "" || s.atlas_code !== "" ? " - " : "" }${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-  },
-];
-
-const shortTemplatePresetOptions = computed(() => {
-  return [...speciesCommentPresets, { key: PERSONALIZED_PRESET_KEY, labelKey: "templatePresetPersonalized" }];
-});
-
-const longTemplatePresetOptions = computed(() => {
-  return [...speciesCommentPresets, { key: PERSONALIZED_PRESET_KEY, labelKey: "templatePresetPersonalized" }];
-});
-
-function templatePresetKeyFor(field) {
-  const property = field === "long" ? "long" : "short";
-  const matchedPreset = speciesCommentPresets.find(
-    (preset) => preset[property] === props.settings.speciesCommentTemplate[property]
-  );
-  return matchedPreset?.key || PERSONALIZED_PRESET_KEY;
-}
-
-const selectedShortTemplatePresetKey = ref(templatePresetKeyFor("short"));
-const selectedLongTemplatePresetKey = ref(templatePresetKeyFor("long"));
-const shortTemplateIsPersonalized = computed(() => selectedShortTemplatePresetKey.value === PERSONALIZED_PRESET_KEY);
-const longTemplateIsPersonalized = computed(() => selectedLongTemplatePresetKey.value === PERSONALIZED_PRESET_KEY);
 const hasPersonalizedTemplate = computed(() => {
-  return shortTemplateIsPersonalized.value || longTemplateIsPersonalized.value;
+  return Boolean(props.settings.speciesCommentTemplateOptions?.personalized);
 });
 
 const advancedOptionsRef = ref(null);
@@ -175,48 +133,27 @@ const speciesCommentLimitError = computed(() => {
   return "";
 });
 
-function applyTemplatePreset(field, presetKey) {
-  if (field === "long") {
-    selectedLongTemplatePresetKey.value = presetKey;
-  } else {
-    selectedShortTemplatePresetKey.value = presetKey;
-  }
-
-  if (presetKey === PERSONALIZED_PRESET_KEY) {
-    return;
-  }
-
-  const property = field === "long" ? "long" : "short";
-  const preset = speciesCommentPresets.find((entry) => entry.key === presetKey);
-  if (!preset) {
-    return;
-  }
-
-  props.settings.speciesCommentTemplate[property] = preset[property];
-}
-
 watch(
-  () => props.settings.speciesCommentTemplate.short,
-  () => {
-    const matchedPreset = speciesCommentPresets.find(
-      (preset) => preset.short === props.settings.speciesCommentTemplate.short
-    );
-    if (selectedShortTemplatePresetKey.value !== PERSONALIZED_PRESET_KEY || !matchedPreset) {
-      selectedShortTemplatePresetKey.value = matchedPreset?.key || PERSONALIZED_PRESET_KEY;
+  () => ({
+    options: { ...props.settings.speciesCommentTemplateOptions },
+    longOptions: { ...props.settings.speciesCommentLongTemplateOptions },
+    limit: props.settings.speciesCommentTemplate.limit,
+  }),
+  (value) => {
+    if (value.options.personalized) {
+      return;
     }
-  }
-);
 
-watch(
-  () => props.settings.speciesCommentTemplate.long,
-  () => {
-    const matchedPreset = speciesCommentPresets.find(
-      (preset) => preset.long === props.settings.speciesCommentTemplate.long
+    Object.assign(
+      props.settings.speciesCommentTemplate,
+      buildSpeciesCommentTemplateFromOptions(
+        props.settings.speciesCommentTemplateOptions,
+        props.settings.speciesCommentTemplate.limit,
+        props.settings.speciesCommentLongTemplateOptions
+      )
     );
-    if (selectedLongTemplatePresetKey.value !== PERSONALIZED_PRESET_KEY || !matchedPreset) {
-      selectedLongTemplatePresetKey.value = matchedPreset?.key || PERSONALIZED_PRESET_KEY;
-    }
-  }
+  },
+  { deep: true, immediate: true }
 );
 
 watch(
@@ -241,51 +178,56 @@ watch(
     <section class="modal-panel card border-0 shadow">
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="mb-0">{{ t("globalSettings") }}</h2>
+          <h2 class="modal-title-heading">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+            <span>{{ t("globalSettings") }}</span>
+          </h2>
           <button class="btn btn-outline-secondary btn-sm" type="button" @click="emit('close')">
             {{ t("close") }}
           </button>
         </div>
 
-        <div class="mt-3">
-          <h3 class="h5">{{ t("basicSettingsTitle") }}</h3>
-          <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-            <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
-            <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
-              <option
-                v-for="language in EBIRD_LANGUAGES"
-                :key="language.value"
-                :value="language.value"
-              >
-                {{ language.label }}
-              </option>
-            </select>
+        <div class="settings-section settings-section-first">
+          <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
+          <div class="settings-field">
+            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+              <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
+              <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
+                <option
+                  v-for="language in EBIRD_LANGUAGES"
+                  :key="language.value"
+                  :value="language.value"
+                >
+                  {{ language.label }}
+                </option>
+              </select>
+            </div>
+            <div class="form-text">
+              {{ t("ebirdLanguageHelp") }}
+              <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
+                t("ebirdLanguagePrefsLink")
+              }}</a>
+            </div>
           </div>
-          <div class="form-text">
-            {{ t("ebirdLanguageHelp") }}
-            <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
-              t("ebirdLanguagePrefsLink")
-            }}</a>
+
+          <div class="settings-field">
+            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+              <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
+              <input
+                id="default-observers-input"
+                v-model.number="settings.defaultNumberObserver"
+                class="form-control"
+                type="number"
+                min="1"
+                step="1"
+              />
+            </div>
+            <div class="form-text">{{ t("partySizeHelp") }}</div>
           </div>
         </div>
 
-        <div class="mt-3">
-          <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-            <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
-            <input
-              id="default-observers-input"
-              v-model.number="settings.defaultNumberObserver"
-              class="form-control"
-              type="number"
-              min="1"
-              step="1"
-            />
-          </div>
-          <div class="form-text">{{ t("partySizeHelp") }}</div>
-        </div>
-
-        <div ref="advancedOptionsRef" class="mt-4">
-          <h3 class="h5">{{ t("advancedOptionsTitle") }}</h3>
+        <div ref="advancedOptionsRef" class="settings-section">
+          <h3 class="modal-section-title">{{ t("advancedOptionsTitle") }}</h3>
           <div class="d-grid gap-3 mt-1">
             <button
               class="btn w-100 text-start p-3 border"
@@ -308,8 +250,8 @@ watch(
           </div>
         </div>
 
-        <div class="mt-4">
-          <h3 class="h5">{{ t("advancedSettingsTitle") }}</h3>
+        <div class="settings-section">
+          <h3 class="modal-section-title">{{ t("advancedSettingsTitle") }}</h3>
           <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
           <button
             class="btn btn-link btn-sm p-0 mb-3"
@@ -366,13 +308,13 @@ watch(
                   </option>
                 </select>
               </div>
-              <div class="form-text">{{ t("assignmentMapBaseLayerHelp") }}</div>
             </div>
           </div>
         </div>
 
-        <div ref="speciesCommentRef" class="mt-4">
-          <h3 class="h5">{{ t("speciesCommentTemplate") }}</h3>
+        <div ref="speciesCommentRef" class="settings-section">
+          <h3 class="modal-section-title">{{ t("speciesCommentTemplate") }}</h3>
+          <p class="small text-muted mb-3">{{ t("speciesCommentTemplateIntro") }}</p>
           <div class="form-check form-switch mb-3">
             <input
               id="customized-species-comments"
@@ -386,22 +328,59 @@ watch(
           </div>
 
           <div v-if="settings.customizedSpeciesComments">
-            <div class="mb-3">
-              <label class="form-label" for="short-template-preset">{{ t("template") }}</label>
-              <select
-                id="short-template-preset"
-                class="form-select"
-                :value="selectedShortTemplatePresetKey"
-                @change="applyTemplatePreset('short', $event.target.value)"
-              >
-                <option v-for="preset in shortTemplatePresetOptions" :key="`short-${preset.key}`" :value="preset.key">
-                  {{ t(preset.labelKey) }}
-                </option>
-              </select>
+            <div v-if="!hasPersonalizedTemplate" class="mb-3">
+              <h4 class="h6">{{ t("templateRegularFields") }}</h4>
+              <div class="species-comment-options">
+                <div
+                  v-for="item in speciesCommentOptionItems"
+                  :key="item.key"
+                  class="species-comment-option"
+                >
+                  <div class="species-comment-option-main">
+                    <input
+                      :id="`species-comment-option-${item.key}`"
+                      v-model="settings.speciesCommentTemplateOptions[item.key]"
+                      class="form-check-input"
+                      type="checkbox"
+                    />
+                    <label class="species-comment-option-label" :for="`species-comment-option-${item.key}`">
+                      {{ t(item.labelKey) }}
+                    </label>
+                    <label v-if="item.subKey" class="species-comment-inline-option">
+                      <input
+                        v-model="settings.speciesCommentTemplateOptions[item.subKey]"
+                        class="form-check-input"
+                        type="checkbox"
+                        :disabled="!settings.speciesCommentTemplateOptions[item.key]"
+                      />
+                      <span>{{ t(item.subLabelKey) }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div v-if="shortTemplateIsPersonalized" class="mb-3">
+
+            <div class="form-check form-switch mb-3">
+              <input
+                id="personalized-species-comments"
+                v-model="settings.speciesCommentTemplateOptions.personalized"
+                class="form-check-input"
+                type="checkbox"
+              />
+              <label class="form-check-label" for="personalized-species-comments">
+                {{ t("templatePersonalized") }}
+              </label>
+            </div>
+
+            <div v-if="hasPersonalizedTemplate" class="mb-3">
+              <label class="form-label" for="short-template-textarea">{{ t("templateRegular") }}</label>
               <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
-              <textarea v-model="settings.speciesCommentTemplate.short" class="form-control" rows="4" />
+              <textarea
+                id="short-template-textarea"
+                v-model="settings.speciesCommentTemplate.short"
+                class="form-control"
+                rows="4"
+              />
             </div>
 
             <div class="card bg-light border-0 mb-4">
@@ -412,6 +391,37 @@ watch(
             </div>
 
             <div class="form-text mb-2">{{ t("longTemplateHelp") }}</div>
+            <div v-if="!hasPersonalizedTemplate" class="mb-3">
+              <h4 class="h6">{{ t("templateLongFields") }}</h4>
+              <div class="species-comment-options">
+                <div
+                  v-for="item in speciesCommentOptionItems"
+                  :key="`long-${item.key}`"
+                  class="species-comment-option"
+                >
+                  <div class="species-comment-option-main">
+                    <input
+                      :id="`species-comment-long-option-${item.key}`"
+                      v-model="settings.speciesCommentLongTemplateOptions[item.key]"
+                      class="form-check-input"
+                      type="checkbox"
+                    />
+                    <label class="species-comment-option-label" :for="`species-comment-long-option-${item.key}`">
+                      {{ t(item.labelKey) }}
+                    </label>
+                    <label v-if="item.subKey" class="species-comment-inline-option">
+                      <input
+                        v-model="settings.speciesCommentLongTemplateOptions[item.subKey]"
+                        class="form-check-input"
+                        type="checkbox"
+                        :disabled="!settings.speciesCommentLongTemplateOptions[item.key]"
+                      />
+                      <span>{{ t(item.subLabelKey) }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="mb-3">
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="switch-limit-input">{{ t("switchLimit") }}</label>
@@ -429,22 +439,16 @@ watch(
                 {{ speciesCommentLimitError }}
               </div>
             </div>
-            <div class="mb-4">
-              <label class="form-label" for="long-template-preset">{{ t("longTemplate") }}</label>
-              <select
-                id="long-template-preset"
-                class="form-select"
-                :value="selectedLongTemplatePresetKey"
-                @change="applyTemplatePreset('long', $event.target.value)"
-              >
-                <option v-for="preset in longTemplatePresetOptions" :key="`long-${preset.key}`" :value="preset.key">
-                  {{ t(preset.labelKey) }}
-                </option>
-              </select>
-            </div>
-            <div v-if="longTemplateIsPersonalized" class="mb-4">
+
+            <div v-if="hasPersonalizedTemplate" class="mb-4">
+              <label class="form-label" for="long-template-textarea">{{ t("longTemplate") }}</label>
               <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
-              <textarea v-model="settings.speciesCommentTemplate.long" class="form-control" rows="4" />
+              <textarea
+                id="long-template-textarea"
+                v-model="settings.speciesCommentTemplate.long"
+                class="form-control"
+                rows="4"
+              />
             </div>
 
             <div class="card bg-light border-0 mb-4">
@@ -478,8 +482,8 @@ watch(
           </div>
         </div>
 
-        <div class="mt-4">
-          <h3 class="h5">{{ t("staticMapTitle") }}</h3>
+        <div class="settings-section">
+          <h3 class="modal-section-title">{{ t("staticMapTitle") }}</h3>
           <div class="form-check form-switch mb-3">
             <input
               id="static-map-enabled"

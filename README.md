@@ -75,7 +75,7 @@ Convert exports from ornitho, ornitho network sites, Observation websites, and B
 
 - Imports exported files from supported source websites
 - Preserves existing checklist data when the source already provides effort metadata
-- Automatically groups standalone sightings into draft eBird checklists
+- Automatically groups casual observations into draft eBird checklists
 - Lets you review and edit checklist metadata in a map-based advanced workflow
 - Exports a CSV that can be uploaded through eBird import
 - Supports multiple interface languages and localized eBird taxonomy names
@@ -98,12 +98,12 @@ The full source list lives in [`data/websites_list.json`](/Users/rafnuss/Documen
 The app uses two different paths depending on what you import:
 
 - Existing lists/checklists are the preferred path. They already contain most of the effort metadata needed for eBird.
-- Standalone sightings are automatically aggregated into new checklists using time and distance thresholds.
+- Casual observations are automatically aggregated into new checklists using time and distance thresholds.
 
 By default, the app makes a few pragmatic assumptions so imports can work with minimal manual input:
 
 - A default party size is used because some source systems do not store observer count
-- Same-day incidental sightings can be grouped into one checklist if they remain within configurable time and distance limits
+- Same-day casual observations can be grouped into one checklist if they remain within configurable time and distance limits
 - Generated sighting-based checklists are marked as primary purpose by default and incomplete by default
 - If a checklist has no track or distance, it may end up as a historical checklist in eBird
 
@@ -127,7 +127,7 @@ Basic mode is the fast path. The app imports the file, applies automatic aggrega
 
 Customized mode unlocks the review tools:
 
-- reassign sightings between checklists
+- reassign casual observations between checklists
 - create new checklists from map selections
 - edit checklist metadata
 - draw a path to compute traveling distance

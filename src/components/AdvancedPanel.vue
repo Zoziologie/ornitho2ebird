@@ -25,6 +25,7 @@ import {
   applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
   buildForm,
+  buildSpeciesRows,
   distanceFromPath,
   haversineDistanceKm,
   protocol,
@@ -62,6 +63,7 @@ const assignSelectorOpen = ref(false);
 const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
+const observationsModalOpen = ref(false);
 
 let assignmentMap = null;
 let assignmentSightingsLayer = null;
@@ -179,6 +181,14 @@ const spansMultipleDays = computed(() => {
 
 const selectedProtocol = computed(() => {
   return selectedForm.value ? protocol(selectedForm.value) : null;
+});
+
+const selectedSpeciesCommentTemplate = computed(() => {
+  return selectedForm.value?.species_comment_template || props.defaultSpeciesCommentTemplate;
+});
+
+const checklistObservationRows = computed(() => {
+  return buildSpeciesRows(selectedSightings.value, selectedSpeciesCommentTemplate.value);
 });
 
 const isInvalid = computed(() => {
@@ -1188,10 +1198,7 @@ onMounted(() => {
     <section v-if="sightings.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
         <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
-        <p class="mb-3">
-          {{ t("assignmentIntro") }}
-          {{ t("assignmentWarning") }}
-        </p>
+        <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
         <div class="assignment-map-shell mb-3">
           <div
@@ -1308,6 +1315,7 @@ onMounted(() => {
                 <i class="bi bi-journal-text" aria-hidden="true"></i>
               </button>
             </div>
+            <p class="assignment-magic-help mb-0">{{ t("assignmentMagicHelp") }}</p>
 
             <div class="assignment-magic-inputs">
               <label class="assignment-magic-field">
@@ -1428,7 +1436,17 @@ onMounted(() => {
             </div>
           </div>
           <div class="col-lg-3">
-            <div class="form-check form-switch">
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2"
+                type="button"
+                @click="observationsModalOpen = true"
+              >
+                <i class="bi bi-list-ul" aria-hidden="true"></i>
+                <span>{{ t("viewChecklistObservations", { count: selectedSightings.length }) }}</span>
+              </button>
+            </div>
+            <div class="form-check form-switch mt-2">
               <input
                 id="export-ready"
                 v-model="selectedForm.exportable"
@@ -1693,5 +1711,54 @@ onMounted(() => {
         </section>
       </div>
     </section>
+
+    <div
+      v-if="observationsModalOpen && selectedForm"
+      class="modal-backdrop"
+      @click.self="observationsModalOpen = false"
+    >
+      <section class="modal-panel card border-0 shadow">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="modal-title-heading">
+              <i class="bi bi-list-ul" aria-hidden="true"></i>
+              <span>{{ t("checklistObservationsTitle") }}</span>
+            </h2>
+            <button class="btn btn-outline-secondary btn-sm" type="button" @click="observationsModalOpen = false">
+              {{ t("close") }}
+            </button>
+          </div>
+
+          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+            <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
+            <div class="badge bg-secondary">
+              {{ t("checklistObservationCount", { count: selectedSightings.length }) }}
+            </div>
+          </div>
+
+          <p v-if="selectedSightings.length === 0" class="text-muted mb-0">
+            {{ t("checklistObservationsEmpty") }}
+          </p>
+          <div v-else class="table-responsive checklist-observations-table">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="text-nowrap">{{ t("observationTableCount") }}</th>
+                  <th>{{ t("observationTableSpecies") }}</th>
+                  <th>{{ t("observationTableSpeciesComment") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in checklistObservationRows" :key="`${row.common_name}-${row.sightings[0]?.id || row.count}`">
+                  <td class="text-nowrap">{{ row.count }}</td>
+                  <td>{{ row.common_name || t("observationTableMissingSpecies") }}</td>
+                  <td class="checklist-observations-comment" v-html="row.species_comment || ''"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>

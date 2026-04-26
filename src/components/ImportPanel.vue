@@ -109,7 +109,7 @@ const importSuccessText = computed(() => {
   const listCount = Number(numberImportedForms.value) || 0;
   const sightingCount = Number(numberImportedSightings.value) || 0;
   const listLabel = listCount === 1 ? "list" : "lists";
-  const sightingLabel = sightingCount === 1 ? "incidental sighting" : "incidental sightings";
+  const sightingLabel = sightingCount === 1 ? "casual observation" : "casual observations";
 
   return `Data loaded successfully: ${listCount} ${listLabel} and ${sightingCount} ${sightingLabel}`;
 });

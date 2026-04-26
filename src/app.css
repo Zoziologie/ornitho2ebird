@@ -123,6 +123,24 @@ h6 {
   --bs-alert-border-color: #c6d5df;
 }
 
+.instruction-section {
+  padding: 1.1rem 0 1.25rem;
+  border-top: 1px solid rgba(41, 67, 86, 0.14);
+}
+
+.instruction-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.instruction-section h3 {
+  margin-bottom: 0.8rem;
+}
+
+.instruction-section-alert {
+  padding-bottom: 0;
+}
+
 .instruction-list,
 .instruction-icon-list {
   display: grid;
@@ -682,6 +700,53 @@ h6 {
   overflow-y: auto;
 }
 
+.modal-title-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0;
+  color: #253846;
+  font-size: 1.65rem;
+}
+
+.modal-title-heading .bi {
+  color: var(--ebird-blue);
+  font-size: 1.35rem;
+}
+
+.settings-section {
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid rgba(41, 67, 86, 0.16);
+}
+
+.settings-section-first {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.modal-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  color: #253846;
+  font-size: 1.16rem;
+}
+
+.modal-section-title::before {
+  content: "";
+  width: 0.28rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: var(--ebird-blue);
+}
+
+.settings-field + .settings-field {
+  margin-top: 1rem;
+}
+
 .inline-icon {
   width: 18px;
   vertical-align: middle;
@@ -694,6 +759,89 @@ h6 {
   border-radius: var(--bs-border-radius);
   background-color: #fff;
   overflow-wrap: anywhere;
+}
+
+.checklist-observations-table {
+  max-height: min(60vh, 520px);
+  overflow: auto;
+}
+
+.checklist-observations-comment {
+  min-width: 16rem;
+  overflow-wrap: anywhere;
+}
+
+.species-comment-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.species-comment-option {
+  min-height: 2rem;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: #f8f9fa;
+}
+
+.species-comment-option:has(.form-check-input:checked) {
+  border-color: rgba(56, 91, 117, 0.45);
+  background: rgba(56, 91, 117, 0.06);
+}
+
+.species-comment-option-main,
+.species-comment-inline-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.species-comment-option-label {
+  flex: 1;
+  margin-bottom: 0;
+  font-weight: 500;
+  color: #253846;
+  cursor: pointer;
+}
+
+.species-comment-inline-option {
+  margin-bottom: 0;
+  padding: 0.12rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(56, 91, 117, 0.08);
+  color: #667985;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.species-comment-inline-option .form-check-input {
+  width: 0.78rem;
+  height: 0.78rem;
+  margin-top: 0;
+}
+
+.species-comment-inline-option:has(.form-check-input:checked) {
+  background: rgba(56, 91, 117, 0.14);
+  color: #253846;
+}
+
+.species-comment-inline-option:has(.form-check-input:disabled) {
+  opacity: 0.55;
+}
+
+@media (max-width: 991.98px) {
+  .species-comment-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .species-comment-options {
+    grid-template-columns: 1fr;
+  }
 }
 
 .footer-brand {
@@ -838,6 +986,12 @@ h6 {
   flex-wrap: wrap;
   gap: 0.6rem;
   min-width: 0;
+}
+
+.assignment-magic-help {
+  flex: 1 1 100%;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
 }
 
 .assignment-magic-field {
