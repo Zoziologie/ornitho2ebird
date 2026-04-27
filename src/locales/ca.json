@@ -171,6 +171,7 @@
   "mapButtonLabel": "Mapa",
   "drawPath": "Trajecte",
   "locationName": "Nom del lloc",
+  "locationNameLimitHint": "{count}/{max} caràcters",
   "date": "Data",
   "time": "Hora",
   "durationMinutes": "Durada (minuts)",

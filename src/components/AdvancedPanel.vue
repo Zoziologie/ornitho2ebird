@@ -28,9 +28,11 @@ import {
   buildSpeciesRows,
   distanceFromPath,
   haversineDistanceKm,
+  normalizeLocationName,
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
+import { LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
 
 const props = defineProps({
   forms: { type: Array, required: true },
@@ -561,6 +563,20 @@ watch(
   () => props.assignmentMapBaseLayer,
   (value) => {
     applyAssignmentBaseLayer(value);
+  },
+);
+
+watch(
+  () => selectedForm.value?.location_name,
+  (value) => {
+    if (!selectedForm.value || typeof value !== "string") {
+      return;
+    }
+
+    const normalized = normalizeLocationName(value);
+    if (normalized !== value) {
+      selectedForm.value.location_name = normalized;
+    }
   },
 );
 
@@ -1481,6 +1497,7 @@ onMounted(() => {
                   class="form-control"
                   :class="requiredStateClass(selectedForm.location_name)"
                   type="text"
+                  :maxlength="LOCATION_NAME_MAX_LENGTH"
                 />
                 <button
                   class="btn btn-outline-secondary btn-icon"
@@ -1491,6 +1508,17 @@ onMounted(() => {
                 >
                   <i class="bi bi-map" aria-hidden="true"></i>
                 </button>
+              </div>
+              <div
+                class="form-text"
+                :class="{ 'text-warning': (selectedForm.location_name || '').length >= LOCATION_NAME_MAX_LENGTH }"
+              >
+                {{
+                  t("locationNameLimitHint", {
+                    count: (selectedForm.location_name || "").length,
+                    max: LOCATION_NAME_MAX_LENGTH,
+                  })
+                }}
               </div>
             </div>
             <div class="col-lg-4 col-sm-6">

@@ -2,6 +2,7 @@ import ebirdTaxonomyLanguages from "../../data/ebird_taxonomy_languages.json";
 
 export const APP_STORAGE_PREFIX = "ornitho2ebird";
 export const LANGUAGE_COOKIE_NAME = `${APP_STORAGE_PREFIX}_language`;
+export const LOCATION_NAME_MAX_LENGTH = 128;
 
 export const UI_LANGUAGES = [
   { value: "en", label: "English" },

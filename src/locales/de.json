@@ -171,6 +171,7 @@
   "mapButtonLabel": "Karte",
   "drawPath": "Pfad",
   "locationName": "Ortsname",
+  "locationNameLimitHint": "{count}/{max} Zeichen",
   "date": "Datum",
   "time": "Zeit",
   "durationMinutes": "Dauer (Minuten)",

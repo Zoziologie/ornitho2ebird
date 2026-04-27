@@ -7,6 +7,7 @@ import {
   formatDate,
   formatNumber,
   mathRound,
+  normalizeLocationName,
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
@@ -197,7 +198,7 @@ const exportState = computed(() => {
         Species: "",
         count: speciesRow.count,
         species_comment: speciesRow.species_comment,
-        location_name: form.location_name,
+        location_name: normalizeLocationName(form.location_name),
         latitude: form.lat ? Number.parseFloat(form.lat).toFixed(6) : "",
         longitude: form.lon ? Number.parseFloat(form.lon).toFixed(6) : "",
         date: formatDate(form.date, "/"),

@@ -171,6 +171,7 @@
   "mapButtonLabel": "Map",
   "drawPath": "Draw path",
   "locationName": "Location name",
+  "locationNameLimitHint": "{count}/{max} characters",
   "date": "Date",
   "time": "Time",
   "durationMinutes": "Duration (minutes)",

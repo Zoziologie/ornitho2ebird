@@ -1,7 +1,16 @@
-import { BASIC_SPECIES_COMMENT_TEMPLATE, DEFAULT_SPECIES_COMMENT_TEMPLATE } from "./constants";
+import {
+  BASIC_SPECIES_COMMENT_TEMPLATE,
+  DEFAULT_SPECIES_COMMENT_TEMPLATE,
+  LOCATION_NAME_MAX_LENGTH,
+} from "./constants";
 
 function normalizeName(value) {
   return String(value || "").normalize("NFC").trim();
+}
+
+export function normalizeLocationName(value, fallback = "") {
+  const normalized = normalizeName(value || fallback);
+  return normalized.slice(0, LOCATION_NAME_MAX_LENGTH);
 }
 
 export function formatNumber(value) {
@@ -353,7 +362,7 @@ export function buildForm(form, id, options = {}) {
     id,
     imported: Boolean(form.imported),
     exportable: form.exportable !== false,
-    location_name: normalizeName(form.location_name || `Checklist ${id}`),
+    location_name: normalizeLocationName(form.location_name, `Checklist ${id}`),
     lat: mathRound(form.lat, 6),
     lon: mathRound(form.lon, 6),
     date: form.date || "",
@@ -390,7 +399,7 @@ export function createSighting(raw) {
     permalink: raw.permalink || "",
     source_website_name: raw.source_website_name || raw.website || "",
     source_record_url: raw.source_record_url || raw.permalink || "",
-    location_name: normalizeName(raw.location_name),
+    location_name: normalizeLocationName(raw.location_name),
     lat: roundedLat,
     lon: roundedLon,
     coordinates,
