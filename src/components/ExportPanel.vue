@@ -59,6 +59,9 @@ const EBIRD_COMMENT_MAX_LENGTH = 8000;
 const taxonomyCommonNameByCode = ref(new Map());
 const taxonomyStatus = ref("idle");
 const taxonomyReportCodeByIssue = ref({});
+const exportFilename = ref(buildExportFilename());
+const exportFilenameDraft = ref("");
+const exportFilenameEditing = ref(false);
 let taxonomyRequestId = 0;
 
 const exportableForms = computed(() => {
@@ -161,6 +164,30 @@ function buildExportFilename() {
   return `ornitho2ebird_${year}${month}${day}_${hours}${minutes}${seconds}.csv`;
 }
 
+function normalizedExportFilename() {
+  const rawValue = String(exportFilename.value || "").trim();
+  if (!rawValue) {
+    return buildExportFilename();
+  }
+
+  return rawValue.toLowerCase().endsWith(".csv") ? rawValue : `${rawValue}.csv`;
+}
+
+function startEditingExportFilename() {
+  exportFilenameDraft.value = exportFilename.value;
+  exportFilenameEditing.value = true;
+}
+
+function saveExportFilename() {
+  exportFilename.value = String(exportFilenameDraft.value || "").trim() || buildExportFilename();
+  exportFilenameEditing.value = false;
+}
+
+function cancelEditingExportFilename() {
+  exportFilenameDraft.value = exportFilename.value;
+  exportFilenameEditing.value = false;
+}
+
 function maxStaticMapUrlLengthForComment(form, sightings, importedWithText) {
   const commentWithoutMap = checklistComment(form, sightings, importedWithText, { staticMapUrl: "" });
   const placeholderUrl = "x";
@@ -247,7 +274,7 @@ const exportState = computed(() => {
   }
 
   const csv = rowsToCsv(rows);
-  const filename = buildExportFilename();
+  const filename = normalizedExportFilename();
 
   return {
     errors,
@@ -324,6 +351,16 @@ watch(unmatchedTaxonomy, (issues) => {
   });
   taxonomyReportCodeByIssue.value = nextCodeByIssue;
 }, { immediate: true });
+
+watch(
+  () => exportableForms.value.length,
+  (count, previousCount) => {
+    if (count > 0 && previousCount === 0 && !String(exportFilename.value || "").trim()) {
+      exportFilename.value = buildExportFilename();
+    }
+  },
+  { immediate: true }
+);
 
 const exportSummaryStats = computed(() => {
   const protocolCounts = new Map();
@@ -447,7 +484,7 @@ function downloadFile() {
   const link = document.createElement("a");
   const objectUrl = URL.createObjectURL(blob);
   link.href = objectUrl;
-  link.download = exportState.value.filename;
+  link.download = normalizedExportFilename();
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -642,8 +679,53 @@ function downloadFile() {
             <div class="export-action-icon" aria-hidden="true">
               <i class="bi bi-file-earmark-arrow-down"></i>
             </div>
-            <div class="export-action-title">
-              {{ t(exportState.errors.length === 0 ? "exportReady" : "exportBlocked") }}
+            <div class="export-filename-field">
+              <div class="export-filename-row">
+                <template v-if="exportFilenameEditing">
+                  <input
+                    id="export-filename"
+                    v-model="exportFilenameDraft"
+                    type="text"
+                    class="form-control form-control-sm export-filename-input"
+                    :placeholder="t('exportFilenamePlaceholder')"
+                    spellcheck="false"
+                    autocapitalize="off"
+                    autocomplete="off"
+                    @keydown.enter.prevent="saveExportFilename"
+                    @keydown.esc.prevent="cancelEditingExportFilename"
+                  />
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    type="button"
+                    :aria-label="t('save')"
+                    :title="t('save')"
+                    @click="saveExportFilename"
+                  >
+                    <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    class="btn btn-link btn-sm export-filename-edit"
+                    type="button"
+                    :aria-label="t('cancel')"
+                    :title="t('cancel')"
+                    @click="cancelEditingExportFilename"
+                  >
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                  </button>
+                </template>
+                <template v-else>
+                  <div class="export-filename">{{ normalizedExportFilename() }}</div>
+                  <button
+                    class="btn btn-link btn-sm export-filename-edit"
+                    type="button"
+                    :aria-label="t('edit')"
+                    :title="t('edit')"
+                    @click="startEditingExportFilename"
+                  >
+                    <i class="bi bi-pen" aria-hidden="true"></i>
+                  </button>
+                </template>
+              </div>
             </div>
             <button
               class="btn btn-primary btn-lg export-download-btn"
@@ -653,7 +735,6 @@ function downloadFile() {
             >
               {{ t("downloadCsv") }}
             </button>
-            <div class="export-filename">{{ exportState.filename || "ornitho2ebird.csv" }}</div>
           </section>
         </div>
 

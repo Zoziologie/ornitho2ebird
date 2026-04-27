@@ -405,7 +405,7 @@ h6 {
 }
 
 .export-panel-action {
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
 }
@@ -421,26 +421,48 @@ h6 {
   font-size: 1.5rem;
 }
 
-.export-action-title {
-  position: relative;
-  z-index: 1;
-  font-family: "Montserrat", sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e3645;
-}
-
 .export-download-btn {
   position: relative;
   z-index: 1;
   min-width: 100%;
 }
 
+.export-filename-field {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.export-filename-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.export-filename-input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  border-radius: 0.85rem;
+}
+
 .export-filename {
   position: relative;
   z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.83rem;
   word-break: break-word;
+}
+
+.export-filename-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+  font-size: 0.83rem;
+  text-decoration: none;
 }
 
 .export-warning-box {
@@ -978,6 +1000,20 @@ h6 {
   position: relative;
 }
 
+.assignment-map-fullscreen {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+}
+
 .assignment-map-controls {
   position: absolute;
   right: 1rem;
@@ -990,6 +1026,20 @@ h6 {
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(2px);
+}
+
+.assignment-map-shell:fullscreen,
+.assignment-map-shell:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+
+.assignment-map-shell:fullscreen .assignment-map,
+.assignment-map-shell:-webkit-full-screen .assignment-map {
+  height: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
 }
 
 .assignment-magic-row {
@@ -1040,6 +1090,11 @@ h6 {
 }
 
 @media (max-width: 767.98px) {
+  .assignment-map-fullscreen {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
   .assignment-magic-field {
     flex: 1 1 100%;
   }

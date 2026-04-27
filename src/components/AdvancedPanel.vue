@@ -59,6 +59,7 @@ const assignDuration = ref(props.defaultAssignDuration || 1);
 const assignDistance = ref(props.defaultAssignDistance || 3);
 const assignFormId = ref(0);
 let creatingChecklist = false;
+const assignmentMapShellElement = ref(null);
 const assignmentMapElement = ref(null);
 const reviewMapElement = ref(null);
 const assignSelectorOpen = ref(false);
@@ -66,6 +67,7 @@ const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
 const observationsModalOpen = ref(false);
+const assignmentMapFullscreen = ref(false);
 
 let assignmentMap = null;
 let assignmentSightingsLayer = null;
@@ -504,6 +506,41 @@ function handleDocumentClick(event) {
 
   if (reviewSelectorRef.value && !reviewSelectorRef.value.contains(event.target)) {
     reviewSelectorOpen.value = false;
+  }
+}
+
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function syncAssignmentMapFullscreenState() {
+  assignmentMapFullscreen.value = fullscreenElement() === assignmentMapShellElement.value;
+  setTimeout(() => assignmentMap?.invalidateSize(), 100);
+}
+
+async function toggleAssignmentMapFullscreen() {
+  const shell = assignmentMapShellElement.value;
+  if (!shell) {
+    return;
+  }
+
+  try {
+    if (fullscreenElement() === shell) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        document.webkitExitFullscreen?.();
+      }
+      return;
+    }
+
+    if (shell.requestFullscreen) {
+      await shell.requestFullscreen();
+    } else {
+      shell.webkitRequestFullscreen?.();
+    }
+  } catch {
+    syncAssignmentMapFullscreenState();
   }
 }
 
@@ -1155,6 +1192,20 @@ function initializeReviewMap() {
   setTimeout(() => reviewMap?.invalidateSize(), 100);
 }
 
+function destroyReviewMap() {
+  if (reviewMap) {
+    reviewMap.off();
+    reviewMap.remove();
+  }
+
+  reviewMap = null;
+  reviewSightingsLayer = null;
+  reviewMarkerLayer = null;
+  reviewPathLayer = null;
+  reviewHotspotLayer = null;
+  reviewDrawPolyline = null;
+}
+
 watch(
   () => [selectedForm.value?.id, selectedForm.value?.lat, selectedForm.value?.lon],
   async () => {
@@ -1182,6 +1233,7 @@ watch(
   reviewMapElement,
   async (value) => {
     if (!value) {
+      destroyReviewMap();
       return;
     }
     await nextTick();
@@ -1192,6 +1244,8 @@ watch(
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
+  document.removeEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
+  document.removeEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
   stopRectangleDraw();
   if (assignmentMap) {
     assignmentMap.off();
@@ -1199,13 +1253,14 @@ onBeforeUnmount(() => {
   }
   assignmentMapHasInitialView = false;
   if (reviewMap) {
-    reviewMap.off();
-    reviewMap.remove();
+    destroyReviewMap();
   }
 });
 
 onMounted(() => {
   document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
+  document.addEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
 });
 </script>
 
@@ -1216,12 +1271,31 @@ onMounted(() => {
         <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
         <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
-        <div class="assignment-map-shell mb-3">
+        <div ref="assignmentMapShellElement" class="assignment-map-shell mb-3">
           <div
             ref="assignmentMapElement"
             class="assignment-map rounded border"
             :aria-label="t('assignmentMapAria')"
           ></div>
+
+          <button
+            class="assignment-map-fullscreen btn btn-light btn-sm"
+            type="button"
+            :aria-label="
+              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+            "
+            :title="
+              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+            "
+            :aria-pressed="assignmentMapFullscreen"
+            @click="toggleAssignmentMapFullscreen"
+          >
+            <i
+              class="bi"
+              :class="assignmentMapFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"
+              aria-hidden="true"
+            ></i>
+          </button>
 
           <div class="assignment-map-controls">
             <button
