@@ -1718,8 +1718,8 @@ onMounted(() => {
       @click.self="observationsModalOpen = false"
     >
       <section class="modal-panel card border-0 shadow">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="card-body modal-body-shell p-4">
+          <div class="modal-header-bar d-flex justify-content-between align-items-center mb-3">
             <h2 class="modal-title-heading">
               <i class="bi bi-list-ul" aria-hidden="true"></i>
               <span>{{ t("checklistObservationsTitle") }}</span>
@@ -1729,33 +1729,38 @@ onMounted(() => {
             </button>
           </div>
 
-          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-            <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
-            <div class="badge bg-secondary">
-              {{ t("checklistObservationCount", { count: selectedSightings.length }) }}
+          <div class="modal-content-scroll">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+              <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
+              <div class="badge bg-secondary">
+                {{ t("checklistObservationCount", { count: selectedSightings.length }) }}
+              </div>
             </div>
-          </div>
 
-          <p v-if="selectedSightings.length === 0" class="text-muted mb-0">
-            {{ t("checklistObservationsEmpty") }}
-          </p>
-          <div v-else class="table-responsive checklist-observations-table">
-            <table class="table table-sm align-middle mb-0">
-              <thead>
-                <tr>
-                  <th class="text-nowrap">{{ t("observationTableCount") }}</th>
-                  <th>{{ t("observationTableSpecies") }}</th>
-                  <th>{{ t("observationTableSpeciesComment") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in checklistObservationRows" :key="`${row.common_name}-${row.sightings[0]?.id || row.count}`">
-                  <td class="text-nowrap">{{ row.count }}</td>
-                  <td>{{ row.common_name || t("observationTableMissingSpecies") }}</td>
-                  <td class="checklist-observations-comment" v-html="row.species_comment || ''"></td>
-                </tr>
-              </tbody>
-            </table>
+            <p v-if="selectedSightings.length === 0" class="text-muted mb-0">
+              {{ t("checklistObservationsEmpty") }}
+            </p>
+            <div v-else class="table-responsive checklist-observations-table">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th class="text-nowrap">{{ t("observationTableCount") }}</th>
+                    <th>{{ t("observationTableSpecies") }}</th>
+                    <th>{{ t("observationTableSpeciesComment") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in checklistObservationRows"
+                    :key="`${row.common_name}-${row.sightings[0]?.id || row.count}`"
+                  >
+                    <td class="text-nowrap">{{ row.count }}</td>
+                    <td>{{ row.common_name || t("observationTableMissingSpecies") }}</td>
+                    <td class="checklist-observations-comment" v-html="row.species_comment || ''"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

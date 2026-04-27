@@ -377,8 +377,8 @@ function openSettingsForSection(section) {
     />
     <div v-if="infoOpen" class="modal-backdrop" @click.self="infoOpen = false">
       <section class="modal-panel card border-0 shadow">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="card-body modal-body-shell p-4">
+          <div class="modal-header-bar d-flex justify-content-between align-items-center mb-3">
             <h2 class="modal-title-heading">
               <i class="bi bi-journal-text" aria-hidden="true"></i>
               <span>{{ $t("infoTitle") }}</span>
@@ -387,7 +387,9 @@ function openSettingsForSection(section) {
               {{ $t("close") }}
             </button>
           </div>
-          <InfoPanel :focus-section="infoSection" />
+          <div class="modal-content-scroll">
+            <InfoPanel :focus-section="infoSection" />
+          </div>
         </div>
       </section>
     </div>

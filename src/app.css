@@ -697,6 +697,25 @@ h6 {
 .modal-panel {
   width: min(720px, 100%);
   max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-body-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.modal-header-bar {
+  flex: 0 0 auto;
+}
+
+.modal-content-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 

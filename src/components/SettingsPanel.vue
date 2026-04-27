@@ -176,8 +176,8 @@ watch(
 <template>
   <div v-if="open" class="modal-backdrop" @click.self="emit('close')">
     <section class="modal-panel card border-0 shadow">
-      <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="card-body modal-body-shell p-4">
+        <div class="modal-header-bar d-flex justify-content-between align-items-center mb-3">
           <h2 class="modal-title-heading">
             <i class="bi bi-gear" aria-hidden="true"></i>
             <span>{{ t("globalSettings") }}</span>
@@ -187,77 +187,78 @@ watch(
           </button>
         </div>
 
-        <div class="settings-section settings-section-first">
-          <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
-          <div class="settings-field">
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-              <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
-              <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
-                <option
-                  v-for="language in EBIRD_LANGUAGES"
-                  :key="language.value"
-                  :value="language.value"
-                >
-                  {{ language.label }}
-                </option>
-              </select>
+        <div class="modal-content-scroll">
+          <div class="settings-section settings-section-first">
+            <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
+            <div class="settings-field">
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
+                <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
+                  <option
+                    v-for="language in EBIRD_LANGUAGES"
+                    :key="language.value"
+                    :value="language.value"
+                  >
+                    {{ language.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-text">
+                {{ t("ebirdLanguageHelp") }}
+                <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
+                  t("ebirdLanguagePrefsLink")
+                }}</a>
+              </div>
             </div>
-            <div class="form-text">
-              {{ t("ebirdLanguageHelp") }}
-              <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
-                t("ebirdLanguagePrefsLink")
-              }}</a>
+
+            <div class="settings-field">
+              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
+                <input
+                  id="default-observers-input"
+                  v-model.number="settings.defaultNumberObserver"
+                  class="form-control"
+                  type="number"
+                  min="1"
+                  step="1"
+                />
+              </div>
+              <div class="form-text">{{ t("partySizeHelp") }}</div>
             </div>
           </div>
 
-          <div class="settings-field">
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-              <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
-              <input
-                id="default-observers-input"
-                v-model.number="settings.defaultNumberObserver"
-                class="form-control"
-                type="number"
-                min="1"
-                step="1"
-              />
+          <div ref="advancedOptionsRef" class="settings-section">
+            <h3 class="modal-section-title">{{ t("advancedOptionsTitle") }}</h3>
+            <div class="d-grid gap-3 mt-1">
+              <button
+                class="btn w-100 text-start p-3 border"
+                :class="settings.advancedEnabled ? 'btn-outline-secondary' : 'btn-secondary'"
+                type="button"
+                @click="settings.advancedEnabled = false"
+              >
+                <h4 class="h6 mb-1">{{ t("advancedModeSimpleTitle") }}</h4>
+                <p class="mb-0 small">{{ t("advancedModeSimpleBody") }}</p>
+              </button>
+              <button
+                class="btn w-100 text-start p-3 border"
+                :class="settings.advancedEnabled ? 'btn-secondary' : 'btn-outline-secondary'"
+                type="button"
+                @click="settings.advancedEnabled = true"
+              >
+                <h4 class="h6 mb-1">{{ t("advancedModeCustomTitle") }}</h4>
+                <p class="mb-0 small">{{ t("advancedModeCustomBody") }}</p>
+              </button>
             </div>
-            <div class="form-text">{{ t("partySizeHelp") }}</div>
           </div>
-        </div>
 
-        <div ref="advancedOptionsRef" class="settings-section">
-          <h3 class="modal-section-title">{{ t("advancedOptionsTitle") }}</h3>
-          <div class="d-grid gap-3 mt-1">
+          <div class="settings-section">
+            <h3 class="modal-section-title">{{ t("advancedSettingsTitle") }}</h3>
+            <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
             <button
-              class="btn w-100 text-start p-3 border"
-              :class="settings.advancedEnabled ? 'btn-outline-secondary' : 'btn-secondary'"
+              class="btn btn-link btn-sm p-0 mb-3"
               type="button"
-              @click="settings.advancedEnabled = false"
+              @click="emit('open-info', 'auto-assignment')"
             >
-              <h4 class="h6 mb-1">{{ t("advancedModeSimpleTitle") }}</h4>
-              <p class="mb-0 small">{{ t("advancedModeSimpleBody") }}</p>
-            </button>
-            <button
-              class="btn w-100 text-start p-3 border"
-              :class="settings.advancedEnabled ? 'btn-secondary' : 'btn-outline-secondary'"
-              type="button"
-              @click="settings.advancedEnabled = true"
-            >
-              <h4 class="h6 mb-1">{{ t("advancedModeCustomTitle") }}</h4>
-              <p class="mb-0 small">{{ t("advancedModeCustomBody") }}</p>
-            </button>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <h3 class="modal-section-title">{{ t("advancedSettingsTitle") }}</h3>
-          <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
-          <button
-            class="btn btn-link btn-sm p-0 mb-3"
-            type="button"
-            @click="emit('open-info', 'auto-assignment')"
-          >
             {{ t("aggregationSettingsLearnMore") }}
           </button>
 
@@ -627,7 +628,7 @@ watch(
             </div>
           </div>
         </div>
-
+      </div>
       </div>
     </section>
   </div>
