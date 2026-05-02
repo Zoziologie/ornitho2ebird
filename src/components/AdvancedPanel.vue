@@ -1816,12 +1816,12 @@ onMounted(() => {
 
     <div
       v-if="observationsModalOpen && selectedForm"
-      class="modal-backdrop"
+      class="modal-backdrop d-grid p-3 overflow-x-hidden"
       @click.self="observationsModalOpen = false"
     >
-      <section class="modal-panel card border-0 shadow">
-        <div class="card-body modal-body-shell p-4">
-          <div class="modal-header-bar d-flex justify-content-between align-items-center mb-3">
+      <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
+        <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
+          <div class="d-flex flex-shrink-0 justify-content-between align-items-center mb-3">
             <h2 class="modal-title-heading">
               <i class="bi bi-list-ul" aria-hidden="true"></i>
               <span>{{ t("checklistObservationsTitle") }}</span>
@@ -1831,7 +1831,7 @@ onMounted(() => {
             </button>
           </div>
 
-          <div class="modal-content-scroll">
+          <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
               <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
               <div class="badge bg-secondary">

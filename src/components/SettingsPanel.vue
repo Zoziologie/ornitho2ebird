@@ -174,10 +174,10 @@ watch(
 </script>
 
 <template>
-  <div v-if="open" class="modal-backdrop" @click.self="emit('close')">
-    <section class="modal-panel card border-0 shadow">
-      <div class="card-body modal-body-shell p-4">
-        <div class="modal-header-bar d-flex justify-content-between align-items-center mb-3">
+  <div v-if="open" class="modal-backdrop d-grid p-3 overflow-x-hidden" @click.self="emit('close')">
+    <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
+      <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
+        <div class="d-flex flex-shrink-0 justify-content-between align-items-center mb-3">
           <h2 class="modal-title-heading">
             <i class="bi bi-gear" aria-hidden="true"></i>
             <span>{{ t("globalSettings") }}</span>
@@ -187,10 +187,10 @@ watch(
           </button>
         </div>
 
-        <div class="modal-content-scroll">
-          <div class="settings-section settings-section-first">
+        <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
+          <div class="settings-section mt-0 pt-0 border-top-0">
             <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
-            <div class="settings-field">
+            <div>
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
                 <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
@@ -211,7 +211,7 @@ watch(
               </div>
             </div>
 
-            <div class="settings-field">
+            <div class="mt-3">
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
                 <input
@@ -530,11 +530,11 @@ watch(
               </select>
             </div>
 
-            <div class="row g-2 mb-2">
-              <div class="col-12">
+            <div class="row g-2 mx-0 mb-2">
+              <div class="col-12 px-0">
                 <label class="form-label mb-0">{{ t("pathStyle") }}</label>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 pe-md-1">
                 <input
                   v-model.number="settings.globalStaticMap.pathStyle.strokeWidth"
                   class="form-control"
@@ -544,7 +544,7 @@ watch(
                   title="line width"
                 />
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 px-md-1">
                 <input
                   v-model="settings.globalStaticMap.pathStyle.strokeColor"
                   class="form-control form-control-color w-100"
@@ -552,7 +552,7 @@ watch(
                   title="line color"
                 />
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 ps-md-1">
                 <input
                   v-model.number="settings.globalStaticMap.pathStyle.strokeOpacity"
                   class="form-control"
@@ -565,25 +565,25 @@ watch(
               </div>
             </div>
 
-            <div class="row g-2 mb-3">
-              <div class="col-12">
+            <div class="row g-2 mx-0 mb-3">
+              <div class="col-12 px-0">
                 <label class="form-label mb-0">{{ t("markerStyle") }}</label>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 pe-md-1">
                 <select v-model="settings.globalStaticMap.markerStyle.markerSize" class="form-select">
                   <option value="small">{{ t("small") }}</option>
                   <option value="medium">{{ t("medium") }}</option>
                   <option value="large">{{ t("large") }}</option>
                 </select>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 px-md-1">
                 <select v-model="settings.globalStaticMap.markerStyle.markerSymbol" class="form-select">
                   <option v-for="symbol in markerSymbolOptions" :key="symbol" :value="symbol">
                     {{ symbol }}
                   </option>
                 </select>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-4 px-0 ps-md-1">
                 <input
                   v-model="settings.globalStaticMap.markerStyle.markerColor"
                   class="form-control form-control-color w-100"

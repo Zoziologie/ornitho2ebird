@@ -710,35 +710,27 @@ h6 {
   position: fixed;
   inset: 0;
   z-index: 1055;
-  display: grid;
+  width: auto;
+  height: auto;
   place-items: center;
-  padding: 1rem;
   background: rgba(33, 37, 41, 0.55);
 }
 
 .modal-panel {
-  width: min(720px, 100%);
+  width: min(720px, calc(100vw - 2rem));
+  max-width: 100%;
   max-height: calc(100vh - 2rem);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .modal-body-shell {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
   min-height: 0;
-}
-
-.modal-header-bar {
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .modal-content-scroll {
-  flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  min-width: 0;
 }
 
 .modal-title-heading {
@@ -756,15 +748,10 @@ h6 {
 }
 
 .settings-section {
+  min-width: 0;
   margin-top: 1.35rem;
   padding-top: 1.35rem;
   border-top: 1px solid rgba(41, 67, 86, 0.16);
-}
-
-.settings-section-first {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
 }
 
 .modal-section-title {
@@ -782,10 +769,6 @@ h6 {
   height: 1.25rem;
   border-radius: 999px;
   background: var(--ebird-blue);
-}
-
-.settings-field + .settings-field {
-  margin-top: 1rem;
 }
 
 .inline-icon {
@@ -819,6 +802,7 @@ h6 {
 }
 
 .species-comment-option {
+  min-width: 0;
   min-height: 2rem;
   padding: 0.32rem 0.5rem;
   border: 1px solid var(--bs-border-color);
@@ -838,11 +822,18 @@ h6 {
   gap: 0.4rem;
 }
 
+.species-comment-option-main {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
 .species-comment-option-label {
   flex: 1;
+  min-width: min(8rem, 100%);
   margin-bottom: 0;
   font-weight: 500;
   color: #253846;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
