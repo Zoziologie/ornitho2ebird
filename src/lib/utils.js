@@ -161,6 +161,7 @@ export function speciesComment(speciesCommentTemplate, sightings) {
         })
         .join("");
     })
+    .filter((comment) => String(comment).trim() !== "")
     .join(separator);
 }
 
