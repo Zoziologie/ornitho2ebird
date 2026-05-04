@@ -11,6 +11,7 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
+import { buildInteractiveMapViewerUrl, createInteractiveMapGist } from "../lib/interactiveMap";
 import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
 
 const props = defineProps({
@@ -31,6 +32,10 @@ const props = defineProps({
     required: true,
   },
   mapboxToken: {
+    type: String,
+    default: "",
+  },
+  githubToken: {
     type: String,
     default: "",
   },
@@ -62,6 +67,9 @@ const taxonomyReportCodeByIssue = ref({});
 const exportFilename = ref(buildExportFilename());
 const exportFilenameDraft = ref("");
 const exportFilenameEditing = ref(false);
+const interactiveMapPublishing = ref(false);
+const interactiveMapError = ref("");
+const interactiveMapStatusByFormId = ref({});
 let taxonomyRequestId = 0;
 
 const exportableForms = computed(() => {
@@ -188,11 +196,15 @@ function cancelEditingExportFilename() {
   exportFilenameEditing.value = false;
 }
 
-function maxStaticMapUrlLengthForComment(form, sightings, importedWithText) {
-  const commentWithoutMap = checklistComment(form, sightings, importedWithText, { staticMapUrl: "" });
+function maxStaticMapUrlLengthForComment(form, sightings, importedWithText, interactiveMapUrl = "") {
+  const commentWithoutMap = checklistComment(form, sightings, importedWithText, {
+    staticMapUrl: "",
+    interactiveMapUrl,
+  });
   const placeholderUrl = "x";
   const commentWithPlaceholderMap = checklistComment(form, sightings, importedWithText, {
     staticMapUrl: placeholderUrl,
+    interactiveMapUrl,
   });
   const staticMapWrapperLength = commentWithPlaceholderMap.length - commentWithoutMap.length - placeholderUrl.length;
   return Math.max(0, EBIRD_COMMENT_MAX_LENGTH - commentWithoutMap.length - staticMapWrapperLength);
@@ -204,7 +216,16 @@ const exportState = computed(() => {
 
   const rows = exportableForms.value.flatMap(({ form, protocolState }) => {
     const formSightings = sightingsByFormId.get(form.id) || [];
-    const maxStaticMapUrlLength = maxStaticMapUrlLengthForComment(form, formSightings, t("importedWith"));
+    const interactiveMapUrl =
+      props.globalStaticMap?.interactive && form.interactive_map_url
+        ? buildInteractiveMapViewerUrl(form.interactive_map_url)
+        : "";
+    const maxStaticMapUrlLength = maxStaticMapUrlLengthForComment(
+      form,
+      formSightings,
+      t("importedWith"),
+      interactiveMapUrl
+    );
     const staticMapUrl =
       maxStaticMapUrlLength > 0
         ? buildStaticMapUrl({
@@ -217,7 +238,10 @@ const exportState = computed(() => {
             maxUrlLength: maxStaticMapUrlLength,
           }).url
         : "";
-    const mergedComment = checklistComment(form, formSightings, t("importedWith"), { staticMapUrl });
+    const mergedComment = checklistComment(form, formSightings, t("importedWith"), {
+      staticMapUrl,
+      interactiveMapUrl,
+    });
     return buildSpeciesRows(formSightings, activeSpeciesCommentTemplate.value, taxonomyMatchedCommonName).map((speciesRow) => {
       const row = {
         common_name: speciesRow.common_name,
@@ -470,13 +494,82 @@ function openTaxonomyIssue() {
   window.open(githubReportUrl.value, "_blank", "noopener");
 }
 
-function downloadFile() {
+function hasInteractiveMapCoordinates(form, sightings) {
+  const hasSightingCoordinates = sightings.some((sighting) => {
+    return Number.isFinite(Number(sighting.lat)) && Number.isFinite(Number(sighting.lon));
+  });
+  const hasPathCoordinates = Array.isArray(form?.path) && form.path.length > 1;
+  return hasSightingCoordinates || hasPathCoordinates;
+}
+
+async function publishInteractiveMapsForExport() {
+  if (!props.globalStaticMap?.interactive) {
+    return true;
+  }
+
+  const token = String(props.githubToken || "").trim();
+  if (!token) {
+    interactiveMapError.value = t("interactiveMapTokenMissing");
+    window.alert(interactiveMapError.value);
+    return false;
+  }
+
+  const sightingsByFormId = exportableSightingsByFormId.value;
+  const pendingForms = exportableForms.value
+    .map(({ form }) => ({ form, sightings: sightingsByFormId.get(form.id) || [] }))
+    .filter(({ form, sightings }) => !form.interactive_map_url && hasInteractiveMapCoordinates(form, sightings));
+
+  if (!pendingForms.length) {
+    return true;
+  }
+
+  interactiveMapPublishing.value = true;
+  interactiveMapError.value = "";
+
+  try {
+    for (const { form, sightings } of pendingForms) {
+      interactiveMapStatusByFormId.value = {
+        ...interactiveMapStatusByFormId.value,
+        [form.id]: "publishing",
+      };
+
+      const result = await createInteractiveMapGist({
+        form,
+        sightings,
+        speciesCommentTemplate: activeSpeciesCommentTemplate.value,
+        token,
+      });
+
+      form.interactive_map_url = result.rawUrl;
+      interactiveMapStatusByFormId.value = {
+        ...interactiveMapStatusByFormId.value,
+        [form.id]: "ready",
+      };
+    }
+    return true;
+  } catch (error) {
+    interactiveMapError.value = t("interactiveMapPublishFailed", {
+      message: error?.message || "Unknown error",
+    });
+    window.alert(interactiveMapError.value);
+    return false;
+  } finally {
+    interactiveMapPublishing.value = false;
+  }
+}
+
+async function downloadFile() {
   if (!exportState.value.csv) {
     return;
   }
 
   if (taxonomyNeededForExport.value && taxonomyStatus.value === "loading") {
     window.alert(t("exportTaxonomyLoading"));
+    return;
+  }
+
+  const interactiveMapsReady = await publishInteractiveMapsForExport();
+  if (!interactiveMapsReady || !exportState.value.csv) {
     return;
   }
 
@@ -509,6 +602,15 @@ function downloadFile() {
         </div>
         <div v-else-if="taxonomyNeededForExport && taxonomyStatus === 'error'" class="alert alert-warning mb-3">
           {{ t("exportTaxonomyLoadFailed") }}
+        </div>
+        <div v-if="globalStaticMap.interactive && interactiveMapPublishing" class="alert alert-secondary mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            <span>{{ t("interactiveMapPublishing") }}</span>
+          </div>
+        </div>
+        <div v-else-if="globalStaticMap.interactive && interactiveMapError" class="alert alert-warning mb-3">
+          {{ interactiveMapError }}
         </div>
         <div v-else-if="unmatchedTaxonomy.length > 0" class="alert alert-warning export-warning-box mb-3">
           <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
@@ -730,10 +832,14 @@ function downloadFile() {
             <button
               class="btn btn-primary btn-lg export-download-btn"
               type="button"
-              :disabled="exportState.errors.length > 0 || (taxonomyNeededForExport && taxonomyStatus === 'loading')"
+              :disabled="
+                interactiveMapPublishing ||
+                exportState.errors.length > 0 ||
+                (taxonomyNeededForExport && taxonomyStatus === 'loading')
+              "
               @click="downloadFile"
             >
-              {{ t("downloadCsv") }}
+              {{ interactiveMapPublishing ? t("interactiveMapPublishing") : t("downloadCsv") }}
             </button>
           </section>
         </div>

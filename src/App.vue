@@ -426,6 +426,7 @@ function openSettingsForSection(section) {
         :forms-sightings="formsSightings"
         :selected-ebird-language="settings.ebirdLanguage"
         :mapbox-token="settings.mapboxToken"
+        :github-token="settings.githubToken"
         :global-static-map="settings.globalStaticMap"
         :species-comment-template="settings.speciesCommentTemplate"
         :customized-species-comments="settings.customizedSpeciesComments"

@@ -200,9 +200,14 @@ export function buildSpeciesRows(sightings, speciesCommentTemplate, commonNameFo
 export function checklistComment(form, sightings, importedWithText, options = {}) {
   const comment = form.checklist_comment || "";
   const staticMapUrl = options.staticMapUrl || "";
-  const staticMapImage = staticMapUrl
+  const interactiveMapUrl = options.interactiveMapUrl || "";
+  const staticMapImageTag = staticMapUrl
     ? `<img src="${staticMapUrl}" alt="Checklist static map" style="max-width:300px;width:100%;display:block;margin-top:0.5rem;">`
     : "";
+  const staticMapImage =
+    staticMapImageTag && interactiveMapUrl
+      ? `<a href="${interactiveMapUrl}" target="_blank" rel="noopener">${staticMapImageTag}</a>`
+      : staticMapImageTag;
   const importedWithLink = `<a href="https://ornitho2ebird.com/" target="_blank" rel="noopener">${importedWithText}</a>`;
   return `${comment}${staticMapImage}${comment || staticMapImage ? "<br/>" : ""}<small>${importedWithLink}</small>`;
 }
@@ -376,6 +381,7 @@ export function buildForm(form, id, options = {}) {
     species_comment_template: template,
     static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",
     static_map_zoom: Number.isFinite(Number(form.static_map_zoom)) ? Number(form.static_map_zoom) : 12,
+    interactive_map_url: form.interactive_map_url || form.static_map?.gist || "",
     path: form.path || null,
     hotspots: form.hotspots || [],
     hotspot_key: form.hotspot_key || "",
