@@ -9,6 +9,7 @@ export const UI_LANGUAGES = [
   { value: "fr", label: "Français" },
   { value: "ca", label: "Català" },
   { value: "de", label: "Deutsch" },
+  { value: "it", label: "Italiano" },
 ];
 
 export const EBIRD_LANGUAGES = ebirdTaxonomyLanguages;
@@ -18,6 +19,7 @@ export const DEFAULT_WEBSITE_BY_LANGUAGE = {
   fr: "faune-france.org",
   ca: "ornitho.cat",
   de: "ornitho.de",
+  it: "ornitho.it",
 };
 
 export const ASSIGNMENT_MAP_BASE_LAYER_OPTIONS = [

@@ -3,7 +3,7 @@
 ## Files
 
 - Source language: `src/locales/en.json`
-- Translation files: `src/locales/fr.json`, `src/locales/ca.json`, `src/locales/de.json`
+- Translation files: `src/locales/fr.json`, `src/locales/ca.json`, `src/locales/de.json`, `src/locales/it.json`
 - Crowdin config: `crowdin.yml`
 
 ## Rules

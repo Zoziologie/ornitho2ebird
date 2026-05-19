@@ -140,7 +140,7 @@ Species comments are customizable. The app can generate concise or expanded comm
 
 ### Localized taxonomy
 
-The UI supports English, French, Catalan, and German. eBird taxonomy names can also be requested in many eBird locales so imported species names better match the language you use in eBird.
+The UI supports English, French, Catalan, German, and Italian. eBird taxonomy names can also be requested in many eBird locales so imported species names better match the language you use in eBird.
 
 ## Privacy and external services
 
