@@ -378,6 +378,7 @@ export function buildForm(form, id, options = {}) {
     number_observer: form.number_observer || options.defaultNumberObserver || 1,
     full_form: Boolean(form.full_form),
     primary_purpose: form.primary_purpose !== false,
+    include_static_map: form.include_static_map !== false,
     checklist_comment: form.checklist_comment || "",
     species_comment_template: template,
     static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",

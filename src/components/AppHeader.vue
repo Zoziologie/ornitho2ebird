@@ -14,7 +14,7 @@ const { t } = useI18n();
 
 <template>
   <header
-    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-3 my-3 text-white rounded shadow-sm bg-secondary"
+    class="app-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-3 text-white rounded shadow-sm bg-secondary"
   >
     <div>
       <h1 class="mb-0">{{ t("appTitle") }}</h1>

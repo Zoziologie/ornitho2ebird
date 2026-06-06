@@ -121,6 +121,7 @@ const hasPersonalizedTemplate = computed(() => {
 });
 
 const advancedOptionsRef = ref(null);
+const ebirdLanguageInputRef = ref(null);
 const speciesCommentRef = ref(null);
 
 const speciesCommentLimitError = computed(() => {
@@ -166,9 +167,12 @@ watch(
     await nextTick();
     const sectionMap = {
       "advanced-options": advancedOptionsRef.value,
+      "ebird-language": ebirdLanguageInputRef.value,
       "species-comment-template": speciesCommentRef.value,
     };
-    sectionMap[section]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = sectionMap[section];
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    target?.focus?.({ preventScroll: true });
   }
 );
 </script>
@@ -193,7 +197,12 @@ watch(
             <div>
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
-                <select id="ebird-language-input" v-model="settings.ebirdLanguage" class="form-select">
+                <select
+                  id="ebird-language-input"
+                  ref="ebirdLanguageInputRef"
+                  v-model="settings.ebirdLanguage"
+                  class="form-select"
+                >
                   <option
                     v-for="language in EBIRD_LANGUAGES"
                     :key="language.value"

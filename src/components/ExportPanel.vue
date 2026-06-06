@@ -217,7 +217,7 @@ const exportState = computed(() => {
   const rows = exportableForms.value.flatMap(({ form, protocolState }) => {
     const formSightings = sightingsByFormId.get(form.id) || [];
     const interactiveMapUrl =
-      props.globalStaticMap?.interactive && form.interactive_map_url
+      props.globalStaticMap?.interactive && form.include_static_map !== false && form.interactive_map_url
         ? buildInteractiveMapViewerUrl(form.interactive_map_url)
         : "";
     const maxStaticMapUrlLength = maxStaticMapUrlLengthForComment(
@@ -227,7 +227,7 @@ const exportState = computed(() => {
       interactiveMapUrl
     );
     const staticMapUrl =
-      maxStaticMapUrlLength > 0
+      form.include_static_map !== false && maxStaticMapUrlLength > 0
         ? buildStaticMapUrl({
             form,
             sightings: formSightings,
@@ -517,7 +517,12 @@ async function publishInteractiveMapsForExport() {
   const sightingsByFormId = exportableSightingsByFormId.value;
   const pendingForms = exportableForms.value
     .map(({ form }) => ({ form, sightings: sightingsByFormId.get(form.id) || [] }))
-    .filter(({ form, sightings }) => !form.interactive_map_url && hasInteractiveMapCoordinates(form, sightings));
+    .filter(
+      ({ form, sightings }) =>
+        form.include_static_map !== false &&
+        !form.interactive_map_url &&
+        hasInteractiveMapCoordinates(form, sightings),
+    );
 
   if (!pendingForms.length) {
     return true;

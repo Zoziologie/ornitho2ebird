@@ -76,7 +76,7 @@ function normalizeSpeciesCommentSettings(savedSettings) {
       SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.map((key) => [
         key,
         key in (value || {}) ? Boolean(value[key]) : Boolean(defaults[key]),
-      ])
+      ]),
     );
   const options = normalizeOptions(savedOptions, DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS);
   const longOptions = normalizeOptions(savedLongOptions, options);
@@ -86,7 +86,7 @@ function normalizeSpeciesCommentSettings(savedSettings) {
     : buildSpeciesCommentTemplateFromOptions(
         options,
         savedSettings.speciesCommentTemplate?.limit || DEFAULT_SPECIES_COMMENT_TEMPLATE.limit,
-        longOptions
+        longOptions,
       );
 
   return { options, longOptions, template };
@@ -99,7 +99,8 @@ function normalizeGlobalStaticMap(settings) {
   return {
     show: Boolean(normalized.show),
     interactive: Boolean(normalized.interactive),
-    style: typeof normalized.style === "string" && normalized.style ? normalized.style : defaults.style,
+    style:
+      typeof normalized.style === "string" && normalized.style ? normalized.style : defaults.style,
     pathStyle: {
       ...defaults.pathStyle,
       ...(normalized.pathStyle || {}),
@@ -146,14 +147,25 @@ function normalizeEbirdLanguage(value) {
   return LEGACY_EBIRD_LANGUAGE_CODES[value] || value;
 }
 
+const LANGUAGE_MISMATCH_ALERT_STORAGE_KEY = `${APP_STORAGE_PREFIX}:ebird-language-mismatch-alert`;
+const LANGUAGE_MISMATCH_ALERT_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+function languageFamily(value) {
+  if (typeof value !== "string" || value.length === 0) {
+    return "";
+  }
+
+  return value.split(/[-_]/)[0].toLowerCase();
+}
+
 const savedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, DEFAULT_SETTINGS);
 const queryLanguage = normalizeLanguage(
-  typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : ""
+  typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
 );
 const cookieLanguage = normalizeLanguage(readCookie(LANGUAGE_COOKIE_NAME));
 const savedUiLanguage = normalizeLanguage(savedSettings.uiLanguage || savedSettings.language);
 const browserLanguage = normalizeLanguage(
-  typeof navigator !== "undefined" ? navigator.language || navigator.languages?.[0] : ""
+  typeof navigator !== "undefined" ? navigator.language || navigator.languages?.[0] : "",
 );
 const resolvedUiLanguage =
   queryLanguage || cookieLanguage || savedUiLanguage || browserLanguage || "en";
@@ -196,7 +208,31 @@ const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
 const { locale, t } = useI18n({ useScope: "global" });
+const dismissedLanguageMismatchAlert = ref(
+  readStorage(LANGUAGE_MISMATCH_ALERT_STORAGE_KEY, { key: "", expiresAt: 0 }),
+);
 locale.value = settings.uiLanguage;
+
+const currentLanguageMismatchKey = computed(() => {
+  return `${languageFamily(settings.uiLanguage)}:${languageFamily(settings.ebirdLanguage)}`;
+});
+const showLanguageMismatchAlert = computed(() => {
+  const currentUiLanguageFamily = languageFamily(settings.uiLanguage);
+  const currentEbirdLanguageFamily = languageFamily(settings.ebirdLanguage);
+
+  if (!currentUiLanguageFamily || !currentEbirdLanguageFamily) {
+    return false;
+  }
+
+  if (currentUiLanguageFamily === currentEbirdLanguageFamily) {
+    return false;
+  }
+
+  const dismissed = dismissedLanguageMismatchAlert.value || {};
+  return !(
+    dismissed.key === currentLanguageMismatchKey.value && Number(dismissed.expiresAt) > Date.now()
+  );
+});
 
 function updateDocumentMetadata(language) {
   if (typeof document === "undefined") {
@@ -228,7 +264,7 @@ watch(
   (value) => {
     writeStorage(`${APP_STORAGE_PREFIX}:settings`, value);
   },
-  { deep: true }
+  { deep: true },
 );
 
 watch(
@@ -243,7 +279,7 @@ watch(
       settings.websiteName = defaultWebsiteForLanguage(value);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const hasImportedData = computed(() => {
@@ -261,18 +297,21 @@ function clearImportedData() {
 function importData(payload) {
   const nextWebsite = payload.website || null;
   const nextWebsiteSpeciesCommentTemplate = normalizeSpeciesCommentTemplate(
-    nextWebsite?.species_comment_template
+    nextWebsite?.species_comment_template,
   );
   const nextSightings = payload.sightings || [];
   const nextForms = (payload.forms || []).map((form, index) =>
-    buildForm(form, index + 1, { defaultNumberObserver: settings.defaultNumberObserver })
+    buildForm(form, index + 1, { defaultNumberObserver: settings.defaultNumberObserver }),
   );
   const nextFormsSightings = payload.formsSightings || [];
 
   if (settings.speciesCommentTemplateOptions.personalized) {
     if (
       !speciesCommentTemplateHasContent(settings.speciesCommentTemplate) ||
-      sameSpeciesCommentTemplate(settings.speciesCommentTemplate, website.value?.species_comment_template)
+      sameSpeciesCommentTemplate(
+        settings.speciesCommentTemplate,
+        website.value?.species_comment_template,
+      )
     ) {
       settings.speciesCommentTemplate = structuredClone(nextWebsiteSpeciesCommentTemplate);
     }
@@ -280,7 +319,7 @@ function importData(payload) {
     settings.speciesCommentTemplate = buildSpeciesCommentTemplateFromOptions(
       settings.speciesCommentTemplateOptions,
       settings.speciesCommentTemplate.limit,
-      settings.speciesCommentLongTemplateOptions
+      settings.speciesCommentLongTemplateOptions,
     );
   }
 
@@ -315,7 +354,7 @@ function updateSelectedWebsiteName(nextWebsiteName) {
     t("websiteChangeConfirm", {
       currentWebsite: settings.websiteName,
       nextWebsite: normalizedName,
-    })
+    }),
   );
   if (!confirmed) {
     return;
@@ -333,7 +372,7 @@ watch(
         form.number_observer = value;
       }
     });
-  }
+  },
 );
 
 function openInfo(section = "") {
@@ -344,6 +383,14 @@ function openInfo(section = "") {
 function openSettings(section = "") {
   settingsFocusSection.value = section;
   settingsOpen.value = true;
+}
+
+function dismissLanguageMismatchAlert() {
+  dismissedLanguageMismatchAlert.value = {
+    key: currentLanguageMismatchKey.value,
+    expiresAt: Date.now() + LANGUAGE_MISMATCH_ALERT_DURATION_MS,
+  };
+  writeStorage(LANGUAGE_MISMATCH_ALERT_STORAGE_KEY, dismissedLanguageMismatchAlert.value);
 }
 
 function closeSettings() {
@@ -375,7 +422,11 @@ function openSettingsForSection(section) {
       @close="closeSettings"
       @open-info="openInfo($event)"
     />
-    <div v-if="infoOpen" class="modal-backdrop d-grid p-3 overflow-x-hidden" @click.self="infoOpen = false">
+    <div
+      v-if="infoOpen"
+      class="modal-backdrop d-grid p-3 overflow-x-hidden"
+      @click.self="infoOpen = false"
+    >
       <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
         <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
           <div class="d-flex flex-shrink-0 justify-content-between align-items-center mb-3">
@@ -383,7 +434,11 @@ function openSettingsForSection(section) {
               <i class="bi bi-journal-text" aria-hidden="true"></i>
               <span>{{ $t("infoTitle") }}</span>
             </h2>
-            <button class="btn btn-outline-secondary btn-sm" type="button" @click="infoOpen = false">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              @click="infoOpen = false"
+            >
               {{ $t("close") }}
             </button>
           </div>
@@ -395,6 +450,42 @@ function openSettingsForSection(section) {
     </div>
 
     <main class="main-stack">
+      <div
+        v-if="showLanguageMismatchAlert"
+        class="alert alert-warning app-language-alert mb-0"
+        role="alert"
+      >
+        <div class="d-flex align-items-start justify-content-between gap-3">
+          <div>
+            <h5 class="alert-heading mb-1 d-flex align-items-center gap-2">
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              <span>{{ t("importLanguageMismatchTitle") }}</span>
+            </h5>
+            <p class="mb-0">
+              <span>{{ t("importLanguageMismatchBodyPrefix") }}</span>
+              <button
+                class="btn btn-link p-0 align-baseline"
+                type="button"
+                @click="openSettings('ebird-language')"
+              >
+                {{ t("importLanguageMismatchSettingsInlineLink") }}
+              </button>
+              <span>{{ t("importLanguageMismatchRecommendationMiddle") }}</span>
+              <a href="https://ebird.org/prefs" target="_blank" rel="noopener">
+                {{ t("importLanguageMismatchPrefsInlineLink") }}
+              </a>
+              <span>{{ t("importLanguageMismatchBodySuffix") }}</span>
+            </p>
+          </div>
+          <button
+            class="btn-close flex-shrink-0"
+            type="button"
+            :aria-label="t('close')"
+            @click="dismissLanguageMismatchAlert"
+          ></button>
+        </div>
+      </div>
+
       <ImportPanel
         :selected-website-name="settings.websiteName"
         @update:selected-website-name="updateSelectedWebsiteName"

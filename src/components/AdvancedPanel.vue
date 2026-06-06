@@ -208,6 +208,10 @@ const staticMapPreview = computed(() => {
     return { url: "", reason: "no_coordinates" };
   }
 
+  if (!selectedForm.value.include_static_map) {
+    return { url: "", reason: "disabled" };
+  }
+
   return buildStaticMapUrl({
     form: selectedForm.value,
     sightings: selectedSightings.value,
@@ -660,6 +664,27 @@ function assignClean() {
       props.forms.splice(index, 1);
     }
   }
+}
+
+function deleteSelectedChecklist() {
+  if (!selectedForm.value || !window.confirm(t("deleteChecklistConfirm"))) {
+    return;
+  }
+
+  const formIndex = props.forms.findIndex((form) => form.id === selectedForm.value.id);
+  if (formIndex < 0) {
+    return;
+  }
+
+  props.forms.splice(formIndex, 1);
+
+  if (!props.forms.length) {
+    emit("update:selectedFormId", null);
+    return;
+  }
+
+  const nextForm = props.forms[Math.min(formIndex, props.forms.length - 1)] || props.forms[0];
+  emit("update:selectedFormId", nextForm?.id || null);
 }
 
 function assignReset() {
@@ -1557,7 +1582,12 @@ onMounted(() => {
             </div>
             <div v-if="selectedSightings.length === 0 || isInvalid" class="alert alert-danger mb-0">
               <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
-              <p v-if="selectedSightings.length === 0">{{ t("warningNoSightings") }}</p>
+              <div v-if="selectedSightings.length === 0" class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                <p class="mb-0">{{ t("warningNoSightings") }}</p>
+                <button class="btn btn-outline-danger btn-sm flex-shrink-0" type="button" @click="deleteSelectedChecklist">
+                  {{ t("deleteChecklist") }}
+                </button>
+              </div>
               <p v-if="isInvalid" class="mb-0">{{ t("warningInvalid") }}</p>
             </div>
           </div>
@@ -1757,6 +1787,18 @@ onMounted(() => {
                     <h3 class="h6 mb-0">{{ t("staticMapPreviewTitle") }}</h3>
                   </div>
 
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      id="include-static-map"
+                      v-model="selectedForm.include_static_map"
+                      class="form-check-input"
+                      type="checkbox"
+                    />
+                    <label class="form-check-label" for="include-static-map">
+                      {{ t("staticMapChecklistEnabled") }}
+                    </label>
+                  </div>
+
                   <div v-if="staticMapPreview.url" class="d-block">
                     <img
                       class="img-fluid rounded border static-map-preview-image"
@@ -1764,7 +1806,7 @@ onMounted(() => {
                       :alt="t('staticMapPreviewAlt')"
                     />
                   </div>
-                  <div v-else class="alert alert-warning small mb-0">
+                  <div v-else-if="staticMapPreview.reason !== 'disabled'" class="alert alert-warning small mb-0">
                     <span v-if="staticMapPreview.reason === 'token_missing'">
                       {{ t("staticMapPreviewTokenMissing") }}
                     </span>
@@ -1803,7 +1845,10 @@ onMounted(() => {
                       />
                     </div>
                   </div>
-                  <p class="small text-body-secondary mt-2 mb-0 static-map-preview-note">
+                  <p
+                    v-if="selectedForm.static_map_zoom_mode === 'manual'"
+                    class="small text-body-secondary mt-2 mb-0 static-map-preview-note"
+                  >
                     {{ t("staticMapCenterHint") }}
                   </p>
                 </div>
