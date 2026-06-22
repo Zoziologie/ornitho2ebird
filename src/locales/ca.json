@@ -200,7 +200,7 @@
   "speciesCommentTemplateIntro": "Les observacions d'ornitho poden incloure detalls que eBird no desa per separat, com ara l'hora de cada observació, la precisió del recompte i la ubicació exacta. Quan diverses observacions de la mateixa espècie es fusionen en una sola fila d'eBird, els comentaris d'espècie conserven aquests detalls per a cada observació original.",
   "speciesCommentTemplateHelp": "Afegeix informació específica de l'observació als comentaris d'espècie d'eBird.",
   "speciesCommentTemplateAdvancedHelp": "Fes servir codi HTML/JS dins de la plantilla per personalitzar el comentari. Utilitza la notació ${'{'} javascript code {'}'} per inserir informació dinàmica de cada observació. Pots accedir als valors del nivell d'observació amb ${'{'} s.property {'}'}, fent servir les propietats llistades a la taula de sota.",
-  "speciesCommentSourceLinkWarning": "Sense un enllaç d'origen d'ornitho als comentaris d'espècie, els revisors d'eBird no poden obrir ràpidament l'observació original.",
+  "speciesCommentSourceLinkWarning": "Recomanem fermament incloure un enllaç d’origen d’ornitho perquè els revisors d’eBird puguin comprovar ràpidament l’observació i el seu estat de revisió.",
   "speciesCommentOptionCount": "Recompte",
   "speciesCommentOptionTime": "Hora",
   "speciesCommentOptionTimeSourceLink": "enllaç d'origen",

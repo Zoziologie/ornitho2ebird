@@ -200,7 +200,7 @@
   "speciesCommentTemplateIntro": "Ornitho-Beobachtungen können Details enthalten, die eBird nicht separat speichert, zum Beispiel Beobachtungszeit, Zählgenauigkeit und genaue Position. Wenn mehrere Beobachtungen derselben Art in einer eBird-Zeile zusammengeführt werden, bewahren Artenkommentare diese Details für jede ursprüngliche Beobachtung.",
   "speciesCommentTemplateHelp": "Beobachtungsspezifische Informationen zu den eBird-Artenkommentaren hinzufügen.",
   "speciesCommentTemplateAdvancedHelp": "Verwende HTML/JS-Code in der Vorlage, um den Kommentar anzupassen. Nutze die Schreibweise ${'{'} javascript code {'}'}, um dynamische Informationen für jede Beobachtung einzufügen. Auf Werte auf Beobachtungsebene kannst du mit ${'{'} s.property {'}'} zugreifen, anhand der unten aufgeführten Eigenschaften.",
-  "speciesCommentSourceLinkWarning": "Ohne ornitho-Quellenlink im Artenkommentar können eBird-Prüfende die ursprüngliche Beobachtung nicht schnell öffnen.",
+  "speciesCommentSourceLinkWarning": "Wir empfehlen dringend, einen ornitho-Quellenlink einzuschließen, damit eBird-Prüfende die Beobachtung und ihren Prüfstatus schnell überprüfen können.",
   "speciesCommentOptionCount": "Anzahl",
   "speciesCommentOptionTime": "Uhrzeit",
   "speciesCommentOptionTimeSourceLink": "Quellenlink",
