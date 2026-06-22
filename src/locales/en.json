@@ -200,6 +200,7 @@
   "speciesCommentTemplateIntro": "Ornitho observations can include details eBird does not store separately, such as observation time, count precision and exact location. When several observations of the same species are merged into one eBird row, species comments preserve those details for each original observation.",
   "speciesCommentTemplateHelp": "Add observation details to the eBird species comments.",
   "speciesCommentTemplateAdvancedHelp": "Use HTML/JS code in the template to customize the comment. Use the notation ${'{'} javascript code {'}'} to insert dynamic information for each observation. You can access observation-level values with ${'{'} s.property {'}'}, using the properties listed in the table below.",
+  "speciesCommentSourceLinkWarning": "We strongly encourage including an ornitho source link so eBird reviewers can quickly check the observation and its review status.",
   "speciesCommentOptionCount": "Count",
   "speciesCommentOptionTime": "Time",
   "speciesCommentOptionTimeSourceLink": "source link",

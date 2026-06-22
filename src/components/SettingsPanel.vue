@@ -120,6 +120,15 @@ const hasPersonalizedTemplate = computed(() => {
   return Boolean(props.settings.speciesCommentTemplateOptions?.personalized);
 });
 
+const speciesCommentLinkWarningVisible = computed(() => {
+  if (!props.settings.customizedSpeciesComments || hasPersonalizedTemplate.value) {
+    return false;
+  }
+
+  const options = props.settings.speciesCommentTemplateOptions || {};
+  return !options.sourceLink && !(options.time && options.timeSourceLink);
+});
+
 const advancedOptionsRef = ref(null);
 const ebirdLanguageInputRef = ref(null);
 const speciesCommentRef = ref(null);
@@ -339,6 +348,9 @@ watch(
 
           <div v-if="settings.customizedSpeciesComments">
             <div v-if="!hasPersonalizedTemplate" class="mb-3">
+              <div v-if="speciesCommentLinkWarningVisible" class="alert alert-danger py-2 px-3 mb-3">
+                {{ t("speciesCommentSourceLinkWarning") }}
+              </div>
               <h4 class="h6">{{ t("templateRegularFields") }}</h4>
               <div class="species-comment-options">
                 <div

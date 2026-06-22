@@ -200,6 +200,7 @@
   "speciesCommentTemplateIntro": "Le osservazioni di ornitho possono includere dettagli che eBird non memorizza separatamente, come ora dell'osservazione, precisione del conteggio e posizione esatta. Quando più osservazioni della stessa specie vengono unite in una sola riga eBird, i commenti specie conservano questi dettagli per ciascuna osservazione originale.",
   "speciesCommentTemplateHelp": "Aggiungi dettagli dell'osservazione ai commenti specie di eBird.",
   "speciesCommentTemplateAdvancedHelp": "Usa codice HTML/JS nel modello per personalizzare il commento. Usa la notazione ${'{'} codice javascript {'}'} per inserire informazioni dinamiche per ogni osservazione. Puoi accedere ai valori a livello di osservazione con ${'{'} s.property {'}'}, usando le proprietà elencate nella tabella qui sotto.",
+  "speciesCommentSourceLinkWarning": "Senza un link alla fonte ornitho nei commenti specie, i revisori eBird non possono aprire rapidamente l'osservazione originale.",
   "speciesCommentOptionCount": "Conteggio",
   "speciesCommentOptionTime": "Ora",
   "speciesCommentOptionTimeSourceLink": "link alla fonte",

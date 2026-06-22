@@ -200,6 +200,7 @@
   "speciesCommentTemplateIntro": "Les observations ornitho peuvent contenir des détails qu'eBird ne stocke pas séparément, comme l'heure d'observation, la précision de l'effectif et la localisation exacte. Lorsque plusieurs observations de la même espèce sont fusionnées dans une ligne eBird, les commentaires d'espèce conservent ces détails pour chaque observation d'origine.",
   "speciesCommentTemplateHelp": "Ajouter des informations propres à l'observation dans les commentaires d'espèce eBird.",
   "speciesCommentTemplateAdvancedHelp": "Utilisez du code HTML/JS dans le modèle pour personnaliser le commentaire. Utilisez la notation ${'{'} javascript code {'}'} pour insérer des informations dynamiques pour chaque observation. Vous pouvez accéder aux valeurs au niveau de l'observation avec ${'{'} s.property {'}'}, en utilisant les propriétés listées dans le tableau ci-dessous.",
+  "speciesCommentSourceLinkWarning": "Sans lien source ornitho dans les commentaires d'espèce, les réviseurs eBird ne peuvent pas ouvrir rapidement l'observation d'origine.",
   "speciesCommentOptionCount": "Effectif",
   "speciesCommentOptionTime": "Heure",
   "speciesCommentOptionTimeSourceLink": "lien source",
