@@ -643,7 +643,7 @@
 1072,Marabou Stork,Leptoptilos crumenifer,marsto1
 1073,Short-billed Dowitcher,Limnodromus griseus,shbdow
 1074,Long-billed Dowitcher,Limnodromus scolopaceus,lobdow
-1075,Pallas's Grasshopper-Warbler,Locustella certhiola,
+1075,Pallas's Grasshopper-Warbler,Locustella certhiola,pagwar1
 1077,Lanceolated Warbler,Locustella lanceolata,lanwar
 1078,Siberian Rubythroat,Luscinia calliope,sibrub
 1079,Black Scoter,Melanitta americana,blksco2
@@ -689,7 +689,7 @@
 1122,African Collared Dove,Streptopelia risoria,afcdov1
 1123,Red-billed Starling,Sturnus sericeus,rebsta1
 1124,Spotless Starling,Sturnus unicolor,sposta1
-1125,Rueppell's Warbler,Sylvia ruppeli,
+1125,Rueppell's Warbler,Sylvia ruppeli,ruewar1
 1126,Marmora's Warbler,Sylvia sarda,marwar1
 1127,Reeves's Pheasant,Syrmaticus reevesii,reephe1
 1128,Black-browed Albatross,Thalassarche melanophris,bkbalb
@@ -704,7 +704,7 @@
 1137,Red-eyed Vireo,Vireo olivaceus,reevir1
 1139,White-crowned Sparrow,Zonotrichia leucophrys,whcspa
 1141,Amur Falcon,Falco amurensis,amufal1
-1142,Barbary Falcon,Falco pelegrinoides,
+1142,Barbary Falcon,Falco pelegrinoides,barfal1
 1143,Rueppell's Griffon,Gyps rueppellii,ruegri1
 1144,Masked Booby,Sula dactylatra,masboo
 1145,unidentified Diver,Gavia sp.,loon
@@ -724,14 +724,14 @@
 1161,European Herring Gull (L.a.argenteus),Larus argentatus argenteus,
 1162,Lesser Black-backed Gull (ssp. graellsii),Larus fuscus graellsii,lbbgul3
 1163,unidentified Gull,Larus sp.,larus1
-1164,unidentified small Gull,Larus sp.(pusilli),
+1164,unidentified small Gull,Larus sp.(pusilli),larus
 1165,Rock Dove,Columba livia,rocpig
 1167,Ural Owl,Strix uralensis,uraowl1
 1168,Great Grey Owl,Strix nebulosa,grgowl
 1169,Syrian Woodpecker,Dendrocopos syriacus,syrwoo1
 1171,Western Jackdaw (C.m.spermologus),Corvus monedula spermologus,eurjac
 1172,Eastern Jackdaw (ssp. soemmerringii),Corvus monedula soemmerringii,
-1173,Spotted Nutcracker (N.c.caryocadactes),Nucifraga caryocatactes caryocatactes,
+1173,Spotted Nutcracker (N.c.caryocadactes),Nucifraga caryocatactes caryocatactes,eurnut3
 1174,Spotted Nutcracker (ssp. macrorhynchos),Nucifraga caryocatactes macrorhynchos,
 1175,Western Rock Nuthatch,Sitta neumayer,rocnut1
 1178,Ring Ouzel (ssp. torquatus),Turdus torquatus torquatus,rinouz2
@@ -768,7 +768,7 @@
 1214,"Shearwater, unidentified",Puffinus / Calonectris sp.,shearw
 1215,"Sandpiper / Stint, unidentified",Calidris / Limicola / Tryngites sp.,calidr1
 1216,"Charadrius-Plover, unidentified",Charadrius sp.,smaplo1
-1221,Spoonbill Sandpiper,Eurynorhynchus pygmeus,
+1221,Spoonbill Sandpiper,Eurynorhynchus pygmeus,spbsan1
 1223,"Finch, unidentified",Fringillidae sp.,finch1
 1224,unidentified Snipe,Gallinago sp.,snipe2
 1226,"Hippolais-/Iduna-Warbler, unidentified",Hippolais / Iduna sp.,y00908
@@ -784,9 +784,9 @@
 1246,"Phylloscopus-Warbler, unidentified",Phylloscopus sp.,phyllo1
 1247,Common Chaffinch / Brambling,Fringilla coelebs / montifringilla,y01056
 1249,unidentified Plover (Pluvialis),Pluvialis sp.,y00494
-1250,"Rail / Crake, unidentified",Porzana sp.,
-1251,Bullfinch (P.p.europaea),Pyrrhula pyrrhula europaea,
-1252,unidentified Rail,Rallidae sp.,
+1250,"Rail / Crake, unidentified",Porzana sp.,porzan1
+1251,Bullfinch (P.p.europaea),Pyrrhula pyrrhula europaea,eurbul2
+1252,unidentified Rail,Rallidae sp.,rail1
 1254,"Crest, unidentified",Regulus sp.,
 1259,Common / Arctic Tern,Sterna hirundo / paradisaea,y00317
 1260,"Sternidae, unidentified",Sternidae sp.,tern1
@@ -796,7 +796,7 @@
 1266,Razorbill / Common Murre,Uria aalge / Alca torda,laralc1
 1267,unidentified Bunting,Emberiza sp.,emberi1
 1268,Eurasian Sparrowhawk/Northern Goshawk/Falcon,Accipiter sp. / Falco sp.,
-1269,Common / Lesser Kestrel,Falco naumanni / tinnunculus,
+1269,Common / Lesser Kestrel,Falco naumanni / tinnunculus,y00613
 1270,Carrion / Hooded Crow,Corvus corone / cornix,y00613
 1271,American Coot,Fulica americana,y00475
 1272,Eclectus Parrot,Eclectus roratus,eclpar
@@ -859,7 +859,7 @@
 1362,Black-faced Bunting,Emberiza spodocephala,bkfbun1
 1363,Eastern Subalpine Warbler (ssp. albistriata),Sylvia cantillans albistriata,
 1364,Common Pochard x Ferruginous Duck,Aythya ferina x nyroca,x00764
-1365,"Storm-Petrel, unidentified",Hydrobatidae sp.,
+1365,"Storm-Petrel, unidentified",Hydrobatidae sp.,stopet
 1366,Willow Warbler (ssp. acredula),Phylloscopus trochilus acredula,
 1367,Red-billed Teal,Anas erythrorhyncha,rebduc1
 1368,Graugans (A.a.albifrons),Anser albifrons albifrons,gwfgoo4
