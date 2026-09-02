@@ -13,7 +13,12 @@ const baseUrl = import.meta.env.BASE_URL;
 const poweredByLogo = `${baseUrl}logo_w.svg`;
 
 const supporters = [
-  { id: "vogelwarte", name: "Vogelwarte", href: "https://www.ornitho.ch/", logo: `${baseUrl}logo_vowa.png` },
+  {
+    id: "vogelwarte",
+    name: "Vogelwarte.ch",
+    href: "https://www.ornitho.ch/",
+    logo: `${baseUrl}logo_vowa.png`,
+  },
   {
     id: "ico",
     name: "Institut Català d'Ornitologia",
