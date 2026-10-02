@@ -11,6 +11,7 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
+import { alertDialog } from "../lib/dialog";
 import { buildInteractiveMapViewerUrl, createInteractiveMapGist } from "../lib/interactiveMap";
 import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
 
@@ -511,7 +512,7 @@ async function publishInteractiveMapsForExport() {
   const token = String(props.githubToken || "").trim();
   if (!token) {
     interactiveMapError.value = t("interactiveMapTokenMissing");
-    window.alert(interactiveMapError.value);
+    alertDialog(interactiveMapError.value);
     return false;
   }
 
@@ -557,7 +558,7 @@ async function publishInteractiveMapsForExport() {
     interactiveMapError.value = t("interactiveMapPublishFailed", {
       message: error?.message || "Unknown error",
     });
-    window.alert(interactiveMapError.value);
+    alertDialog(interactiveMapError.value);
     return false;
   } finally {
     interactiveMapPublishing.value = false;
@@ -570,7 +571,7 @@ async function downloadFile() {
   }
 
   if (taxonomyNeededForExport.value && taxonomyStatus.value === "loading") {
-    window.alert(t("exportTaxonomyLoading"));
+    alertDialog(t("exportTaxonomyLoading"));
     return;
   }
 

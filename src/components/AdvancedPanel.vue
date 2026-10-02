@@ -23,6 +23,7 @@ import {
   requiredTimeStateClass,
   sightingMarkerHtml,
 } from "../lib/advancedPanel";
+import { alertDialog, confirmDialog } from "../lib/dialog";
 import {
   applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
@@ -321,17 +322,16 @@ function startPathDraw() {
   reviewDrawPolyline.enable();
 }
 
-function updatePath(path) {
-  if (!selectedForm.value) {
+async function updatePath(path) {
+  const form = selectedForm.value;
+  if (!form) {
     return;
   }
 
   const newDistance = distanceFromPath(path);
-  const currentDistance = Array.isArray(selectedForm.value.path)
-    ? distanceFromPath(selectedForm.value.path)
-    : null;
+  const currentDistance = Array.isArray(form.path) ? distanceFromPath(form.path) : null;
 
-  const confirmed = window.confirm(
+  const confirmed = await confirmDialog(
     currentDistance !== null
       ? t("updatePathConfirmReplace", { previous: currentDistance, next: newDistance })
       : t("updatePathConfirm", { next: newDistance }),
@@ -341,8 +341,8 @@ function updatePath(path) {
     return;
   }
 
-  selectedForm.value.path = markRaw(path);
-  selectedForm.value.distance = newDistance;
+  form.path = markRaw(path);
+  form.distance = newDistance;
   refreshReviewMap();
 }
 
@@ -440,7 +440,7 @@ function applyAssignmentSelection(bounds) {
   stopRectangleDraw();
 
   if (!matchedSightings.length) {
-    window.alert(t("assignNoSightingsInSelection"));
+    alertDialog(t("assignNoSightingsInSelection"));
     return;
   }
 
@@ -674,12 +674,13 @@ function assignClean() {
   }
 }
 
-function deleteSelectedChecklist() {
-  if (!selectedForm.value || !window.confirm(t("deleteChecklistConfirm"))) {
+async function deleteSelectedChecklist() {
+  const formToDelete = selectedForm.value;
+  if (!formToDelete || !(await confirmDialog(t("deleteChecklistConfirm")))) {
     return;
   }
 
-  const formIndex = props.forms.findIndex((form) => form.id === selectedForm.value.id);
+  const formIndex = props.forms.findIndex((form) => form.id === formToDelete.id);
   if (formIndex < 0) {
     return;
   }
@@ -695,8 +696,8 @@ function deleteSelectedChecklist() {
   emit("update:selectedFormId", nextForm?.id || null);
 }
 
-function assignReset() {
-  if (!window.confirm(t("assignResetConfirm"))) {
+async function assignReset() {
+  if (!(await confirmDialog(t("assignResetConfirm")))) {
     return;
   }
 
@@ -714,24 +715,24 @@ function assignReset() {
   emit("update:selectedFormId", props.forms[0]?.id || null);
 }
 
-function assignMagic() {
+async function assignMagic() {
   if (assignDuration.value > 24) {
-    window.alert(t("assignDurationTooLong"));
+    alertDialog(t("assignDurationTooLong"));
     return;
   }
 
   if (assignDistance.value > 10 && assignDistance.value < 80) {
-    if (!window.confirm(t("assignDistanceLongConfirm"))) {
+    if (!(await confirmDialog(t("assignDistanceLongConfirm")))) {
       return;
     }
   } else if (assignDistance.value >= 80) {
-    window.alert(t("assignDistanceTooLong"));
+    alertDialog(t("assignDistanceTooLong"));
     return;
   }
 
   const availableSightings = unassignedSightings.value;
   if (!availableSightings.length) {
-    window.alert(t("assignNoSightings"));
+    alertDialog(t("assignNoSightings"));
     return;
   }
 

@@ -21,6 +21,8 @@ import {
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
 import { normalizeLanguage, resolveUiLanguage, setI18nLanguage } from "./i18n";
 import { applyDefaultAutomaticAssignment, buildForm } from "./lib/utils";
+import { confirmDialog } from "./lib/dialog";
+import AppDialog from "./components/AppDialog.vue";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
 const InfoPanel = defineAsyncComponent(() => import("./components/InfoPanel.vue"));
@@ -147,19 +149,24 @@ function languageFamily(value) {
   return value.split(/[-_]/)[0].toLowerCase();
 }
 
-const savedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, DEFAULT_SETTINGS);
+const storedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, null);
+const savedSettings = storedSettings || DEFAULT_SETTINGS;
 const queryLanguage = normalizeLanguage(
   typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
 );
 const resolvedUiLanguage = resolveUiLanguage(savedSettings);
 const supportedEbirdLanguages = new Set(EBIRD_LANGUAGES.map((language) => language.value));
-const savedEbirdLanguage = normalizeEbirdLanguage(savedSettings.ebirdLanguage);
+// storedSettings, not savedSettings: the defaults' "en" must not count as a user choice.
+const savedEbirdLanguage = normalizeEbirdLanguage(storedSettings?.ebirdLanguage);
 const legacySavedLanguage = normalizeEbirdLanguage(savedSettings.language);
+// With nothing saved, guess the UI language: most users display eBird names in the language they use here.
 const resolvedEbirdLanguage = supportedEbirdLanguages.has(savedEbirdLanguage)
   ? savedEbirdLanguage
   : supportedEbirdLanguages.has(legacySavedLanguage)
     ? legacySavedLanguage
-    : "en";
+    : supportedEbirdLanguages.has(resolvedUiLanguage)
+      ? resolvedUiLanguage
+      : "en";
 const initialWebsiteName =
   queryLanguage || !savedSettings.websiteName
     ? defaultWebsiteForLanguage(resolvedUiLanguage)
@@ -338,7 +345,7 @@ function importData(payload) {
   selectedFormId.value = forms.value[0]?.id || null;
 }
 
-function updateSelectedWebsiteName(nextWebsiteName) {
+async function updateSelectedWebsiteName(nextWebsiteName) {
   const normalizedName = String(nextWebsiteName || "").trim();
   if (!normalizedName || normalizedName === settings.websiteName) {
     return;
@@ -349,7 +356,7 @@ function updateSelectedWebsiteName(nextWebsiteName) {
     return;
   }
 
-  const confirmed = window.confirm(
+  const confirmed = await confirmDialog(
     t("websiteChangeConfirm", {
       currentWebsite: settings.websiteName,
       nextWebsite: normalizedName,
@@ -525,5 +532,6 @@ function openSettingsForSection(section) {
     </main>
 
     <AppFooter :version="version" />
+    <AppDialog />
   </div>
 </template>

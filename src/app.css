@@ -749,6 +749,19 @@ h6 {
   min-width: 0;
 }
 
+/* Confirm/alert dialogs can open on top of another modal. */
+.app-dialog-backdrop {
+  z-index: 1065;
+}
+
+.app-dialog-panel {
+  width: min(480px, calc(100vw - 2rem));
+}
+
+.app-dialog-message {
+  white-space: pre-line;
+}
+
 .modal-content-scroll {
   min-height: 0;
   min-width: 0;

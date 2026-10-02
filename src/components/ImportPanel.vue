@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import Papa from "papaparse/papaparse.js";
 import Wkt from "wicket/wicket.js";
@@ -76,6 +76,16 @@ const websiteName = computed({
 const website = computed(() => {
   return websitesList.find((item) => item.name === websiteName.value) || null;
 });
+
+// The parent may ask for confirmation (or refuse) before switching website, so show the
+// current value until the prop actually changes.
+function onWebsiteChange(event) {
+  const select = event.target;
+  websiteName.value = select.value;
+  nextTick(() => {
+    select.value = props.selectedWebsiteName || "";
+  });
+}
 
 watch(
   () => props.selectedWebsiteName,
@@ -527,19 +537,140 @@ async function checkWebsite(exportData, selectedWebsite) {
   <section class="card border-0 shadow-sm rounded-3 mb-3">
     <div class="card-body p-3 p-md-4">
       <h2 class="border-bottom pb-2 mb-3">{{ t("importTitle") }}</h2>
-      <div class="row g-4">
+      <div class="row">
+        <div class="col-lg-6 mb-3">
+          <label class="form-label" for="import-source-website">{{ t("websiteSelect") }}</label>
+          <select
+            id="import-source-website"
+            :value="websiteName"
+            class="form-select form-select-lg"
+            @change="onWebsiteChange"
+          >
+            <option value="" disabled>{{ t("websiteSelectPlaceholder") }}</option>
+            <option v-for="entry in websitesList" :key="entry.name" :value="entry.name">
+              {{ entry.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <!-- Steps in the order users do them: find/export the data, then upload it. -->
+      <div v-if="website" class="row g-4">
+        <div class="col-lg-6">
+          <div class="feature-panel feature-panel-helper mb-0">
+            <div class="feature-panel-header mb-3">
+              <span class="feature-panel-icon" aria-hidden="true">
+                <i class="bi bi-search"></i>
+              </span>
+              <div>
+                <div class="feature-panel-eyebrow">{{ t("importStep", { n: 1 }) }}</div>
+                <h3 class="h6 fw-bold mb-0">{{ t("importHelperTitle") }}</h3>
+              </div>
+            </div>
+
+            <template v-if="website.system === 'ornitho'">
+              <p class="mb-3">{{ t("importHelpOrnitho") }}</p>
+              <div class="d-flex flex-column gap-2">
+                <div class="row g-2 align-items-center">
+                  <div class="col-sm-auto">
+                    <div class="form-check m-0">
+                      <input
+                        id="recent-days"
+                        v-model="importQueryDate"
+                        class="form-check-input"
+                        type="radio"
+                        value="offset"
+                      />
+                      <label class="form-check-label d-block" for="recent-days">
+                        {{ t("recentDays") }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-sm">
+                    <input
+                      v-model.number="importQueryDateOffset"
+                      class="form-control"
+                      type="number"
+                      min="0"
+                      :aria-label="t('recentDays')"
+                      @focus="importQueryDate = 'offset'"
+                    />
+                  </div>
+                </div>
+                <div class="row g-2 align-items-center">
+                  <div class="col-sm-auto">
+                    <div class="form-check m-0">
+                      <input
+                        id="date-range"
+                        v-model="importQueryDate"
+                        class="form-check-input"
+                        type="radio"
+                        value="range"
+                      />
+                      <label class="form-check-label d-block" for="date-range">
+                        {{ t("dateRange") }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-sm">
+                    <input
+                      v-model="importQueryDateRangeFrom"
+                      class="form-control"
+                      type="date"
+                      :aria-label="t('dateRangeFrom')"
+                      @focus="importQueryDate = 'range'"
+                    />
+                  </div>
+                  <div class="col-sm">
+                    <input
+                      v-model="importQueryDateRangeTo"
+                      class="form-control"
+                      type="date"
+                      :aria-label="t('dateRangeTo')"
+                      @focus="importQueryDate = 'range'"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-center mt-3">
+                <a class="btn btn-primary" :href="exportLink" target="_blank" rel="noopener">
+                  {{ t("openExportPage", { website: website.name }) }}
+                </a>
+              </div>
+            </template>
+
+            <template v-else-if="website.system === 'observation'">
+              <p class="mb-3">{{ t("importHelpObservation") }}</p>
+              <div class="d-flex justify-content-center">
+                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                  {{ t("openWebsite", { website: website.name }) }}
+                </a>
+              </div>
+            </template>
+
+            <template v-else-if="website.system === 'birdlasser'">
+              <p class="mb-3">{{ t("importHelpBirdlasser") }}</p>
+              <div class="d-flex justify-content-center">
+                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                  {{ t("openWebsite", { website: website.name }) }}
+                </a>
+              </div>
+            </template>
+
+            <template v-else-if="website.system === 'ornitho.net'">
+              <p class="mb-3">{{ t("importHelpOrnithoNet") }}</p>
+              <div class="d-flex justify-content-center">
+                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                  {{ t("openExportPage", { website: website.name }) }}
+                </a>
+              </div>
+            </template>
+          </div>
+        </div>
+
         <div class="col-lg-6">
           <div class="mb-3">
-            <label class="form-label">{{ t("websiteSelect") }}</label>
-            <select v-model="websiteName" class="form-select form-select-lg">
-              <option v-for="entry in websitesList" :key="entry.name" :value="entry.name">
-                {{ entry.name }}
-              </option>
-            </select>
-          </div>
-
-          <div v-if="website" class="mb-3">
-            <label class="form-label">{{ t(importFileLabelKey) }}</label>
+            <div class="feature-panel-eyebrow mb-1">{{ t("importStep", { n: 2 }) }}</div>
+            <label class="form-label fw-semibold">{{ t(importFileLabelKey) }}</label>
             <div
               class="import-dropzone"
               :class="{ 'is-drag-active': isDragActive, 'is-compact': file }"
@@ -600,115 +731,6 @@ async function checkWebsite(exportData, selectedWebsite) {
           <div v-if="verificationWarning" class="alert alert-warning d-flex align-items-center gap-2">
             <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
             <span>{{ verificationWarning }}</span>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div v-if="website" class="feature-panel feature-panel-helper mb-0">
-            <div class="feature-panel-header mb-3">
-              <span class="feature-panel-icon" aria-hidden="true">
-                <i class="bi bi-search"></i>
-              </span>
-              <div>
-                <div class="feature-panel-eyebrow">{{ t("importTitle") }}</div>
-                <h3 class="h6 fw-bold mb-0">{{ t("importHelperTitle") }}</h3>
-              </div>
-            </div>
-
-            <template v-if="website.system === 'ornitho'">
-              <p class="mb-3">{{ t("importHelpOrnitho") }}</p>
-              <div class="d-flex flex-column gap-2">
-                <div class="row g-2 align-items-center">
-                  <div class="col-sm-auto">
-                    <div class="form-check m-0">
-                      <input
-                        id="recent-days"
-                        v-model="importQueryDate"
-                        class="form-check-input"
-                        type="radio"
-                        value="offset"
-                      />
-                      <label class="form-check-label d-block" for="recent-days">
-                        {{ t("recentDays") }}
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-sm">
-                    <input
-                      v-model.number="importQueryDateOffset"
-                      class="form-control"
-                      type="number"
-                      min="0"
-                      :disabled="importQueryDate !== 'offset'"
-                    />
-                  </div>
-                </div>
-                <div class="row g-2 align-items-center">
-                  <div class="col-sm-auto">
-                    <div class="form-check m-0">
-                      <input
-                        id="date-range"
-                        v-model="importQueryDate"
-                        class="form-check-input"
-                        type="radio"
-                        value="range"
-                      />
-                      <label class="form-check-label d-block" for="date-range">
-                        {{ t("dateRange") }}
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-sm">
-                    <input
-                      v-model="importQueryDateRangeFrom"
-                      class="form-control"
-                      type="date"
-                      :disabled="importQueryDate !== 'range'"
-                    />
-                  </div>
-                  <div class="col-sm">
-                    <input
-                      v-model="importQueryDateRangeTo"
-                      class="form-control"
-                      type="date"
-                      :disabled="importQueryDate !== 'range'"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="d-flex justify-content-center mt-3">
-                <a class="btn btn-primary" :href="exportLink" target="_blank" rel="noopener">
-                  {{ t("openExportPage", { website: website.name }) }}
-                </a>
-              </div>
-            </template>
-
-            <template v-else-if="website.system === 'observation'">
-              <p class="mb-3">{{ t("importHelpObservation") }}</p>
-              <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage", { website: website.name }) }}
-                </a>
-              </div>
-            </template>
-
-            <template v-else-if="website.system === 'birdlasser'">
-              <p class="mb-3">{{ t("importHelpBirdlasser") }}</p>
-              <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage", { website: website.name }) }}
-                </a>
-              </div>
-            </template>
-
-            <template v-else-if="website.system === 'ornitho.net'">
-              <p class="mb-3">{{ t("importHelpOrnithoNet") }}</p>
-              <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
-                  {{ t("openExportPage", { website: website.name }) }}
-                </a>
-              </div>
-            </template>
           </div>
         </div>
       </div>

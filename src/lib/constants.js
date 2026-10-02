@@ -14,8 +14,9 @@ export const UI_LANGUAGES = [
 
 export const EBIRD_LANGUAGES = ebirdTaxonomyLanguages;
 
+// English has no obvious default source: the import panel shows a placeholder instead.
 export const DEFAULT_WEBSITE_BY_LANGUAGE = {
-  en: "ornitho network",
+  en: "",
   fr: "faune-france.org",
   ca: "ornitho.cat",
   de: "ornitho.de",
