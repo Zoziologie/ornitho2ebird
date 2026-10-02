@@ -56,8 +56,10 @@ function isChunkLoadError(error) {
   );
 }
 
+// Vite also fires this when a lazy chunk loads but throws while running: only a missing file
+// is fixed by reloading, a real bug should reach the error dialog.
 window.addEventListener("vite:preloadError", (event) => {
-  if (reloadForNewVersion()) {
+  if (isChunkLoadError(event.payload) && reloadForNewVersion()) {
     event.preventDefault();
   }
 });
