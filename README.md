@@ -91,7 +91,7 @@ The app currently supports:
 - `waarneming.nl`
 - `waarnemingen.be`
 
-The full source list lives in [`data/websites_list.json`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/data/websites_list.json).
+The full source list lives in [`data/websites_list.json`](data/websites_list.json).
 
 ## Conversion model
 
@@ -146,12 +146,16 @@ The UI supports English, French, Catalan, German, and Italian. eBird taxonomy na
 
 This project is a static front-end app. The conversion itself happens in the browser.
 
-The app can optionally call eBird APIs from the browser to:
+The app calls these services from the browser:
 
-- retrieve localized taxonomy names
-- suggest nearby hotspots
+- the eBird API, to retrieve localized taxonomy names and suggest nearby hotspots
+- OpenStreetMap Nominatim, with the coordinates of the first imported record, to check that the file matches the selected website
+- map tile servers (OpenStreetMap, Esri, swisstopo, IGN, BKG) for the review maps
+- Mapbox, only if you add a Mapbox token, to render static checklist maps
+- GitHub Gists, only if you add a GitHub token and enable interactive maps, to publish each checklist's map data as a secret gist
+- Google Analytics, for page-view statistics (see [#10](https://github.com/Zoziologie/ornitho2ebird/issues/10))
 
-If those requests fail, the app still falls back to bundled species mappings where possible.
+If the eBird requests fail, the export keeps the source species names.
 
 ## Local development
 
@@ -184,33 +188,42 @@ npm run build
 npm run preview
 ```
 
+### Run the tests
+
+```bash
+npm test
+```
+
 ## Available scripts
 
 - `npm run dev` starts Vite in development mode
 - `npm run build` creates the production build
 - `npm run preview` serves the built app locally
-- `npm run splist` regenerates [`data/ornitho_species_list_short.json`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/data/ornitho_species_list_short.json) from [`data/ornitho_species_list_full.csv`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/data/ornitho_species_list_full.csv)
+- `npm test` runs the unit and golden-file tests once (`npm run test:watch` re-runs them on change)
+- `npm run splist` regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv)
 
 ## Project structure
 
-- [`src/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/src) application source
-- [`src/components/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/src/components) import, settings, advanced review, and export UI
-- [`src/lib/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/src/lib) conversion logic and helpers
-- [`src/locales/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/src/locales) interface translations
-- [`data/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/data) source website metadata and species mapping files
-- [`docs/localization-workflow.md`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/docs/localization-workflow.md) translation workflow
-- [`test/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/test) sample import/export fixtures
+- [`src/`](src) application source
+- [`src/components/`](src/components) import, settings, advanced review, and export UI
+- [`src/lib/`](src/lib) conversion logic and helpers
+- [`src/locales/`](src/locales) interface translations
+- [`data/`](data) source website metadata and species mapping files
+- [`docs/localization-workflow.md`](docs/localization-workflow.md) translation workflow
+- [`test/fixtures/`](test/fixtures) sample exports from each supported source
+- [`test/unit/`](test/unit) unit tests for parsing, comment templates, CSV export and locales
+- [`test/golden/`](test/golden) the expected eBird CSV for every fixture (`__snapshots__/`)
 
 ## Deployment note
 
-The app now builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/vite.config.js).
+The app now builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](vite.config.js).
 
 ## Contributing
 
-Issues and pull requests are welcome. If you change translation keys, update [`src/locales/en.json`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/src/locales/en.json) first and follow the translation notes in [`docs/localization-workflow.md`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/docs/localization-workflow.md).
+Issues and pull requests are welcome. If you change translation keys, update [`src/locales/en.json`](src/locales/en.json) first and follow the translation notes in [`docs/localization-workflow.md`](docs/localization-workflow.md).
 
-When changing conversion logic, test with realistic exports from the fixtures in [`test/`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/test).
+When changing conversion logic, run `npm test`. The golden-file tests compare the eBird CSV produced for every fixture in [`test/fixtures/`](test/fixtures) with the files in [`test/golden/__snapshots__/`](test/golden/__snapshots__). If a difference is intended, review it and update the files with `npx vitest run -u`. CI runs the tests on every pull request and before each deployment.
 
 ## License
 
-GPL-3.0. See [`LICENSE`](/Users/rafnuss/Documents/GitHub/ornitho2ebird/LICENSE).
+GPL-3.0. See [`LICENSE`](LICENSE).

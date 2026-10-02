@@ -1,0 +1,2 @@
+# Golden CSVs are compared byte for byte: keep LF line endings on every OS.
+test/golden/__snapshots__/*.csv text eol=lf
