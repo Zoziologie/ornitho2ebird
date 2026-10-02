@@ -1,4 +1,4 @@
-import Papa from "papaparse/papaparse.js";
+import Papa from "papaparse";
 import { buildSpeciesCommentTemplate, createSighting, distanceFromPath, mathMode } from "./utils";
 import { getOrnithoEbirdSpeciesCode } from "./taxonomy";
 

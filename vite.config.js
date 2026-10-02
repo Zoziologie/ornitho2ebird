@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import packageJson from "./package.json";
+import packageJson from "./package.json" with { type: "json" };
 import bootstrapIconsSubset from "./build/bootstrapIconsSubset.js";
 
 // https://vitejs.dev/config/
@@ -10,6 +10,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // The global-L shim must run before the Leaflet plugins, so it goes in their chunk.
+          if (id.endsWith("/src/lib/leaflet.js")) {
+            return "map-vendor";
+          }
+
           if (!id.includes("node_modules")) {
             return;
           }
@@ -18,7 +23,7 @@ export default defineConfig({
             return "map-vendor";
           }
 
-          if (id.includes("papaparse") || id.includes("wicket")) {
+          if (id.includes("papaparse")) {
             return "import-vendor";
           }
 
