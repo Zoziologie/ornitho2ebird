@@ -43,6 +43,7 @@ const numberImportedForms = ref(0);
 const numberImportedSightings = ref(0);
 const errorMessage = ref("");
 const verificationWarning = ref("");
+const skippedWarnings = ref([]);
 const file = ref(null);
 const fileInput = ref(null);
 const dragCounter = ref(0);
@@ -58,6 +59,7 @@ function resetImportState() {
   numberImportedSightings.value = 0;
   errorMessage.value = "";
   verificationWarning.value = "";
+  skippedWarnings.value = [];
   file.value = null;
   dragCounter.value = 0;
   isDragActive.value = false;
@@ -108,23 +110,34 @@ const importFileLabelKey = computed(() => {
 const importSuccessText = computed(() => {
   const listCount = Number(numberImportedForms.value) || 0;
   const sightingCount = Number(numberImportedSightings.value) || 0;
-  const listLabel = listCount === 1 ? "list" : "lists";
-  const sightingLabel = sightingCount === 1 ? "casual observation" : "casual observations";
 
-  return `Data loaded successfully: ${listCount} ${listLabel} and ${sightingCount} ${sightingLabel}`;
+  return t("importSuccess", {
+    lists: t("importSuccessLists", listCount),
+    sightings: t("importSuccessSightings", sightingCount),
+  });
 });
+
+// Error whose message is already translated and can be shown as is.
+class ImportError extends Error {}
+
+function requireColumns(rows, columns) {
+  const header = Object.keys(rows[0] || {});
+  const missing = columns.filter((column) => !header.includes(column));
+  if (missing.length > 0) {
+    throw new ImportError(t("importErrorMissingColumns", { columns: missing.join(", ") }));
+  }
+}
 
 const exportLink = computed(() => {
   if (!website.value) {
     return "#";
   }
 
-  const rangeFrom = importQueryDateRangeFrom.value
-    ? new Date(importQueryDateRangeFrom.value).toLocaleDateString("fr-CH")
-    : "";
-  const rangeTo = importQueryDateRangeTo.value
-    ? new Date(importQueryDateRangeTo.value).toLocaleDateString("fr-CH")
-    : "";
+  // ornitho expects dd.mm.yyyy. Reformat the "yyyy-mm-dd" input value directly: going
+  // through Date would parse it as UTC and shift the day for users west of UTC.
+  const toOrnithoDate = (value) => (value ? value.split("-").reverse().join(".") : "");
+  const rangeFrom = toOrnithoDate(importQueryDateRangeFrom.value);
+  const rangeTo = toOrnithoDate(importQueryDateRangeTo.value);
 
   return `${website.value.website}index.php?m_id=31&sp_DChoice=${importQueryDate.value}&sp_DFrom=${rangeFrom}&sp_DTo=${rangeTo}&sp_DOffset=${importQueryDateOffset.value}&sp_SChoice=all&sp_PChoice=all&sp_OnlyMyData=1`;
 });
@@ -138,6 +151,7 @@ watch(file, async (nextFile) => {
   numberImportedSightings.value = 0;
   errorMessage.value = "";
   verificationWarning.value = "";
+  skippedWarnings.value = [];
   loadingStatus.value = 0;
 
   try {
@@ -151,6 +165,10 @@ watch(file, async (nextFile) => {
       species_comment_template: buildSpeciesCommentTemplate(website.value),
     };
 
+    skippedWarnings.value = [
+      parsed.skipped.emptyForms > 0 ? t("importSkippedEmptyForms", parsed.skipped.emptyForms) : "",
+      parsed.skipped.noCoordinates > 0 ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates) : "",
+    ].filter(Boolean);
     verificationWarning.value = await checkWebsite(parsed, website.value);
 
     numberImportedForms.value = parsed.forms.length;
@@ -159,7 +177,10 @@ watch(file, async (nextFile) => {
     loadingStatus.value = 1;
   } catch (error) {
     loadingStatus.value = -1;
-    errorMessage.value = error instanceof Error ? error.message : String(error);
+    errorMessage.value =
+      error instanceof ImportError
+        ? error.message
+        : t("importErrorUnexpected", { detail: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -278,17 +299,24 @@ function parseImportFile(rawText, selectedWebsite) {
     forms: [],
     sightings: [],
     formsSightings: [],
+    skipped: { emptyForms: 0, noCoordinates: 0 },
   };
 
   if (selectedWebsite.system === "ornitho") {
     let data;
     try {
       data = JSON.parse(rawText).data;
-    } catch (error) {
-      throw new Error(`Invalid JSON file. ${error}`);
+    } catch {
+      throw new ImportError(t("importErrorInvalidJson"));
+    }
+    if (!data || typeof data !== "object") {
+      throw new ImportError(t("importErrorInvalidJson"));
     }
 
-    data.forms = data.forms || [];
+    const allForms = data.forms || [];
+    // A checklist without sightings has no date and nothing to import.
+    data.forms = allForms.filter((form) => form.sightings?.length > 0);
+    exportData.skipped.emptyForms = allForms.length - data.forms.length;
     data.sightings = data.sightings || [];
 
     exportData.sightings = ornithoSightingsTransformation(data.sightings, 0, selectedWebsite);
@@ -296,6 +324,11 @@ function parseImportFile(rawText, selectedWebsite) {
       const date = form.sightings[0].observers[0].timing["@ISO8601"].split("T")[0];
       const timeStart = `${date}T${form.time_start}`;
       const timeStop = `${date}T${form.time_stop}`;
+      let duration = (new Date(timeStop) - new Date(timeStart)) / 1000 / 60;
+      if (duration < 0) {
+        // The checklist ended after midnight.
+        duration += 24 * 60;
+      }
 
       let path = null;
       let distance = null;
@@ -334,7 +367,7 @@ function parseImportFile(rawText, selectedWebsite) {
         lon: form.lon,
         date,
         time: form.time_start,
-        duration: (new Date(timeStop) - new Date(timeStart)) / 1000 / 60,
+        duration,
         distance,
         number_observer: null,
         full_form: form.full_form === "1",
@@ -349,10 +382,13 @@ function parseImportFile(rawText, selectedWebsite) {
       return ornithoSightingsTransformation(form.sightings, index + 1, selectedWebsite);
     });
   } else if (selectedWebsite.system === "birdlasser") {
-    exportData.sightings = Papa.parse(rawText, {
+    const rows = Papa.parse(rawText, {
       skipEmptyLines: true,
       header: true,
-    }).data.map((sighting, index) => {
+    }).data;
+    requireColumns(rows, ["Date", "Time", "Latitude", "Longitude", "Species primary name", "Count"]);
+
+    exportData.sightings = rows.map((sighting, index) => {
       return createSighting({
         id: `s${index}`,
         form_id: 0,
@@ -375,10 +411,13 @@ function parseImportFile(rawText, selectedWebsite) {
       });
     });
   } else if (selectedWebsite.system === "observation") {
-    exportData.sightings = Papa.parse(rawText, {
+    const rows = Papa.parse(rawText, {
       skipEmptyLines: true,
       header: true,
-    }).data.map((sighting) => {
+    }).data;
+    requireColumns(rows, ["id", "date", "time", "lat", "lng", "species name", "number"]);
+
+    exportData.sightings = rows.map((sighting) => {
       return createSighting({
         id: sighting.id,
         form_id: 0,
@@ -406,7 +445,7 @@ function parseImportFile(rawText, selectedWebsite) {
     }).data;
 
     if (!parsed[0]?.Timing) {
-      throw new Error("The TXT header is not recognized. Export the file in English.");
+      throw new ImportError(t("importErrorTxtHeader"));
     }
 
     exportData.sightings = parsed.map((sighting) => {
@@ -430,10 +469,17 @@ function parseImportFile(rawText, selectedWebsite) {
       });
     });
   } else {
-    throw new Error("Unsupported import source");
+    throw new ImportError(t("importErrorUnsupported"));
   }
 
-  exportData.sightings = exportData.sightings.sort((a, b) => a.time.localeCompare(b.time));
+  // Without coordinates a sighting cannot be mapped or assigned to a checklist location.
+  const hasCoordinates = (sighting) => Number.isFinite(sighting.lat) && Number.isFinite(sighting.lon);
+  const sightingCount = exportData.sightings.length;
+  exportData.sightings = exportData.sightings.filter(hasCoordinates);
+  exportData.skipped.noCoordinates = sightingCount - exportData.sightings.length;
+
+  const sortKey = (sighting) => `${sighting.date || ""} ${sighting.time || ""}`;
+  exportData.sightings.sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
   return exportData;
 }
 
@@ -538,6 +584,14 @@ async function checkWebsite(exportData, selectedWebsite) {
           <div v-else-if="loadingStatus === -1" class="alert alert-danger d-flex align-items-center gap-2">
             <i class="bi bi-exclamation-octagon-fill flex-shrink-0" aria-hidden="true"></i>
             <span><strong>{{ t("error") }}.</strong> {{ errorMessage }}</span>
+          </div>
+          <div
+            v-for="warning in skippedWarnings"
+            :key="warning"
+            class="alert alert-warning d-flex align-items-center gap-2"
+          >
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
+            <span>{{ warning }}</span>
           </div>
           <div v-if="verificationWarning" class="alert alert-warning d-flex align-items-center gap-2">
             <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>

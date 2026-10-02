@@ -738,7 +738,7 @@ async function downloadFile() {
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
             <div class="export-total">
               <span class="export-total-value">{{ formatNumber(exportSummaryStats.totalChecklists) }}</span>
-              <span class="export-total-label">{{ t("exportSummaryChecklists") }}</span>
+              <span class="export-total-label">{{ t("exportSummaryChecklists", exportSummaryStats.totalChecklists) }}</span>
             </div>
             <div class="export-protocol-list">
               <div
@@ -750,7 +750,7 @@ async function downloadFile() {
                   <i :class="['bi', protocolSummaryIcon(item.name)]" aria-hidden="true"></i>
                 </span>
                 <span class="export-protocol-count">{{ formatNumber(item.count) }}</span>
-                <span class="export-protocol-label">{{ t(`protocolLabel${item.name}`) }}</span>
+                <span class="export-protocol-label">{{ t(`protocolLabel${item.name}`, item.count) }}</span>
               </div>
             </div>
           </section>
@@ -761,12 +761,12 @@ async function downloadFile() {
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-feather" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSpecies) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySpecies") }}</span>
+                <span class="export-stat-label">{{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }}</span>
               </div>
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-binoculars" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSightings) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySightings") }}</span>
+                <span class="export-stat-label">{{ t("exportSummarySightings", exportSummaryStats.totalSightings) }}</span>
               </div>
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span>
@@ -776,7 +776,7 @@ async function downloadFile() {
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalLocations) }}</span>
-                <span class="export-stat-label">{{ t("exportSummaryLocations") }}</span>
+                <span class="export-stat-label">{{ t("exportSummaryLocations", exportSummaryStats.totalLocations) }}</span>
               </div>
             </div>
           </section>

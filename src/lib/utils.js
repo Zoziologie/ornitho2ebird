@@ -162,7 +162,13 @@ export function speciesComment(speciesCommentTemplate, sightings) {
             return chunk;
           }
 
-          const [expression, suffix = ""] = chunk.split("}");
+          // The expression ends at the first "}"; anything after it, including further "}", is literal text.
+          const end = chunk.indexOf("}");
+          if (end === -1) {
+            return `\${${chunk}`;
+          }
+          const expression = chunk.slice(0, end);
+          const suffix = chunk.slice(end + 1);
 
           try {
             return (

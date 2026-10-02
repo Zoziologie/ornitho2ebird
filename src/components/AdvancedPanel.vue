@@ -274,26 +274,30 @@ function computeDurationFromSightings() {
 }
 
 async function loadHotspotsForSelectedForm() {
-  if (!selectedForm.value?.lat || !selectedForm.value?.lon) {
+  // Keep a reference: the selection may change while the request is in flight.
+  const form = selectedForm.value;
+  if (!form?.lat || !form?.lon) {
     return;
   }
 
-  const hotspotKey = `${Number(selectedForm.value.lat).toFixed(3)},${Number(selectedForm.value.lon).toFixed(3)}`;
-  if (selectedForm.value.hotspot_key === hotspotKey && Array.isArray(selectedForm.value.hotspots)) {
+  const hotspotKey = `${Number(form.lat).toFixed(3)},${Number(form.lon).toFixed(3)}`;
+  if (form.hotspot_key === hotspotKey && Array.isArray(form.hotspots)) {
     return;
   }
 
   try {
     const response = await fetch(
-      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${selectedForm.value.lat}&lng=${selectedForm.value.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
+      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
     );
     const json = await response.json();
-    selectedForm.value.hotspots = Array.isArray(json) ? json : [];
-    selectedForm.value.hotspot_key = hotspotKey;
-    refreshReviewMap();
+    form.hotspots = Array.isArray(json) ? json : [];
+    form.hotspot_key = hotspotKey;
+    if (selectedForm.value === form) {
+      refreshReviewMap();
+    }
   } catch {
-    selectedForm.value.hotspots = [];
-    selectedForm.value.hotspot_key = hotspotKey;
+    form.hotspots = [];
+    form.hotspot_key = hotspotKey;
   }
 }
 
@@ -1219,6 +1223,24 @@ function initializeReviewMap() {
   setTimeout(() => reviewMap?.invalidateSize(), 100);
 }
 
+function destroyAssignmentMap() {
+  stopRectangleDraw();
+  if (assignmentMap) {
+    assignmentMap.off();
+    assignmentMap.remove();
+  }
+
+  assignmentMap = null;
+  assignmentSightingsLayer = null;
+  assignmentFormsLayer = null;
+  assignmentBaseLayers = null;
+  assignmentActiveBaseLayer = null;
+  assignmentMapHasInitialView = false;
+  assignmentDrawCaptureEnabled = false;
+  assignmentSelectionLayer = null;
+  assignmentClusterPopupLatLng = null;
+}
+
 function destroyReviewMap() {
   if (reviewMap) {
     reviewMap.off();
@@ -1248,6 +1270,8 @@ watch(
   assignmentMapElement,
   async (value) => {
     if (!value) {
+      // The section unmounts when no casual observations remain; drop the map so a later import starts fresh.
+      destroyAssignmentMap();
       return;
     }
     await nextTick();
@@ -1273,12 +1297,7 @@ onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
   document.removeEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
   document.removeEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
-  stopRectangleDraw();
-  if (assignmentMap) {
-    assignmentMap.off();
-    assignmentMap.remove();
-  }
-  assignmentMapHasInitialView = false;
+  destroyAssignmentMap();
   if (reviewMap) {
     destroyReviewMap();
   }
@@ -1882,7 +1901,7 @@ onMounted(() => {
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
               <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
               <div class="badge bg-secondary">
-                {{ t("checklistObservationCount", { count: selectedSightings.length }) }}
+                {{ t("checklistObservationCount", selectedSightings.length) }}
               </div>
             </div>
 

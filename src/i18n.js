@@ -36,6 +36,10 @@ export const i18n = createI18n({
   locale: "en",
   fallbackLocale: "en",
   messages: { en },
+  pluralRules: {
+    // French uses the singular for 0 and 1 ("0 liste", "1 liste").
+    fr: (choice, choicesLength) => (choicesLength === 2 && choice <= 1 ? 0 : Math.min(choice, choicesLength - 1)),
+  },
 });
 
 const loadingLocales = new Map();
