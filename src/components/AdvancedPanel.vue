@@ -83,7 +83,6 @@ let assignmentSelectionActive = false;
 let assignmentSelectionStart = null;
 let assignmentSelectionLayer = null;
 let assignmentSelectionDragging = false;
-let assignmentClusterPopupLatLng = null;
 
 let reviewMap = null;
 let reviewSightingsLayer = null;
@@ -808,12 +807,9 @@ function assignmentSightingsNearLatLng(latlng) {
 function assignmentClusterPopupContent(latlng) {
   const sameLocationSightings = assignmentSightingsNearLatLng(latlng);
   if (sameLocationSightings.length <= 1) {
-    assignmentClusterPopupLatLng = null;
     assignmentMap?.closePopup();
     return null;
   }
-
-  assignmentClusterPopupLatLng = latlng;
 
   const container = document.createElement("div");
   container.className = "map-popup map-popup-cluster";
@@ -974,15 +970,6 @@ function applyAssignmentBaseLayer(layerName) {
   assignmentActiveBaseLayer = nextLayer;
 }
 
-function rebuildAssignmentSightingsLayer() {
-  if (!assignmentMap) {
-    return;
-  }
-
-  createAssignmentSightingsLayer();
-  refreshAssignmentMap();
-}
-
 function hotspotPopupContent(hotspot) {
   const container = document.createElement("div");
   container.className = "map-popup";
@@ -1100,9 +1087,6 @@ function initializeAssignmentMap() {
   assignmentMap.on("mousedown", onAssignmentSelectionMouseDown);
   assignmentMap.on("mousemove", onAssignmentSelectionMouseMove);
   assignmentMap.on("mouseup", onAssignmentSelectionMouseUp);
-  assignmentMap.on("popupclose", () => {
-    assignmentClusterPopupLatLng = null;
-  });
   assignmentMap.on("baselayerchange", (event) => {
     assignmentActiveBaseLayer = event.layer;
     emit("update:assignmentMapBaseLayer", event.name);
@@ -1241,7 +1225,6 @@ function destroyAssignmentMap() {
   assignmentMapHasInitialView = false;
   assignmentDrawCaptureEnabled = false;
   assignmentSelectionLayer = null;
-  assignmentClusterPopupLatLng = null;
 }
 
 function destroyReviewMap() {
@@ -1348,9 +1331,9 @@ onMounted(() => {
 
           <div class="assignment-map-controls">
             <button
+              v-tooltip:top="t('createChecklistTooltip')"
               class="btn btn-success w-100 mb-2 d-inline-flex align-items-center justify-content-center gap-2"
               type="button"
-              v-tooltip:top="t('createChecklistTooltip')"
               :aria-label="t('createChecklistTooltip')"
               @click="startRectangleDraw('create')"
             >
@@ -1409,9 +1392,9 @@ onMounted(() => {
                 </div>
               </div>
               <button
+                v-tooltip:top="t('assignToChecklistTooltip')"
                 class="btn btn-primary btn-icon"
                 type="button"
-                v-tooltip:top="t('assignToChecklistTooltip')"
                 :aria-label="t('assignToChecklistTooltip')"
                 @click="startRectangleDraw('assign')"
               >
@@ -1420,18 +1403,18 @@ onMounted(() => {
             </div>
             <div class="btn-group w-100">
               <button
+                v-tooltip:top="t('assignCleanTooltip')"
                 class="btn btn-outline-warning btn-icon"
                 type="button"
-                v-tooltip:top="t('assignCleanTooltip')"
                 :aria-label="t('assignCleanTooltip')"
                 @click="assignClean"
               >
                 <i class="bi bi-eraser" aria-hidden="true"></i>
               </button>
               <button
+                v-tooltip:top="t('assignResetTooltip')"
                 class="btn btn-outline-danger btn-icon"
                 type="button"
-                v-tooltip:top="t('assignResetTooltip')"
                 :aria-label="t('assignResetTooltip')"
                 @click="assignReset"
               >
@@ -1483,9 +1466,9 @@ onMounted(() => {
             </div>
 
             <button
+              v-tooltip:top="t('assignmentMagicTooltip')"
               class="btn btn-primary assignment-magic-action d-inline-flex align-items-center justify-content-center gap-2"
               type="button"
-              v-tooltip:top="t('assignmentMagicTooltip')"
               :aria-label="t('assignmentMagicTooltip')"
               @click="assignMagic"
             >
@@ -1628,9 +1611,9 @@ onMounted(() => {
                   :maxlength="LOCATION_NAME_MAX_LENGTH"
                 />
                 <button
+                  v-tooltip:top="t('focusMapTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('focusMapTooltip')"
                   :aria-label="t('focusMapTooltip')"
                   @click="focusReviewMap"
                 >
@@ -1659,9 +1642,9 @@ onMounted(() => {
                   type="date"
                 />
                 <button
+                  v-tooltip:top="t('computeDateTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeDateTooltip')"
                   :aria-label="t('computeDateTooltip')"
                   @click="computeDateFromSightings"
                 >
@@ -1692,9 +1675,9 @@ onMounted(() => {
                   step="60"
                 />
                 <button
+                  v-tooltip:top="t('computeTimeTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeTimeTooltip')"
                   :aria-label="t('computeTimeTooltip')"
                   @click="computeTimeFromSightings"
                 >
@@ -1714,9 +1697,9 @@ onMounted(() => {
                   max="1440"
                 />
                 <button
+                  v-tooltip:top="t('computeDurationTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeDurationTooltip')"
                   :aria-label="t('computeDurationTooltip')"
                   @click="computeDurationFromSightings"
                 >
@@ -1737,9 +1720,9 @@ onMounted(() => {
                   step="0.1"
                 />
                 <button
+                  v-tooltip:top="t('drawPathTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('drawPathTooltip')"
                   :aria-label="t('drawPathTooltip')"
                   @click="startPathDraw"
                 >
@@ -1751,12 +1734,12 @@ onMounted(() => {
               <div class="d-flex align-items-center gap-2">
                 <label class="form-label mb-0">{{ t("effort") }}</label>
                 <a
+                  v-tooltip:top="'eBird effort help'"
                   href="https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists"
                   target="_blank"
                   rel="noopener"
                   class="d-inline-flex align-items-center text-primary text-decoration-none"
                   aria-label="eBird effort help"
-                  v-tooltip:top="'eBird effort help'"
                 >
                   <i class="bi bi-question-circle-fill" aria-hidden="true"></i>
                 </a>
@@ -1792,9 +1775,9 @@ onMounted(() => {
                 <div ref="reviewMapElement" class="review-map rounded border"></div>
                 <div class="review-map-controls">
                   <button
+                    v-tooltip:left="t('drawPathTooltip')"
                     class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
                     type="button"
-                    v-tooltip:left="t('drawPathTooltip')"
                     :aria-label="t('drawPathTooltip')"
                     @click="startPathDraw"
                   >
@@ -1927,7 +1910,8 @@ onMounted(() => {
                   >
                     <td class="text-nowrap">{{ row.count }}</td>
                     <td>{{ row.common_name || t("observationTableMissingSpecies") }}</td>
-                    <td class="checklist-observations-comment" v-html="row.species_comment || ''"></td>
+                    <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
+                    <td class="checklist-observations-comment" v-html="row.species_comment"></td>
                   </tr>
                 </tbody>
               </table>

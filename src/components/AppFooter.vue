@@ -40,9 +40,9 @@ const supporters = [
       <div class="support-strip-label">{{ t("supportedBy") }}</div>
       <div class="support-strip-list">
         <component
+          :is="supporter.href ? 'a' : 'div'"
           v-for="supporter in supporters"
           :key="supporter.id"
-          :is="supporter.href ? 'a' : 'div'"
           :href="supporter.href || undefined"
           :target="supporter.href ? '_blank' : undefined"
           :rel="supporter.href ? 'noopener' : undefined"

@@ -408,6 +408,7 @@ watch(
             <div class="card bg-light border-0 mb-4">
               <div class="card-body">
                 <h4 class="h6">{{ t("preview") }}</h4>
+                <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
                 <div class="html-preview" v-html="speciesCommentPreview"></div>
               </div>
             </div>
@@ -476,6 +477,7 @@ watch(
             <div class="card bg-light border-0 mb-4">
               <div class="card-body">
                 <h4 class="h6">{{ t("longTemplatePreview") }}</h4>
+                <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
                 <div class="html-preview" v-html="speciesCommentLongPreview"></div>
               </div>
             </div>
