@@ -33,6 +33,10 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    include: ["test/**/*.test.js"],
+    environment: "node",
+  },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
     __APP_LICENSE__: JSON.stringify(packageJson.license),

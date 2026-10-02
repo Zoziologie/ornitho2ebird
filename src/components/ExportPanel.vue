@@ -1,18 +1,15 @@
 <script setup>
 import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { formatNumber, mathRound } from "../lib/utils";
 import {
-  checklistComment,
-  buildSpeciesRows,
-  formatDate,
-  formatNumber,
-  mathRound,
-  normalizeLocationName,
-  protocol,
-} from "../lib/utils";
-import { buildStaticMapUrl } from "../lib/staticMap";
+  buildExportRows,
+  exportableFormsOf,
+  groupSightingsByForm,
+  rowsToCsv,
+} from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
-import { buildInteractiveMapViewerUrl, createInteractiveMapGist } from "../lib/interactiveMap";
+import { createInteractiveMapGist } from "../lib/interactiveMap";
 import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
 
 const props = defineProps({
@@ -61,7 +58,6 @@ const TAXONOMY_WARNING_LIST_LIMIT = 12;
 const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues/new";
 const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
 const EBIRD_MAP_URL = "https://ebird.org/map/";
-const EBIRD_COMMENT_MAX_LENGTH = 8000;
 // ~17k entries, always replaced as a whole: no need for deep reactivity.
 const taxonomyCommonNameByCode = shallowRef(new Map());
 const taxonomyStatus = ref("idle");
@@ -74,11 +70,7 @@ const interactiveMapError = ref("");
 const interactiveMapStatusByFormId = ref({});
 let taxonomyRequestId = 0;
 
-const exportableForms = computed(() => {
-  return props.forms
-    .map((form) => ({ form, protocolState: protocol(form) }))
-    .filter(({ form, protocolState }) => form.exportable && protocolState.name !== "Invalid");
-});
+const exportableForms = computed(() => exportableFormsOf(props.forms));
 
 const activeSpeciesCommentTemplate = computed(() => {
   return props.customizedSpeciesComments ? props.speciesCommentTemplate : null;
@@ -120,47 +112,15 @@ function taxonomyMatchedCommonName(sighting) {
   return taxonomyCommonNameByCode.value.get(speciesCode) || sighting?.common_name || "";
 }
 
-const exportableSightingsByFormId = computed(() => {
-  const formIds = new Set(exportableForms.value.map(({ form }) => form.id));
-  const sightingsByFormId = new Map();
-
-  const appendSighting = (sighting) => {
-    if (!formIds.has(sighting.form_id)) {
-      return;
-    }
-
-    const groupedSightings = sightingsByFormId.get(sighting.form_id) || [];
-    groupedSightings.push(sighting);
-    sightingsByFormId.set(sighting.form_id, groupedSightings);
-  };
-
-  props.sightings.forEach(appendSighting);
-  props.formsSightings.forEach((formSightings) => formSightings.forEach(appendSighting));
-  return sightingsByFormId;
-});
+const exportableSightingsByFormId = computed(() =>
+  groupSightingsByForm(exportableForms.value, props.sightings, props.formsSightings),
+);
 
 const taxonomyNeededForExport = computed(() => {
   return [...exportableSightingsByFormId.value.values()].some((group) => {
     return group.some((sighting) => sighting.system === "ornitho");
   });
 });
-
-function escapeCsvValue(value) {
-  const normalized = value ?? "";
-  const stringValue = String(normalized).replace(/\r\n|\r|\n/g, " ");
-  const escaped = stringValue.replaceAll('"', '""');
-  return /[",]/.test(escaped) ? `"${escaped}"` : escaped;
-}
-
-function rowsToCsv(rows) {
-  return rows
-    .map((row) => {
-      return Object.values(row)
-        .map((value) => escapeCsvValue(value))
-        .join(",");
-    })
-    .join("\n");
-}
 
 function buildExportFilename() {
   const now = new Date();
@@ -198,96 +158,15 @@ function cancelEditingExportFilename() {
   exportFilenameEditing.value = false;
 }
 
-function maxStaticMapUrlLengthForComment(form, sightings, importedWithText, interactiveMapUrl = "") {
-  const commentWithoutMap = checklistComment(form, sightings, importedWithText, {
-    staticMapUrl: "",
-    interactiveMapUrl,
-  });
-  const placeholderUrl = "x";
-  const commentWithPlaceholderMap = checklistComment(form, sightings, importedWithText, {
-    staticMapUrl: placeholderUrl,
-    interactiveMapUrl,
-  });
-  const staticMapWrapperLength = commentWithPlaceholderMap.length - commentWithoutMap.length - placeholderUrl.length;
-  return Math.max(0, EBIRD_COMMENT_MAX_LENGTH - commentWithoutMap.length - staticMapWrapperLength);
-}
-
 const exportState = computed(() => {
-  const errors = [];
-  const sightingsByFormId = exportableSightingsByFormId.value;
-
-  const rows = exportableForms.value.flatMap(({ form, protocolState }) => {
-    const formSightings = sightingsByFormId.get(form.id) || [];
-    const interactiveMapUrl =
-      props.globalStaticMap?.interactive && form.include_static_map !== false && form.interactive_map_url
-        ? buildInteractiveMapViewerUrl(form.interactive_map_url)
-        : "";
-    const maxStaticMapUrlLength = maxStaticMapUrlLengthForComment(
-      form,
-      formSightings,
-      t("importedWith"),
-      interactiveMapUrl
-    );
-    const staticMapUrl =
-      form.include_static_map !== false && maxStaticMapUrlLength > 0
-        ? buildStaticMapUrl({
-            form,
-            sightings: formSightings,
-            token: props.mapboxToken,
-            settings: props.globalStaticMap,
-            width: 640,
-            height: 420,
-            maxUrlLength: maxStaticMapUrlLength,
-          }).url
-        : "";
-    const mergedComment = checklistComment(form, formSightings, t("importedWith"), {
-      staticMapUrl,
-      interactiveMapUrl,
-    });
-    return buildSpeciesRows(formSightings, activeSpeciesCommentTemplate.value, taxonomyMatchedCommonName).map((speciesRow) => {
-      const row = {
-        common_name: speciesRow.common_name,
-        Genus: "",
-        Species: "",
-        count: speciesRow.count,
-        species_comment: speciesRow.species_comment,
-        location_name: normalizeLocationName(form.location_name),
-        latitude: form.lat ?? "",
-        longitude: form.lon ?? "",
-        date: formatDate(form.date, "/"),
-        time: form.time ? form.time.substring(0, 5) : "",
-        state: "",
-        country: "",
-        protocol: protocolState.name,
-        number_observer: form.number_observer,
-        Duration: Number(form.duration) > 0 ? form.duration : "",
-        full_form: form.full_form ? "Y" : "N",
-        distance: Number(form.distance) > 0 ? mathRound(Number(form.distance) * 0.621371, 3) : "",
-        area_covered: "",
-        checklist_comment: mergedComment,
-      };
-
-      if (!row.common_name) {
-        errors.push(row);
-      }
-      if (row.count !== "X" && Number(row.count) > 999999) {
-        errors.push(row);
-      }
-      if (row.count !== "X" && Number(row.count) < 0) {
-        errors.push(row);
-      }
-      if ((row.species_comment || "").length > EBIRD_COMMENT_MAX_LENGTH) {
-        errors.push(row);
-      }
-      if ((row.checklist_comment || "").length > EBIRD_COMMENT_MAX_LENGTH) {
-        errors.push(row);
-      }
-      if (!row.date) {
-        errors.push(row);
-      }
-
-      return row;
-    });
+  const { rows, errors } = buildExportRows({
+    exportableForms: exportableForms.value,
+    sightingsByFormId: exportableSightingsByFormId.value,
+    speciesCommentTemplate: activeSpeciesCommentTemplate.value,
+    commonNameForSighting: taxonomyMatchedCommonName,
+    importedWithText: t("importedWith"),
+    mapboxToken: props.mapboxToken,
+    globalStaticMap: props.globalStaticMap,
   });
 
   if (errors.length > 0) {

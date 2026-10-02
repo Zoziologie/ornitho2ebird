@@ -1,24 +1,22 @@
-name: Build and Deploy
+name: CI
 on:
+  pull_request:
   push:
-    branches:
+    branches-ignore:
       - master
+      - gh-pages
+      - l10n_master
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  test-and-build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -37,12 +35,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
-
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
