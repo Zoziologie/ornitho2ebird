@@ -241,13 +241,26 @@ function updateDocumentMetadata(language) {
   updateMeta('meta[name="twitter:description"]', "content", description);
 }
 
+// Debounced: typing in a custom template would otherwise serialise all settings on every keystroke.
+let settingsWriteTimer = null;
+function writeSettings() {
+  clearTimeout(settingsWriteTimer);
+  settingsWriteTimer = null;
+  writeStorage(`${APP_STORAGE_PREFIX}:settings`, settings);
+}
 watch(
   settings,
-  (value) => {
-    writeStorage(`${APP_STORAGE_PREFIX}:settings`, value);
+  () => {
+    clearTimeout(settingsWriteTimer);
+    settingsWriteTimer = setTimeout(writeSettings, 300);
   },
   { deep: true },
 );
+window.addEventListener("pagehide", () => {
+  if (settingsWriteTimer) {
+    writeSettings();
+  }
+});
 
 watch(
   () => settings.uiLanguage,

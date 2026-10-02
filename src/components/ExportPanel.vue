@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   checklistComment,
@@ -61,7 +61,8 @@ const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issu
 const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
 const EBIRD_MAP_URL = "https://ebird.org/map/";
 const EBIRD_COMMENT_MAX_LENGTH = 8000;
-const taxonomyCommonNameByCode = ref(new Map());
+// ~17k entries, always replaced as a whole: no need for deep reactivity.
+const taxonomyCommonNameByCode = shallowRef(new Map());
 const taxonomyStatus = ref("idle");
 const taxonomyReportCodeByIssue = ref({});
 const exportFilename = ref(buildExportFilename());

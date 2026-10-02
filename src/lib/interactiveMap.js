@@ -104,7 +104,8 @@ export async function createInteractiveMapGist({
     },
     body: JSON.stringify({
       description: `ornitho2ebird interactive map for ${form?.location_name || "checklist"}`,
-      public: true,
+      // Secret: not listed on the profile, but the raw URL used by the viewer still works.
+      public: false,
       files: {
         [filename]: {
           content,

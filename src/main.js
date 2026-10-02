@@ -18,12 +18,13 @@ app.directive("tooltip", {
     element._tooltip = new Tooltip(element);
   },
   updated(element, binding) {
+    // Runs on every parent re-render: only touch the tooltip when its text changed.
+    if (binding.value === binding.oldValue) {
+      return;
+    }
     const title = typeof binding.value === "string" ? binding.value : "";
     element.setAttribute("data-bs-title", title);
-    if (element._tooltip) {
-      element._tooltip.dispose();
-    }
-    element._tooltip = new Tooltip(element);
+    element._tooltip?.setContent({ ".tooltip-inner": title });
   },
   unmounted(element) {
     element._tooltip?.dispose();

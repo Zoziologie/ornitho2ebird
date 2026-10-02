@@ -1,3 +1,4 @@
+import { markRaw } from "vue";
 import {
   BASIC_SPECIES_COMMENT_TEMPLATE,
   DEFAULT_SPECIES_COMMENT_TEMPLATE,
@@ -406,8 +407,9 @@ export function buildForm(form, id, options = {}) {
     static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",
     static_map_zoom: Number.isFinite(Number(form.static_map_zoom)) ? Number(form.static_map_zoom) : 12,
     interactive_map_url: form.interactive_map_url || form.static_map?.gist || "",
-    path: form.path || null,
-    hotspots: form.hotspots || [],
+    // Traces and hotspot lists can be large and are only ever replaced as a whole.
+    path: form.path ? markRaw(form.path) : null,
+    hotspots: markRaw(form.hotspots || []),
     hotspot_key: form.hotspot_key || "",
   };
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -290,13 +290,13 @@ async function loadHotspotsForSelectedForm() {
       `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
     );
     const json = await response.json();
-    form.hotspots = Array.isArray(json) ? json : [];
+    form.hotspots = markRaw(Array.isArray(json) ? json : []);
     form.hotspot_key = hotspotKey;
     if (selectedForm.value === form) {
       refreshReviewMap();
     }
   } catch {
-    form.hotspots = [];
+    form.hotspots = markRaw([]);
     form.hotspot_key = hotspotKey;
   }
 }
@@ -341,7 +341,7 @@ function updatePath(path) {
     return;
   }
 
-  selectedForm.value.path = path;
+  selectedForm.value.path = markRaw(path);
   selectedForm.value.distance = newDistance;
   refreshReviewMap();
 }
@@ -555,18 +555,17 @@ async function toggleAssignmentMapFullscreen() {
 }
 
 watch(
-  () => props.forms,
-  (forms) => {
-    if (!forms.length) {
+  () => props.forms.map((form) => form.id),
+  (formIds) => {
+    if (!formIds.length) {
       return;
     }
 
-    const stillExists = forms.some((form) => form.id === props.selectedFormId);
-    if (!stillExists) {
-      emit("update:selectedFormId", forms[0].id);
+    if (!formIds.includes(props.selectedFormId)) {
+      emit("update:selectedFormId", formIds[0]);
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
 watch(
@@ -596,14 +595,17 @@ watch(
   },
 );
 
+// Only read what the maps draw, so typing in checklist fields does not rebuild every marker.
 watch(
-  () => [props.sightings, props.forms],
+  () => [
+    props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
+    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon, form.path, form.hotspots]),
+  ],
   async () => {
     await nextTick();
     refreshAssignmentMap();
     refreshReviewMap();
   },
-  { deep: true },
 );
 
 watch(
