@@ -120,9 +120,13 @@ const importSuccessText = computed(() => {
 // Error whose message is already translated and can be shown as is.
 class ImportError extends Error {}
 
+// Each entry is a column name, or a list of alternative names of which one must be present.
 function requireColumns(rows, columns) {
   const header = Object.keys(rows[0] || {});
-  const missing = columns.filter((column) => !header.includes(column));
+  const missing = columns
+    .map((column) => (Array.isArray(column) ? column : [column]))
+    .filter((alternatives) => !alternatives.some((name) => header.includes(name)))
+    .map((alternatives) => alternatives.join(" / "));
   if (missing.length > 0) {
     throw new ImportError(t("importErrorMissingColumns", { columns: missing.join(", ") }));
   }
@@ -386,7 +390,7 @@ function parseImportFile(rawText, selectedWebsite) {
       skipEmptyLines: true,
       header: true,
     }).data;
-    requireColumns(rows, ["Date", "Time", "Latitude", "Longitude", "Species primary name", "Count"]);
+    requireColumns(rows, ["Date", "Time", "Latitude", "Longitude", ["Species primary name", "Primary language"], "Count"]);
 
     exportData.sightings = rows.map((sighting, index) => {
       return createSighting({
