@@ -1,0 +1,8 @@
+dist/
+docs/
+public/
+data/
+package-lock.json
+src/locales/*.json
+test/fixtures/
+test/golden/__snapshots__/

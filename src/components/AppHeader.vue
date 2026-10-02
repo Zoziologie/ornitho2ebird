@@ -27,7 +27,11 @@ const { t } = useI18n();
         :aria-label="t('appLanguage')"
         @change="emit('update:ui-language', $event.target.value)"
       >
-        <option v-for="languageOption in UI_LANGUAGES" :key="languageOption.value" :value="languageOption.value">
+        <option
+          v-for="languageOption in UI_LANGUAGES"
+          :key="languageOption.value"
+          :value="languageOption.value"
+        >
           {{ languageOption.label }}
         </option>
       </select>

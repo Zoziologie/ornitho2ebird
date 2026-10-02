@@ -70,10 +70,17 @@ export function escapeCsvValue(value) {
 }
 
 export function rowsToCsv(rows) {
-  return rows.map((row) => EXPORT_COLUMNS.map((column) => escapeCsvValue(row[column])).join(",")).join("\n");
+  return rows
+    .map((row) => EXPORT_COLUMNS.map((column) => escapeCsvValue(row[column])).join(","))
+    .join("\n");
 }
 
-function maxStaticMapUrlLengthForComment(form, sightings, importedWithText, interactiveMapUrl = "") {
+function maxStaticMapUrlLengthForComment(
+  form,
+  sightings,
+  importedWithText,
+  interactiveMapUrl = "",
+) {
   const commentWithoutMap = checklistComment(form, sightings, importedWithText, {
     staticMapUrl: "",
     interactiveMapUrl,
@@ -83,7 +90,8 @@ function maxStaticMapUrlLengthForComment(form, sightings, importedWithText, inte
     staticMapUrl: placeholderUrl,
     interactiveMapUrl,
   });
-  const staticMapWrapperLength = commentWithPlaceholderMap.length - commentWithoutMap.length - placeholderUrl.length;
+  const staticMapWrapperLength =
+    commentWithPlaceholderMap.length - commentWithoutMap.length - placeholderUrl.length;
   return Math.max(0, EBIRD_COMMENT_MAX_LENGTH - commentWithoutMap.length - staticMapWrapperLength);
 }
 
@@ -138,34 +146,37 @@ export function buildExportRows({
       staticMapUrl,
       interactiveMapUrl,
     });
-    return buildSpeciesRows(formSightings, speciesCommentTemplate, commonNameForSighting).map((speciesRow) => {
-      const row = {
-        common_name: speciesRow.common_name,
-        Genus: "",
-        Species: "",
-        count: speciesRow.count,
-        species_comment: speciesRow.species_comment,
-        location_name: normalizeLocationName(form.location_name),
-        latitude: form.lat ?? "",
-        longitude: form.lon ?? "",
-        date: formatDate(form.date, "/"),
-        time: form.time ? form.time.substring(0, 5) : "",
-        state: "",
-        country: "",
-        protocol: protocolState.name,
-        number_observer: form.number_observer,
-        Duration: Number(form.duration) > 0 ? form.duration : "",
-        full_form: form.full_form ? "Y" : "N",
-        distance: Number(form.distance) > 0 ? mathRound(Number(form.distance) * KM_TO_MILES, 3) : "",
-        area_covered: "",
-        checklist_comment: mergedComment,
-      };
+    return buildSpeciesRows(formSightings, speciesCommentTemplate, commonNameForSighting).map(
+      (speciesRow) => {
+        const row = {
+          common_name: speciesRow.common_name,
+          Genus: "",
+          Species: "",
+          count: speciesRow.count,
+          species_comment: speciesRow.species_comment,
+          location_name: normalizeLocationName(form.location_name),
+          latitude: form.lat ?? "",
+          longitude: form.lon ?? "",
+          date: formatDate(form.date, "/"),
+          time: form.time ? form.time.substring(0, 5) : "",
+          state: "",
+          country: "",
+          protocol: protocolState.name,
+          number_observer: form.number_observer,
+          Duration: Number(form.duration) > 0 ? form.duration : "",
+          full_form: form.full_form ? "Y" : "N",
+          distance:
+            Number(form.distance) > 0 ? mathRound(Number(form.distance) * KM_TO_MILES, 3) : "",
+          area_covered: "",
+          checklist_comment: mergedComment,
+        };
 
-      if (rowHasError(row)) {
-        errors.push(row);
-      }
-      return row;
-    });
+        if (rowHasError(row)) {
+          errors.push(row);
+        }
+        return row;
+      },
+    );
   });
 
   return { rows, errors };

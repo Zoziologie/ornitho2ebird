@@ -14,9 +14,6 @@ parsedData.data.forEach((row) => {
   species_list[row.id] = row.ebird_species_code;
 });
 
-fs.writeFileSync(
-  "./data/ornitho_species_list_short.json",
-  JSON.stringify(species_list, null, 2)
-);
+fs.writeFileSync("./data/ornitho_species_list_short.json", JSON.stringify(species_list, null, 2));
 
 console.log("Species list saved successfully.");

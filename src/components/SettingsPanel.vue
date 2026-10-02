@@ -98,7 +98,10 @@ const repeatedPreviewSightings = Array.from({ length: 12 }, (_, index) => ({
 
 const shortPreviewSightings = computed(() => {
   const limit = Math.max(1, Number(props.settings.speciesCommentTemplate.limit) || 5);
-  return repeatedPreviewSightings.slice(0, Math.max(1, Math.min(limit - 1, repeatedPreviewSightings.length - 1)));
+  return repeatedPreviewSightings.slice(
+    0,
+    Math.max(1, Math.min(limit - 1, repeatedPreviewSightings.length - 1)),
+  );
 });
 
 const longPreviewSightings = computed(() => {
@@ -114,7 +117,10 @@ const speciesCommentLongPreview = computed(() => {
   return speciesComment(props.settings.speciesCommentTemplate, longPreviewSightings.value);
 });
 
-const propertyRows = Object.entries(previewSighting).map(([property, value]) => [property, String(value)]);
+const propertyRows = Object.entries(previewSighting).map(([property, value]) => [
+  property,
+  String(value),
+]);
 
 const hasPersonalizedTemplate = computed(() => {
   return Boolean(props.settings.speciesCommentTemplateOptions?.personalized);
@@ -159,11 +165,11 @@ watch(
       buildSpeciesCommentTemplateFromOptions(
         props.settings.speciesCommentTemplateOptions,
         props.settings.speciesCommentTemplate.limit,
-        props.settings.speciesCommentLongTemplateOptions
-      )
+        props.settings.speciesCommentLongTemplateOptions,
+      ),
     );
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 watch(
@@ -182,7 +188,7 @@ watch(
     const target = sectionMap[section];
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
     target?.focus?.({ preventScroll: true });
-  }
+  },
 );
 </script>
 
@@ -205,7 +211,9 @@ watch(
             <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
             <div>
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{ t("ebirdLanguage") }}</label>
+                <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{
+                  t("ebirdLanguage")
+                }}</label>
                 <select
                   id="ebird-language-input"
                   ref="ebirdLanguageInputRef"
@@ -231,7 +239,9 @@ watch(
 
             <div class="mt-3">
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{ t("partySize") }}</label>
+                <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{
+                  t("partySize")
+                }}</label>
                 <input
                   id="default-observers-input"
                   v-model.number="settings.defaultNumberObserver"
@@ -277,379 +287,415 @@ watch(
               type="button"
               @click="emit('open-info', 'auto-assignment')"
             >
-            {{ t("aggregationSettingsLearnMore") }}
-          </button>
+              {{ t("aggregationSettingsLearnMore") }}
+            </button>
 
-          <div class="d-flex flex-column gap-3">
-            <div>
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="duration-input">{{ t("autoAssignDuration") }}</label>
-                <input
-                  id="duration-input"
-                  v-model.number="settings.autoAssignDuration"
-                  class="form-control"
-                  type="number"
-                  min="0.1"
-                  max="24"
-                  step="0.5"
-                />
+            <div class="d-flex flex-column gap-3">
+              <div>
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                  <label class="form-label mb-0 flex-shrink-0" for="duration-input">{{
+                    t("autoAssignDuration")
+                  }}</label>
+                  <input
+                    id="duration-input"
+                    v-model.number="settings.autoAssignDuration"
+                    class="form-control"
+                    type="number"
+                    min="0.1"
+                    max="24"
+                    step="0.5"
+                  />
+                </div>
+                <div class="form-text">{{ t("autoAssignDurationHelp") }}</div>
               </div>
-              <div class="form-text">{{ t("autoAssignDurationHelp") }}</div>
-            </div>
 
-            <div>
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="distance-input">{{ t("distance") }}</label>
-                <input
-                  id="distance-input"
-                  v-model.number="settings.autoAssignDistance"
-                  class="form-control"
-                  type="number"
-                  min="0.1"
-                  step="0.5"
-                />
+              <div>
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                  <label class="form-label mb-0 flex-shrink-0" for="distance-input">{{
+                    t("distance")
+                  }}</label>
+                  <input
+                    id="distance-input"
+                    v-model.number="settings.autoAssignDistance"
+                    class="form-control"
+                    type="number"
+                    min="0.1"
+                    step="0.5"
+                  />
+                </div>
+                <div class="form-text">{{ t("distanceHelp") }}</div>
               </div>
-              <div class="form-text">{{ t("distanceHelp") }}</div>
-            </div>
 
-            <div>
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="assignment-map-base-layer-input">
-                  {{ t("assignmentMapBaseLayer") }}
-                </label>
-                <select
-                  id="assignment-map-base-layer-input"
-                  v-model="settings.assignmentMapBaseLayer"
-                  class="form-select"
-                >
-                  <option v-for="option in assignmentMapBaseLayerOptions" :key="option" :value="option">
-                    {{ option }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div ref="speciesCommentRef" class="settings-section">
-          <h3 class="modal-section-title">{{ t("speciesCommentTemplate") }}</h3>
-          <p class="small text-muted mb-3">{{ t("speciesCommentTemplateIntro") }}</p>
-          <div class="form-check form-switch mb-3">
-            <input
-              id="customized-species-comments"
-              v-model="settings.customizedSpeciesComments"
-              class="form-check-input"
-              type="checkbox"
-            />
-            <label class="form-check-label" for="customized-species-comments">
-              {{ t("speciesCommentTemplateHelp") }}
-            </label>
-          </div>
-
-          <div v-if="settings.customizedSpeciesComments">
-            <div v-if="!hasPersonalizedTemplate" class="mb-3">
-              <div v-if="speciesCommentLinkWarningVisible" class="alert alert-danger py-2 px-3 mb-3">
-                {{ t("speciesCommentSourceLinkWarning") }}
-              </div>
-              <h4 class="h6">{{ t("templateRegularFields") }}</h4>
-              <div class="species-comment-options">
-                <div
-                  v-for="item in speciesCommentOptionItems"
-                  :key="item.key"
-                  class="species-comment-option"
-                >
-                  <div class="species-comment-option-main">
-                    <input
-                      :id="`species-comment-option-${item.key}`"
-                      v-model="settings.speciesCommentTemplateOptions[item.key]"
-                      class="form-check-input"
-                      type="checkbox"
-                    />
-                    <label class="species-comment-option-label" :for="`species-comment-option-${item.key}`">
-                      {{ t(item.labelKey) }}
-                    </label>
-                    <label v-if="item.subKey" class="species-comment-inline-option">
-                      <input
-                        v-model="settings.speciesCommentTemplateOptions[item.subKey]"
-                        class="form-check-input"
-                        type="checkbox"
-                        :disabled="!settings.speciesCommentTemplateOptions[item.key]"
-                      />
-                      <span>{{ t(item.subLabelKey) }}</span>
-                    </label>
-                  </div>
+              <div>
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                  <label
+                    class="form-label mb-0 flex-shrink-0"
+                    for="assignment-map-base-layer-input"
+                  >
+                    {{ t("assignmentMapBaseLayer") }}
+                  </label>
+                  <select
+                    id="assignment-map-base-layer-input"
+                    v-model="settings.assignmentMapBaseLayer"
+                    class="form-select"
+                  >
+                    <option
+                      v-for="option in assignmentMapBaseLayerOptions"
+                      :key="option"
+                      :value="option"
+                    >
+                      {{ option }}
+                    </option>
+                  </select>
                 </div>
               </div>
             </div>
+          </div>
 
+          <div ref="speciesCommentRef" class="settings-section">
+            <h3 class="modal-section-title">{{ t("speciesCommentTemplate") }}</h3>
+            <p class="small text-muted mb-3">{{ t("speciesCommentTemplateIntro") }}</p>
             <div class="form-check form-switch mb-3">
               <input
-                id="personalized-species-comments"
-                v-model="settings.speciesCommentTemplateOptions.personalized"
+                id="customized-species-comments"
+                v-model="settings.customizedSpeciesComments"
                 class="form-check-input"
                 type="checkbox"
               />
-              <label class="form-check-label" for="personalized-species-comments">
-                {{ t("templatePersonalized") }}
+              <label class="form-check-label" for="customized-species-comments">
+                {{ t("speciesCommentTemplateHelp") }}
               </label>
             </div>
 
-            <div v-if="hasPersonalizedTemplate" class="mb-3">
-              <label class="form-label" for="short-template-textarea">{{ t("templateRegular") }}</label>
-              <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
-              <textarea
-                id="short-template-textarea"
-                v-model="settings.speciesCommentTemplate.short"
-                class="form-control"
-                rows="4"
-              />
-            </div>
-
-            <div class="card bg-light border-0 mb-4">
-              <div class="card-body">
-                <h4 class="h6">{{ t("preview") }}</h4>
-                <div class="html-preview" v-html="speciesCommentPreview"></div>
-              </div>
-            </div>
-
-            <div class="form-text mb-2">{{ t("longTemplateHelp") }}</div>
-            <div v-if="!hasPersonalizedTemplate" class="mb-3">
-              <h4 class="h6">{{ t("templateLongFields") }}</h4>
-              <div class="species-comment-options">
+            <div v-if="settings.customizedSpeciesComments">
+              <div v-if="!hasPersonalizedTemplate" class="mb-3">
                 <div
-                  v-for="item in speciesCommentOptionItems"
-                  :key="`long-${item.key}`"
-                  class="species-comment-option"
+                  v-if="speciesCommentLinkWarningVisible"
+                  class="alert alert-danger py-2 px-3 mb-3"
                 >
-                  <div class="species-comment-option-main">
-                    <input
-                      :id="`species-comment-long-option-${item.key}`"
-                      v-model="settings.speciesCommentLongTemplateOptions[item.key]"
-                      class="form-check-input"
-                      type="checkbox"
-                    />
-                    <label class="species-comment-option-label" :for="`species-comment-long-option-${item.key}`">
-                      {{ t(item.labelKey) }}
-                    </label>
-                    <label v-if="item.subKey" class="species-comment-inline-option">
+                  {{ t("speciesCommentSourceLinkWarning") }}
+                </div>
+                <h4 class="h6">{{ t("templateRegularFields") }}</h4>
+                <div class="species-comment-options">
+                  <div
+                    v-for="item in speciesCommentOptionItems"
+                    :key="item.key"
+                    class="species-comment-option"
+                  >
+                    <div class="species-comment-option-main">
                       <input
-                        v-model="settings.speciesCommentLongTemplateOptions[item.subKey]"
+                        :id="`species-comment-option-${item.key}`"
+                        v-model="settings.speciesCommentTemplateOptions[item.key]"
                         class="form-check-input"
                         type="checkbox"
-                        :disabled="!settings.speciesCommentLongTemplateOptions[item.key]"
                       />
-                      <span>{{ t(item.subLabelKey) }}</span>
-                    </label>
+                      <label
+                        class="species-comment-option-label"
+                        :for="`species-comment-option-${item.key}`"
+                      >
+                        {{ t(item.labelKey) }}
+                      </label>
+                      <label v-if="item.subKey" class="species-comment-inline-option">
+                        <input
+                          v-model="settings.speciesCommentTemplateOptions[item.subKey]"
+                          class="form-check-input"
+                          type="checkbox"
+                          :disabled="!settings.speciesCommentTemplateOptions[item.key]"
+                        />
+                        <span>{{ t(item.subLabelKey) }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-check form-switch mb-3">
+                <input
+                  id="personalized-species-comments"
+                  v-model="settings.speciesCommentTemplateOptions.personalized"
+                  class="form-check-input"
+                  type="checkbox"
+                />
+                <label class="form-check-label" for="personalized-species-comments">
+                  {{ t("templatePersonalized") }}
+                </label>
+              </div>
+
+              <div v-if="hasPersonalizedTemplate" class="mb-3">
+                <label class="form-label" for="short-template-textarea">{{
+                  t("templateRegular")
+                }}</label>
+                <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
+                <textarea
+                  id="short-template-textarea"
+                  v-model="settings.speciesCommentTemplate.short"
+                  class="form-control"
+                  rows="4"
+                />
+              </div>
+
+              <div class="card bg-light border-0 mb-4">
+                <div class="card-body">
+                  <h4 class="h6">{{ t("preview") }}</h4>
+                  <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
+                  <div class="html-preview" v-html="speciesCommentPreview"></div>
+                </div>
+              </div>
+
+              <div class="form-text mb-2">{{ t("longTemplateHelp") }}</div>
+              <div v-if="!hasPersonalizedTemplate" class="mb-3">
+                <h4 class="h6">{{ t("templateLongFields") }}</h4>
+                <div class="species-comment-options">
+                  <div
+                    v-for="item in speciesCommentOptionItems"
+                    :key="`long-${item.key}`"
+                    class="species-comment-option"
+                  >
+                    <div class="species-comment-option-main">
+                      <input
+                        :id="`species-comment-long-option-${item.key}`"
+                        v-model="settings.speciesCommentLongTemplateOptions[item.key]"
+                        class="form-check-input"
+                        type="checkbox"
+                      />
+                      <label
+                        class="species-comment-option-label"
+                        :for="`species-comment-long-option-${item.key}`"
+                      >
+                        {{ t(item.labelKey) }}
+                      </label>
+                      <label v-if="item.subKey" class="species-comment-inline-option">
+                        <input
+                          v-model="settings.speciesCommentLongTemplateOptions[item.subKey]"
+                          class="form-check-input"
+                          type="checkbox"
+                          :disabled="!settings.speciesCommentLongTemplateOptions[item.key]"
+                        />
+                        <span>{{ t(item.subLabelKey) }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
+                  <label class="form-label mb-0 flex-shrink-0" for="switch-limit-input">{{
+                    t("switchLimit")
+                  }}</label>
+                  <input
+                    id="switch-limit-input"
+                    v-model.number="settings.speciesCommentTemplate.limit"
+                    class="form-control"
+                    :class="{ 'is-invalid': speciesCommentLimitError }"
+                    type="number"
+                    min="1"
+                    step="1"
+                  />
+                </div>
+                <div v-if="speciesCommentLimitError" class="invalid-feedback d-block">
+                  {{ speciesCommentLimitError }}
+                </div>
+              </div>
+
+              <div v-if="hasPersonalizedTemplate" class="mb-4">
+                <label class="form-label" for="long-template-textarea">{{
+                  t("longTemplate")
+                }}</label>
+                <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
+                <textarea
+                  id="long-template-textarea"
+                  v-model="settings.speciesCommentTemplate.long"
+                  class="form-control"
+                  rows="4"
+                />
+              </div>
+
+              <div class="card bg-light border-0 mb-4">
+                <div class="card-body">
+                  <h4 class="h6">{{ t("longTemplatePreview") }}</h4>
+                  <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
+                  <div class="html-preview" v-html="speciesCommentLongPreview"></div>
+                </div>
+              </div>
+
+              <div v-if="hasPersonalizedTemplate" class="card bg-light border-0">
+                <div class="card-body">
+                  <h4 class="h6">{{ t("propertiesTitle") }}</h4>
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                      <thead>
+                        <tr>
+                          <th>{{ t("property") }}</th>
+                          <th>{{ t("value") }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="[property, value] in propertyRows" :key="property">
+                          <td>
+                            <code>{{ property }}</code>
+                          </td>
+                          <td>{{ value }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="mb-3">
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="switch-limit-input">{{ t("switchLimit") }}</label>
-                <input
-                  id="switch-limit-input"
-                  v-model.number="settings.speciesCommentTemplate.limit"
-                  class="form-control"
-                  :class="{ 'is-invalid': speciesCommentLimitError }"
-                  type="number"
-                  min="1"
-                  step="1"
-                />
-              </div>
-              <div v-if="speciesCommentLimitError" class="invalid-feedback d-block">
-                {{ speciesCommentLimitError }}
-              </div>
-            </div>
-
-            <div v-if="hasPersonalizedTemplate" class="mb-4">
-              <label class="form-label" for="long-template-textarea">{{ t("longTemplate") }}</label>
-              <p class="small text-muted mb-2">{{ t("speciesCommentTemplateAdvancedHelp") }}</p>
-              <textarea
-                id="long-template-textarea"
-                v-model="settings.speciesCommentTemplate.long"
-                class="form-control"
-                rows="4"
-              />
-            </div>
-
-            <div class="card bg-light border-0 mb-4">
-              <div class="card-body">
-                <h4 class="h6">{{ t("longTemplatePreview") }}</h4>
-                <div class="html-preview" v-html="speciesCommentLongPreview"></div>
-              </div>
-            </div>
-
-            <div v-if="hasPersonalizedTemplate" class="card bg-light border-0">
-              <div class="card-body">
-                <h4 class="h6">{{ t("propertiesTitle") }}</h4>
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0">
-                    <thead>
-                      <tr>
-                        <th>{{ t("property") }}</th>
-                        <th>{{ t("value") }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="[property, value] in propertyRows" :key="property">
-                        <td><code>{{ property }}</code></td>
-                        <td>{{ value }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <h3 class="modal-section-title">{{ t("staticMapTitle") }}</h3>
-          <div class="form-check form-switch mb-3">
-            <input
-              id="static-map-enabled"
-              v-model="settings.globalStaticMap.show"
-              class="form-check-input"
-              type="checkbox"
-            />
-            <label class="form-check-label" for="static-map-enabled">
-              {{ t("staticMapEnabled") }}
-            </label>
           </div>
 
-          <div v-if="settings.globalStaticMap.show">
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <label class="form-label mb-0">{{ t("mapboxToken") }}</label>
-              <a
-                class="small"
-                href="https://account.mapbox.com/access-tokens/"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ t("mapboxTokenLink") }}
-              </a>
-            </div>
-            <input
-              v-model.trim="settings.mapboxToken"
-              class="form-control"
-              type="text"
-              placeholder="pk.ey..."
-            />
-            <div class="form-text mb-3">{{ t("mapboxTokenHelp") }}</div>
-
-            <div class="mb-3">
-              <label class="form-label mb-0">{{ t("staticMapStyle") }}</label>
-              <select v-model="settings.globalStaticMap.style" class="form-select">
-                <option
-                  v-for="option in staticMapStyleOptions"
-                  :key="option.value"
-                  :value="option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
-            </div>
-
-            <div class="row g-2 mx-0 mb-2">
-              <div class="col-12 px-0">
-                <label class="form-label mb-0">{{ t("pathStyle") }}</label>
-              </div>
-              <div class="col-md-4 px-0 pe-md-1">
-                <input
-                  v-model.number="settings.globalStaticMap.pathStyle.strokeWidth"
-                  class="form-control"
-                  type="number"
-                  min="1"
-                  step="1"
-                  title="line width"
-                />
-              </div>
-              <div class="col-md-4 px-0 px-md-1">
-                <input
-                  v-model="settings.globalStaticMap.pathStyle.strokeColor"
-                  class="form-control form-control-color w-100"
-                  type="color"
-                  title="line color"
-                />
-              </div>
-              <div class="col-md-4 px-0 ps-md-1">
-                <input
-                  v-model.number="settings.globalStaticMap.pathStyle.strokeOpacity"
-                  class="form-control"
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  title="line opacity"
-                />
-              </div>
-            </div>
-
-            <div class="row g-2 mx-0 mb-3">
-              <div class="col-12 px-0">
-                <label class="form-label mb-0">{{ t("markerStyle") }}</label>
-              </div>
-              <div class="col-md-4 px-0 pe-md-1">
-                <select v-model="settings.globalStaticMap.markerStyle.markerSize" class="form-select">
-                  <option value="small">{{ t("small") }}</option>
-                  <option value="medium">{{ t("medium") }}</option>
-                  <option value="large">{{ t("large") }}</option>
-                </select>
-              </div>
-              <div class="col-md-4 px-0 px-md-1">
-                <select v-model="settings.globalStaticMap.markerStyle.markerSymbol" class="form-select">
-                  <option v-for="symbol in markerSymbolOptions" :key="symbol" :value="symbol">
-                    {{ symbol }}
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-4 px-0 ps-md-1">
-                <input
-                  v-model="settings.globalStaticMap.markerStyle.markerColor"
-                  class="form-control form-control-color w-100"
-                  type="color"
-                />
-              </div>
-            </div>
-
-            <h4 class="h6 mb-2">{{ t("interactiveMapTitle") }}</h4>
-            <div class="form-check form-switch mb-2">
+          <div class="settings-section">
+            <h3 class="modal-section-title">{{ t("staticMapTitle") }}</h3>
+            <div class="form-check form-switch mb-3">
               <input
-                id="interactive-map-enabled"
-                v-model="settings.globalStaticMap.interactive"
+                id="static-map-enabled"
+                v-model="settings.globalStaticMap.show"
                 class="form-check-input"
                 type="checkbox"
               />
-              <label class="form-check-label" for="interactive-map-enabled">
-                {{ t("interactiveMapEnabled") }}
+              <label class="form-check-label" for="static-map-enabled">
+                {{ t("staticMapEnabled") }}
               </label>
             </div>
 
-            <div v-if="settings.globalStaticMap.interactive">
-              <div class="form-text mb-3">{{ t("interactiveMapHelp") }}</div>
+            <div v-if="settings.globalStaticMap.show">
               <div class="d-flex align-items-center justify-content-between gap-2">
-                <label class="form-label mb-0">{{ t("githubToken") }}</label>
+                <label class="form-label mb-0">{{ t("mapboxToken") }}</label>
                 <a
                   class="small"
-                  href="https://github.com/settings/tokens/new?scopes=gist&description=ornitho2ebird"
+                  href="https://account.mapbox.com/access-tokens/"
                   target="_blank"
                   rel="noopener"
                 >
-                  {{ t("githubTokenLink") }}
+                  {{ t("mapboxTokenLink") }}
                 </a>
               </div>
               <input
-                v-model.trim="settings.githubToken"
+                v-model.trim="settings.mapboxToken"
                 class="form-control"
                 type="text"
-                placeholder="github_pat_..."
+                placeholder="pk.ey..."
               />
-              <div class="form-text">{{ t("githubTokenHelp") }}</div>
+              <div class="form-text mb-3">{{ t("mapboxTokenHelp") }}</div>
+
+              <div class="mb-3">
+                <label class="form-label mb-0">{{ t("staticMapStyle") }}</label>
+                <select v-model="settings.globalStaticMap.style" class="form-select">
+                  <option
+                    v-for="option in staticMapStyleOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="row g-2 mx-0 mb-2">
+                <div class="col-12 px-0">
+                  <label class="form-label mb-0">{{ t("pathStyle") }}</label>
+                </div>
+                <div class="col-md-4 px-0 pe-md-1">
+                  <input
+                    v-model.number="settings.globalStaticMap.pathStyle.strokeWidth"
+                    class="form-control"
+                    type="number"
+                    min="1"
+                    step="1"
+                    title="line width"
+                  />
+                </div>
+                <div class="col-md-4 px-0 px-md-1">
+                  <input
+                    v-model="settings.globalStaticMap.pathStyle.strokeColor"
+                    class="form-control form-control-color w-100"
+                    type="color"
+                    title="line color"
+                  />
+                </div>
+                <div class="col-md-4 px-0 ps-md-1">
+                  <input
+                    v-model.number="settings.globalStaticMap.pathStyle.strokeOpacity"
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    title="line opacity"
+                  />
+                </div>
+              </div>
+
+              <div class="row g-2 mx-0 mb-3">
+                <div class="col-12 px-0">
+                  <label class="form-label mb-0">{{ t("markerStyle") }}</label>
+                </div>
+                <div class="col-md-4 px-0 pe-md-1">
+                  <select
+                    v-model="settings.globalStaticMap.markerStyle.markerSize"
+                    class="form-select"
+                  >
+                    <option value="small">{{ t("small") }}</option>
+                    <option value="medium">{{ t("medium") }}</option>
+                    <option value="large">{{ t("large") }}</option>
+                  </select>
+                </div>
+                <div class="col-md-4 px-0 px-md-1">
+                  <select
+                    v-model="settings.globalStaticMap.markerStyle.markerSymbol"
+                    class="form-select"
+                  >
+                    <option v-for="symbol in markerSymbolOptions" :key="symbol" :value="symbol">
+                      {{ symbol }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-md-4 px-0 ps-md-1">
+                  <input
+                    v-model="settings.globalStaticMap.markerStyle.markerColor"
+                    class="form-control form-control-color w-100"
+                    type="color"
+                  />
+                </div>
+              </div>
+
+              <h4 class="h6 mb-2">{{ t("interactiveMapTitle") }}</h4>
+              <div class="form-check form-switch mb-2">
+                <input
+                  id="interactive-map-enabled"
+                  v-model="settings.globalStaticMap.interactive"
+                  class="form-check-input"
+                  type="checkbox"
+                />
+                <label class="form-check-label" for="interactive-map-enabled">
+                  {{ t("interactiveMapEnabled") }}
+                </label>
+              </div>
+
+              <div v-if="settings.globalStaticMap.interactive">
+                <div class="form-text mb-3">{{ t("interactiveMapHelp") }}</div>
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                  <label class="form-label mb-0">{{ t("githubToken") }}</label>
+                  <a
+                    class="small"
+                    href="https://github.com/settings/tokens/new?scopes=gist&description=ornitho2ebird"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {{ t("githubTokenLink") }}
+                  </a>
+                </div>
+                <input
+                  v-model.trim="settings.githubToken"
+                  class="form-control"
+                  type="text"
+                  placeholder="github_pat_..."
+                />
+                <div class="form-text">{{ t("githubTokenHelp") }}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </section>
   </div>

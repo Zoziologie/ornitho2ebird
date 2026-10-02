@@ -51,11 +51,7 @@ const props = defineProps({
   assignmentMapBaseLayer: { type: String, default: "OpenStreetMap" },
 });
 
-const emit = defineEmits([
-  "update:selectedFormId",
-  "update:assignmentMapBaseLayer",
-  "open-info",
-]);
+const emit = defineEmits(["update:selectedFormId", "update:assignmentMapBaseLayer", "open-info"]);
 const { t } = useI18n();
 
 const assignDuration = ref(props.defaultAssignDuration || 1);
@@ -83,7 +79,6 @@ let assignmentSelectionActive = false;
 let assignmentSelectionStart = null;
 let assignmentSelectionLayer = null;
 let assignmentSelectionDragging = false;
-let assignmentClusterPopupLatLng = null;
 
 let reviewMap = null;
 let reviewSightingsLayer = null;
@@ -599,7 +594,14 @@ watch(
 watch(
   () => [
     props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
-    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon, form.path, form.hotspots]),
+    props.forms.map((form) => [
+      form.id,
+      form.imported,
+      form.lat,
+      form.lon,
+      form.path,
+      form.hotspots,
+    ]),
   ],
   async () => {
     await nextTick();
@@ -766,8 +768,7 @@ function assignmentClusterIcon(cluster) {
     .map((marker) => Number(marker.options.formId))
     .filter((value) => Number.isFinite(value));
   const uniqueFormIds = [...new Set(formIds)];
-  const clusterColor =
-    uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
+  const clusterColor = uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
   const clusterTextColor = clusterColor === "#ffff33" ? "#223846" : "#ffffff";
 
   return L.divIcon({
@@ -794,7 +795,8 @@ function assignmentSightingsNearLatLng(latlng) {
   return props.sightings
     .filter((sighting) => {
       return (
-        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) * 1000 <=
+        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) *
+          1000 <=
         ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS
       );
     })
@@ -808,12 +810,9 @@ function assignmentSightingsNearLatLng(latlng) {
 function assignmentClusterPopupContent(latlng) {
   const sameLocationSightings = assignmentSightingsNearLatLng(latlng);
   if (sameLocationSightings.length <= 1) {
-    assignmentClusterPopupLatLng = null;
     assignmentMap?.closePopup();
     return null;
   }
-
-  assignmentClusterPopupLatLng = latlng;
 
   const container = document.createElement("div");
   container.className = "map-popup map-popup-cluster";
@@ -865,7 +864,7 @@ function assignmentClusterPopupContent(latlng) {
     const countValue = document.createElement("span");
     countValue.className = "map-popup-compact-item";
     const countParts = [sighting.count_precision, sighting.count].filter(
-      (value) => value !== null && value !== ""
+      (value) => value !== null && value !== "",
     );
     countValue.textContent = countParts.length ? countParts.join("") : "—";
     meta.appendChild(countValue);
@@ -921,10 +920,7 @@ function openAssignmentClusterPopup(latlng) {
     return;
   }
 
-  L.popup({ maxWidth: 420 })
-    .setLatLng(latlng)
-    .setContent(content)
-    .openOn(assignmentMap);
+  L.popup({ maxWidth: 420 }).setLatLng(latlng).setContent(content).openOn(assignmentMap);
 }
 
 function onAssignmentClusterClick(event) {
@@ -972,15 +968,6 @@ function applyAssignmentBaseLayer(layerName) {
 
   nextLayer.addTo(assignmentMap);
   assignmentActiveBaseLayer = nextLayer;
-}
-
-function rebuildAssignmentSightingsLayer() {
-  if (!assignmentMap) {
-    return;
-  }
-
-  createAssignmentSightingsLayer();
-  refreshAssignmentMap();
 }
 
 function hotspotPopupContent(hotspot) {
@@ -1100,9 +1087,6 @@ function initializeAssignmentMap() {
   assignmentMap.on("mousedown", onAssignmentSelectionMouseDown);
   assignmentMap.on("mousemove", onAssignmentSelectionMouseMove);
   assignmentMap.on("mouseup", onAssignmentSelectionMouseUp);
-  assignmentMap.on("popupclose", () => {
-    assignmentClusterPopupLatLng = null;
-  });
   assignmentMap.on("baselayerchange", (event) => {
     assignmentActiveBaseLayer = event.layer;
     emit("update:assignmentMapBaseLayer", event.name);
@@ -1241,7 +1225,6 @@ function destroyAssignmentMap() {
   assignmentMapHasInitialView = false;
   assignmentDrawCaptureEnabled = false;
   assignmentSelectionLayer = null;
-  assignmentClusterPopupLatLng = null;
 }
 
 function destroyReviewMap() {
@@ -1331,10 +1314,14 @@ onMounted(() => {
             class="assignment-map-fullscreen btn btn-light btn-sm"
             type="button"
             :aria-label="
-              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+              assignmentMapFullscreen
+                ? t('assignmentMapExitFullscreen')
+                : t('assignmentMapEnterFullscreen')
             "
             :title="
-              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+              assignmentMapFullscreen
+                ? t('assignmentMapExitFullscreen')
+                : t('assignmentMapEnterFullscreen')
             "
             :aria-pressed="assignmentMapFullscreen"
             @click="toggleAssignmentMapFullscreen"
@@ -1348,9 +1335,9 @@ onMounted(() => {
 
           <div class="assignment-map-controls">
             <button
+              v-tooltip:top="t('createChecklistTooltip')"
               class="btn btn-success w-100 mb-2 d-inline-flex align-items-center justify-content-center gap-2"
               type="button"
-              v-tooltip:top="t('createChecklistTooltip')"
               :aria-label="t('createChecklistTooltip')"
               @click="startRectangleDraw('create')"
             >
@@ -1409,9 +1396,9 @@ onMounted(() => {
                 </div>
               </div>
               <button
+                v-tooltip:top="t('assignToChecklistTooltip')"
                 class="btn btn-primary btn-icon"
                 type="button"
-                v-tooltip:top="t('assignToChecklistTooltip')"
                 :aria-label="t('assignToChecklistTooltip')"
                 @click="startRectangleDraw('assign')"
               >
@@ -1420,18 +1407,18 @@ onMounted(() => {
             </div>
             <div class="btn-group w-100">
               <button
+                v-tooltip:top="t('assignCleanTooltip')"
                 class="btn btn-outline-warning btn-icon"
                 type="button"
-                v-tooltip:top="t('assignCleanTooltip')"
                 :aria-label="t('assignCleanTooltip')"
                 @click="assignClean"
               >
                 <i class="bi bi-eraser" aria-hidden="true"></i>
               </button>
               <button
+                v-tooltip:top="t('assignResetTooltip')"
                 class="btn btn-outline-danger btn-icon"
                 type="button"
-                v-tooltip:top="t('assignResetTooltip')"
                 :aria-label="t('assignResetTooltip')"
                 @click="assignReset"
               >
@@ -1483,9 +1470,9 @@ onMounted(() => {
             </div>
 
             <button
+              v-tooltip:top="t('assignmentMagicTooltip')"
               class="btn btn-primary assignment-magic-action d-inline-flex align-items-center justify-content-center gap-2"
               type="button"
-              v-tooltip:top="t('assignmentMagicTooltip')"
               :aria-label="t('assignmentMagicTooltip')"
               @click="assignMagic"
             >
@@ -1582,7 +1569,9 @@ onMounted(() => {
                 @click="observationsModalOpen = true"
               >
                 <i class="bi bi-list-ul" aria-hidden="true"></i>
-                <span>{{ t("viewChecklistObservations", { count: selectedSightings.length }) }}</span>
+                <span>{{
+                  t("viewChecklistObservations", { count: selectedSightings.length })
+                }}</span>
               </button>
             </div>
             <div class="form-check form-switch mt-2">
@@ -1606,9 +1595,16 @@ onMounted(() => {
             </div>
             <div v-if="selectedSightings.length === 0 || isInvalid" class="alert alert-danger mb-0">
               <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
-              <div v-if="selectedSightings.length === 0" class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+              <div
+                v-if="selectedSightings.length === 0"
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+              >
                 <p class="mb-0">{{ t("warningNoSightings") }}</p>
-                <button class="btn btn-outline-danger btn-sm flex-shrink-0" type="button" @click="deleteSelectedChecklist">
+                <button
+                  class="btn btn-outline-danger btn-sm flex-shrink-0"
+                  type="button"
+                  @click="deleteSelectedChecklist"
+                >
                   {{ t("deleteChecklist") }}
                 </button>
               </div>
@@ -1628,9 +1624,9 @@ onMounted(() => {
                   :maxlength="LOCATION_NAME_MAX_LENGTH"
                 />
                 <button
+                  v-tooltip:top="t('focusMapTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('focusMapTooltip')"
                   :aria-label="t('focusMapTooltip')"
                   @click="focusReviewMap"
                 >
@@ -1639,7 +1635,10 @@ onMounted(() => {
               </div>
               <div
                 class="form-text"
-                :class="{ 'text-warning': (selectedForm.location_name || '').length >= LOCATION_NAME_MAX_LENGTH }"
+                :class="{
+                  'text-warning':
+                    (selectedForm.location_name || '').length >= LOCATION_NAME_MAX_LENGTH,
+                }"
               >
                 {{
                   t("locationNameLimitHint", {
@@ -1659,9 +1658,9 @@ onMounted(() => {
                   type="date"
                 />
                 <button
+                  v-tooltip:top="t('computeDateTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeDateTooltip')"
                   :aria-label="t('computeDateTooltip')"
                   @click="computeDateFromSightings"
                 >
@@ -1692,9 +1691,9 @@ onMounted(() => {
                   step="60"
                 />
                 <button
+                  v-tooltip:top="t('computeTimeTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeTimeTooltip')"
                   :aria-label="t('computeTimeTooltip')"
                   @click="computeTimeFromSightings"
                 >
@@ -1714,9 +1713,9 @@ onMounted(() => {
                   max="1440"
                 />
                 <button
+                  v-tooltip:top="t('computeDurationTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('computeDurationTooltip')"
                   :aria-label="t('computeDurationTooltip')"
                   @click="computeDurationFromSightings"
                 >
@@ -1737,9 +1736,9 @@ onMounted(() => {
                   step="0.1"
                 />
                 <button
+                  v-tooltip:top="t('drawPathTooltip')"
                   class="btn btn-outline-secondary btn-icon"
                   type="button"
-                  v-tooltip:top="t('drawPathTooltip')"
                   :aria-label="t('drawPathTooltip')"
                   @click="startPathDraw"
                 >
@@ -1751,12 +1750,12 @@ onMounted(() => {
               <div class="d-flex align-items-center gap-2">
                 <label class="form-label mb-0">{{ t("effort") }}</label>
                 <a
+                  v-tooltip:top="'eBird effort help'"
                   href="https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists"
                   target="_blank"
                   rel="noopener"
                   class="d-inline-flex align-items-center text-primary text-decoration-none"
                   aria-label="eBird effort help"
-                  v-tooltip:top="'eBird effort help'"
                 >
                   <i class="bi bi-question-circle-fill" aria-hidden="true"></i>
                 </a>
@@ -1792,9 +1791,9 @@ onMounted(() => {
                 <div ref="reviewMapElement" class="review-map rounded border"></div>
                 <div class="review-map-controls">
                   <button
+                    v-tooltip:left="t('drawPathTooltip')"
                     class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
                     type="button"
-                    v-tooltip:left="t('drawPathTooltip')"
                     :aria-label="t('drawPathTooltip')"
                     @click="startPathDraw"
                   >
@@ -1830,7 +1829,10 @@ onMounted(() => {
                       :alt="t('staticMapPreviewAlt')"
                     />
                   </div>
-                  <div v-else-if="staticMapPreview.reason !== 'disabled'" class="alert alert-warning small mb-0">
+                  <div
+                    v-else-if="staticMapPreview.reason !== 'disabled'"
+                    class="alert alert-warning small mb-0"
+                  >
                     <span v-if="staticMapPreview.reason === 'token_missing'">
                       {{ t("staticMapPreviewTokenMissing") }}
                     </span>
@@ -1844,11 +1846,17 @@ onMounted(() => {
 
                   <div
                     class="static-map-preview-controls mt-3"
-                    :class="{ 'static-map-preview-controls-with-zoom': selectedForm.static_map_zoom_mode === 'manual' }"
+                    :class="{
+                      'static-map-preview-controls-with-zoom':
+                        selectedForm.static_map_zoom_mode === 'manual',
+                    }"
                   >
                     <div class="static-map-preview-control">
                       <label class="form-label mb-1">{{ t("staticMapZoomMode") }}</label>
-                      <select v-model="selectedForm.static_map_zoom_mode" class="form-select form-select-sm">
+                      <select
+                        v-model="selectedForm.static_map_zoom_mode"
+                        class="form-select form-select-sm"
+                      >
                         <option value="auto">{{ t("staticMapZoomModeAuto") }}</option>
                         <option value="manual">{{ t("staticMapZoomModeManual") }}</option>
                       </select>
@@ -1895,14 +1903,22 @@ onMounted(() => {
               <i class="bi bi-list-ul" aria-hidden="true"></i>
               <span>{{ t("checklistObservationsTitle") }}</span>
             </h2>
-            <button class="btn btn-outline-secondary btn-sm" type="button" @click="observationsModalOpen = false">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              @click="observationsModalOpen = false"
+            >
               {{ t("close") }}
             </button>
           </div>
 
           <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-              <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
+            <div
+              class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3"
+            >
+              <div class="fw-semibold">
+                {{ selectedReviewOption?.label || selectedForm.location_name }}
+              </div>
               <div class="badge bg-secondary">
                 {{ t("checklistObservationCount", selectedSightings.length) }}
               </div>
@@ -1927,7 +1943,8 @@ onMounted(() => {
                   >
                     <td class="text-nowrap">{{ row.count }}</td>
                     <td>{{ row.common_name || t("observationTableMissingSpecies") }}</td>
-                    <td class="checklist-observations-comment" v-html="row.species_comment || ''"></td>
+                    <!-- eslint-disable-next-line vue/no-v-html -- built from escaped data, see templateSighting() -->
+                    <td class="checklist-observations-comment" v-html="row.species_comment"></td>
                   </tr>
                 </tbody>
               </table>

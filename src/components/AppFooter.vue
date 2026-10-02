@@ -40,9 +40,9 @@ const supporters = [
       <div class="support-strip-label">{{ t("supportedBy") }}</div>
       <div class="support-strip-list">
         <component
+          :is="supporter.href ? 'a' : 'div'"
           v-for="supporter in supporters"
           :key="supporter.id"
-          :is="supporter.href ? 'a' : 'div'"
           :href="supporter.href || undefined"
           :target="supporter.href ? '_blank' : undefined"
           :rel="supporter.href ? 'noopener' : undefined"
@@ -50,7 +50,14 @@ const supporters = [
           :aria-label="supporter.href ? supporter.name : undefined"
           :class="{ 'support-card-placeholder': !supporter.logo }"
         >
-          <img v-if="supporter.logo" :src="supporter.logo" :alt="supporter.name" class="support-card-logo" loading="lazy" decoding="async" />
+          <img
+            v-if="supporter.logo"
+            :src="supporter.logo"
+            :alt="supporter.name"
+            class="support-card-logo"
+            loading="lazy"
+            decoding="async"
+          />
           <span v-else class="support-card-placeholder-mark" aria-hidden="true">
             <i class="bi bi-plus-lg"></i>
           </span>
@@ -59,7 +66,9 @@ const supporters = [
       </div>
     </div>
 
-    <div class="footer-meta d-flex flex-wrap justify-content-center align-items-center gap-2 small mt-3">
+    <div
+      class="footer-meta d-flex flex-wrap justify-content-center align-items-center gap-2 small mt-3"
+    >
       <span>v{{ version }}</span>
       <span aria-hidden="true">•</span>
       <a

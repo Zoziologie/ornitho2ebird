@@ -4,7 +4,9 @@ import { LANGUAGE_COOKIE_NAME, UI_LANGUAGES } from "./lib/constants";
 import { readCookie } from "./lib/storage";
 
 // English is bundled as the fallback; other locales are fetched on demand.
-const localeLoaders = import.meta.glob(["./locales/*.json", "!./locales/en.json"], { import: "default" });
+const localeLoaders = import.meta.glob(["./locales/*.json", "!./locales/en.json"], {
+  import: "default",
+});
 
 const supportedLanguages = new Set(UI_LANGUAGES.map((language) => language.value));
 
@@ -38,7 +40,8 @@ export const i18n = createI18n({
   messages: { en },
   pluralRules: {
     // French uses the singular for 0 and 1 ("0 liste", "1 liste").
-    fr: (choice, choicesLength) => (choicesLength === 2 && choice <= 1 ? 0 : Math.min(choice, choicesLength - 1)),
+    fr: (choice, choicesLength) =>
+      choicesLength === 2 && choice <= 1 ? 0 : Math.min(choice, choicesLength - 1),
   },
 });
 

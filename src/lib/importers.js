@@ -11,12 +11,12 @@ const precisionMatchOrnitho = {
 };
 
 const precisionMatchObservation = {
-  "unknown": ">",
+  unknown: ">",
   "seen not counted": "",
   "real count": "=",
-  "estimated": "~",
-  "extrapolated": "~",
-  "abundance": "~",
+  estimated: "~",
+  extrapolated: "~",
+  abundance: "~",
 };
 
 // Import failure with a user-facing reason: `key` is an i18n message key, `params` its values.
@@ -64,9 +64,10 @@ function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
 
     const baseComment = observer.comment || "";
     const detailsComment = formatOrnithoDetails(observer.details);
-    const comment = baseComment && detailsComment
-      ? `${baseComment} - ${detailsComment}`
-      : baseComment || detailsComment;
+    const comment =
+      baseComment && detailsComment
+        ? `${baseComment} - ${detailsComment}`
+        : baseComment || detailsComment;
 
     const speciesId = sighting.species["@id"];
     const commonName = sighting.species.name || "";
@@ -191,7 +192,14 @@ export function parseImportFile(rawText, selectedWebsite) {
       skipEmptyLines: true,
       header: true,
     }).data;
-    requireColumns(rows, ["Date", "Time", "Latitude", "Longitude", ["Species primary name", "Primary language"], "Count"]);
+    requireColumns(rows, [
+      "Date",
+      "Time",
+      "Latitude",
+      "Longitude",
+      ["Species primary name", "Primary language"],
+      "Count",
+    ]);
 
     exportData.sightings = rows.map((sighting, index) => {
       return createSighting({
@@ -278,7 +286,8 @@ export function parseImportFile(rawText, selectedWebsite) {
   }
 
   // Without coordinates a sighting cannot be mapped or assigned to a checklist location.
-  const hasCoordinates = (sighting) => Number.isFinite(sighting.lat) && Number.isFinite(sighting.lon);
+  const hasCoordinates = (sighting) =>
+    Number.isFinite(sighting.lat) && Number.isFinite(sighting.lon);
   const sightingCount = exportData.sightings.length;
   exportData.sightings = exportData.sightings.filter(hasCoordinates);
   exportData.skipped.noCoordinates = sightingCount - exportData.sightings.length;

@@ -4,11 +4,11 @@ import { protocol } from "./utils";
 
 export function createBaseLayers() {
   return {
-    "OpenStreetMap": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    OpenStreetMap: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
       maxZoom: 19,
     }),
-    "Satellite": L.tileLayer(
+    Satellite: L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
         attribution: "Tiles &copy; Esri",
@@ -155,13 +155,16 @@ export function formatSightingPopup(sighting, t) {
   const datetime = [sighting.date, sighting.time].filter(Boolean).join(" ").trim() || "—";
   const commonName = sighting.common_name ? escapeHtml(sighting.common_name) : "";
   const scientificName = sighting.scientific_name ? escapeHtml(sighting.scientific_name) : "";
-  const species = commonName || scientificName
-    ? `${commonName}${commonName && scientificName ? " " : ""}${
-        scientificName ? `<span class="map-popup-species-scientific">${scientificName}</span>` : ""
-      }`
-    : escapeHtml(t("records"));
+  const species =
+    commonName || scientificName
+      ? `${commonName}${commonName && scientificName ? " " : ""}${
+          scientificName
+            ? `<span class="map-popup-species-scientific">${scientificName}</span>`
+            : ""
+        }`
+      : escapeHtml(t("records"));
   const countParts = [sighting.count_precision, sighting.count].filter(
-    (value) => value !== null && value !== ""
+    (value) => value !== null && value !== "",
   );
   const count = countParts.length ? countParts.join("") : "—";
   const comment = sighting.comment || escapeHtml(t("popupNoComment"));

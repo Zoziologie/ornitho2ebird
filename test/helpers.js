@@ -9,7 +9,12 @@ import {
   DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
   buildSpeciesCommentTemplateFromOptions,
 } from "../src/lib/constants";
-import { buildExportRows, exportableFormsOf, groupSightingsByForm, rowsToCsv } from "../src/lib/exportCsv";
+import {
+  buildExportRows,
+  exportableFormsOf,
+  groupSightingsByForm,
+  rowsToCsv,
+} from "../src/lib/exportCsv";
 import { parseImportFile } from "../src/lib/importers";
 import { loadOrnithoSpeciesList } from "../src/lib/taxonomy";
 import { assembleImport } from "../src/lib/utils";

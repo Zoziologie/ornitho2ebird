@@ -13,12 +13,21 @@ import {
 const template = (short, long = short, limit = 5) => ({ short, long, limit });
 
 describe("speciesComment", () => {
-  const sighting = createSighting({ id: 1, lat: 46, lon: 7, count: 3, count_precision: "~", time: "08:15:00" });
+  const sighting = createSighting({
+    id: 1,
+    lat: 46,
+    lon: 7,
+    count: 3,
+    count_precision: "~",
+    time: "08:15:00",
+  });
 
   it("evaluates ${...} expressions against the sighting", () => {
-    expect(speciesComment(template("${ s.count_precision }${ s.count } ind. at ${ s.time }"), [sighting])).toBe(
-      "~3 ind. at 08:15",
-    );
+    expect(
+      speciesComment(template("${ s.count_precision }${ s.count } ind. at ${ s.time }"), [
+        sighting,
+      ]),
+    ).toBe("~3 ind. at 08:15");
   });
 
   it("keeps literal text after a closing brace", () => {
@@ -50,7 +59,11 @@ describe("speciesComment", () => {
 
   describe("escaping imported data", () => {
     it("escapes HTML in imported comments, keeping line breaks", () => {
-      const evil = createSighting({ lat: 1, lon: 1, comment: '<img src=x onerror="alert(1)">\r\nline 2' });
+      const evil = createSighting({
+        lat: 1,
+        lon: 1,
+        comment: '<img src=x onerror="alert(1)">\r\nline 2',
+      });
       expect(speciesComment(template("${ s.comment }"), [evil])).toBe(
         '&lt;img src=x onerror="alert(1)">' + "<br>line 2",
       );
@@ -58,19 +71,30 @@ describe("speciesComment", () => {
 
     it('escapes "<" and quotes in other imported fields', () => {
       const evil = createSighting({ lat: 1, lon: 1, common_name: '<b>"Tit"</b>' });
-      expect(speciesComment(template("${ s.common_name }"), [evil])).toBe("&lt;b>&quot;Tit&quot;&lt;/b>");
+      expect(speciesComment(template("${ s.common_name }"), [evil])).toBe(
+        "&lt;b>&quot;Tit&quot;&lt;/b>",
+      );
     });
 
     it("leaves ordinary text untouched", () => {
-      const plain = createSighting({ lat: 1, lon: 1, comment: "pair & 2 juv. >5 m", common_name: "Great Tit" });
+      const plain = createSighting({
+        lat: 1,
+        lon: 1,
+        comment: "pair & 2 juv. >5 m",
+        common_name: "Great Tit",
+      });
       expect(speciesComment(template("${ s.common_name }: ${ s.comment }"), [plain])).toBe(
         "Great Tit: pair & 2 juv. >5 m",
       );
     });
 
     it("cannot break out of an href built by the template", () => {
-      const evil = createSighting({ lat: 1, lon: 1, source_record_url: 'x" onmouseover="alert(1)' });
-      const html = speciesComment(template("<a href=\"${ s.source_record_url }\">link</a>"), [evil]);
+      const evil = createSighting({
+        lat: 1,
+        lon: 1,
+        source_record_url: 'x" onmouseover="alert(1)',
+      });
+      const html = speciesComment(template('<a href="${ s.source_record_url }">link</a>'), [evil]);
       expect(html).toBe('<a href="x&quot; onmouseover=&quot;alert(1)">link</a>');
     });
   });
@@ -96,7 +120,14 @@ describe("createSighting", () => {
 });
 
 describe("protocol", () => {
-  const base = { date: "2024-05-01", time: "07:00", duration: 60, distance: 1.2, number_observer: 1, primary_purpose: true };
+  const base = {
+    date: "2024-05-01",
+    time: "07:00",
+    duration: 60,
+    distance: 1.2,
+    number_observer: 1,
+    primary_purpose: true,
+  };
 
   it("is Traveling above 30 m and Stationary below", () => {
     expect(protocol(base).name).toBe("Traveling");
@@ -122,7 +153,12 @@ describe("protocol", () => {
 describe("small helpers", () => {
   it("distanceFromPath sums haversine segments in km", () => {
     // 1 degree of latitude is ~111.19 km
-    expect(distanceFromPath([[0, 0], [1, 0]])).toBeCloseTo(111.19, 1);
+    expect(
+      distanceFromPath([
+        [0, 0],
+        [1, 0],
+      ]),
+    ).toBeCloseTo(111.19, 1);
     expect(distanceFromPath([[0, 0]])).toBe(0);
   });
 
@@ -138,9 +174,27 @@ describe("small helpers", () => {
 
 describe("buildSpeciesRows", () => {
   const sightings = [
-    createSighting({ lat: 1, lon: 1, ebird_species_code: "gretit1", common_name: "Great Tit", count: 2 }),
-    createSighting({ lat: 1, lon: 1, ebird_species_code: "gretit1", common_name: "Great Tit", count: 3 }),
-    createSighting({ lat: 1, lon: 1, ebird_species_code: "blutit", common_name: "Blue Tit", count: "x" }),
+    createSighting({
+      lat: 1,
+      lon: 1,
+      ebird_species_code: "gretit1",
+      common_name: "Great Tit",
+      count: 2,
+    }),
+    createSighting({
+      lat: 1,
+      lon: 1,
+      ebird_species_code: "gretit1",
+      common_name: "Great Tit",
+      count: 3,
+    }),
+    createSighting({
+      lat: 1,
+      lon: 1,
+      ebird_species_code: "blutit",
+      common_name: "Blue Tit",
+      count: "x",
+    }),
   ];
 
   it("groups by species, sums counts and uses X for uncounted", () => {
@@ -152,19 +206,30 @@ describe("buildSpeciesRows", () => {
   });
 
   it("names species through the provided taxonomy lookup", () => {
-    const rows = buildSpeciesRows(sightings, null, (s) => (s.ebird_species_code === "gretit1" ? "Mésange charbonnière" : s.common_name));
+    const rows = buildSpeciesRows(sightings, null, (s) =>
+      s.ebird_species_code === "gretit1" ? "Mésange charbonnière" : s.common_name,
+    );
     expect(rows[0].common_name).toBe("Mésange charbonnière");
   });
 });
 
 describe("checklistComment", () => {
   it("adds the static map (linked to the interactive map) and the credit line", () => {
-    const html = checklistComment({ checklist_comment: "Nice morning" }, [], "Imported with ornitho2eBird.", {
-      staticMapUrl: "https://map.example/img.png",
-      interactiveMapUrl: "https://viewer.example/?u=1",
-    });
+    const html = checklistComment(
+      { checklist_comment: "Nice morning" },
+      [],
+      "Imported with ornitho2eBird.",
+      {
+        staticMapUrl: "https://map.example/img.png",
+        interactiveMapUrl: "https://viewer.example/?u=1",
+      },
+    );
     expect(html).toContain("Nice morning");
-    expect(html).toContain('<a href="https://viewer.example/?u=1" target="_blank" rel="noopener"><img src="https://map.example/img.png"');
-    expect(html).toMatch(/<small><a href="https:\/\/ornitho2ebird.com\/"[^>]*>Imported with ornitho2eBird.<\/a><\/small>$/);
+    expect(html).toContain(
+      '<a href="https://viewer.example/?u=1" target="_blank" rel="noopener"><img src="https://map.example/img.png"',
+    );
+    expect(html).toMatch(
+      /<small><a href="https:\/\/ornitho2ebird.com\/"[^>]*>Imported with ornitho2eBird.<\/a><\/small>$/,
+    );
   });
 });

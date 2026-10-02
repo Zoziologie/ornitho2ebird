@@ -17,10 +17,14 @@ export function loadOrnithoSpeciesList() {
 const taxonomyByLocaleCache = new Map();
 
 function fetchCommonNameBySpeciesCode(localeCode) {
-  return fetch(`https://api.ebird.org/v2/ref/taxonomy/ebird?key=vcs68p4j67pt&fmt=json&locale=${localeCode}`)
+  return fetch(
+    `https://api.ebird.org/v2/ref/taxonomy/ebird?key=vcs68p4j67pt&fmt=json&locale=${localeCode}`,
+  )
     .then((response) => response.json())
     .then((json) => {
-      return new Map((Array.isArray(json) ? json : []).map((entry) => [entry.speciesCode, entry.comName]));
+      return new Map(
+        (Array.isArray(json) ? json : []).map((entry) => [entry.speciesCode, entry.comName]),
+      );
     });
 }
 
