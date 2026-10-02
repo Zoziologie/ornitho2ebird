@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   checklistComment,
@@ -11,6 +11,7 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
+import { alertDialog } from "../lib/dialog";
 import { buildInteractiveMapViewerUrl, createInteractiveMapGist } from "../lib/interactiveMap";
 import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
 
@@ -61,7 +62,8 @@ const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issu
 const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
 const EBIRD_MAP_URL = "https://ebird.org/map/";
 const EBIRD_COMMENT_MAX_LENGTH = 8000;
-const taxonomyCommonNameByCode = ref(new Map());
+// ~17k entries, always replaced as a whole: no need for deep reactivity.
+const taxonomyCommonNameByCode = shallowRef(new Map());
 const taxonomyStatus = ref("idle");
 const taxonomyReportCodeByIssue = ref({});
 const exportFilename = ref(buildExportFilename());
@@ -510,7 +512,7 @@ async function publishInteractiveMapsForExport() {
   const token = String(props.githubToken || "").trim();
   if (!token) {
     interactiveMapError.value = t("interactiveMapTokenMissing");
-    window.alert(interactiveMapError.value);
+    alertDialog(interactiveMapError.value);
     return false;
   }
 
@@ -556,7 +558,7 @@ async function publishInteractiveMapsForExport() {
     interactiveMapError.value = t("interactiveMapPublishFailed", {
       message: error?.message || "Unknown error",
     });
-    window.alert(interactiveMapError.value);
+    alertDialog(interactiveMapError.value);
     return false;
   } finally {
     interactiveMapPublishing.value = false;
@@ -569,7 +571,7 @@ async function downloadFile() {
   }
 
   if (taxonomyNeededForExport.value && taxonomyStatus.value === "loading") {
-    window.alert(t("exportTaxonomyLoading"));
+    alertDialog(t("exportTaxonomyLoading"));
     return;
   }
 
@@ -738,7 +740,7 @@ async function downloadFile() {
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
             <div class="export-total">
               <span class="export-total-value">{{ formatNumber(exportSummaryStats.totalChecklists) }}</span>
-              <span class="export-total-label">{{ t("exportSummaryChecklists") }}</span>
+              <span class="export-total-label">{{ t("exportSummaryChecklists", exportSummaryStats.totalChecklists) }}</span>
             </div>
             <div class="export-protocol-list">
               <div
@@ -750,7 +752,7 @@ async function downloadFile() {
                   <i :class="['bi', protocolSummaryIcon(item.name)]" aria-hidden="true"></i>
                 </span>
                 <span class="export-protocol-count">{{ formatNumber(item.count) }}</span>
-                <span class="export-protocol-label">{{ t(`protocolLabel${item.name}`) }}</span>
+                <span class="export-protocol-label">{{ t(`protocolLabel${item.name}`, item.count) }}</span>
               </div>
             </div>
           </section>
@@ -761,12 +763,12 @@ async function downloadFile() {
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-feather" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSpecies) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySpecies") }}</span>
+                <span class="export-stat-label">{{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }}</span>
               </div>
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-binoculars" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSightings) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySightings") }}</span>
+                <span class="export-stat-label">{{ t("exportSummarySightings", exportSummaryStats.totalSightings) }}</span>
               </div>
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span>
@@ -776,7 +778,7 @@ async function downloadFile() {
               <div class="export-stat-tile">
                 <span class="export-stat-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
                 <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalLocations) }}</span>
-                <span class="export-stat-label">{{ t("exportSummaryLocations") }}</span>
+                <span class="export-stat-label">{{ t("exportSummaryLocations", exportSummaryStats.totalLocations) }}</span>
               </div>
             </div>
           </section>

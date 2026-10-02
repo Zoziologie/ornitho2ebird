@@ -1,11 +1,11 @@
 import { createApp } from "vue";
-import { Tooltip } from "bootstrap";
+import Tooltip from "bootstrap/js/dist/tooltip";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
 import App from "./App.vue";
-import { i18n } from "./i18n";
+import { i18n, resolveUiLanguage, setI18nLanguage } from "./i18n";
+import { APP_STORAGE_PREFIX } from "./lib/constants";
+import { readStorage } from "./lib/storage";
 
 const app = createApp(App);
 
@@ -18,16 +18,20 @@ app.directive("tooltip", {
     element._tooltip = new Tooltip(element);
   },
   updated(element, binding) {
+    // Runs on every parent re-render: only touch the tooltip when its text changed.
+    if (binding.value === binding.oldValue) {
+      return;
+    }
     const title = typeof binding.value === "string" ? binding.value : "";
     element.setAttribute("data-bs-title", title);
-    if (element._tooltip) {
-      element._tooltip.dispose();
-    }
-    element._tooltip = new Tooltip(element);
+    element._tooltip?.setContent({ ".tooltip-inner": title });
   },
   unmounted(element) {
     element._tooltip?.dispose();
   },
 });
 
-app.use(i18n).mount("#app");
+// Load the user's language before the first render to avoid a flash of English.
+setI18nLanguage(resolveUiLanguage(readStorage(`${APP_STORAGE_PREFIX}:settings`, {}))).finally(() => {
+  app.use(i18n).mount("#app");
+});

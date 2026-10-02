@@ -1,4 +1,18 @@
-import ornithoSpeciesList from "/data/ornitho_species_list_short.json";
+// ~116 KB, so it is fetched only when an ornitho file is imported.
+let ornithoSpeciesList = null;
+let ornithoSpeciesListPromise = null;
+
+export function loadOrnithoSpeciesList() {
+  ornithoSpeciesListPromise ??= import("/data/ornitho_species_list_short.json")
+    .then((module) => {
+      ornithoSpeciesList = module.default;
+    })
+    .catch((error) => {
+      ornithoSpeciesListPromise = null;
+      throw error;
+    });
+  return ornithoSpeciesListPromise;
+}
 
 const taxonomyByLocaleCache = new Map();
 
@@ -18,6 +32,10 @@ export async function getCommonNameBySpeciesCode(localeCode) {
   return taxonomyByLocaleCache.get(locale);
 }
 
+// Call loadOrnithoSpeciesList() first.
 export function getOrnithoEbirdSpeciesCode(ornithoSpeciesId) {
+  if (!ornithoSpeciesList) {
+    throw new Error("The ornitho species list is not loaded yet.");
+  }
   return ornithoSpeciesList[ornithoSpeciesId] || "";
 }

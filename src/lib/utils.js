@@ -1,3 +1,4 @@
+import { markRaw } from "vue";
 import {
   BASIC_SPECIES_COMMENT_TEMPLATE,
   DEFAULT_SPECIES_COMMENT_TEMPLATE,
@@ -125,6 +126,22 @@ export function protocol(form) {
   };
 }
 
+// Imported text must not open tags or break out of the href="..." attributes built by templates.
+// Only "<" and '"' are encoded so the exported text stays identical for ordinary data.
+function escapeTemplateText(value) {
+  return String(value).replaceAll("<", "&lt;").replaceAll('"', "&quot;");
+}
+
+function templateSighting(sighting) {
+  return Object.fromEntries(
+    Object.entries(sighting).map(([key, value]) => [
+      key,
+      // comment is already escaped HTML (see createSighting)
+      typeof value === "string" && key !== "comment" ? escapeTemplateText(value) : value,
+    ])
+  );
+}
+
 export function speciesComment(speciesCommentTemplate, sightings) {
   if (!speciesCommentTemplate || !sightings?.length) {
     return "";
@@ -138,6 +155,7 @@ export function speciesComment(speciesCommentTemplate, sightings) {
 
   return sightings
     .map((sighting) => {
+      const context = { s: templateSighting(sighting) };
       return template
         .split("${")
         .map((chunk, index) => {
@@ -145,8 +163,13 @@ export function speciesComment(speciesCommentTemplate, sightings) {
             return chunk;
           }
 
-          const [expression, suffix = ""] = chunk.split("}");
-          const context = { s: sighting };
+          // The expression ends at the first "}"; anything after it, including further "}", is literal text.
+          const end = chunk.indexOf("}");
+          if (end === -1) {
+            return `\${${chunk}`;
+          }
+          const expression = chunk.slice(0, end);
+          const suffix = chunk.slice(end + 1);
 
           try {
             return (
@@ -384,8 +407,9 @@ export function buildForm(form, id, options = {}) {
     static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",
     static_map_zoom: Number.isFinite(Number(form.static_map_zoom)) ? Number(form.static_map_zoom) : 12,
     interactive_map_url: form.interactive_map_url || form.static_map?.gist || "",
-    path: form.path || null,
-    hotspots: form.hotspots || [],
+    // Traces and hotspot lists can be large and are only ever replaced as a whole.
+    path: form.path ? markRaw(form.path) : null,
+    hotspots: markRaw(form.hotspots || []),
     hotspot_key: form.hotspot_key || "",
   };
 
@@ -422,6 +446,7 @@ export function createSighting(raw) {
     count_precision: raw.count_precision || "",
     atlas_code: raw.atlas_code ?? "",
     auditory_contact: raw.auditory_contact ?? "",
-    comment: raw.comment ? raw.comment.replace(/\r\n/g, "<br>") : "",
+    // Stored as HTML: escape the imported text, keep line breaks.
+    comment: raw.comment ? String(raw.comment).replaceAll("<", "&lt;").replace(/\r?\n/g, "<br>") : "",
   };
 }

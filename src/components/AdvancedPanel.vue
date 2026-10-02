@@ -1,7 +1,9 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw/dist/leaflet.draw-src.js";
 import "leaflet.markercluster/dist/leaflet.markercluster.js";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -21,6 +23,7 @@ import {
   requiredTimeStateClass,
   sightingMarkerHtml,
 } from "../lib/advancedPanel";
+import { alertDialog, confirmDialog } from "../lib/dialog";
 import {
   applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
@@ -272,26 +275,30 @@ function computeDurationFromSightings() {
 }
 
 async function loadHotspotsForSelectedForm() {
-  if (!selectedForm.value?.lat || !selectedForm.value?.lon) {
+  // Keep a reference: the selection may change while the request is in flight.
+  const form = selectedForm.value;
+  if (!form?.lat || !form?.lon) {
     return;
   }
 
-  const hotspotKey = `${Number(selectedForm.value.lat).toFixed(3)},${Number(selectedForm.value.lon).toFixed(3)}`;
-  if (selectedForm.value.hotspot_key === hotspotKey && Array.isArray(selectedForm.value.hotspots)) {
+  const hotspotKey = `${Number(form.lat).toFixed(3)},${Number(form.lon).toFixed(3)}`;
+  if (form.hotspot_key === hotspotKey && Array.isArray(form.hotspots)) {
     return;
   }
 
   try {
     const response = await fetch(
-      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${selectedForm.value.lat}&lng=${selectedForm.value.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
+      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
     );
     const json = await response.json();
-    selectedForm.value.hotspots = Array.isArray(json) ? json : [];
-    selectedForm.value.hotspot_key = hotspotKey;
-    refreshReviewMap();
+    form.hotspots = markRaw(Array.isArray(json) ? json : []);
+    form.hotspot_key = hotspotKey;
+    if (selectedForm.value === form) {
+      refreshReviewMap();
+    }
   } catch {
-    selectedForm.value.hotspots = [];
-    selectedForm.value.hotspot_key = hotspotKey;
+    form.hotspots = markRaw([]);
+    form.hotspot_key = hotspotKey;
   }
 }
 
@@ -315,17 +322,16 @@ function startPathDraw() {
   reviewDrawPolyline.enable();
 }
 
-function updatePath(path) {
-  if (!selectedForm.value) {
+async function updatePath(path) {
+  const form = selectedForm.value;
+  if (!form) {
     return;
   }
 
   const newDistance = distanceFromPath(path);
-  const currentDistance = Array.isArray(selectedForm.value.path)
-    ? distanceFromPath(selectedForm.value.path)
-    : null;
+  const currentDistance = Array.isArray(form.path) ? distanceFromPath(form.path) : null;
 
-  const confirmed = window.confirm(
+  const confirmed = await confirmDialog(
     currentDistance !== null
       ? t("updatePathConfirmReplace", { previous: currentDistance, next: newDistance })
       : t("updatePathConfirm", { next: newDistance }),
@@ -335,8 +341,8 @@ function updatePath(path) {
     return;
   }
 
-  selectedForm.value.path = path;
-  selectedForm.value.distance = newDistance;
+  form.path = markRaw(path);
+  form.distance = newDistance;
   refreshReviewMap();
 }
 
@@ -434,7 +440,7 @@ function applyAssignmentSelection(bounds) {
   stopRectangleDraw();
 
   if (!matchedSightings.length) {
-    window.alert(t("assignNoSightingsInSelection"));
+    alertDialog(t("assignNoSightingsInSelection"));
     return;
   }
 
@@ -549,18 +555,17 @@ async function toggleAssignmentMapFullscreen() {
 }
 
 watch(
-  () => props.forms,
-  (forms) => {
-    if (!forms.length) {
+  () => props.forms.map((form) => form.id),
+  (formIds) => {
+    if (!formIds.length) {
       return;
     }
 
-    const stillExists = forms.some((form) => form.id === props.selectedFormId);
-    if (!stillExists) {
-      emit("update:selectedFormId", forms[0].id);
+    if (!formIds.includes(props.selectedFormId)) {
+      emit("update:selectedFormId", formIds[0]);
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
 watch(
@@ -590,14 +595,17 @@ watch(
   },
 );
 
+// Only read what the maps draw, so typing in checklist fields does not rebuild every marker.
 watch(
-  () => [props.sightings, props.forms],
+  () => [
+    props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
+    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon, form.path, form.hotspots]),
+  ],
   async () => {
     await nextTick();
     refreshAssignmentMap();
     refreshReviewMap();
   },
-  { deep: true },
 );
 
 watch(
@@ -666,12 +674,13 @@ function assignClean() {
   }
 }
 
-function deleteSelectedChecklist() {
-  if (!selectedForm.value || !window.confirm(t("deleteChecklistConfirm"))) {
+async function deleteSelectedChecklist() {
+  const formToDelete = selectedForm.value;
+  if (!formToDelete || !(await confirmDialog(t("deleteChecklistConfirm")))) {
     return;
   }
 
-  const formIndex = props.forms.findIndex((form) => form.id === selectedForm.value.id);
+  const formIndex = props.forms.findIndex((form) => form.id === formToDelete.id);
   if (formIndex < 0) {
     return;
   }
@@ -687,8 +696,8 @@ function deleteSelectedChecklist() {
   emit("update:selectedFormId", nextForm?.id || null);
 }
 
-function assignReset() {
-  if (!window.confirm(t("assignResetConfirm"))) {
+async function assignReset() {
+  if (!(await confirmDialog(t("assignResetConfirm")))) {
     return;
   }
 
@@ -706,24 +715,24 @@ function assignReset() {
   emit("update:selectedFormId", props.forms[0]?.id || null);
 }
 
-function assignMagic() {
+async function assignMagic() {
   if (assignDuration.value > 24) {
-    window.alert(t("assignDurationTooLong"));
+    alertDialog(t("assignDurationTooLong"));
     return;
   }
 
   if (assignDistance.value > 10 && assignDistance.value < 80) {
-    if (!window.confirm(t("assignDistanceLongConfirm"))) {
+    if (!(await confirmDialog(t("assignDistanceLongConfirm")))) {
       return;
     }
   } else if (assignDistance.value >= 80) {
-    window.alert(t("assignDistanceTooLong"));
+    alertDialog(t("assignDistanceTooLong"));
     return;
   }
 
   const availableSightings = unassignedSightings.value;
   if (!availableSightings.length) {
-    window.alert(t("assignNoSightings"));
+    alertDialog(t("assignNoSightings"));
     return;
   }
 
@@ -1217,6 +1226,24 @@ function initializeReviewMap() {
   setTimeout(() => reviewMap?.invalidateSize(), 100);
 }
 
+function destroyAssignmentMap() {
+  stopRectangleDraw();
+  if (assignmentMap) {
+    assignmentMap.off();
+    assignmentMap.remove();
+  }
+
+  assignmentMap = null;
+  assignmentSightingsLayer = null;
+  assignmentFormsLayer = null;
+  assignmentBaseLayers = null;
+  assignmentActiveBaseLayer = null;
+  assignmentMapHasInitialView = false;
+  assignmentDrawCaptureEnabled = false;
+  assignmentSelectionLayer = null;
+  assignmentClusterPopupLatLng = null;
+}
+
 function destroyReviewMap() {
   if (reviewMap) {
     reviewMap.off();
@@ -1246,6 +1273,8 @@ watch(
   assignmentMapElement,
   async (value) => {
     if (!value) {
+      // The section unmounts when no casual observations remain; drop the map so a later import starts fresh.
+      destroyAssignmentMap();
       return;
     }
     await nextTick();
@@ -1271,12 +1300,7 @@ onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
   document.removeEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
   document.removeEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
-  stopRectangleDraw();
-  if (assignmentMap) {
-    assignmentMap.off();
-    assignmentMap.remove();
-  }
-  assignmentMapHasInitialView = false;
+  destroyAssignmentMap();
   if (reviewMap) {
     destroyReviewMap();
   }
@@ -1880,7 +1904,7 @@ onMounted(() => {
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
               <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
               <div class="badge bg-secondary">
-                {{ t("checklistObservationCount", { count: selectedSightings.length }) }}
+                {{ t("checklistObservationCount", selectedSightings.length) }}
               </div>
             </div>
 

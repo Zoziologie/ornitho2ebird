@@ -50,7 +50,7 @@ const supporters = [
           :aria-label="supporter.href ? supporter.name : undefined"
           :class="{ 'support-card-placeholder': !supporter.logo }"
         >
-          <img v-if="supporter.logo" :src="supporter.logo" :alt="supporter.name" class="support-card-logo" />
+          <img v-if="supporter.logo" :src="supporter.logo" :alt="supporter.name" class="support-card-logo" loading="lazy" decoding="async" />
           <span v-else class="support-card-placeholder-mark" aria-hidden="true">
             <i class="bi bi-plus-lg"></i>
           </span>
