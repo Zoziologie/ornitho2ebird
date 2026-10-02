@@ -161,7 +161,7 @@ If the eBird requests fail, the export keeps the source species names.
 
 ### Requirements
 
-- Recent Node.js LTS release
+- Node.js 22 or newer (see [`.nvmrc`](.nvmrc))
 - npm
 
 ### Install
@@ -188,11 +188,17 @@ npm run build
 npm run preview
 ```
 
-### Run the tests
+### Run the tests and checks
 
 ```bash
 npm test
 ```
+
+```bash
+npm run check
+```
+
+`npm run check` runs ESLint, the Prettier format check and the tests, the same checks CI runs. `npm run format` and `npm run lint:fix` fix most of what they report. Editors with the ESLint and Prettier extensions pick up the config automatically.
 
 ## Available scripts
 
@@ -200,6 +206,9 @@ npm test
 - `npm run build` creates the production build
 - `npm run preview` serves the built app locally
 - `npm test` runs the unit and golden-file tests once (`npm run test:watch` re-runs them on change)
+- `npm run lint` / `npm run lint:fix` runs ESLint (Vue and JavaScript rules)
+- `npm run format` / `npm run format:check` runs Prettier
+- `npm run check` runs lint, format check and tests together
 - `npm run splist` regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv)
 
 ## Project structure
@@ -214,15 +223,17 @@ npm test
 - [`test/unit/`](test/unit) unit tests for parsing, comment templates, CSV export and locales
 - [`test/golden/`](test/golden) the expected eBird CSV for every fixture (`__snapshots__/`)
 
-## Deployment note
+## Deployment
 
-The app now builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](vite.config.js).
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab. Dependabot opens monthly update PRs for npm packages and GitHub Actions.
+
+The app builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](vite.config.js).
 
 ## Contributing
 
 Issues and pull requests are welcome. If you change translation keys, update [`src/locales/en.json`](src/locales/en.json) first and follow the translation notes in [`docs/localization-workflow.md`](docs/localization-workflow.md).
 
-When changing conversion logic, run `npm test`. The golden-file tests compare the eBird CSV produced for every fixture in [`test/fixtures/`](test/fixtures) with the files in [`test/golden/__snapshots__/`](test/golden/__snapshots__). If a difference is intended, review it and update the files with `npx vitest run -u`. CI runs the tests on every pull request and before each deployment.
+When changing conversion logic, run `npm test`. The golden-file tests compare the eBird CSV produced for every fixture in [`test/fixtures/`](test/fixtures) with the files in [`test/golden/__snapshots__/`](test/golden/__snapshots__). If a difference is intended, review it and update the files with `npx vitest run -u`. CI runs the tests, lint and format check on every pull request and before each deployment.
 
 ## License
 
