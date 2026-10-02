@@ -3,7 +3,9 @@ import Tooltip from "bootstrap/js/dist/tooltip";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import App from "./App.vue";
-import { i18n } from "./i18n";
+import { i18n, resolveUiLanguage, setI18nLanguage } from "./i18n";
+import { APP_STORAGE_PREFIX } from "./lib/constants";
+import { readStorage } from "./lib/storage";
 
 const app = createApp(App);
 
@@ -28,4 +30,7 @@ app.directive("tooltip", {
   },
 });
 
-app.use(i18n).mount("#app");
+// Load the user's language before the first render to avoid a flash of English.
+setI18nLanguage(resolveUiLanguage(readStorage(`${APP_STORAGE_PREFIX}:settings`, {}))).finally(() => {
+  app.use(i18n).mount("#app");
+});

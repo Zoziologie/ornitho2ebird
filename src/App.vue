@@ -16,10 +16,10 @@ import {
   LANGUAGE_COOKIE_NAME,
   SPECIES_COMMENT_TEMPLATE_OPTION_KEYS,
   EBIRD_LANGUAGES,
-  UI_LANGUAGES,
   buildSpeciesCommentTemplateFromOptions,
 } from "./lib/constants";
-import { readCookie, readStorage, writeCookie, writeStorage } from "./lib/storage";
+import { readStorage, writeCookie, writeStorage } from "./lib/storage";
+import { normalizeLanguage, resolveUiLanguage, setI18nLanguage } from "./i18n";
 import { applyDefaultAutomaticAssignment, buildForm } from "./lib/utils";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
@@ -118,22 +118,11 @@ function normalizeAssignmentMapBaseLayer(value) {
     : DEFAULT_SETTINGS.assignmentMapBaseLayer;
 }
 
-const supportedLanguages = new Set(UI_LANGUAGES.map((language) => language.value));
 const LEGACY_EBIRD_LANGUAGE_CODES = {
   id: "in",
   pa: "pa_IN",
   en_HAW: "haw",
 };
-
-function normalizeLanguage(value) {
-  if (typeof value !== "string" || value.length === 0) {
-    return null;
-  }
-
-  const normalized = value.trim().toLowerCase().replaceAll("_", "-");
-  const exactMatch = normalized.split("-")[0];
-  return supportedLanguages.has(exactMatch) ? exactMatch : null;
-}
 
 function defaultWebsiteForLanguage(language) {
   return DEFAULT_WEBSITE_BY_LANGUAGE[language] || DEFAULT_WEBSITE_BY_LANGUAGE.en;
@@ -162,13 +151,7 @@ const savedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, DEFAULT_SETT
 const queryLanguage = normalizeLanguage(
   typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
 );
-const cookieLanguage = normalizeLanguage(readCookie(LANGUAGE_COOKIE_NAME));
-const savedUiLanguage = normalizeLanguage(savedSettings.uiLanguage || savedSettings.language);
-const browserLanguage = normalizeLanguage(
-  typeof navigator !== "undefined" ? navigator.language || navigator.languages?.[0] : "",
-);
-const resolvedUiLanguage =
-  queryLanguage || cookieLanguage || savedUiLanguage || browserLanguage || "en";
+const resolvedUiLanguage = resolveUiLanguage(savedSettings);
 const supportedEbirdLanguages = new Set(EBIRD_LANGUAGES.map((language) => language.value));
 const savedEbirdLanguage = normalizeEbirdLanguage(savedSettings.ebirdLanguage);
 const legacySavedLanguage = normalizeEbirdLanguage(savedSettings.language);
@@ -207,11 +190,10 @@ const infoSection = ref("");
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
-const { locale, t } = useI18n({ useScope: "global" });
+const { t } = useI18n({ useScope: "global" });
 const dismissedLanguageMismatchAlert = ref(
   readStorage(LANGUAGE_MISMATCH_ALERT_STORAGE_KEY, { key: "", expiresAt: 0 }),
 );
-locale.value = settings.uiLanguage;
 
 const currentLanguageMismatchKey = computed(() => {
   return `${languageFamily(settings.uiLanguage)}:${languageFamily(settings.ebirdLanguage)}`;
@@ -270,9 +252,13 @@ watch(
 watch(
   () => settings.uiLanguage,
   (value, previousValue) => {
-    locale.value = value;
     writeCookie(LANGUAGE_COOKIE_NAME, value);
-    updateDocumentMetadata(value);
+    setI18nLanguage(value).then(() => {
+      // Skip if the user switched language again while this one was loading.
+      if (settings.uiLanguage === value) {
+        updateDocumentMetadata(value);
+      }
+    });
 
     const previousDefault = defaultWebsiteForLanguage(previousValue || value);
     if (!settings.websiteName || settings.websiteName === previousDefault) {

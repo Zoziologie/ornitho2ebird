@@ -10,7 +10,7 @@ import {
   distanceFromPath,
   mathMode,
 } from "../lib/utils";
-import { getOrnithoEbirdSpeciesCode } from "../lib/taxonomy";
+import { getOrnithoEbirdSpeciesCode, loadOrnithoSpeciesList } from "../lib/taxonomy";
 
 const props = defineProps({
   selectedWebsiteName: {
@@ -142,6 +142,9 @@ watch(file, async (nextFile) => {
 
   try {
     const rawText = await nextFile.text();
+    if (website.value.system === "ornitho") {
+      await loadOrnithoSpeciesList();
+    }
     const parsed = parseImportFile(rawText, website.value);
     parsed.website = {
       ...website.value,
