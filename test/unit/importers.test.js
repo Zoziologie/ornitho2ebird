@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { ImportError, parseImportFile } from "../../src/lib/importers";
+import { ImportError, parseImportFile, parseWktLineString } from "../../src/lib/importers";
 import { loadOrnithoSpeciesList } from "../../src/lib/taxonomy";
 import { parseFixture, readFixture, website } from "../helpers";
 
@@ -184,5 +184,32 @@ describe("other sources", () => {
     expect(importError(() => parseImportFile("", { name: "x", system: "unknown" })).key).toBe(
       "importErrorUnsupported",
     );
+  });
+});
+
+describe("parseWktLineString", () => {
+  it("reads LINESTRING as [lat, lon] points", () => {
+    expect(parseWktLineString("LINESTRING(6.63 46.52, 6.64 46.53)")).toEqual([
+      [46.52, 6.63],
+      [46.53, 6.64],
+    ]);
+    expect(parseWktLineString(" linestring ( -0.5 51.4 , 0 0 ) ")).toEqual([
+      [51.4, -0.5],
+      [0, 0],
+    ]);
+  });
+
+  it("returns null for anything that is not a 2D line of two or more points", () => {
+    for (const wkt of [
+      "",
+      null,
+      "POINT(6.6 46.5)",
+      "LINESTRING(6.6 46.5)",
+      "LINESTRING(6.6 46.5 400, 6.7 46.6 410)",
+      "MULTILINESTRING((6.6 46.5, 6.7 46.6))",
+      "LINESTRING(6.6 abc, 6.7 46.6)",
+    ]) {
+      expect(parseWktLineString(wkt)).toBeNull();
+    }
   });
 });

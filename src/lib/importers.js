@@ -1,5 +1,4 @@
 import Papa from "papaparse/papaparse.js";
-import Wkt from "wicket/wicket.js";
 import { buildSpeciesCommentTemplate, createSighting, distanceFromPath, mathMode } from "./utils";
 import { getOrnithoEbirdSpeciesCode } from "./taxonomy";
 
@@ -20,6 +19,25 @@ const precisionMatchObservation = {
 };
 
 // Import failure with a user-facing reason: `key` is an i18n message key, `params` its values.
+// Reads a WKT "LINESTRING(lon lat, lon lat, ...)" into [[lat, lon], ...]. Returns null for
+// anything else (other geometry types, 3D points, fewer than two points).
+export function parseWktLineString(wkt) {
+  const match = /^\s*LINESTRING\s*\(([^()]*)\)\s*$/i.exec(String(wkt || ""));
+  if (!match) {
+    return null;
+  }
+
+  const path = [];
+  for (const point of match[1].split(",")) {
+    const values = point.trim().split(/\s+/).map(Number);
+    if (values.length !== 2 || !values.every(Number.isFinite)) {
+      return null;
+    }
+    path.push([values[1], values[0]]);
+  }
+  return path.length >= 2 ? path : null;
+}
+
 export class ImportError extends Error {
   constructor(key, params = {}) {
     super(key);
@@ -136,34 +154,8 @@ export function parseImportFile(rawText, selectedWebsite) {
         duration += 24 * 60;
       }
 
-      let path = null;
-      let distance = null;
-      if (form.protocol?.wkt) {
-        const wkt = new Wkt.Wkt();
-        wkt.read(form.protocol.wkt);
-        path = wkt.toJson().coordinates.map((coordinate) => [coordinate[1], coordinate[0]]);
-        if (path.length >= 2) {
-          distance = distanceFromPath(path);
-        } else {
-          path = null;
-          distance = null;
-        }
-      } else if (form.trace) {
-        const wkt = new Wkt.Wkt();
-        wkt.read(form.trace);
-        if (wkt.toJson().coordinates[0]?.length === 2) {
-          path = wkt.toJson().coordinates.map((coordinate) => [coordinate[1], coordinate[0]]);
-          if (path.length >= 2) {
-            distance = distanceFromPath(path);
-          } else {
-            path = null;
-            distance = null;
-          }
-        } else {
-          path = null;
-          distance = null;
-        }
-      }
+      const path = parseWktLineString(form.protocol?.wkt || form.trace);
+      const distance = path ? distanceFromPath(path) : null;
 
       return {
         id: index + 1,
