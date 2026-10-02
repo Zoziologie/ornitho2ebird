@@ -6,7 +6,9 @@ import {
 } from "./constants";
 
 function normalizeName(value) {
-  return String(value || "").normalize("NFC").trim();
+  return String(value || "")
+    .normalize("NFC")
+    .trim();
 }
 
 export function normalizeLocationName(value, fallback = "") {
@@ -76,7 +78,12 @@ export function distanceFromPath(path) {
 
   let distance = 0;
   for (let index = 1; index < path.length; index += 1) {
-    distance += haversineDistanceKm(path[index - 1][0], path[index - 1][1], path[index][0], path[index][1]);
+    distance += haversineDistanceKm(
+      path[index - 1][0],
+      path[index - 1][1],
+      path[index][0],
+      path[index][1],
+    );
   }
 
   return mathRound(distance, 2);
@@ -108,12 +115,7 @@ export function protocol(form) {
     Number.isFinite(Number(form.distance)) &&
     Number(form.distance) >= 0;
 
-  if (
-    form.time &&
-    hasDistance &&
-    Number(form.duration) > 0 &&
-    Number(form.number_observer) > 0
-  ) {
+  if (form.time && hasDistance && Number(form.duration) > 0 && Number(form.number_observer) > 0) {
     return Number(form.distance) > stationaryDistanceThresholdKm
       ? { name: "Traveling", letter: "T", variant: "success" }
       : { name: "Stationary", letter: "S", variant: "success" };
@@ -138,7 +140,7 @@ function templateSighting(sighting) {
       key,
       // comment is already escaped HTML (see createSighting)
       typeof value === "string" && key !== "comment" ? escapeTemplateText(value) : value,
-    ])
+    ]),
   );
 }
 
@@ -173,10 +175,10 @@ export function speciesComment(speciesCommentTemplate, sightings) {
 
           try {
             return (
-              Function("context", `with (context) { return String(${expression}); }`)(context).replace(
-                /(?:\r\n|\r|\n)/g,
-                "<br>"
-              ) + suffix
+              Function(
+                "context",
+                `with (context) { return String(${expression}); }`,
+              )(context).replace(/(?:\r\n|\r|\n)/g, "<br>") + suffix
             );
           } catch {
             return suffix;
@@ -188,7 +190,11 @@ export function speciesComment(speciesCommentTemplate, sightings) {
     .join(separator);
 }
 
-export function buildSpeciesRows(sightings, speciesCommentTemplate, commonNameForSighting = (sighting) => sighting?.common_name || "") {
+export function buildSpeciesRows(
+  sightings,
+  speciesCommentTemplate,
+  commonNameForSighting = (sighting) => sighting?.common_name || "",
+) {
   const speciesGroups = new Map();
 
   sightings.forEach((sighting) => {
@@ -324,7 +330,9 @@ export function applyDefaultAutomaticAssignment({
   const assignDistanceKm = Number(autoAssignDistance) || 3;
   const newSightingsByFormId = new Map();
   const datetimes = unassigned.map((sighting) => {
-    return sighting.time ? new Date(`${sighting.date}T${sighting.time}`) : new Date(`${sighting.date}T00:00:00`);
+    return sighting.time
+      ? new Date(`${sighting.date}T${sighting.time}`)
+      : new Date(`${sighting.date}T00:00:00`);
   });
   const firstGeneratedFormId = Math.max(0, ...forms.map((form) => Number(form.id) || 0)) + 1;
   let nextFormId = firstGeneratedFormId;
@@ -344,7 +352,7 @@ export function applyDefaultAutomaticAssignment({
           unassigned[compare].lat,
           unassigned[compare].lon,
           unassigned[index].lat,
-          unassigned[index].lon
+          unassigned[index].lon,
         );
         if (km < assignDistanceKm) {
           unassigned[index].form_id = unassigned[compare].form_id;
@@ -375,7 +383,7 @@ export function applyDefaultAutomaticAssignment({
     forms.push(
       buildForm(payload, formId, {
         defaultNumberObserver,
-      })
+      }),
     );
   }
 }
@@ -397,7 +405,7 @@ export function buildForm(form, id, options = {}) {
     date: form.date || "",
     time: form.time ? form.time.substring(0, 5) : "",
     duration: form.duration || "",
-    distance: form.distance === 0 ? 0 : form.distance ?? "",
+    distance: form.distance === 0 ? 0 : (form.distance ?? ""),
     number_observer: form.number_observer || options.defaultNumberObserver || 1,
     full_form: Boolean(form.full_form),
     primary_purpose: form.primary_purpose !== false,
@@ -405,7 +413,9 @@ export function buildForm(form, id, options = {}) {
     checklist_comment: form.checklist_comment || "",
     species_comment_template: template,
     static_map_zoom_mode: form.static_map_zoom_mode === "manual" ? "manual" : "auto",
-    static_map_zoom: Number.isFinite(Number(form.static_map_zoom)) ? Number(form.static_map_zoom) : 12,
+    static_map_zoom: Number.isFinite(Number(form.static_map_zoom))
+      ? Number(form.static_map_zoom)
+      : 12,
     interactive_map_url: form.interactive_map_url || form.static_map?.gist || "",
     // Traces and hotspot lists can be large and are only ever replaced as a whole.
     path: form.path ? markRaw(form.path) : null,
@@ -418,8 +428,13 @@ export function buildForm(form, id, options = {}) {
 
 // Turn parsed import data into app state: build the imported checklists, then group casual
 // sightings into new checklists with the automatic-assignment settings.
-export function assembleImport(payload, { defaultNumberObserver, autoAssignDuration, autoAssignDistance, speciesCommentTemplate }) {
-  const forms = (payload.forms || []).map((form, index) => buildForm(form, index + 1, { defaultNumberObserver }));
+export function assembleImport(
+  payload,
+  { defaultNumberObserver, autoAssignDuration, autoAssignDistance, speciesCommentTemplate },
+) {
+  const forms = (payload.forms || []).map((form, index) =>
+    buildForm(form, index + 1, { defaultNumberObserver }),
+  );
   const sightings = payload.sightings || [];
 
   applyDefaultAutomaticAssignment({
@@ -439,7 +454,9 @@ export function createSighting(raw) {
   const roundedLon = mathRound(raw.lon, 6);
   const hasCoordinates = Number.isFinite(Number(roundedLat)) && Number.isFinite(Number(roundedLon));
   const coordinates = hasCoordinates ? `${roundedLat}, ${roundedLon}` : "";
-  const googleMapsUrl = hasCoordinates ? `https://maps.google.com/?q=${roundedLat},${roundedLon}` : "";
+  const googleMapsUrl = hasCoordinates
+    ? `https://maps.google.com/?q=${roundedLat},${roundedLon}`
+    : "";
 
   return {
     id: raw.id,
@@ -465,6 +482,8 @@ export function createSighting(raw) {
     atlas_code: raw.atlas_code ?? "",
     auditory_contact: raw.auditory_contact ?? "",
     // Stored as HTML: escape the imported text, keep line breaks.
-    comment: raw.comment ? String(raw.comment).replaceAll("<", "&lt;").replace(/\r?\n/g, "<br>") : "",
+    comment: raw.comment
+      ? String(raw.comment).replaceAll("<", "&lt;").replace(/\r?\n/g, "<br>")
+      : "",
   };
 }

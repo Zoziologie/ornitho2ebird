@@ -33,7 +33,11 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
 </script>
 
 <template>
-  <div v-if="dialog" class="modal-backdrop d-grid p-3 overflow-x-hidden app-dialog-backdrop" @click.self="cancel">
+  <div
+    v-if="dialog"
+    class="modal-backdrop d-grid p-3 overflow-x-hidden app-dialog-backdrop"
+    @click.self="cancel"
+  >
     <section
       class="modal-panel app-dialog-panel card border-0 shadow"
       role="alertdialog"
@@ -43,7 +47,12 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKeydown));
       <div class="card-body p-4">
         <p id="app-dialog-message" class="mb-4 app-dialog-message">{{ dialog.message }}</p>
         <div class="d-flex justify-content-end gap-2">
-          <button v-if="dialog.type === 'confirm'" class="btn btn-outline-secondary" type="button" @click="cancel">
+          <button
+            v-if="dialog.type === 'confirm'"
+            class="btn btn-outline-secondary"
+            type="button"
+            @click="cancel"
+          >
             {{ t("cancel") }}
           </button>
           <button ref="okButton" class="btn btn-primary" type="button" @click="confirm">

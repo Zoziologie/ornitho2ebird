@@ -19,7 +19,13 @@ function ornithoJson(forms = [], sightings = []) {
   return JSON.stringify({ data: { forms, sightings } });
 }
 
-function ornithoSighting({ id = 1, iso = "2024-05-01T07:30:00+02:00", lat = "46.1", lon = "7.1", speciesId = "1" } = {}) {
+function ornithoSighting({
+  id = 1,
+  iso = "2024-05-01T07:30:00+02:00",
+  lat = "46.1",
+  lon = "7.1",
+  speciesId = "1",
+} = {}) {
   return {
     species: { "@id": speciesId, name: "Species", latin_name: "Latin" },
     place: { name: "Somewhere" },
@@ -62,13 +68,24 @@ describe("ornitho JSON", () => {
       key: "importErrorInvalidJson",
       params: {},
     });
-    expect(importError(() => parseImportFile("{}", website("ornitho.ch"))).key).toBe("importErrorInvalidJson");
+    expect(importError(() => parseImportFile("{}", website("ornitho.ch"))).key).toBe(
+      "importErrorInvalidJson",
+    );
   });
 
   it("skips checklists without sightings instead of failing", () => {
-    const form = { time_start: "07:00:00", time_stop: "08:00:00", lat: "46", lon: "7", full_form: "1" };
+    const form = {
+      time_start: "07:00:00",
+      time_stop: "08:00:00",
+      lat: "46",
+      lon: "7",
+      full_form: "1",
+    };
     const parsed = parseImportFile(
-      ornithoJson([{ ...form, sightings: [ornithoSighting()] }, { ...form, sightings: [] }]),
+      ornithoJson([
+        { ...form, sightings: [ornithoSighting()] },
+        { ...form, sightings: [] },
+      ]),
       website("ornitho.ch"),
     );
     expect(parsed.forms).toHaveLength(1);
@@ -77,9 +94,17 @@ describe("ornitho JSON", () => {
   });
 
   it("gives checklists that end after midnight a positive duration", () => {
-    const form = { time_start: "23:30:00", time_stop: "00:45:00", lat: "46", lon: "7", full_form: "1" };
+    const form = {
+      time_start: "23:30:00",
+      time_stop: "00:45:00",
+      lat: "46",
+      lon: "7",
+      full_form: "1",
+    };
     const parsed = parseImportFile(
-      ornithoJson([{ ...form, sightings: [ornithoSighting({ iso: "2024-05-01T23:40:00+02:00" })] }]),
+      ornithoJson([
+        { ...form, sightings: [ornithoSighting({ iso: "2024-05-01T23:40:00+02:00" })] },
+      ]),
       website("ornitho.ch"),
     );
     expect(parsed.forms[0].duration).toBe(75);
@@ -116,13 +141,18 @@ describe("BirdLasser CSV", () => {
     const latitude = columns.indexOf('"Latitude"');
     const broken = rows[0].split(",");
     broken[latitude] = '""';
-    const parsed = parseImportFile([header, broken.join(","), rows[1]].join("\n"), website("birdlasser"));
+    const parsed = parseImportFile(
+      [header, broken.join(","), rows[1]].join("\n"),
+      website("birdlasser"),
+    );
     expect(parsed.sightings).toHaveLength(1);
     expect(parsed.skipped.noCoordinates).toBe(1);
   });
 
   it("names the missing columns when the file is from another source", () => {
-    const error = importError(() => parseImportFile(readFixture("observation_org.csv"), website("birdlasser")));
+    const error = importError(() =>
+      parseImportFile(readFixture("observation_org.csv"), website("birdlasser")),
+    );
     expect(error.key).toBe("importErrorMissingColumns");
     expect(error.params.columns).toContain("Species primary name / Primary language");
   });
@@ -145,9 +175,9 @@ describe("Observation CSV", () => {
 
 describe("other sources", () => {
   it("rejects an ornitho.net TXT without the English header", () => {
-    expect(importError(() => parseImportFile("Datum\tArt\n1\t2", website("data.biolovision.net"))).key).toBe(
-      "importErrorTxtHeader",
-    );
+    expect(
+      importError(() => parseImportFile("Datum\tArt\n1\t2", website("data.biolovision.net"))).key,
+    ).toBe("importErrorTxtHeader");
   });
 
   it("rejects unknown systems", () => {

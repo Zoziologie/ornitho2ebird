@@ -71,7 +71,7 @@ watch(
     if (nextValue !== previousValue) {
       resetImportState();
     }
-  }
+  },
 );
 
 const importFileLabelKey = computed(() => {
@@ -144,7 +144,9 @@ watch(file, async (nextFile) => {
 
     skippedWarnings.value = [
       parsed.skipped.emptyForms > 0 ? t("importSkippedEmptyForms", parsed.skipped.emptyForms) : "",
-      parsed.skipped.noCoordinates > 0 ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates) : "",
+      parsed.skipped.noCoordinates > 0
+        ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates)
+        : "",
     ].filter(Boolean);
     verificationWarning.value = await checkWebsite(parsed, website.value);
 
@@ -157,7 +159,9 @@ watch(file, async (nextFile) => {
     errorMessage.value =
       error instanceof ImportError
         ? t(error.key, error.params)
-        : t("importErrorUnexpected", { detail: error instanceof Error ? error.message : String(error) });
+        : t("importErrorUnexpected", {
+            detail: error instanceof Error ? error.message : String(error),
+          });
   }
 });
 
@@ -412,7 +416,10 @@ async function checkWebsite(exportData, selectedWebsite) {
               <div class="import-dropzone-body">
                 <div class="import-dropzone-main">
                   <div class="import-dropzone-meta">
-                    <i class="bi bi-cloud-arrow-up import-dropzone-icon text-secondary" aria-hidden="true"></i>
+                    <i
+                      class="bi bi-cloud-arrow-up import-dropzone-icon text-secondary"
+                      aria-hidden="true"
+                    ></i>
                     <div class="import-dropzone-text">
                       <div class="fw-semibold">{{ t("importDropzoneTitle") }}</div>
                       <div class="small text-muted">{{ t("importDropzoneHint") }}</div>
@@ -426,17 +433,28 @@ async function checkWebsite(exportData, selectedWebsite) {
             </div>
           </div>
 
-          <div v-if="loadingStatus === 0" class="alert alert-warning d-flex align-items-center gap-2">
+          <div
+            v-if="loadingStatus === 0"
+            class="alert alert-warning d-flex align-items-center gap-2"
+          >
             <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
             <span>{{ t("loadingData") }}</span>
           </div>
-          <div v-else-if="loadingStatus === 1" class="alert alert-success d-flex align-items-center gap-2">
+          <div
+            v-else-if="loadingStatus === 1"
+            class="alert alert-success d-flex align-items-center gap-2"
+          >
             <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
             <span>{{ importSuccessText }}</span>
           </div>
-          <div v-else-if="loadingStatus === -1" class="alert alert-danger d-flex align-items-center gap-2">
+          <div
+            v-else-if="loadingStatus === -1"
+            class="alert alert-danger d-flex align-items-center gap-2"
+          >
             <i class="bi bi-exclamation-octagon-fill flex-shrink-0" aria-hidden="true"></i>
-            <span><strong>{{ t("error") }}.</strong> {{ errorMessage }}</span>
+            <span
+              ><strong>{{ t("error") }}.</strong> {{ errorMessage }}</span
+            >
           </div>
           <div
             v-for="warning in skippedWarnings"
@@ -446,7 +464,10 @@ async function checkWebsite(exportData, selectedWebsite) {
             <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
             <span>{{ warning }}</span>
           </div>
-          <div v-if="verificationWarning" class="alert alert-warning d-flex align-items-center gap-2">
+          <div
+            v-if="verificationWarning"
+            class="alert alert-warning d-flex align-items-center gap-2"
+          >
             <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
             <span>{{ verificationWarning }}</span>
           </div>

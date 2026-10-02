@@ -51,11 +51,7 @@ const props = defineProps({
   assignmentMapBaseLayer: { type: String, default: "OpenStreetMap" },
 });
 
-const emit = defineEmits([
-  "update:selectedFormId",
-  "update:assignmentMapBaseLayer",
-  "open-info",
-]);
+const emit = defineEmits(["update:selectedFormId", "update:assignmentMapBaseLayer", "open-info"]);
 const { t } = useI18n();
 
 const assignDuration = ref(props.defaultAssignDuration || 1);
@@ -598,7 +594,14 @@ watch(
 watch(
   () => [
     props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
-    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon, form.path, form.hotspots]),
+    props.forms.map((form) => [
+      form.id,
+      form.imported,
+      form.lat,
+      form.lon,
+      form.path,
+      form.hotspots,
+    ]),
   ],
   async () => {
     await nextTick();
@@ -765,8 +768,7 @@ function assignmentClusterIcon(cluster) {
     .map((marker) => Number(marker.options.formId))
     .filter((value) => Number.isFinite(value));
   const uniqueFormIds = [...new Set(formIds)];
-  const clusterColor =
-    uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
+  const clusterColor = uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
   const clusterTextColor = clusterColor === "#ffff33" ? "#223846" : "#ffffff";
 
   return L.divIcon({
@@ -793,7 +795,8 @@ function assignmentSightingsNearLatLng(latlng) {
   return props.sightings
     .filter((sighting) => {
       return (
-        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) * 1000 <=
+        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) *
+          1000 <=
         ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS
       );
     })
@@ -861,7 +864,7 @@ function assignmentClusterPopupContent(latlng) {
     const countValue = document.createElement("span");
     countValue.className = "map-popup-compact-item";
     const countParts = [sighting.count_precision, sighting.count].filter(
-      (value) => value !== null && value !== ""
+      (value) => value !== null && value !== "",
     );
     countValue.textContent = countParts.length ? countParts.join("") : "—";
     meta.appendChild(countValue);
@@ -917,10 +920,7 @@ function openAssignmentClusterPopup(latlng) {
     return;
   }
 
-  L.popup({ maxWidth: 420 })
-    .setLatLng(latlng)
-    .setContent(content)
-    .openOn(assignmentMap);
+  L.popup({ maxWidth: 420 }).setLatLng(latlng).setContent(content).openOn(assignmentMap);
 }
 
 function onAssignmentClusterClick(event) {
@@ -1314,10 +1314,14 @@ onMounted(() => {
             class="assignment-map-fullscreen btn btn-light btn-sm"
             type="button"
             :aria-label="
-              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+              assignmentMapFullscreen
+                ? t('assignmentMapExitFullscreen')
+                : t('assignmentMapEnterFullscreen')
             "
             :title="
-              assignmentMapFullscreen ? t('assignmentMapExitFullscreen') : t('assignmentMapEnterFullscreen')
+              assignmentMapFullscreen
+                ? t('assignmentMapExitFullscreen')
+                : t('assignmentMapEnterFullscreen')
             "
             :aria-pressed="assignmentMapFullscreen"
             @click="toggleAssignmentMapFullscreen"
@@ -1565,7 +1569,9 @@ onMounted(() => {
                 @click="observationsModalOpen = true"
               >
                 <i class="bi bi-list-ul" aria-hidden="true"></i>
-                <span>{{ t("viewChecklistObservations", { count: selectedSightings.length }) }}</span>
+                <span>{{
+                  t("viewChecklistObservations", { count: selectedSightings.length })
+                }}</span>
               </button>
             </div>
             <div class="form-check form-switch mt-2">
@@ -1589,9 +1595,16 @@ onMounted(() => {
             </div>
             <div v-if="selectedSightings.length === 0 || isInvalid" class="alert alert-danger mb-0">
               <h4 class="alert-heading">{{ t("checklistWarnings") }}</h4>
-              <div v-if="selectedSightings.length === 0" class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+              <div
+                v-if="selectedSightings.length === 0"
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+              >
                 <p class="mb-0">{{ t("warningNoSightings") }}</p>
-                <button class="btn btn-outline-danger btn-sm flex-shrink-0" type="button" @click="deleteSelectedChecklist">
+                <button
+                  class="btn btn-outline-danger btn-sm flex-shrink-0"
+                  type="button"
+                  @click="deleteSelectedChecklist"
+                >
                   {{ t("deleteChecklist") }}
                 </button>
               </div>
@@ -1622,7 +1635,10 @@ onMounted(() => {
               </div>
               <div
                 class="form-text"
-                :class="{ 'text-warning': (selectedForm.location_name || '').length >= LOCATION_NAME_MAX_LENGTH }"
+                :class="{
+                  'text-warning':
+                    (selectedForm.location_name || '').length >= LOCATION_NAME_MAX_LENGTH,
+                }"
               >
                 {{
                   t("locationNameLimitHint", {
@@ -1813,7 +1829,10 @@ onMounted(() => {
                       :alt="t('staticMapPreviewAlt')"
                     />
                   </div>
-                  <div v-else-if="staticMapPreview.reason !== 'disabled'" class="alert alert-warning small mb-0">
+                  <div
+                    v-else-if="staticMapPreview.reason !== 'disabled'"
+                    class="alert alert-warning small mb-0"
+                  >
                     <span v-if="staticMapPreview.reason === 'token_missing'">
                       {{ t("staticMapPreviewTokenMissing") }}
                     </span>
@@ -1827,11 +1846,17 @@ onMounted(() => {
 
                   <div
                     class="static-map-preview-controls mt-3"
-                    :class="{ 'static-map-preview-controls-with-zoom': selectedForm.static_map_zoom_mode === 'manual' }"
+                    :class="{
+                      'static-map-preview-controls-with-zoom':
+                        selectedForm.static_map_zoom_mode === 'manual',
+                    }"
                   >
                     <div class="static-map-preview-control">
                       <label class="form-label mb-1">{{ t("staticMapZoomMode") }}</label>
-                      <select v-model="selectedForm.static_map_zoom_mode" class="form-select form-select-sm">
+                      <select
+                        v-model="selectedForm.static_map_zoom_mode"
+                        class="form-select form-select-sm"
+                      >
                         <option value="auto">{{ t("staticMapZoomModeAuto") }}</option>
                         <option value="manual">{{ t("staticMapZoomModeManual") }}</option>
                       </select>
@@ -1878,14 +1903,22 @@ onMounted(() => {
               <i class="bi bi-list-ul" aria-hidden="true"></i>
               <span>{{ t("checklistObservationsTitle") }}</span>
             </h2>
-            <button class="btn btn-outline-secondary btn-sm" type="button" @click="observationsModalOpen = false">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              @click="observationsModalOpen = false"
+            >
               {{ t("close") }}
             </button>
           </div>
 
           <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-              <div class="fw-semibold">{{ selectedReviewOption?.label || selectedForm.location_name }}</div>
+            <div
+              class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3"
+            >
+              <div class="fw-semibold">
+                {{ selectedReviewOption?.label || selectedForm.location_name }}
+              </div>
               <div class="badge bg-secondary">
                 {{ t("checklistObservationCount", selectedSightings.length) }}
               </div>

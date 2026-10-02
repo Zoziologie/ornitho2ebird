@@ -54,13 +54,22 @@ export default function bootstrapIconsSubset({ root = process.cwd(), sourceDirs 
       }
 
       const names = [...used].sort();
-      const font = await readFile(require.resolve("bootstrap-icons/font/fonts/bootstrap-icons.woff2"));
-      const subset = await subsetFont(font, String.fromCodePoint(...names.map((name) => codepoints[name])), {
-        targetFormat: "woff2",
-      });
+      const font = await readFile(
+        require.resolve("bootstrap-icons/font/fonts/bootstrap-icons.woff2"),
+      );
+      const subset = await subsetFont(
+        font,
+        String.fromCodePoint(...names.map((name) => codepoints[name])),
+        {
+          targetFormat: "woff2",
+        },
+      );
 
       // Keep the library's shared ".bi::before" rule, drop the per-icon rules and font URLs.
-      const baseRule = code.slice(code.indexOf(".bi::before"), code.indexOf("}", code.indexOf(".bi::before")) + 1);
+      const baseRule = code.slice(
+        code.indexOf(".bi::before"),
+        code.indexOf("}", code.indexOf(".bi::before")) + 1,
+      );
       const iconRules = names
         .map((name) => `.bi-${name}::before { content: "\\${codepoints[name].toString(16)}"; }`)
         .join("\n");

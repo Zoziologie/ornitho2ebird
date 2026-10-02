@@ -6,7 +6,10 @@ const localesDir = fileURLToPath(new URL("../../src/locales/", import.meta.url))
 const locales = Object.fromEntries(
   readdirSync(localesDir)
     .filter((file) => file.endsWith(".json"))
-    .map((file) => [file.replace(".json", ""), JSON.parse(readFileSync(localesDir + file, "utf8"))]),
+    .map((file) => [
+      file.replace(".json", ""),
+      JSON.parse(readFileSync(localesDir + file, "utf8")),
+    ]),
 );
 const en = locales.en;
 const translations = Object.entries(locales).filter(([language]) => language !== "en");
@@ -28,7 +31,10 @@ describe("locales", () => {
     const mismatches = Object.keys(en)
       .filter((key) => key in messages)
       .filter((key) => placeholders(messages[key]).join() !== placeholders(en[key]).join())
-      .map((key) => `${key}: en {${placeholders(en[key])}} vs ${language} {${placeholders(messages[key])}}`);
+      .map(
+        (key) =>
+          `${key}: en {${placeholders(en[key])}} vs ${language} {${placeholders(messages[key])}}`,
+      );
     expect(mismatches).toEqual([]);
   });
 

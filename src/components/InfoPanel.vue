@@ -98,7 +98,7 @@ watch(
     await nextTick();
     autoAssignmentRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
@@ -167,11 +167,7 @@ watch(
       <h3 class="modal-section-title">{{ t("infoAutoAssignTitle") }}</h3>
       <p>{{ t("infoAutoAssignIntro") }}</p>
       <ul class="instruction-icon-list mb-0">
-        <li
-          v-for="item in autoAssignmentPoints"
-          :key="item.id"
-          class="instruction-icon-list-item"
-        >
+        <li v-for="item in autoAssignmentPoints" :key="item.id" class="instruction-icon-list-item">
           <span class="instruction-icon-list-icon">
             <i :class="['bi', item.icon]" aria-hidden="true"></i>
           </span>

@@ -32,6 +32,8 @@ app.directive("tooltip", {
 });
 
 // Load the user's language before the first render to avoid a flash of English.
-setI18nLanguage(resolveUiLanguage(readStorage(`${APP_STORAGE_PREFIX}:settings`, {}))).finally(() => {
-  app.use(i18n).mount("#app");
-});
+setI18nLanguage(resolveUiLanguage(readStorage(`${APP_STORAGE_PREFIX}:settings`, {}))).finally(
+  () => {
+    app.use(i18n).mount("#app");
+  },
+);

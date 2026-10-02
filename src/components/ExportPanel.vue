@@ -100,7 +100,7 @@ watch(
       taxonomyStatus.value = "error";
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function taxonomyMatchedCommonName(sighting) {
@@ -248,14 +248,18 @@ const taxonomyReportRows = computed(() => {
   }));
 });
 
-watch(unmatchedTaxonomy, (issues) => {
-  const nextCodeByIssue = {};
-  issues.forEach((issue) => {
-    const key = taxonomyIssueKey(issue);
-    nextCodeByIssue[key] = taxonomyReportCodeByIssue.value[key] || "";
-  });
-  taxonomyReportCodeByIssue.value = nextCodeByIssue;
-}, { immediate: true });
+watch(
+  unmatchedTaxonomy,
+  (issues) => {
+    const nextCodeByIssue = {};
+    issues.forEach((issue) => {
+      const key = taxonomyIssueKey(issue);
+      nextCodeByIssue[key] = taxonomyReportCodeByIssue.value[key] || "";
+    });
+    taxonomyReportCodeByIssue.value = nextCodeByIssue;
+  },
+  { immediate: true },
+);
 
 watch(
   () => exportableForms.value.length,
@@ -264,7 +268,7 @@ watch(
       exportFilename.value = buildExportFilename();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const exportSummaryStats = computed(() => {
@@ -282,7 +286,8 @@ const exportSummaryStats = computed(() => {
     }))
     .filter((item) => item.count > 0);
 
-  const totalSpecies = new Set(exportState.value.rows.map((row) => row.common_name).filter(Boolean)).size;
+  const totalSpecies = new Set(exportState.value.rows.map((row) => row.common_name).filter(Boolean))
+    .size;
   const completeChecklists = exportableForms.value.filter(({ form }) => form.full_form).length;
   const completePercent = exportableForms.value.length
     ? Math.round((completeChecklists / exportableForms.value.length) * 100)
@@ -292,7 +297,7 @@ const exportSummaryStats = computed(() => {
       const latitude = Number.isFinite(Number(form.lat)) ? Number(form.lat).toFixed(5) : "";
       const longitude = Number.isFinite(Number(form.lon)) ? Number(form.lon).toFixed(5) : "";
       return `${String(form.location_name || "").trim()}|${latitude}|${longitude}`;
-    })
+    }),
   ).size;
 
   return {
@@ -313,7 +318,9 @@ const distanceWarningForms = computed(() => {
       protocolState,
       distanceKm: Number(form.distance),
     }))
-    .filter(({ distanceKm }) => Number.isFinite(distanceKm) && distanceKm > DISTANCE_WARNING_THRESHOLD_KM)
+    .filter(
+      ({ distanceKm }) => Number.isFinite(distanceKm) && distanceKm > DISTANCE_WARNING_THRESHOLD_KM,
+    )
     .sort((left, right) => right.distanceKm - left.distanceKm);
 });
 
@@ -322,7 +329,10 @@ const displayedDistanceWarningForms = computed(() => {
 });
 
 const hiddenDistanceWarningCount = computed(() => {
-  return Math.max(0, distanceWarningForms.value.length - displayedDistanceWarningForms.value.length);
+  return Math.max(
+    0,
+    distanceWarningForms.value.length - displayedDistanceWarningForms.value.length,
+  );
 });
 
 function protocolSummaryIcon(name) {
@@ -480,25 +490,40 @@ async function downloadFile() {
       </div>
 
       <div v-else>
-        <div v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'" class="alert alert-secondary mb-3">
+        <div
+          v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'"
+          class="alert alert-secondary mb-3"
+        >
           <div class="d-flex align-items-center gap-2">
             <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
             <span>{{ t("exportTaxonomyLoading") }}</span>
           </div>
         </div>
-        <div v-else-if="taxonomyNeededForExport && taxonomyStatus === 'error'" class="alert alert-warning mb-3">
+        <div
+          v-else-if="taxonomyNeededForExport && taxonomyStatus === 'error'"
+          class="alert alert-warning mb-3"
+        >
           {{ t("exportTaxonomyLoadFailed") }}
         </div>
-        <div v-if="globalStaticMap.interactive && interactiveMapPublishing" class="alert alert-secondary mb-3">
+        <div
+          v-if="globalStaticMap.interactive && interactiveMapPublishing"
+          class="alert alert-secondary mb-3"
+        >
           <div class="d-flex align-items-center gap-2">
             <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
             <span>{{ t("interactiveMapPublishing") }}</span>
           </div>
         </div>
-        <div v-else-if="globalStaticMap.interactive && interactiveMapError" class="alert alert-warning mb-3">
+        <div
+          v-else-if="globalStaticMap.interactive && interactiveMapError"
+          class="alert alert-warning mb-3"
+        >
           {{ interactiveMapError }}
         </div>
-        <div v-else-if="unmatchedTaxonomy.length > 0" class="alert alert-warning export-warning-box mb-3">
+        <div
+          v-else-if="unmatchedTaxonomy.length > 0"
+          class="alert alert-warning export-warning-box mb-3"
+        >
           <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
             <span class="export-warning-icon" aria-hidden="true">
               <i class="bi bi-exclamation-triangle-fill"></i>
@@ -548,7 +573,9 @@ async function downloadFile() {
                       </thead>
                       <tbody>
                         <tr v-for="issue in taxonomyReportRows" :key="issue.reportKey">
-                          <td><code>{{ issue.speciesId || "?" }}</code></td>
+                          <td>
+                            <code>{{ issue.speciesId || "?" }}</code>
+                          </td>
                           <td>
                             <input
                               class="form-control form-control-sm"
@@ -559,11 +586,15 @@ async function downloadFile() {
                               "
                               :value="taxonomyReportCodeByIssue[issue.reportKey] || ''"
                               :placeholder="t('speciesCodePrompt')"
-                              @input="updateTaxonomyReportCode(issue.reportKey, $event.target.value)"
+                              @input="
+                                updateTaxonomyReportCode(issue.reportKey, $event.target.value)
+                              "
                             />
                           </td>
                           <td>{{ issue.sourceName }}</td>
-                          <td><em>{{ issue.scientificName }}</em></td>
+                          <td>
+                            <em>{{ issue.scientificName }}</em>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -571,15 +602,22 @@ async function downloadFile() {
                 </li>
                 <li>
                   {{ t("exportTaxonomyReportStepIssuePrefix") }}
-                  <button class="btn btn-outline-danger btn-sm ms-1" type="button" @click="openTaxonomyIssue">
-                    {{ t("exportTaxonomyReportCreateIssueAll") }}
-                  </button>{{ t("exportTaxonomyReportStepIssueSuffix") }}
+                  <button
+                    class="btn btn-outline-danger btn-sm ms-1"
+                    type="button"
+                    @click="openTaxonomyIssue"
+                  >
+                    {{ t("exportTaxonomyReportCreateIssueAll") }}</button
+                  >{{ t("exportTaxonomyReportStepIssueSuffix") }}
                 </li>
               </ol>
             </div>
           </details>
         </div>
-        <div v-if="distanceWarningForms.length > 0" class="alert alert-warning export-warning-box mb-3">
+        <div
+          v-if="distanceWarningForms.length > 0"
+          class="alert alert-warning export-warning-box mb-3"
+        >
           <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
             <span class="export-warning-icon" aria-hidden="true">
               <i class="bi bi-sign-turn-right-fill"></i>
@@ -589,7 +627,11 @@ async function downloadFile() {
           <p class="mb-2">
             {{ t("exportDistanceWarningBodyPrefix") }}
             {{ " " }}
-            <button class="btn btn-link btn-sm p-0 align-baseline" type="button" @click="openCustomizedMode">
+            <button
+              class="btn btn-link btn-sm p-0 align-baseline"
+              type="button"
+              @click="openCustomizedMode"
+            >
               {{ t("advancedModeCustomTitle") }}
             </button>
             :
@@ -601,8 +643,12 @@ async function downloadFile() {
               class="export-warning-item"
             >
               <div>
-                <div class="fw-semibold">{{ t("exportDistanceWarningChecklist", { id: form.id }) }}</div>
-                <div class="small text-muted">{{ form.date || "-" }} · {{ form.location_name || "-" }}</div>
+                <div class="fw-semibold">
+                  {{ t("exportDistanceWarningChecklist", { id: form.id }) }}
+                </div>
+                <div class="small text-muted">
+                  {{ form.date || "-" }} · {{ form.location_name || "-" }}
+                </div>
               </div>
               <span class="badge rounded-pill text-bg-danger export-warning-distance">
                 {{ mathRound(distanceKm, 2) }} km
@@ -618,8 +664,12 @@ async function downloadFile() {
           <section class="export-panel export-panel-protocol">
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
             <div class="export-total">
-              <span class="export-total-value">{{ formatNumber(exportSummaryStats.totalChecklists) }}</span>
-              <span class="export-total-label">{{ t("exportSummaryChecklists", exportSummaryStats.totalChecklists) }}</span>
+              <span class="export-total-value">{{
+                formatNumber(exportSummaryStats.totalChecklists)
+              }}</span>
+              <span class="export-total-label">{{
+                t("exportSummaryChecklists", exportSummaryStats.totalChecklists)
+              }}</span>
             </div>
             <div class="export-protocol-list">
               <div
@@ -631,7 +681,9 @@ async function downloadFile() {
                   <i :class="['bi', protocolSummaryIcon(item.name)]" aria-hidden="true"></i>
                 </span>
                 <span class="export-protocol-count">{{ formatNumber(item.count) }}</span>
-                <span class="export-protocol-label">{{ t(`protocolLabel${item.name}`, item.count) }}</span>
+                <span class="export-protocol-label">{{
+                  t(`protocolLabel${item.name}`, item.count)
+                }}</span>
               </div>
             </div>
           </section>
@@ -640,24 +692,44 @@ async function downloadFile() {
             <div class="export-panel-eyebrow">{{ t("exportPanelSnapshot") }}</div>
             <div class="export-stat-grid">
               <div class="export-stat-tile">
-                <span class="export-stat-icon"><i class="bi bi-feather" aria-hidden="true"></i></span>
-                <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSpecies) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }}</span>
+                <span class="export-stat-icon"
+                  ><i class="bi bi-feather" aria-hidden="true"></i
+                ></span>
+                <span class="export-stat-value">{{
+                  formatNumber(exportSummaryStats.totalSpecies)
+                }}</span>
+                <span class="export-stat-label">{{
+                  t("exportSummarySpecies", exportSummaryStats.totalSpecies)
+                }}</span>
               </div>
               <div class="export-stat-tile">
-                <span class="export-stat-icon"><i class="bi bi-binoculars" aria-hidden="true"></i></span>
-                <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalSightings) }}</span>
-                <span class="export-stat-label">{{ t("exportSummarySightings", exportSummaryStats.totalSightings) }}</span>
+                <span class="export-stat-icon"
+                  ><i class="bi bi-binoculars" aria-hidden="true"></i
+                ></span>
+                <span class="export-stat-value">{{
+                  formatNumber(exportSummaryStats.totalSightings)
+                }}</span>
+                <span class="export-stat-label">{{
+                  t("exportSummarySightings", exportSummaryStats.totalSightings)
+                }}</span>
               </div>
               <div class="export-stat-tile">
-                <span class="export-stat-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span>
+                <span class="export-stat-icon"
+                  ><i class="bi bi-check2-square" aria-hidden="true"></i
+                ></span>
                 <span class="export-stat-value">{{ exportSummaryStats.completePercent }}%</span>
                 <span class="export-stat-label">{{ t("exportSummaryComplete") }}</span>
               </div>
               <div class="export-stat-tile">
-                <span class="export-stat-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
-                <span class="export-stat-value">{{ formatNumber(exportSummaryStats.totalLocations) }}</span>
-                <span class="export-stat-label">{{ t("exportSummaryLocations", exportSummaryStats.totalLocations) }}</span>
+                <span class="export-stat-icon"
+                  ><i class="bi bi-geo-alt" aria-hidden="true"></i
+                ></span>
+                <span class="export-stat-value">{{
+                  formatNumber(exportSummaryStats.totalLocations)
+                }}</span>
+                <span class="export-stat-label">{{
+                  t("exportSummaryLocations", exportSummaryStats.totalLocations)
+                }}</span>
               </div>
             </div>
           </section>
@@ -745,7 +817,14 @@ async function downloadFile() {
                 <tr v-for="(row, index) in exportState.errors" :key="`${row.common_name}-${index}`">
                   <td>{{ row.common_name || "Missing species" }}</td>
                   <td>{{ row.date || "Missing date" }}</td>
-                  <td>{{ Math.max((row.species_comment || "").length, (row.checklist_comment || "").length) }}</td>
+                  <td>
+                    {{
+                      Math.max(
+                        (row.species_comment || "").length,
+                        (row.checklist_comment || "").length,
+                      )
+                    }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -765,9 +844,13 @@ async function downloadFile() {
             </div>
             <p>
               {{ t("finalStepsImportPrefix") }}
-              <a href="https://ebird.org/ebird/import/upload.form?theme=ebird" target="_blank" rel="noopener">
-                {{ t("finalStepsImportLink") }}
-              </a>,
+              <a
+                href="https://ebird.org/ebird/import/upload.form?theme=ebird"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ t("finalStepsImportLink") }} </a
+              >,
               {{ t("finalStepsImportMiddle") }}
               <strong>{{ t("openEbirdImport") }}</strong>
               ,
@@ -780,8 +863,8 @@ async function downloadFile() {
                 target="_blank"
                 rel="noopener"
               >
-                {{ t("finalStepsProcessingLink") }}
-              </a>,
+                {{ t("finalStepsProcessingLink") }} </a
+              >,
               {{ t("finalStepsProcessingMiddle") }}
               <a
                 href="https://support.ebird.org/en/support/solutions/articles/48000907878-upload-spreadsheet-data-to-ebird#anchorCleanData"

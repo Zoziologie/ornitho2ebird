@@ -34,8 +34,7 @@ export const ASSIGNMENT_MAP_BASE_LAYER_OPTIONS = [
 export const BASIC_SPECIES_COMMENT_TEMPLATE = {
   short:
     '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
-  long:
-    '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
+  long: '${ s.count_precision }${ s.count }${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
   limit: 5,
 };
 
@@ -88,7 +87,8 @@ const SPECIES_COMMENT_TEMPLATE_EXPRESSIONS = {
     "s.google_maps_url && s.coordinates ? '<a href=\"' + s.google_maps_url + '\">' + s.coordinates + '</a>' : ''",
   comment: () => "s.comment || ''",
   atlas: () => 's.atlas_code ? "Atlas: " + s.atlas_code : ""',
-  auditory: () => 'String(s.auditory_contact) === "1" || s.auditory_contact === true ? "Auditory contact" : ""',
+  auditory: () =>
+    'String(s.auditory_contact) === "1" || s.auditory_contact === true ? "Auditory contact" : ""',
 };
 
 function buildSpeciesCommentTemplateString(options, { withCountUnit = false } = {}) {
@@ -99,7 +99,11 @@ function buildSpeciesCommentTemplateString(options, { withCountUnit = false } = 
   return `\${ [${expressions.join(", ")}].filter(Boolean).join(" - ") }`;
 }
 
-export function buildSpeciesCommentTemplateFromOptions(options = {}, limit = 5, longOptions = options) {
+export function buildSpeciesCommentTemplateFromOptions(
+  options = {},
+  limit = 5,
+  longOptions = options,
+) {
   const normalizedOptions = {
     ...DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
     ...options,

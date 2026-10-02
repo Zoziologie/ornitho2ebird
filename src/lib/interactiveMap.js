@@ -44,7 +44,9 @@ export function buildInteractiveMapGeoJson(form, sightings = [], speciesCommentT
         "marker-color": "F7D826",
         "marker-size": "m",
         "marker-symbol": "1",
-        description: speciesComment(speciesCommentTemplate || form?.species_comment_template, [sighting]),
+        description: speciesComment(speciesCommentTemplate || form?.species_comment_template, [
+          sighting,
+        ]),
         link: "",
       },
       geometry: {
@@ -87,7 +89,9 @@ export async function createInteractiveMapGist({
   token = "",
 }) {
   const filename = buildInteractiveMapFilename(form);
-  const content = JSON.stringify(buildInteractiveMapGeoJson(form, sightings, speciesCommentTemplate));
+  const content = JSON.stringify(
+    buildInteractiveMapGeoJson(form, sightings, speciesCommentTemplate),
+  );
   const trimmedToken = String(token || "").trim();
 
   if (!trimmedToken) {
