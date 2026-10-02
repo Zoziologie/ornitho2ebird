@@ -290,6 +290,8 @@
   "exportDistanceWarningConfirm": "Switch to Customized mode to review and fix checklist distances, then export again.",
   "exportTaxonomyLoading": "Matching species names to the selected eBird taxonomy language...",
   "exportTaxonomyLoadFailed": "Taxonomy matching could not be loaded right now. You can still export, but species names may not match your eBird language.",
+  "retry": "Retry",
+  "unexpectedError": "Something went wrong: {detail}. Reload the page and try again. If it keeps happening, please report it on GitHub.",
   "exportTaxonomyWarningTitle": "Taxonomy matching issue",
   "exportTaxonomyWarningBody": "We were not able to find an eBird species name for the following species from ornitho:",
   "exportTaxonomyWarningLine": "{commonName} ({scientificName}) | @id: \"{id}\"",

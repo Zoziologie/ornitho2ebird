@@ -76,32 +76,31 @@ const activeSpeciesCommentTemplate = computed(() => {
   return props.customizedSpeciesComments ? props.speciesCommentTemplate : null;
 });
 
-watch(
-  () => props.selectedEbirdLanguage,
-  async (language) => {
-    const requestId = taxonomyRequestId + 1;
-    taxonomyRequestId = requestId;
-    taxonomyStatus.value = "loading";
+async function loadTaxonomy(language) {
+  const requestId = taxonomyRequestId + 1;
+  taxonomyRequestId = requestId;
+  taxonomyStatus.value = "loading";
 
-    try {
-      const commonNameByCode = await getCommonNameBySpeciesCode(language);
-      if (requestId !== taxonomyRequestId) {
-        return;
-      }
-
-      taxonomyCommonNameByCode.value = commonNameByCode;
-      taxonomyStatus.value = "ready";
-    } catch {
-      if (requestId !== taxonomyRequestId) {
-        return;
-      }
-
-      taxonomyCommonNameByCode.value = new Map();
-      taxonomyStatus.value = "error";
+  try {
+    const commonNameByCode = await getCommonNameBySpeciesCode(language);
+    if (requestId !== taxonomyRequestId) {
+      return;
     }
-  },
-  { immediate: true },
-);
+
+    taxonomyCommonNameByCode.value = commonNameByCode;
+    taxonomyStatus.value = "ready";
+  } catch (error) {
+    if (requestId !== taxonomyRequestId) {
+      return;
+    }
+
+    console.warn("Could not load the eBird taxonomy", error);
+    taxonomyCommonNameByCode.value = new Map();
+    taxonomyStatus.value = "error";
+  }
+}
+
+watch(() => props.selectedEbirdLanguage, loadTaxonomy, { immediate: true });
 
 function taxonomyMatchedCommonName(sighting) {
   const speciesCode = sighting?.ebird_species_code || "";
@@ -501,9 +500,16 @@ async function downloadFile() {
         </div>
         <div
           v-else-if="taxonomyNeededForExport && taxonomyStatus === 'error'"
-          class="alert alert-warning mb-3"
+          class="alert alert-warning mb-3 d-flex flex-wrap align-items-center gap-2"
         >
-          {{ t("exportTaxonomyLoadFailed") }}
+          <span class="me-auto">{{ t("exportTaxonomyLoadFailed") }}</span>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-dark"
+            @click="loadTaxonomy(selectedEbirdLanguage)"
+          >
+            <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>{{ t("retry") }}
+          </button>
         </div>
         <div
           v-if="globalStaticMap.interactive && interactiveMapPublishing"

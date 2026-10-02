@@ -35,7 +35,8 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
-import { LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
+import { EBIRD_API_KEY, LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
+import { fetchJson } from "../lib/http";
 
 const props = defineProps({
   forms: { type: Array, required: true },
@@ -272,7 +273,9 @@ function computeDurationFromSightings() {
 async function loadHotspotsForSelectedForm() {
   // Keep a reference: the selection may change while the request is in flight.
   const form = selectedForm.value;
-  if (!form?.lat || !form?.lon) {
+  // Not `!form.lat`: latitude or longitude 0 is a valid position.
+  const isCoordinate = (value) => value !== "" && value != null && Number.isFinite(Number(value));
+  if (!form || !isCoordinate(form.lat) || !isCoordinate(form.lon)) {
     return;
   }
 
@@ -282,18 +285,17 @@ async function loadHotspotsForSelectedForm() {
   }
 
   try {
-    const response = await fetch(
-      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=vcs68p4j67pt`,
+    const json = await fetchJson(
+      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=${EBIRD_API_KEY}`,
     );
-    const json = await response.json();
     form.hotspots = markRaw(Array.isArray(json) ? json : []);
     form.hotspot_key = hotspotKey;
     if (selectedForm.value === form) {
       refreshReviewMap();
     }
-  } catch {
-    form.hotspots = markRaw([]);
-    form.hotspot_key = hotspotKey;
+  } catch (error) {
+    // Not cached, so selecting the checklist again retries.
+    console.warn("Could not load eBird hotspots", error);
   }
 }
 
