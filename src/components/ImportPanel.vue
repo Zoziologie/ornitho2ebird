@@ -235,7 +235,7 @@ function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
     const observer = sighting.observers[0];
     const datetime = observer.timing["@ISO8601"].split("+")[0];
 
-    const baseComment = observer.comment ? observer.comment.replace(/\r\n/g, "<br>") : "";
+    const baseComment = observer.comment || "";
     const detailsComment = formatOrnithoDetails(observer.details);
     const comment = baseComment && detailsComment
       ? `${baseComment} - ${detailsComment}`

@@ -1,9 +1,7 @@
 import { createApp } from "vue";
-import { Tooltip } from "bootstrap";
+import Tooltip from "bootstrap/js/dist/tooltip";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
 import App from "./App.vue";
 import { i18n } from "./i18n";
 

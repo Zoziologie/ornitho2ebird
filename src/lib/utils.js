@@ -125,6 +125,22 @@ export function protocol(form) {
   };
 }
 
+// Imported text must not open tags or break out of the href="..." attributes built by templates.
+// Only "<" and '"' are encoded so the exported text stays identical for ordinary data.
+function escapeTemplateText(value) {
+  return String(value).replaceAll("<", "&lt;").replaceAll('"', "&quot;");
+}
+
+function templateSighting(sighting) {
+  return Object.fromEntries(
+    Object.entries(sighting).map(([key, value]) => [
+      key,
+      // comment is already escaped HTML (see createSighting)
+      typeof value === "string" && key !== "comment" ? escapeTemplateText(value) : value,
+    ])
+  );
+}
+
 export function speciesComment(speciesCommentTemplate, sightings) {
   if (!speciesCommentTemplate || !sightings?.length) {
     return "";
@@ -138,6 +154,7 @@ export function speciesComment(speciesCommentTemplate, sightings) {
 
   return sightings
     .map((sighting) => {
+      const context = { s: templateSighting(sighting) };
       return template
         .split("${")
         .map((chunk, index) => {
@@ -146,7 +163,6 @@ export function speciesComment(speciesCommentTemplate, sightings) {
           }
 
           const [expression, suffix = ""] = chunk.split("}");
-          const context = { s: sighting };
 
           try {
             return (
@@ -422,6 +438,7 @@ export function createSighting(raw) {
     count_precision: raw.count_precision || "",
     atlas_code: raw.atlas_code ?? "",
     auditory_contact: raw.auditory_contact ?? "",
-    comment: raw.comment ? raw.comment.replace(/\r\n/g, "<br>") : "",
+    // Stored as HTML: escape the imported text, keep line breaks.
+    comment: raw.comment ? String(raw.comment).replaceAll("<", "&lt;").replace(/\r?\n/g, "<br>") : "",
   };
 }
