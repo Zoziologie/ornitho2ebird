@@ -416,6 +416,24 @@ export function buildForm(form, id, options = {}) {
   return builtForm;
 }
 
+// Turn parsed import data into app state: build the imported checklists, then group casual
+// sightings into new checklists with the automatic-assignment settings.
+export function assembleImport(payload, { defaultNumberObserver, autoAssignDuration, autoAssignDistance, speciesCommentTemplate }) {
+  const forms = (payload.forms || []).map((form, index) => buildForm(form, index + 1, { defaultNumberObserver }));
+  const sightings = payload.sightings || [];
+
+  applyDefaultAutomaticAssignment({
+    forms,
+    sightings,
+    autoAssignDuration,
+    autoAssignDistance,
+    defaultNumberObserver,
+    speciesCommentTemplate,
+  });
+
+  return { forms, sightings, formsSightings: payload.formsSightings || [] };
+}
+
 export function createSighting(raw) {
   const roundedLat = mathRound(raw.lat, 6);
   const roundedLon = mathRound(raw.lon, 6);

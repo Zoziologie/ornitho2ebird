@@ -20,7 +20,7 @@ import {
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
 import { normalizeLanguage, resolveUiLanguage, setI18nLanguage } from "./i18n";
-import { applyDefaultAutomaticAssignment, buildForm } from "./lib/utils";
+import { assembleImport } from "./lib/utils";
 import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
 
@@ -305,11 +305,6 @@ function importData(payload) {
   const nextWebsiteSpeciesCommentTemplate = normalizeSpeciesCommentTemplate(
     nextWebsite?.species_comment_template,
   );
-  const nextSightings = payload.sightings || [];
-  const nextForms = (payload.forms || []).map((form, index) =>
-    buildForm(form, index + 1, { defaultNumberObserver: settings.defaultNumberObserver }),
-  );
-  const nextFormsSightings = payload.formsSightings || [];
 
   if (settings.speciesCommentTemplateOptions.personalized) {
     if (
@@ -329,19 +324,17 @@ function importData(payload) {
     );
   }
 
-  applyDefaultAutomaticAssignment({
-    forms: nextForms,
-    sightings: nextSightings,
+  const assembled = assembleImport(payload, {
+    defaultNumberObserver: settings.defaultNumberObserver,
     autoAssignDuration: settings.autoAssignDuration,
     autoAssignDistance: settings.autoAssignDistance,
-    defaultNumberObserver: settings.defaultNumberObserver,
     speciesCommentTemplate: settings.speciesCommentTemplate,
   });
 
   website.value = nextWebsite;
-  sightings.value = nextSightings;
-  forms.value = nextForms;
-  formsSightings.value = nextFormsSightings;
+  sightings.value = assembled.sightings;
+  forms.value = assembled.forms;
+  formsSightings.value = assembled.formsSightings;
   selectedFormId.value = forms.value[0]?.id || null;
 }
 
