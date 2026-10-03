@@ -20,6 +20,8 @@ export function loadOrnithoSpeciesList() {
 // eBird scientific name → species code (~700 KB, ~180 KB compressed), for sightings that come
 // without a code. Regenerate with `npm run taxonomy:update`.
 let scientificNameIndex = null;
+// The reverse, eBird names only: species code → scientific name.
+let bundledScientificNameByCode = null;
 let scientificNameIndexPromise = null;
 
 export function loadScientificNameIndex() {
@@ -27,12 +29,28 @@ export function loadScientificNameIndex() {
     .then((module) => {
       const { names, synonyms } = module.default;
       scientificNameIndex = new Map([...Object.entries(synonyms), ...Object.entries(names)]);
+      bundledScientificNameByCode = new Map(
+        Object.entries(names).map(([name, code]) => [code, name]),
+      );
     })
     .catch((error) => {
       scientificNameIndexPromise = null;
       throw error;
     });
   return scientificNameIndexPromise;
+}
+
+// Taxa for these codes from the bundled file, for when the eBird API cannot be reached. The
+// names date from the last `npm run taxonomy:update`. Call loadScientificNameIndex() first.
+export function bundledEbirdTaxa(speciesCodes) {
+  if (!bundledScientificNameByCode) {
+    throw new Error("The eBird scientific name index is not loaded yet.");
+  }
+  return new Map(
+    speciesCodes
+      .filter((code) => bundledScientificNameByCode.has(code))
+      .map((code) => [code, { sciName: bundledScientificNameByCode.get(code) }]),
+  );
 }
 
 // The eBird species code for a scientific name, or "". Besides eBird's own names it accepts the

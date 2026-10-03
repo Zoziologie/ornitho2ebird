@@ -10,7 +10,12 @@ import {
 } from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
-import { cachedEbirdTaxa, getEbirdTaxa } from "../lib/taxonomy";
+import {
+  bundledEbirdTaxa,
+  cachedEbirdTaxa,
+  getEbirdTaxa,
+  loadScientificNameIndex,
+} from "../lib/taxonomy";
 
 const props = defineProps({
   forms: {
@@ -119,9 +124,22 @@ async function loadTaxonomy() {
       return;
     }
 
-    console.warn("Could not load the eBird taxonomy", error);
-    taxonByCode.value = new Map();
-    taxonomyStatus.value = "error";
+    console.warn("Could not load the eBird taxonomy, using the bundled names", error);
+    try {
+      await loadScientificNameIndex();
+      if (requestId !== taxonomyRequestId) {
+        return;
+      }
+      taxonByCode.value = bundledEbirdTaxa(codes);
+      taxonomyStatus.value = "ready";
+    } catch (bundledError) {
+      if (requestId !== taxonomyRequestId) {
+        return;
+      }
+      console.warn("Could not load the bundled eBird names", bundledError);
+      taxonByCode.value = new Map();
+      taxonomyStatus.value = "error";
+    }
   }
 }
 

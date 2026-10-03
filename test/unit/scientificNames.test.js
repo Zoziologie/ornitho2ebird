@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { splitScientificName } from "../../src/lib/exportCsv";
-import { ebirdCodeForScientificName, loadScientificNameIndex } from "../../src/lib/taxonomy";
+import {
+  bundledEbirdTaxa,
+  ebirdCodeForScientificName,
+  loadScientificNameIndex,
+} from "../../src/lib/taxonomy";
 import { exportFixture, parseFixture } from "../helpers";
 
 beforeAll(async () => {
@@ -38,6 +42,15 @@ describe("ebirdCodeForScientificName", () => {
     "Plain Martin",
   ])("%j has no eBird code", (name) => {
     expect(ebirdCodeForScientificName(name)).toBe("");
+  });
+});
+
+describe("bundledEbirdTaxa", () => {
+  it("gives the eBird name (not a synonym) of known codes, for when the API is down", () => {
+    const taxa = bundledEbirdTaxa(["gargan", "lesred1", "nocode"]);
+    expect(taxa.get("gargan")).toEqual({ sciName: "Spatula querquedula" });
+    expect(taxa.get("lesred1")).toEqual({ sciName: "Acanthis flammea cabaret" });
+    expect(taxa.has("nocode")).toBe(false);
   });
 });
 
