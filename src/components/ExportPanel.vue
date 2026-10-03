@@ -9,6 +9,7 @@ import {
   rowsToCsv,
 } from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
+import LinkedText from "./LinkedText.vue";
 import { store } from "../lib/store";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
 import {
@@ -51,6 +52,18 @@ const props = defineProps({
   customizedSpeciesComments: {
     type: Boolean,
     required: true,
+  },
+  advancedEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  autoAssignDuration: {
+    type: Number,
+    default: 0,
+  },
+  autoAssignDistance: {
+    type: Number,
+    default: 0,
   },
 });
 const emit = defineEmits(["open-settings-section"]);
@@ -342,6 +355,19 @@ function protocolSummaryIcon(name) {
   );
 }
 
+// What Basic mode decided on its own, which users would otherwise only discover in eBird.
+const basicModeSummary = computed(() => {
+  const createdForms = exportableForms.value.filter(({ form }) => !form.imported);
+  const createdSightings = createdForms.reduce(
+    (total, { form }) => total + (exportableSightingsByFormId.value.get(form.id)?.length || 0),
+    0,
+  );
+  const historical = exportableForms.value.filter(
+    ({ protocolState }) => protocolState.name === "Historical",
+  ).length;
+  return { createdChecklists: createdForms.length, createdSightings, historical };
+});
+
 function openCustomizedMode() {
   emit("open-settings-section", "advanced-options");
 }
@@ -547,6 +573,55 @@ async function downloadFile() {
           </ul>
         </div>
 
+        <div
+          v-if="
+            !advancedEnabled &&
+            (basicModeSummary.createdChecklists > 0 || basicModeSummary.historical > 0)
+          "
+          class="alert alert-light border small mb-3"
+        >
+          <template v-if="basicModeSummary.createdChecklists > 0">
+            <p class="mb-1">
+              {{
+                t(
+                  "exportBasicCreated",
+                  {
+                    checklists: formatNumber(basicModeSummary.createdChecklists),
+                    sightings: formatNumber(basicModeSummary.createdSightings),
+                  },
+                  basicModeSummary.createdSightings,
+                )
+              }}
+              {{ t("exportBasicGrouping", { hours: autoAssignDuration, km: autoAssignDistance }) }}
+            </p>
+          </template>
+          <p v-if="basicModeSummary.historical > 0" class="mb-1">
+            <LinkedText
+              :text="
+                t(
+                  'exportBasicHistorical',
+                  { count: formatNumber(basicModeSummary.historical) },
+                  basicModeSummary.historical,
+                )
+              "
+              :links="['#help/conversion']"
+            />
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <button
+              v-if="basicModeSummary.createdChecklists > 0"
+              class="btn btn-link btn-sm p-0"
+              type="button"
+              @click="emit('open-settings-section', 'aggregation')"
+            >
+              {{ t("exportBasicChangeGrouping") }}
+            </button>
+            <button class="btn btn-link btn-sm p-0" type="button" @click="openCustomizedMode">
+              {{ t("exportBasicReview") }}
+            </button>
+          </div>
+        </div>
+
         <div class="export-overview mb-3">
           <section class="export-panel export-panel-protocol">
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
@@ -729,32 +804,37 @@ async function downloadFile() {
                 <h5 class="mb-0">{{ t("finalStepsTitle") }}</h5>
               </div>
             </div>
-            <p>
-              {{ t("finalStepsImportPrefix") }}
-              <a
-                href="https://ebird.org/ebird/import/upload.form?theme=ebird"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ t("finalStepsImportLink") }} </a
-              >,
-              {{ t("finalStepsImportMiddle") }}
-              <strong>{{ t("openEbirdImport") }}</strong>
-              ,
-              {{ t("finalStepsImportSuffix") }}
-            </p>
-            <p>
-              {{ t("finalStepsProcessingPrefix") }}
-              <a href="#help/processing">{{ t("finalStepsProcessingLink") }}</a
-              >,
-              {{ t("finalStepsProcessingMiddle") }}
-            </p>
-            <p class="mb-0">
-              {{ t("finalStepsReviewPrefix") }}
-              <a href="https://ebird.org/import/status/all.htm" target="_blank" rel="noopener">
-                {{ t("finalStepsReviewLink") }}
-              </a>
-              {{ t("finalStepsReviewSuffix") }}
+            <ol class="final-steps-list mb-2">
+              <li>
+                {{ t("finalStepsImportPrefix") }}
+                <a
+                  href="https://ebird.org/ebird/import/upload.form?theme=ebird"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {{ t("finalStepsImportLink") }} </a
+                >,
+                {{ t("finalStepsImportMiddle") }}
+                <strong>{{ t("openEbirdImport") }}</strong
+                >,
+                {{ t("finalStepsImportSuffix") }}
+              </li>
+              <li>
+                {{ t("finalStepsProcessingPrefix") }}
+                <a href="#help/processing">{{ t("finalStepsProcessingLink") }}</a
+                >,
+                {{ t("finalStepsProcessingMiddle") }}
+              </li>
+              <li>
+                {{ t("finalStepsReviewPrefix") }}
+                <a href="https://ebird.org/import/status/all.htm" target="_blank" rel="noopener">
+                  {{ t("finalStepsReviewLink") }}
+                </a>
+                {{ t("finalStepsReviewSuffix") }}
+              </li>
+            </ol>
+            <p class="mb-0 small">
+              <LinkedText :text="t('finalStepsFaq')" :links="['#help/faq']" />
             </p>
           </section>
         </div>

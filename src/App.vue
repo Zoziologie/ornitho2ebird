@@ -31,6 +31,8 @@ import { setI18nLanguage } from "./i18n";
 import { assembleImport } from "./lib/utils";
 import { store } from "./lib/store";
 import { confirmDialog } from "./lib/dialog";
+import { WORKFLOW_STEPS } from "./lib/workflow";
+import LinkedText from "./components/LinkedText.vue";
 import AppDialog from "./components/AppDialog.vue";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
@@ -188,6 +190,7 @@ function importData(payload) {
 
   website.value = nextWebsite;
   store.loadImport(assembled);
+  assignmentCustomized.value = settings.advancedEnabled;
   selectedFormId.value = forms.value[0]?.id || null;
 }
 
@@ -215,6 +218,34 @@ async function updateSelectedWebsiteName(nextWebsiteName) {
   clearImportedData();
   settings.websiteName = normalizedName;
 }
+
+// In Basic mode the grouping limits apply to the current import too, so the export page's "Change
+// the grouping" link has a visible effect. Not once Customized mode has been used for this
+// import: regrouping would undo the user's own assignments.
+const assignmentCustomized = ref(false);
+watch(
+  () => settings.advancedEnabled,
+  (enabled) => {
+    if (enabled && hasImportedData.value) {
+      assignmentCustomized.value = true;
+    }
+  },
+);
+watch(
+  () => [settings.autoAssignDuration, settings.autoAssignDistance],
+  ([duration, distance]) => {
+    if (assignmentCustomized.value || !hasImportedData.value || !(duration > 0 && distance > 0)) {
+      return;
+    }
+    store.resetAssignment();
+    store.autoAssign({
+      autoAssignDuration: duration,
+      autoAssignDistance: distance,
+      defaultNumberObserver: settings.defaultNumberObserver,
+      speciesCommentTemplate: settings.speciesCommentTemplate,
+    });
+  },
+);
 
 watch(
   () => settings.defaultNumberObserver,
@@ -332,6 +363,23 @@ function openSettingsForSection(section) {
         @import-data="importData"
       />
 
+      <section v-if="!hasImportedData" class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3 p-md-4">
+          <h2 class="h5 mb-3">{{ t("infoWorkflowTitle") }}</h2>
+          <ol class="instruction-list workflow-overview mb-3">
+            <li v-for="step in WORKFLOW_STEPS" :key="step.id" class="instruction-list-item">
+              <span class="instruction-list-icon">
+                <i :class="['bi', step.icon]" aria-hidden="true"></i>
+              </span>
+              <span>{{ t(step.labelKey) }}</span>
+            </li>
+          </ol>
+          <p class="small text-muted mb-0">
+            <LinkedText :text="t('workflowHelpLink')" :links="['#help']" />
+          </p>
+        </div>
+      </section>
+
       <AdvancedPanel
         v-if="settings.advancedEnabled && (forms.length > 0 || sightings.length > 0)"
         :forms="forms"
@@ -360,6 +408,9 @@ function openSettingsForSection(section) {
         :global-static-map="settings.globalStaticMap"
         :species-comment-template="settings.speciesCommentTemplate"
         :customized-species-comments="settings.customizedSpeciesComments"
+        :advanced-enabled="settings.advancedEnabled"
+        :auto-assign-duration="settings.autoAssignDuration"
+        :auto-assign-distance="settings.autoAssignDistance"
         @open-settings-section="openSettingsForSection"
       />
     </main>

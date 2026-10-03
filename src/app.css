@@ -182,6 +182,17 @@ h6 {
   counter-reset: instruction-step;
 }
 
+/* The start page lays the steps out side by side when there is room. */
+.workflow-overview {
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.final-steps-list {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+}
+
 .instruction-list-item,
 .instruction-icon-list-item {
   display: grid;

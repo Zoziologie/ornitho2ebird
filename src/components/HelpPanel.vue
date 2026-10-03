@@ -2,6 +2,7 @@
 import { nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import LinkedText from "./LinkedText.vue";
+import { WORKFLOW_STEPS } from "../lib/workflow";
 
 const props = defineProps({
   // Section or FAQ question to scroll to (#help/<id> in the address).
@@ -16,14 +17,6 @@ const { t } = useI18n();
 const EBIRD_PURPOSE_URL =
   "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists";
 const EBIRD_IMPORTS_URL = "https://ebird.org/import/status/all.htm";
-
-const workflowSteps = [
-  { id: "import", icon: "bi-box-arrow-down", labelKey: "introWorkflowImport" },
-  { id: "load", icon: "bi-file-earmark-arrow-up", labelKey: "introWorkflowLoad" },
-  { id: "export", icon: "bi-filetype-csv", labelKey: "introWorkflowExport" },
-  { id: "ebird", icon: "bi-cloud-arrow-up", labelKey: "introWorkflowEbirdImport" },
-  { id: "review", icon: "bi-clipboard-check", labelKey: "introWorkflowReview" },
-];
 
 const checklistPoints = [
   { id: "ready", icon: "bi-card-checklist", labelKey: "infoHowItWorksChecklistPointOne" },
@@ -154,7 +147,7 @@ watch(
     <section id="help-workflow" class="instruction-section">
       <h3 class="modal-section-title">{{ t("infoWorkflowTitle") }}</h3>
       <ol class="instruction-list">
-        <li v-for="step in workflowSteps" :key="step.id" class="instruction-list-item">
+        <li v-for="step in WORKFLOW_STEPS" :key="step.id" class="instruction-list-item">
           <span class="instruction-list-icon">
             <i :class="['bi', step.icon]" aria-hidden="true"></i>
           </span>

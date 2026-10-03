@@ -329,5 +329,12 @@
   "finalStepsReviewPrefix": "Revisa amb cura les teves llistes: fusiona localitzacions amb hotspots quan sigui possible i comprova les metadades, els textos i els enllaços dels comentaris d'espècies. Si hi ha cap error, és millor",
   "finalStepsReviewLink": "eliminar la importació",
   "finalStepsReviewSuffix": "i tornar a pujar una nova versió en lloc de corregir-la directament a eBird.",
+  "workflowHelpLink": "Més detalls i respostes als problemes habituals a l'[Ajuda].",
+  "exportBasicCreated": "Checklists creades a partir d'observacions casuals: {checklists} (a partir de {sightings} observació). | Checklists creades a partir d'observacions casuals: {checklists} (a partir de {sightings} observacions).",
+  "exportBasicGrouping": "Les observacions a menys de {hours} h i {km} km de distància van a la mateixa checklist.",
+  "exportBasicHistorical": "{count} checklist no té hora d'inici, durada o distància, així que s'importarà com a històrica ([per què?]). | {count} checklists no tenen hora d'inici, durada o distància, així que s'importaran com a històriques ([per què?]).",
+  "exportBasicChangeGrouping": "Canvia l'agrupament",
+  "exportBasicReview": "Revisa-les en mode personalitzat",
+  "finalStepsFaq": "Alguna cosa inesperada? Consulta les [preguntes freqüents].",
   "importedWith": "Importat amb ornitho2eBird."
 }

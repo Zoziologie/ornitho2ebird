@@ -329,5 +329,12 @@
   "finalStepsReviewPrefix": "Prüfe deine Checklisten sorgfältig: Führe Orte wenn möglich mit Hotspots zusammen und kontrolliere Metadaten, Texte und Links in Artenkommentaren. Wenn du einen Fehler siehst, ist es besser,",
   "finalStepsReviewLink": "den Import zu löschen",
   "finalStepsReviewSuffix": "und eine neue Version hochzuladen, statt direkt in eBird zu korrigieren.",
+  "workflowHelpLink": "Mehr Details und Antworten auf häufige Probleme findest du in der [Hilfe].",
+  "exportBasicCreated": "Aus Gelegenheitsbeobachtungen erstellte Checklisten: {checklists} (aus {sightings} Beobachtung). | Aus Gelegenheitsbeobachtungen erstellte Checklisten: {checklists} (aus {sightings} Beobachtungen).",
+  "exportBasicGrouping": "Beobachtungen, die weniger als {hours} h und {km} km auseinanderliegen, kommen in dieselbe Checkliste.",
+  "exportBasicHistorical": "{count} Checkliste hat keine Startzeit, Dauer oder Distanz und wird deshalb als historisch importiert ([warum?]). | {count} Checklisten haben keine Startzeit, Dauer oder Distanz und werden deshalb als historisch importiert ([warum?]).",
+  "exportBasicChangeGrouping": "Gruppierung ändern",
+  "exportBasicReview": "Im benutzerdefinierten Modus prüfen",
+  "finalStepsFaq": "Etwas Unerwartetes? Schau in die [häufigen Fragen].",
   "importedWith": "Importiert mit ornitho2eBird."
 }
