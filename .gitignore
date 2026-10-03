@@ -7,3 +7,7 @@ dist
 
 # Output of npm run taxonomy:test-file
 ebird_matching_test.csv
+
+# Output of npm run test:e2e
+test-results/
+playwright-report/
