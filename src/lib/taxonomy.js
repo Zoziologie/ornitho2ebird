@@ -1,7 +1,7 @@
 import { EBIRD_API_KEY } from "./constants";
 import { fetchJson } from "./http";
 
-// ~116 KB, so it is fetched only when an ornitho file is imported.
+// ~40 KB, so it is fetched only when an ornitho file is imported.
 let ornithoSpeciesList = null;
 let ornithoSpeciesListPromise = null;
 
@@ -17,31 +17,61 @@ export function loadOrnithoSpeciesList() {
   return ornithoSpeciesListPromise;
 }
 
-const taxonomyByLocaleCache = new Map();
+// eBird taxa already fetched, per locale: species code → { comName, sciName, category }, or
+// null for a code eBird does not know (stale after a taxonomy update).
+const taxaByLocale = new Map();
+// Codes per request: keeps the URL well under common length limits.
+const TAXONOMY_CHUNK_SIZE = 150;
 
-async function fetchCommonNameBySpeciesCode(localeCode) {
-  // The full taxonomy is ~6 MB of JSON (~0.6 MB compressed): allow a slow connection.
-  const json = await fetchJson(
-    `https://api.ebird.org/v2/ref/taxonomy/ebird?key=${EBIRD_API_KEY}&fmt=json&locale=${encodeURIComponent(localeCode)}`,
-    { timeoutMs: 60000 },
-  );
-  if (!Array.isArray(json) || json.length === 0) {
-    throw new Error("The eBird taxonomy response is empty.");
+function taxaCacheFor(locale) {
+  if (!taxaByLocale.has(locale)) {
+    taxaByLocale.set(locale, new Map());
   }
-  return new Map(json.map((entry) => [entry.speciesCode, entry.comName]));
+  return taxaByLocale.get(locale);
 }
 
-export function getCommonNameBySpeciesCode(localeCode) {
-  const locale = localeCode || "en";
-  if (!taxonomyByLocaleCache.has(locale)) {
-    const request = fetchCommonNameBySpeciesCode(locale).catch((error) => {
-      // Do not cache failures: the next call retries.
-      taxonomyByLocaleCache.delete(locale);
-      throw error;
-    });
-    taxonomyByLocaleCache.set(locale, request);
+function pickTaxa(cache, codes) {
+  return new Map(codes.filter((code) => cache.get(code)).map((code) => [code, cache.get(code)]));
+}
+
+async function fetchTaxa(locale, codes, cache) {
+  const json = await fetchJson(
+    `https://api.ebird.org/v2/ref/taxonomy/ebird?key=${EBIRD_API_KEY}&fmt=json&locale=${encodeURIComponent(locale)}&species=${codes.map(encodeURIComponent).join(",")}`,
+  );
+  if (!Array.isArray(json)) {
+    throw new Error("Unexpected eBird taxonomy response.");
   }
-  return taxonomyByLocaleCache.get(locale);
+  // Only cache once the whole chunk succeeded, so a failed request is retried next time.
+  const found = new Map(json.map((taxon) => [taxon.speciesCode, taxon]));
+  codes.forEach((code) => {
+    const taxon = found.get(code);
+    cache.set(
+      code,
+      taxon ? { comName: taxon.comName, sciName: taxon.sciName, category: taxon.category } : null,
+    );
+  });
+}
+
+// The eBird taxa for these species codes, already cached: a Map of the known codes, or null
+// when some code still has to be fetched.
+export function cachedEbirdTaxa(localeCode, speciesCodes) {
+  const cache = taxaCacheFor(localeCode || "en");
+  return speciesCodes.every((code) => cache.has(code)) ? pickTaxa(cache, speciesCodes) : null;
+}
+
+// Fetches only the requested codes (a few KB) instead of the full ~6 MB taxonomy. Codes eBird
+// does not know are left out of the returned Map.
+export async function getEbirdTaxa(localeCode, speciesCodes) {
+  const locale = localeCode || "en";
+  const cache = taxaCacheFor(locale);
+  const codes = [...new Set(speciesCodes.filter(Boolean))];
+  const missing = codes.filter((code) => !cache.has(code));
+  const chunks = [];
+  for (let index = 0; index < missing.length; index += TAXONOMY_CHUNK_SIZE) {
+    chunks.push(missing.slice(index, index + TAXONOMY_CHUNK_SIZE));
+  }
+  await Promise.all(chunks.map((chunk) => fetchTaxa(locale, chunk, cache)));
+  return pickTaxa(cache, codes);
 }
 
 // Call loadOrnithoSpeciesList() first.

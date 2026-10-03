@@ -10,7 +10,7 @@ import {
 } from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
-import { getCommonNameBySpeciesCode } from "../lib/taxonomy";
+import { cachedEbirdTaxa, getEbirdTaxa } from "../lib/taxonomy";
 
 const props = defineProps({
   forms: {
@@ -58,8 +58,8 @@ const TAXONOMY_WARNING_LIST_LIMIT = 12;
 const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues/new";
 const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
 const EBIRD_MAP_URL = "https://ebird.org/map/";
-// ~17k entries, always replaced as a whole: no need for deep reactivity.
-const taxonomyCommonNameByCode = shallowRef(new Map());
+// eBird species code → taxon, for the codes in the export. Always replaced as a whole.
+const taxonByCode = shallowRef(new Map());
 const taxonomyStatus = ref("idle");
 const taxonomyReportCodeByIssue = ref({});
 const exportFilename = ref(buildExportFilename());
@@ -76,18 +76,44 @@ const activeSpeciesCommentTemplate = computed(() => {
   return props.customizedSpeciesComments ? props.speciesCommentTemplate : null;
 });
 
-async function loadTaxonomy(language) {
+const exportableSightingsByFormId = computed(() =>
+  groupSightingsByForm(exportableForms.value, props.sightings, props.formsSightings),
+);
+
+const exportSpeciesCodes = computed(() => {
+  const codes = new Set();
+  exportableSightingsByFormId.value.forEach((group) => {
+    group.forEach((sighting) => {
+      if (sighting.ebird_species_code) {
+        codes.add(sighting.ebird_species_code);
+      }
+    });
+  });
+  return [...codes].sort();
+});
+
+async function loadTaxonomy() {
+  const language = props.selectedEbirdLanguage;
+  const codes = exportSpeciesCodes.value;
   const requestId = taxonomyRequestId + 1;
   taxonomyRequestId = requestId;
-  taxonomyStatus.value = "loading";
 
+  // Avoid a "loading" flash when only cached codes are needed (e.g. a checklist toggled back on).
+  const cached = cachedEbirdTaxa(language, codes);
+  if (cached) {
+    taxonByCode.value = cached;
+    taxonomyStatus.value = "ready";
+    return;
+  }
+
+  taxonomyStatus.value = "loading";
   try {
-    const commonNameByCode = await getCommonNameBySpeciesCode(language);
+    const taxa = await getEbirdTaxa(language, codes);
     if (requestId !== taxonomyRequestId) {
       return;
     }
 
-    taxonomyCommonNameByCode.value = commonNameByCode;
+    taxonByCode.value = taxa;
     taxonomyStatus.value = "ready";
   } catch (error) {
     if (requestId !== taxonomyRequestId) {
@@ -95,12 +121,14 @@ async function loadTaxonomy(language) {
     }
 
     console.warn("Could not load the eBird taxonomy", error);
-    taxonomyCommonNameByCode.value = new Map();
+    taxonByCode.value = new Map();
     taxonomyStatus.value = "error";
   }
 }
 
-watch(() => props.selectedEbirdLanguage, loadTaxonomy, { immediate: true });
+watch([() => props.selectedEbirdLanguage, () => exportSpeciesCodes.value.join()], loadTaxonomy, {
+  immediate: true,
+});
 
 function taxonomyMatchedCommonName(sighting) {
   const speciesCode = sighting?.ebird_species_code || "";
@@ -108,12 +136,8 @@ function taxonomyMatchedCommonName(sighting) {
     return sighting?.common_name || "";
   }
 
-  return taxonomyCommonNameByCode.value.get(speciesCode) || sighting?.common_name || "";
+  return taxonByCode.value.get(speciesCode)?.comName || sighting?.common_name || "";
 }
-
-const exportableSightingsByFormId = computed(() =>
-  groupSightingsByForm(exportableForms.value, props.sightings, props.formsSightings),
-);
 
 const taxonomyNeededForExport = computed(() => {
   return [...exportableSightingsByFormId.value.values()].some((group) => {
@@ -199,7 +223,7 @@ const unmatchedTaxonomy = computed(() => {
       .filter((sighting) => sighting.system === "ornitho")
       .forEach((sighting) => {
         const speciesCode = sighting.ebird_species_code || "";
-        const hasMatch = speciesCode && taxonomyCommonNameByCode.value.has(speciesCode);
+        const hasMatch = speciesCode && taxonByCode.value.has(speciesCode);
         if (hasMatch) {
           return;
         }
@@ -503,11 +527,7 @@ async function downloadFile() {
           class="alert alert-warning mb-3 d-flex flex-wrap align-items-center gap-2"
         >
           <span class="me-auto">{{ t("exportTaxonomyLoadFailed") }}</span>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-dark"
-            @click="loadTaxonomy(selectedEbirdLanguage)"
-          >
+          <button type="button" class="btn btn-sm btn-outline-dark" @click="loadTaxonomy()">
             <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>{{ t("retry") }}
           </button>
         </div>

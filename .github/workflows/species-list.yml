@@ -1,0 +1,35 @@
+# Checks the ornitho → eBird species mapping against the live eBird taxonomy.
+# It needs the eBird API, so it only runs when the mapping changes, or by hand from the
+# Actions tab (worth doing after each yearly eBird taxonomy update).
+name: Species list
+
+on:
+  pull_request:
+    paths:
+      - data/ornitho_species_list_full.csv
+      - build/*species*
+  push:
+    branches: [main]
+    paths:
+      - data/ornitho_species_list_full.csv
+      - build/*species*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check codes against the eBird taxonomy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run splist:check -- --verbose

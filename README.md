@@ -148,7 +148,7 @@ This project is a static front-end app. The conversion itself happens in the bro
 
 The app calls these services from the browser:
 
-- the eBird API, to retrieve localized taxonomy names and suggest nearby hotspots
+- the eBird API, to retrieve the localized names of the species in your export and suggest nearby hotspots
 - OpenStreetMap Nominatim, with the coordinates of the first imported record, to check that the file matches the selected website
 - map tile servers (OpenStreetMap, Esri, swisstopo, IGN, BKG) for the review maps
 - Mapbox, only if you add a Mapbox token, to render static checklist maps
@@ -209,7 +209,8 @@ npm run check
 - `npm run lint` / `npm run lint:fix` runs ESLint (Vue and JavaScript rules)
 - `npm run format` / `npm run format:check` runs Prettier
 - `npm run check` runs lint, format check and tests together
-- `npm run splist` regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv)
+- `npm run splist` validates [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv) and regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from it
+- `npm run splist:check` checks every eBird code in the species list against the current eBird taxonomy (needs network; run it after each yearly eBird taxonomy update)
 
 ## Project structure
 

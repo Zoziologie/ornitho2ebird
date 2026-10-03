@@ -1,4 +1,4 @@
-import ebirdTaxonomyLanguages from "../../data/ebird_taxonomy_languages.json";
+import ebirdTaxonomyLanguages from "../../data/ebird_taxonomy_languages.json" with { type: "json" };
 
 export const APP_STORAGE_PREFIX = "ornitho2ebird";
 export const LANGUAGE_COOKIE_NAME = `${APP_STORAGE_PREFIX}_language`;

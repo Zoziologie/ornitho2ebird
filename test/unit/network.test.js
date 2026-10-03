@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HttpError, fetchJson } from "../../src/lib/http";
 import { writeStorage } from "../../src/lib/storage";
-import { getCommonNameBySpeciesCode } from "../../src/lib/taxonomy";
+import { cachedEbirdTaxa, getEbirdTaxa } from "../../src/lib/taxonomy";
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), { status });
@@ -41,31 +41,60 @@ describe("fetchJson", () => {
 });
 
 describe("eBird taxonomy", () => {
+  const retloo = { speciesCode: "retloo", comName: "Plongeon catmarin", sciName: "Gavia stellata" };
+
+  it("requests only the needed codes and caches them", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse([{ ...retloo, category: "species" }]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(cachedEbirdTaxa("xx-codes", ["retloo"])).toBeNull();
+    const taxa = await getEbirdTaxa("xx-codes", ["retloo", "retloo", "oldcode"]);
+    const url = new URL(fetchMock.mock.calls[0][0]);
+    expect(url.searchParams.get("species")).toBe("retloo,oldcode");
+    expect(url.searchParams.get("locale")).toBe("xx-codes");
+    expect(taxa.get("retloo")).toEqual({
+      comName: "Plongeon catmarin",
+      sciName: "Gavia stellata",
+      category: "species",
+    });
+    // A code eBird does not return is left out, and not requested again.
+    expect(taxa.has("oldcode")).toBe(false);
+    await getEbirdTaxa("xx-codes", ["retloo", "oldcode"]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(cachedEbirdTaxa("xx-codes", ["retloo", "oldcode"]).size).toBe(1);
+  });
+
+  it("splits long code lists over several requests", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+    const codes = Array.from({ length: 400 }, (_, index) => `code${index}`);
+    await getEbirdTaxa("xx-chunks", codes);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const requested = fetchMock.mock.calls.flatMap(([url]) =>
+      new URL(url).searchParams.get("species").split(","),
+    );
+    expect(requested.sort()).toEqual([...codes].sort());
+  });
+
   it("does not cache a failed request, so the next call retries", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ title: "Forbidden" }, 403))
-      .mockResolvedValueOnce(
-        jsonResponse([{ speciesCode: "retloo", comName: "Plongeon catmarin" }]),
-      );
+      .mockResolvedValueOnce(jsonResponse([retloo]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getCommonNameBySpeciesCode("xx-test")).rejects.toBeInstanceOf(HttpError);
-    const names = await getCommonNameBySpeciesCode("xx-test");
-    expect(names.get("retloo")).toBe("Plongeon catmarin");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-
-    // Success is cached.
-    await getCommonNameBySpeciesCode("xx-test");
+    await expect(getEbirdTaxa("xx-retry", ["retloo"])).rejects.toBeInstanceOf(HttpError);
+    expect(cachedEbirdTaxa("xx-retry", ["retloo"])).toBeNull();
+    const taxa = await getEbirdTaxa("xx-retry", ["retloo"]);
+    expect(taxa.get("retloo").comName).toBe("Plongeon catmarin");
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("treats an empty taxonomy as a failure", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => jsonResponse([])),
-    );
-    await expect(getCommonNameBySpeciesCode("xx-empty")).rejects.toThrow(/empty/);
+  it("makes no request when there are no codes", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(getEbirdTaxa("xx-none", [])).resolves.toEqual(new Map());
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 
