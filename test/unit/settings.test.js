@@ -154,7 +154,18 @@ describe("migrateSettings", () => {
         ...DEFAULT_SETTINGS.globalStaticMap,
         show: true,
       });
-      expect(settings.assignmentMapBaseLayer).toBe("OpenStreetMap");
+      expect(settings.assignmentMapBaseLayer).toBe("");
+    });
+
+    it("lets the basemap follow the source website unless one other than the old default was chosen", () => {
+      expect(
+        migrateSettings({ assignmentMapBaseLayer: "OpenStreetMap", settingsVersion: 1 })
+          .assignmentMapBaseLayer,
+      ).toBe("");
+      expect(
+        migrateSettings({ assignmentMapBaseLayer: "Satellite", settingsVersion: 1 })
+          .assignmentMapBaseLayer,
+      ).toBe("Satellite");
     });
 
     it("drops assignmentMap", () => {

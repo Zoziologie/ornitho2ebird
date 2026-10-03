@@ -22,7 +22,7 @@ Convert exports from ornitho, ornitho network sites, Observation websites, and B
         <sub>Layout & components</sub>
       </th>
       <th align="center">
-        Leaflet<br/>
+        MapLibre GL JS<br/>
         <sub>Interactive maps</sub>
       </th>
       <th align="center">
@@ -53,8 +53,8 @@ Convert exports from ornitho, ornitho network sites, Observation websites, and B
         </a>
       </td>
       <td align="center">
-        <a href="https://leafletjs.com/">
-          <img src="https://leafletjs.com/docs/images/logo.png" height="40"/>
+        <a href="https://maplibre.org/">
+          <img src="https://maplibre.org/img/maplibre-logo-big.svg" height="40"/>
         </a>
       </td>
       <td align="center">

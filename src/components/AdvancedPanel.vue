@@ -1,34 +1,24 @@
 <script setup>
-import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import L from "../lib/leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
-import "leaflet-draw/dist/leaflet.draw-src.js";
-import "leaflet.markercluster/dist/leaflet.markercluster.js";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import markerColors from "/data/marker_color.json";
-import hotspotMarkerUrl from "../assets/map-marker-hotspot.png";
+import AssignmentMap from "./AssignmentMap.vue";
+import ReviewMap from "./ReviewMap.vue";
 import {
-  addBaseLayerControl,
+  CHECKLIST_COLORS,
+  UNASSIGNED_COLOR,
   buildAssignmentOptions,
   buildReviewOptions,
   checklistColor,
-  checklistMarkerHtml,
-  escapeHtml,
-  formatSightingPopup,
   protocolBadgeClass,
   requiredNumberStateClass,
   requiredStateClass,
   requiredTimeStateClass,
-  sightingMarkerHtml,
 } from "../lib/advancedPanel";
 import { alertDialog, confirmDialog } from "../lib/dialog";
 import {
   buildChecklistPayloadFromSightings,
   buildSpeciesRows,
   distanceFromPath,
-  haversineDistanceKm,
   normalizeLocationName,
   protocol,
 } from "../lib/utils";
@@ -58,47 +48,16 @@ const assignDuration = ref(props.defaultAssignDuration || 1);
 const assignDistance = ref(props.defaultAssignDistance || 3);
 const assignFormId = ref(0);
 let creatingChecklist = false;
-const assignmentMapShellElement = ref(null);
-const assignmentMapElement = ref(null);
-const reviewMapElement = ref(null);
+const assignmentMap = ref(null);
+const reviewMap = ref(null);
 const assignSelectorOpen = ref(false);
 const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
 const observationsModalOpen = ref(false);
-const assignmentMapFullscreen = ref(false);
 
-let assignmentMap = null;
-let assignmentSightingsLayer = null;
-let assignmentFormsLayer = null;
-let assignmentBaseLayers = null;
-let assignmentActiveBaseLayer = null;
-let assignmentMapHasInitialView = false;
-let assignmentDrawCaptureEnabled = false;
-let assignmentSelectionActive = false;
-let assignmentSelectionStart = null;
-let assignmentSelectionLayer = null;
-let assignmentSelectionDragging = false;
-
-let reviewMap = null;
-let reviewSightingsLayer = null;
-let reviewMarkerLayer = null;
-let reviewPathLayer = null;
-let reviewHotspotLayer = null;
-let reviewDrawPolyline = null;
-let reviewBaseLayers = null;
-let reviewActiveBaseLayer = null;
-// The checklist the review map was last fitted to: refit only when another one is selected, so
-// dragging the marker or loading hotspots keeps the user's zoom.
-let reviewMapFittedFormId = null;
-
-const unassignedColor = "#6c757d";
-const checklistColors = markerColors.slice(1).filter((color) => color.toLowerCase() !== "#999999");
-const ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS = 5;
-const EARTH_CIRCUMFERENCE_METERS = 40075016.686;
-const ASSIGNMENT_SIGHTINGS_PANE = "assignmentSightingsPane";
-const ASSIGNMENT_CLUSTER_PANE = "assignmentClusterPane";
-const ASSIGNMENT_CHECKLIST_PANE = "assignmentChecklistPane";
+const unassignedColor = UNASSIGNED_COLOR;
+const checklistColors = CHECKLIST_COLORS;
 
 const selectedForm = computed(() => {
   return props.forms.find((form) => form.id === props.selectedFormId) || null;
@@ -323,9 +282,6 @@ async function loadHotspotsForSelectedForm() {
       hotspots: markRaw(Array.isArray(json) ? json : []),
       hotspot_key: hotspotKey,
     });
-    if (selectedForm.value === form) {
-      refreshReviewMap();
-    }
   } catch (error) {
     // Not cached, so selecting the checklist again retries.
     console.warn("Could not load eBird hotspots", error);
@@ -333,23 +289,11 @@ async function loadHotspotsForSelectedForm() {
 }
 
 function focusReviewMap() {
-  if (!reviewMap || !selectedForm.value) {
-    return;
-  }
-
-  reviewMapElement.value?.scrollIntoView({ behavior: "smooth", block: "center" });
-  reviewMap.flyTo(
-    [selectedForm.value.lat, selectedForm.value.lon],
-    Math.max(reviewMap.getZoom(), 13),
-  );
+  reviewMap.value?.focus();
 }
 
 function startPathDraw() {
-  if (!reviewDrawPolyline) {
-    return;
-  }
-
-  reviewDrawPolyline.enable();
+  reviewMap.value?.startPathDraw();
 }
 
 async function updatePath(path) {
@@ -372,101 +316,16 @@ async function updatePath(path) {
   }
 
   store.setFormPath(form.id, path);
-  refreshReviewMap();
 }
 
 function startRectangleDraw(mode) {
-  if (!assignmentMap) {
-    return;
-  }
-
   creatingChecklist = mode === "create";
-  assignmentSelectionActive = true;
-  assignmentSelectionStart = null;
-  assignmentSelectionDragging = false;
-  clearAssignmentSelectionLayer();
-  setAssignmentDrawCaptureMode(true);
-  setAssignmentSelectionInteraction(true);
+  assignmentMap.value?.startSelection();
 }
 
-function stopRectangleDraw() {
-  assignmentSelectionActive = false;
-  assignmentSelectionStart = null;
-  assignmentSelectionDragging = false;
-  clearAssignmentSelectionLayer();
-  setAssignmentSelectionInteraction(false);
-  setAssignmentDrawCaptureMode(false);
-  creatingChecklist = false;
-}
-
-function clearAssignmentSelectionLayer() {
-  if (assignmentSelectionLayer && assignmentMap?.hasLayer(assignmentSelectionLayer)) {
-    assignmentMap.removeLayer(assignmentSelectionLayer);
-  }
-  assignmentSelectionLayer = null;
-}
-
-function setAssignmentSelectionInteraction(enabled) {
-  if (!assignmentMap) {
-    return;
-  }
-
-  const container = assignmentMap.getContainer();
-  container.style.cursor = enabled ? "crosshair" : "";
-
-  if (enabled) {
-    assignmentMap.dragging?.disable();
-    assignmentMap.doubleClickZoom?.disable();
-  } else {
-    assignmentMap.dragging?.enable();
-    assignmentMap.doubleClickZoom?.enable();
-  }
-}
-
-function setAssignmentDrawCaptureMode(enabled) {
-  if (!assignmentMap || assignmentDrawCaptureEnabled === enabled) {
-    return;
-  }
-
-  const markerPane = assignmentMap.getPane("markerPane");
-  const overlayPane = assignmentMap.getPane("overlayPane");
-  const panePointerEvents = enabled ? "none" : "";
-
-  if (markerPane) {
-    markerPane.style.pointerEvents = panePointerEvents;
-  }
-  if (overlayPane) {
-    overlayPane.style.pointerEvents = panePointerEvents;
-  }
-
-  assignmentDrawCaptureEnabled = enabled;
-}
-
-function updateAssignmentSelectionLayer(bounds) {
-  if (!assignmentMap) {
-    return;
-  }
-
-  if (!assignmentSelectionLayer) {
-    assignmentSelectionLayer = L.rectangle(bounds, {
-      color: "#0d6efd",
-      weight: 2,
-      fillOpacity: 0.08,
-      interactive: false,
-    }).addTo(assignmentMap);
-    return;
-  }
-
-  assignmentSelectionLayer.setBounds(bounds);
-}
-
-function applyAssignmentSelection(bounds) {
+function applyAssignmentSelection(matchedSightings) {
   const isCreateMode = creatingChecklist;
-  const matchedSightings = props.sightings.filter((sighting) =>
-    bounds.contains(L.latLng(sighting.lat, sighting.lon)),
-  );
-
-  stopRectangleDraw();
+  creatingChecklist = false;
 
   if (!matchedSightings.length) {
     alertDialog(t("assignNoSightingsInSelection"));
@@ -482,46 +341,6 @@ function applyAssignmentSelection(bounds) {
   }
 
   store.assignSightings(matchedSightings, assignFormId.value);
-}
-
-function onAssignmentSelectionMouseDown(event) {
-  if (!assignmentSelectionActive) {
-    return;
-  }
-
-  const button = event?.originalEvent?.button;
-  if (typeof button === "number" && button !== 0) {
-    return;
-  }
-
-  assignmentSelectionDragging = true;
-  assignmentSelectionStart = event.latlng;
-  updateAssignmentSelectionLayer(L.latLngBounds(event.latlng, event.latlng));
-}
-
-function onAssignmentSelectionMouseMove(event) {
-  if (!assignmentSelectionActive || !assignmentSelectionDragging || !assignmentSelectionStart) {
-    return;
-  }
-
-  updateAssignmentSelectionLayer(L.latLngBounds(assignmentSelectionStart, event.latlng));
-}
-
-function onAssignmentSelectionMouseUp(event) {
-  if (!assignmentSelectionActive || !assignmentSelectionDragging || !assignmentSelectionStart) {
-    return;
-  }
-
-  assignmentSelectionDragging = false;
-  const startPoint = assignmentMap?.latLngToContainerPoint(assignmentSelectionStart);
-  const endPoint = assignmentMap?.latLngToContainerPoint(event.latlng);
-
-  if (!startPoint || !endPoint || startPoint.distanceTo(endPoint) < 4) {
-    stopRectangleDraw();
-    return;
-  }
-
-  applyAssignmentSelection(L.latLngBounds(assignmentSelectionStart, event.latlng));
 }
 
 function selectAssignmentForm(value) {
@@ -544,41 +363,6 @@ function handleDocumentClick(event) {
   }
 }
 
-function fullscreenElement() {
-  return document.fullscreenElement || document.webkitFullscreenElement || null;
-}
-
-function syncAssignmentMapFullscreenState() {
-  assignmentMapFullscreen.value = fullscreenElement() === assignmentMapShellElement.value;
-  setTimeout(() => assignmentMap?.invalidateSize(), 100);
-}
-
-async function toggleAssignmentMapFullscreen() {
-  const shell = assignmentMapShellElement.value;
-  if (!shell) {
-    return;
-  }
-
-  try {
-    if (fullscreenElement() === shell) {
-      if (document.exitFullscreen) {
-        await document.exitFullscreen();
-      } else {
-        document.webkitExitFullscreen?.();
-      }
-      return;
-    }
-
-    if (shell.requestFullscreen) {
-      await shell.requestFullscreen();
-    } else {
-      shell.webkitRequestFullscreen?.();
-    }
-  } catch {
-    syncAssignmentMapFullscreenState();
-  }
-}
-
 watch(
   () => props.forms.map((form) => form.id),
   (formIds) => {
@@ -597,7 +381,6 @@ watch(
   () => props.selectedFormId,
   (value) => {
     assignFormId.value = assignableForms.value.some((form) => form.id === value) ? value : 0;
-    nextTick(() => refreshReviewMap());
   },
   { immediate: true },
 );
@@ -617,33 +400,6 @@ watch(
     if (value > 0) {
       assignDistance.value = value;
     }
-  },
-);
-
-// Only read what the maps draw, so typing in checklist fields does not rebuild every marker.
-watch(
-  () => [
-    props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
-    props.forms.map((form) => [
-      form.id,
-      form.imported,
-      form.lat,
-      form.lon,
-      form.path,
-      form.hotspots,
-    ]),
-  ],
-  async () => {
-    await nextTick();
-    refreshAssignmentMap();
-    refreshReviewMap();
-  },
-);
-
-watch(
-  () => props.assignmentMapBaseLayer,
-  (value) => {
-    applyBaseLayer(value);
   },
 );
 
@@ -743,524 +499,24 @@ async function assignMagic() {
   });
 }
 
-function markerColor(formId) {
-  return checklistColor(formId, checklistColors, unassignedColor);
-}
-
-function assignmentSightingIcon(formId) {
-  return L.divIcon({
-    className: "assignment-sighting-icon",
-    html: sightingMarkerHtml(formId, checklistColors, unassignedColor),
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-    popupAnchor: [0, -8],
-  });
-}
-
-function assignmentClusterIcon(cluster) {
-  const formIds = cluster
-    .getAllChildMarkers()
-    .map((marker) => Number(marker.options.formId))
-    .filter((value) => Number.isFinite(value));
-  const uniqueFormIds = [...new Set(formIds)];
-  const clusterColor = uniqueFormIds.length === 1 ? markerColor(uniqueFormIds[0]) : "#89a0b1";
-  const clusterTextColor = clusterColor === "#ffff33" ? "#223846" : "#ffffff";
-
-  return L.divIcon({
-    className: "assignment-cluster-icon",
-    html: `<span class="assignment-cluster-icon-dot" style="background:${clusterColor};color:${clusterTextColor};border-color:${clusterColor}">+</span>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
-}
-
-function pixelsForMetersAtZoom(meters, zoom) {
-  const latitude = assignmentMap?.getCenter?.().lat || 0;
-  const metersPerPixel =
-    (EARTH_CIRCUMFERENCE_METERS * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom + 8);
-
-  if (!Number.isFinite(metersPerPixel) || metersPerPixel <= 0) {
-    return 0.01;
-  }
-
-  return Math.max(0.01, meters / metersPerPixel);
-}
-
-function assignmentSightingsNearLatLng(latlng) {
-  return props.sightings
-    .filter((sighting) => {
-      return (
-        haversineDistanceKm(latlng.lat, latlng.lng, Number(sighting.lat), Number(sighting.lon)) *
-          1000 <=
-        ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS
-      );
-    })
-    .sort((left, right) => {
-      const leftKey = `${left.date || ""} ${left.time || ""} ${left.common_name || ""}`;
-      const rightKey = `${right.date || ""} ${right.time || ""} ${right.common_name || ""}`;
-      return leftKey.localeCompare(rightKey);
-    });
-}
-
-function assignmentClusterPopupContent(latlng) {
-  const sameLocationSightings = assignmentSightingsNearLatLng(latlng);
-  if (sameLocationSightings.length <= 1) {
-    assignmentMap?.closePopup();
-    return null;
-  }
-
-  const container = document.createElement("div");
-  container.className = "map-popup map-popup-cluster";
-  L.DomEvent.disableClickPropagation(container);
-
-  const title = document.createElement("div");
-  title.className = "map-popup-heading";
-  title.textContent = t("assignmentClusterTitle", { count: sameLocationSightings.length });
-  container.appendChild(title);
-
-  const list = document.createElement("div");
-  list.className = "map-popup-stack";
-
-  sameLocationSightings.forEach((sighting) => {
-    const row = document.createElement("div");
-    row.className = "map-popup-card";
-
-    const details = document.createElement("div");
-    details.className = "map-popup-card-body";
-
-    const species = document.createElement("div");
-    species.className = "map-popup-card-title";
-    if (sighting.common_name || sighting.scientific_name) {
-      if (sighting.common_name) {
-        species.appendChild(document.createTextNode(sighting.common_name));
-      }
-      if (sighting.scientific_name) {
-        if (sighting.common_name) {
-          species.appendChild(document.createTextNode(" "));
-        }
-        const scientificName = document.createElement("span");
-        scientificName.className = "map-popup-species-scientific";
-        scientificName.textContent = sighting.scientific_name;
-        species.appendChild(scientificName);
-      }
-    } else {
-      species.textContent = t("records");
-    }
-    details.appendChild(species);
-
-    const meta = document.createElement("div");
-    meta.className = "map-popup-compact-meta";
-
-    const datetimeValue = document.createElement("span");
-    datetimeValue.className = "map-popup-compact-item";
-    datetimeValue.textContent = [sighting.date, sighting.time].filter(Boolean).join(" ") || "—";
-    meta.appendChild(datetimeValue);
-
-    const countValue = document.createElement("span");
-    countValue.className = "map-popup-compact-item";
-    const countParts = [sighting.count_precision, sighting.count].filter(
-      (value) => value !== null && value !== "",
-    );
-    countValue.textContent = countParts.length ? countParts.join("") : "—";
-    meta.appendChild(countValue);
-
-    const permalinkValue = document.createElement("span");
-    permalinkValue.className = "map-popup-compact-item";
-    if (sighting.permalink) {
-      const permalink = document.createElement("a");
-      permalink.href = sighting.permalink;
-      permalink.target = "_blank";
-      permalink.rel = "noopener";
-      permalink.textContent = String(sighting.id ?? "—");
-      permalinkValue.appendChild(permalink);
-    } else {
-      permalinkValue.textContent = String(sighting.id ?? "—");
-    }
-    meta.appendChild(permalinkValue);
-
-    details.appendChild(meta);
-
-    const select = document.createElement("select");
-    select.className = "form-select form-select-sm map-popup-select";
-    clusterAssignmentOptions.value.forEach((option) => {
-      const optionElement = document.createElement("option");
-      optionElement.value = String(option.value);
-      optionElement.textContent = option.label;
-      optionElement.selected = Number(option.value) === Number(sighting.form_id);
-      select.appendChild(optionElement);
-    });
-    select.addEventListener("change", (event) => {
-      store.assignSightings([sighting], Number(event.target.value));
-      refreshAssignmentMap();
-      openAssignmentClusterPopup(latlng);
-    });
-    details.appendChild(select);
-
-    row.appendChild(details);
-
-    list.appendChild(row);
-  });
-
-  container.appendChild(list);
-  return container;
-}
-
-function openAssignmentClusterPopup(latlng) {
-  if (!assignmentMap) {
+// The hotspot's own coordinates, not rounded like a dragged marker.
+function useHotspot(hotspot) {
+  if (!selectedForm.value) {
     return;
   }
 
-  const content = assignmentClusterPopupContent(latlng);
-  if (!content) {
-    return;
-  }
-
-  L.popup({ maxWidth: 420 }).setLatLng(latlng).setContent(content).openOn(assignmentMap);
+  store.updateForm(selectedForm.value.id, {
+    location_name: hotspot.locName,
+    lat: hotspot.lat,
+    lon: hotspot.lng,
+    hotspot_key: "",
+  });
+  loadHotspotsForSelectedForm();
 }
 
-function onAssignmentClusterClick(event) {
-  openAssignmentClusterPopup(event.layer.getLatLng());
-}
-
-function createAssignmentSightingsLayer() {
-  if (!assignmentMap) {
-    return null;
-  }
-
-  if (assignmentSightingsLayer && assignmentMap.hasLayer(assignmentSightingsLayer)) {
-    assignmentMap.removeLayer(assignmentSightingsLayer);
-  }
-
-  assignmentSightingsLayer = L.markerClusterGroup({
-    maxClusterRadius: (zoom) =>
-      pixelsForMetersAtZoom(ASSIGNMENT_LOCATION_CLUSTER_DISTANCE_METERS, zoom),
-    chunkedLoading: true,
-    zoomToBoundsOnClick: false,
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: false,
-    clusterPane: ASSIGNMENT_CLUSTER_PANE,
-    iconCreateFunction: assignmentClusterIcon,
-  });
-  assignmentSightingsLayer.on("clusterclick", onAssignmentClusterClick);
-
-  assignmentSightingsLayer.addTo(assignmentMap);
-  return assignmentSightingsLayer;
-}
-
-// Returns the base layer now shown on `map`.
-function switchBaseLayer(map, baseLayers, activeLayer, layerName) {
-  if (!map || !baseLayers) {
-    return activeLayer;
-  }
-
-  const nextLayer = baseLayers[layerName] || baseLayers.OpenStreetMap;
-  if (!nextLayer || activeLayer === nextLayer) {
-    return activeLayer;
-  }
-
-  if (activeLayer && map.hasLayer(activeLayer)) {
-    map.removeLayer(activeLayer);
-  }
-
-  nextLayer.addTo(map);
-  return nextLayer;
-}
-
-function applyBaseLayer(layerName) {
-  assignmentActiveBaseLayer = switchBaseLayer(
-    assignmentMap,
-    assignmentBaseLayers,
-    assignmentActiveBaseLayer,
-    layerName,
-  );
-  reviewActiveBaseLayer = switchBaseLayer(
-    reviewMap,
-    reviewBaseLayers,
-    reviewActiveBaseLayer,
-    layerName,
-  );
-}
-
-function hotspotPopupContent(hotspot) {
-  const container = document.createElement("div");
-  container.className = "map-popup";
-
-  const title = document.createElement("a");
-  title.href = `https://ebird.org/hotspot/${hotspot.locId}`;
-  title.target = "_blank";
-  title.rel = "noopener";
-  title.className = "fw-semibold d-inline-block mb-2";
-  title.textContent = hotspot.locName;
-  container.appendChild(title);
-
-  const species = document.createElement("div");
-  species.innerHTML = `<strong>${t("hotspotSpeciesCount")}:</strong> ${escapeHtml(hotspot.numSpeciesAllTime ?? "—")}`;
-  container.appendChild(species);
-
-  const latest = document.createElement("div");
-  latest.innerHTML = `<strong>${t("hotspotLatestChecklist")}:</strong> ${escapeHtml(hotspot.latestObsDt ?? "—")}`;
-  container.appendChild(latest);
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "btn btn-primary btn-sm mt-2";
-  button.textContent = t("useHotspotLocation");
-  button.addEventListener("click", () => {
-    if (!selectedForm.value) {
-      return;
-    }
-
-    // The hotspot's own coordinates, not rounded like a dragged marker.
-    store.updateForm(selectedForm.value.id, {
-      location_name: hotspot.locName,
-      lat: hotspot.lat,
-      lon: hotspot.lng,
-      hotspot_key: "",
-    });
-    reviewMap?.closePopup();
-    loadHotspotsForSelectedForm();
-    refreshReviewMap();
-  });
-  container.appendChild(button);
-
-  return container;
-}
-
-function refreshAssignmentMap({ refit = false } = {}) {
-  if (!assignmentMap || !assignmentSightingsLayer || !assignmentFormsLayer) {
-    return;
-  }
-
-  assignmentSightingsLayer.clearLayers();
-  assignmentFormsLayer.clearLayers();
-
-  props.sightings.forEach((sighting) => {
-    const marker = L.marker([sighting.lat, sighting.lon], {
-      formId: sighting.form_id,
-      pane: ASSIGNMENT_SIGHTINGS_PANE,
-      icon: assignmentSightingIcon(sighting.form_id),
-    });
-    marker.bindPopup(formatSightingPopup(sighting, t));
-    assignmentSightingsLayer.addLayer(marker);
-  });
-
-  props.forms
-    .filter((form) => !form.imported)
-    .forEach((form) => {
-      const marker = L.marker([form.lat, form.lon], {
-        draggable: true,
-        pane: ASSIGNMENT_CHECKLIST_PANE,
-        icon: L.divIcon({
-          className: "assignment-checklist-icon",
-          html: checklistMarkerHtml(form.id, checklistColors, unassignedColor),
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-        }),
-      });
-      marker.on("click", () => {
-        assignFormId.value = form.id;
-        emit("update:selectedFormId", form.id);
-      });
-      marker.on("dragend", (drawEvent) => {
-        const latlng = drawEvent.target.getLatLng();
-        store.moveForm(form.id, latlng.lat, latlng.lng);
-      });
-      assignmentFormsLayer.addLayer(marker);
-    });
-
-  const points = [
-    ...props.sightings.map((sighting) => [sighting.lat, sighting.lon]),
-    ...props.forms.filter((form) => !form.imported).map((form) => [form.lat, form.lon]),
-  ];
-  if (points.length && (refit || !assignmentMapHasInitialView)) {
-    assignmentMap.fitBounds(points, { padding: [20, 20], maxZoom: 12 });
-    assignmentMapHasInitialView = true;
-  }
-}
-
-function initializeAssignmentMap() {
-  if (assignmentMap || !assignmentMapElement.value) {
-    return;
-  }
-
-  assignmentMap = L.map(assignmentMapElement.value);
-  const assignmentLayerControl = addBaseLayerControl(assignmentMap, props.assignmentMapBaseLayer);
-  assignmentBaseLayers = assignmentLayerControl.baseLayers;
-  assignmentActiveBaseLayer = assignmentLayerControl.activeLayer;
-  assignmentMap.createPane(ASSIGNMENT_SIGHTINGS_PANE);
-  assignmentMap.getPane(ASSIGNMENT_SIGHTINGS_PANE).style.zIndex = "610";
-  assignmentMap.createPane(ASSIGNMENT_CLUSTER_PANE);
-  assignmentMap.getPane(ASSIGNMENT_CLUSTER_PANE).style.zIndex = "620";
-  assignmentMap.createPane(ASSIGNMENT_CHECKLIST_PANE);
-  assignmentMap.getPane(ASSIGNMENT_CHECKLIST_PANE).style.zIndex = "650";
-
-  createAssignmentSightingsLayer();
-  assignmentFormsLayer = L.layerGroup().addTo(assignmentMap);
-
-  assignmentMap.on("mousedown", onAssignmentSelectionMouseDown);
-  assignmentMap.on("mousemove", onAssignmentSelectionMouseMove);
-  assignmentMap.on("mouseup", onAssignmentSelectionMouseUp);
-  assignmentMap.on("baselayerchange", (event) => {
-    assignmentActiveBaseLayer = event.layer;
-    emit("update:assignmentMapBaseLayer", event.name);
-  });
-  refreshAssignmentMap({ refit: true });
-  setTimeout(() => assignmentMap?.invalidateSize(), 100);
-}
-
-function refreshReviewMap() {
-  if (
-    !reviewMap ||
-    !selectedForm.value ||
-    !reviewSightingsLayer ||
-    !reviewMarkerLayer ||
-    !reviewPathLayer
-  ) {
-    return;
-  }
-
-  reviewSightingsLayer.clearLayers();
-  reviewMarkerLayer.clearLayers();
-  reviewPathLayer.clearLayers();
-  reviewHotspotLayer?.clearLayers();
-
-  selectedSightings.value.forEach((sighting) => {
-    const marker = L.circleMarker([sighting.lat, sighting.lon], {
-      radius: 8,
-      color: markerColor(sighting.form_id),
-      fillColor: markerColor(sighting.form_id),
-      fillOpacity: 0.85,
-      weight: 1,
-    });
-    marker.bindPopup(formatSightingPopup(sighting, t));
-    reviewSightingsLayer.addLayer(marker);
-  });
-
-  const checklistMarker = L.marker([selectedForm.value.lat, selectedForm.value.lon], {
-    draggable: true,
-    icon: L.divIcon({
-      className: "assignment-checklist-icon",
-      html: checklistMarkerHtml(selectedForm.value.id, checklistColors, unassignedColor),
-      iconSize: [28, 28],
-      iconAnchor: [14, 14],
-    }),
-  });
-  checklistMarker.on("dragend", (drawEvent) => {
-    const latlng = drawEvent.target.getLatLng();
-    store.moveForm(selectedForm.value.id, latlng.lat, latlng.lng);
-  });
-  reviewMarkerLayer.addLayer(checklistMarker);
-
-  (selectedForm.value.hotspots || []).forEach((hotspot) => {
-    const marker = L.marker([hotspot.lat, hotspot.lng], {
-      zIndexOffset: 999,
-      icon: L.divIcon({
-        className: "hotspot-marker-icon",
-        html: `<img src="${hotspotMarkerUrl}" alt="" />`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -26],
-      }),
-    });
-    marker.bindPopup(hotspotPopupContent(hotspot));
-    reviewHotspotLayer?.addLayer(marker);
-  });
-
-  if (Array.isArray(selectedForm.value.path) && selectedForm.value.path.length > 1) {
-    reviewPathLayer.addLayer(
-      L.polyline(selectedForm.value.path, {
-        color: "#8b5e3c",
-        weight: 4,
-      }),
-    );
-  }
-
-  const points = [
-    ...selectedSightings.value.map((sighting) => [sighting.lat, sighting.lon]),
-    [selectedForm.value.lat, selectedForm.value.lon],
-    ...(selectedForm.value.path || []).map((point) => [point[0], point[1]]),
-  ];
-
-  if (points.length && reviewMapFittedFormId !== selectedForm.value.id) {
-    reviewMap.fitBounds(points, { padding: [20, 20], maxZoom: 13 });
-    reviewMapFittedFormId = selectedForm.value.id;
-  }
-}
-
-function initializeReviewMap() {
-  if (reviewMap || !reviewMapElement.value) {
-    return;
-  }
-
-  reviewMap = L.map(reviewMapElement.value);
-  const reviewLayerControl = addBaseLayerControl(reviewMap, props.assignmentMapBaseLayer);
-  reviewBaseLayers = reviewLayerControl.baseLayers;
-  reviewActiveBaseLayer = reviewLayerControl.activeLayer;
-  reviewMap.on("baselayerchange", (event) => {
-    reviewActiveBaseLayer = event.layer;
-    emit("update:assignmentMapBaseLayer", event.name);
-  });
-
-  reviewSightingsLayer = L.layerGroup().addTo(reviewMap);
-  reviewMarkerLayer = L.layerGroup().addTo(reviewMap);
-  reviewPathLayer = L.layerGroup().addTo(reviewMap);
-  reviewHotspotLayer = L.layerGroup().addTo(reviewMap);
-
-  reviewDrawPolyline = new L.Draw.Polyline(reviewMap, {
-    repeatMode: false,
-    shapeOptions: {
-      color: "#8b5e3c",
-      weight: 4,
-    },
-  });
-
-  reviewMap.on(L.Draw.Event.CREATED, (drawEvent) => {
-    if (drawEvent.layerType !== "polyline") {
-      return;
-    }
-
-    const path = drawEvent.layer.getLatLngs().map((latlng) => [latlng.lat, latlng.lng]);
-    if (path.length > 1) {
-      updatePath(path);
-    }
-  });
-
-  refreshReviewMap();
-  setTimeout(() => reviewMap?.invalidateSize(), 100);
-}
-
-function destroyAssignmentMap() {
-  stopRectangleDraw();
-  if (assignmentMap) {
-    assignmentMap.off();
-    assignmentMap.remove();
-  }
-
-  assignmentMap = null;
-  assignmentSightingsLayer = null;
-  assignmentFormsLayer = null;
-  assignmentBaseLayers = null;
-  assignmentActiveBaseLayer = null;
-  assignmentMapHasInitialView = false;
-  assignmentDrawCaptureEnabled = false;
-  assignmentSelectionLayer = null;
-}
-
-function destroyReviewMap() {
-  if (reviewMap) {
-    reviewMap.off();
-    reviewMap.remove();
-  }
-
-  reviewMap = null;
-  reviewSightingsLayer = null;
-  reviewMarkerLayer = null;
-  reviewPathLayer = null;
-  reviewHotspotLayer = null;
-  reviewDrawPolyline = null;
-  reviewBaseLayers = null;
-  reviewActiveBaseLayer = null;
-  reviewMapFittedFormId = null;
+function selectChecklistOnMap(formId) {
+  assignFormId.value = formId;
+  emit("update:selectedFormId", formId);
 }
 
 watch(
@@ -1274,47 +530,12 @@ watch(
   { immediate: true },
 );
 
-watch(
-  assignmentMapElement,
-  async (value) => {
-    if (!value) {
-      // The section unmounts when no casual observations remain; drop the map so a later import starts fresh.
-      destroyAssignmentMap();
-      return;
-    }
-    await nextTick();
-    initializeAssignmentMap();
-  },
-  { immediate: true },
-);
-
-watch(
-  reviewMapElement,
-  async (value) => {
-    if (!value) {
-      destroyReviewMap();
-      return;
-    }
-    await nextTick();
-    initializeReviewMap();
-  },
-  { immediate: true },
-);
-
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
-  document.removeEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
-  document.removeEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
-  destroyAssignmentMap();
-  if (reviewMap) {
-    destroyReviewMap();
-  }
 });
 
 onMounted(() => {
   document.addEventListener("click", handleDocumentClick);
-  document.addEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
-  document.addEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
 });
 </script>
 
@@ -1325,35 +546,22 @@ onMounted(() => {
         <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
         <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
-        <div ref="assignmentMapShellElement" class="assignment-map-shell mb-3">
-          <div
-            ref="assignmentMapElement"
+        <div class="assignment-map-shell mb-3">
+          <AssignmentMap
+            ref="assignmentMap"
             class="assignment-map rounded border"
             :aria-label="t('assignmentMapAria')"
-          ></div>
-
-          <button
-            class="assignment-map-fullscreen btn btn-light btn-sm"
-            type="button"
-            :aria-label="
-              assignmentMapFullscreen
-                ? t('assignmentMapExitFullscreen')
-                : t('assignmentMapEnterFullscreen')
-            "
-            :title="
-              assignmentMapFullscreen
-                ? t('assignmentMapExitFullscreen')
-                : t('assignmentMapEnterFullscreen')
-            "
-            :aria-pressed="assignmentMapFullscreen"
-            @click="toggleAssignmentMapFullscreen"
-          >
-            <i
-              class="bi"
-              :class="assignmentMapFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"
-              aria-hidden="true"
-            ></i>
-          </button>
+            :sightings="sightings"
+            :forms="forms"
+            :assign-options="clusterAssignmentOptions"
+            :selected-form-id="assignFormId"
+            :base-layer="assignmentMapBaseLayer"
+            @update:base-layer="emit('update:assignmentMapBaseLayer', $event)"
+            @select-form="selectChecklistOnMap"
+            @move-form="store.moveForm"
+            @assign="store.assignSightings"
+            @selection="applyAssignmentSelection"
+          />
 
           <div class="assignment-map-controls">
             <button
@@ -1810,21 +1018,16 @@ onMounted(() => {
 
           <div class="row g-3 mt-1">
             <div :class="showStaticMapPanel ? 'col-xl-8 col-lg-7' : 'col-12'">
-              <div class="review-map-shell">
-                <div ref="reviewMapElement" class="review-map rounded border"></div>
-                <div class="review-map-controls">
-                  <button
-                    v-tooltip:left="t('drawPathTooltip')"
-                    class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
-                    type="button"
-                    :aria-label="t('drawPathTooltip')"
-                    @click="startPathDraw"
-                  >
-                    <i class="bi bi-bezier" aria-hidden="true"></i>
-                    <span>{{ t("drawPath") }}</span>
-                  </button>
-                </div>
-              </div>
+              <ReviewMap
+                ref="reviewMap"
+                :form="selectedForm"
+                :sightings="selectedSightings"
+                :base-layer="assignmentMapBaseLayer"
+                @update:base-layer="emit('update:assignmentMapBaseLayer', $event)"
+                @move-form="store.moveForm"
+                @path="updatePath"
+                @use-hotspot="useHotspot"
+              />
             </div>
             <div v-if="showStaticMapPanel" class="col-xl-4 col-lg-5">
               <article class="card h-100 static-map-preview-card">

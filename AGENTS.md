@@ -13,7 +13,7 @@
   - [#32](https://github.com/Zoziologie/ornitho2ebird/issues/32) tracks the refactor steps.
   - No login and no backend: the app stays a static site.
   - Customized mode is for desktop only: don't spend effort on making its maps work on phones. Basic mode must work on phones.
-  - The maps move from Leaflet to MapLibre GL JS, rebuilt as part of #40 ([#34](https://github.com/Zoziologie/ornitho2ebird/issues/34) has the comparison). Until then, don't invest in the Leaflet code or its plugins. With Vite, MapLibre 6 needs `setWorkerUrl()` with a `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` import.
+  - The maps use MapLibre GL JS ([#48](https://github.com/Zoziologie/ornitho2ebird/issues/48), comparison in [#34](https://github.com/Zoziologie/ornitho2ebird/issues/34)). With Vite, MapLibre 6 needs `setWorkerUrl()` with a `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` import (see `src/lib/maps.js`). The basemaps are listed in `src/lib/basemaps.js`: national maps where the country offers a free one, and by default the map of the source website's country. Their ids are saved in settings, so never change one.
   - Better analytics come later.
 - **User help lives in the app, not in a wiki.** The GitHub wiki is disabled.
 
@@ -81,7 +81,7 @@ Keep tests few and fast (all of them run in a few seconds). The layout will chan
 
 ## Known rough edges
 
-- `AdvancedPanel.vue` (~1,950 lines) holds the two maps, hotspots, the checklist select and the checklist editor.
+- `AdvancedPanel.vue` (~1,250 lines) holds the assignment tools, the checklist select and the checklist editor. The maps are in `AssignmentMap.vue` and `ReviewMap.vue`.
 - `app.css` (~1,500 lines) is mostly component rules.
 - Splitting both is planned in #40, after the UX decisions.
 - Publishing interactive maps needs a GitHub token, so the tests don't cover it.

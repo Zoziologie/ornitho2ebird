@@ -1,6 +1,5 @@
 import {
   APP_STORAGE_PREFIX,
-  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
   DEFAULT_SETTINGS,
   DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
   DEFAULT_SPECIES_COMMENT_TEMPLATE,
@@ -10,6 +9,7 @@ import {
   buildSpeciesCommentTemplateFromOptions,
 } from "./constants";
 import { readStorage, writeStorage } from "./storage";
+import { isBasemapId } from "./basemaps";
 import { normalizeLanguage, resolveUiLanguage } from "../i18n";
 
 export const SETTINGS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:settings`;
@@ -20,7 +20,7 @@ export const SETTINGS_INJECTION_KEY = Symbol("settings");
 
 // Bump when the stored shape changes, and add the step that upgrades the previous version to
 // MIGRATIONS.
-export const SETTINGS_VERSION = 1;
+export const SETTINGS_VERSION = 2;
 
 // MIGRATIONS[n] upgrades settings saved at version n to version n + 1.
 const MIGRATIONS = [
@@ -40,6 +40,12 @@ const MIGRATIONS = [
     }
     return rest;
   },
+  // 1 → 2 (0.6.1): the basemap follows the source website unless chosen. "OpenStreetMap" was the
+  // default, saved whether chosen or not, so it becomes "".
+  (settings) =>
+    settings.assignmentMapBaseLayer === "OpenStreetMap"
+      ? { ...settings, assignmentMapBaseLayer: "" }
+      : settings,
 ];
 
 function isPlainObject(value) {
@@ -134,9 +140,7 @@ function normalizeGlobalStaticMap(value) {
 }
 
 function normalizeAssignmentMapBaseLayer(value) {
-  return ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(value)
-    ? value
-    : DEFAULT_SETTINGS.assignmentMapBaseLayer;
+  return isBasemapId(value) ? value : DEFAULT_SETTINGS.assignmentMapBaseLayer;
 }
 
 function upgradeSettings(stored) {

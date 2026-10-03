@@ -5,6 +5,7 @@ import {
   createSighting,
   distanceFromPath,
   formatDate,
+  groupByLocation,
   mathMode,
   protocol,
   speciesComment,
@@ -169,6 +170,18 @@ describe("small helpers", () => {
 
   it("mathMode returns the most frequent value", () => {
     expect(mathMode(["a", "b", "b", "c"])).toBe("b");
+  });
+
+  it("groupByLocation groups points within the distance of a group's first point", () => {
+    // 0.00003 degrees of latitude is ~3.3 m.
+    const points = [
+      { id: 1, lat: 46, lon: 7 },
+      { id: 2, lat: 46.00003, lon: 7 },
+      { id: 3, lat: 46.00006, lon: 7 },
+      { id: 4, lat: 46, lon: 7.1 },
+    ];
+    const groups = groupByLocation(points, 5);
+    expect(groups.map((group) => group.items.map((point) => point.id))).toEqual([[1, 2], [4], [3]]);
   });
 });
 

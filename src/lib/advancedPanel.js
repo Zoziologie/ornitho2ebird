@@ -1,63 +1,10 @@
-import L from "leaflet";
-import { ASSIGNMENT_MAP_BASE_LAYER_OPTIONS } from "./constants";
+import markerColors from "/data/marker_color.json";
 import { protocol } from "./utils";
 
-export function createBaseLayers() {
-  return {
-    OpenStreetMap: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 19,
-    }),
-    Satellite: L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      {
-        attribution: "Tiles &copy; Esri",
-        maxZoom: 19,
-      },
-    ),
-    "Swiss (swisstopo)": L.tileLayer(
-      "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-      {
-        attribution: "&copy; swisstopo",
-        maxZoom: 18,
-        detectRetina: true,
-      },
-    ),
-    "France (IGN)": L.tileLayer(
-      "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
-      {
-        attribution: "&copy; IGN/Geoportail",
-        maxZoom: 19,
-        tileSize: 256,
-        detectRetina: true,
-      },
-    ),
-    "Germany (BKG)": L.tileLayer(
-      "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png",
-      {
-        attribution: "&copy; basemap.de / BKG",
-        maxZoom: 18,
-      },
-    ),
-  };
-}
-
-export function addBaseLayerControl(map, initialLayerName = "OpenStreetMap") {
-  const baseLayers = createBaseLayers();
-  const selectedLayerName = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(initialLayerName)
-    ? initialLayerName
-    : "OpenStreetMap";
-  const activeLayer = baseLayers[selectedLayerName];
-  activeLayer.addTo(map);
-  const control = L.control.layers(baseLayers, null, { position: "topleft" }).addTo(map);
-
-  return {
-    activeLayer,
-    baseLayers,
-    control,
-    selectedLayerName,
-  };
-}
+export const UNASSIGNED_COLOR = "#6c757d";
+export const CHECKLIST_COLORS = markerColors
+  .slice(1)
+  .filter((color) => color.toLowerCase() !== "#999999");
 
 export function protocolBadgeClass(form) {
   const state = protocol(form);
@@ -89,11 +36,6 @@ export function checklistMarkerHtml(formId, checklistColors, unassignedColor) {
   const color = checklistColor(formId, checklistColors, unassignedColor);
   const textColor = color === "#ffff33" ? "#212529" : "#ffffff";
   return `<span style="background:${color};color:${textColor};border-color:${color}">${formId}</span>`;
-}
-
-export function sightingMarkerHtml(formId, checklistColors, unassignedColor) {
-  const color = checklistColor(formId, checklistColors, unassignedColor);
-  return `<span style="background:${color};border-color:${color}"></span>`;
 }
 
 export function buildAssignmentOptions(forms, t, checklistColors, unassignedColor) {
@@ -195,4 +137,103 @@ export function formatSightingPopup(sighting, t) {
       </div>
     </div>
   `;
+}
+
+// The observations of one place as a list, under `title`. With `assign` ({ options, onChange }),
+// each has a select to move it to another checklist.
+export function sightingListPopupContent(sightings, title, t, assign = null) {
+  const content = document.createElement("div");
+  content.className = "map-popup map-popup-cluster";
+
+  const heading = document.createElement("div");
+  heading.className = "map-popup-heading";
+  heading.textContent = title;
+  content.appendChild(heading);
+
+  const list = document.createElement("div");
+  list.className = "map-popup-stack";
+
+  sightings.forEach((sighting) => {
+    const row = document.createElement("div");
+    row.className = "map-popup-card";
+
+    const details = document.createElement("div");
+    details.className = "map-popup-card-body";
+
+    const species = document.createElement("div");
+    species.className = "map-popup-card-title";
+    if (sighting.common_name || sighting.scientific_name) {
+      if (sighting.common_name) {
+        species.appendChild(document.createTextNode(sighting.common_name));
+      }
+      if (sighting.scientific_name) {
+        if (sighting.common_name) {
+          species.appendChild(document.createTextNode(" "));
+        }
+        const scientificName = document.createElement("span");
+        scientificName.className = "map-popup-species-scientific";
+        scientificName.textContent = sighting.scientific_name;
+        species.appendChild(scientificName);
+      }
+    } else {
+      species.textContent = t("records");
+    }
+    details.appendChild(species);
+
+    const meta = document.createElement("div");
+    meta.className = "map-popup-compact-meta";
+
+    const datetimeValue = document.createElement("span");
+    datetimeValue.className = "map-popup-compact-item";
+    datetimeValue.textContent = [sighting.date, sighting.time].filter(Boolean).join(" ") || "—";
+    meta.appendChild(datetimeValue);
+
+    const countValue = document.createElement("span");
+    countValue.className = "map-popup-compact-item";
+    const countParts = [sighting.count_precision, sighting.count].filter(
+      (value) => value !== null && value !== "",
+    );
+    countValue.textContent = countParts.length ? countParts.join("") : "—";
+    meta.appendChild(countValue);
+
+    const permalinkValue = document.createElement("span");
+    permalinkValue.className = "map-popup-compact-item";
+    if (sighting.permalink) {
+      const permalink = document.createElement("a");
+      permalink.href = sighting.permalink;
+      permalink.target = "_blank";
+      permalink.rel = "noopener";
+      permalink.textContent = String(sighting.id ?? "—");
+      permalinkValue.appendChild(permalink);
+    } else {
+      permalinkValue.textContent = String(sighting.id ?? "—");
+    }
+    meta.appendChild(permalinkValue);
+
+    details.appendChild(meta);
+
+    if (assign) {
+      details.appendChild(assignSelect(sighting, assign));
+    }
+
+    row.appendChild(details);
+    list.appendChild(row);
+  });
+
+  content.appendChild(list);
+  return content;
+}
+
+function assignSelect(sighting, { options, onChange }) {
+  const select = document.createElement("select");
+  select.className = "form-select form-select-sm map-popup-select";
+  options.forEach((option) => {
+    const optionElement = document.createElement("option");
+    optionElement.value = String(option.value);
+    optionElement.textContent = option.label;
+    optionElement.selected = Number(option.value) === Number(sighting.form_id);
+    select.appendChild(optionElement);
+  });
+  select.addEventListener("change", (event) => onChange(sighting, Number(event.target.value)));
+  return select;
 }

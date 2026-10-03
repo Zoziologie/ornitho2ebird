@@ -507,3 +507,32 @@ export function createSighting(raw) {
       : "",
   };
 }
+
+// Groups items ({ lat, lon }) that lie within `meters` of a group's first item. Sorted by latitude,
+// so each item is compared only with the groups of the last few metres of latitude.
+export function groupByLocation(items, meters) {
+  const maxLatitudeDelta = meters / 111000;
+  const groups = [];
+  const sorted = [...items].sort((left, right) => Number(left.lat) - Number(right.lat));
+  for (const item of sorted) {
+    const lat = Number(item.lat);
+    const lon = Number(item.lon);
+    let group = null;
+    for (let index = groups.length - 1; index >= 0; index -= 1) {
+      const candidate = groups[index];
+      if (lat - candidate.lat > maxLatitudeDelta) {
+        break;
+      }
+      if (haversineDistanceKm(candidate.lat, candidate.lon, lat, lon) * 1000 <= meters) {
+        group = candidate;
+        break;
+      }
+    }
+    if (group) {
+      group.items.push(item);
+    } else {
+      groups.push({ lat, lon, items: [item] });
+    }
+  }
+  return groups;
+}
