@@ -225,7 +225,9 @@ npm run check
 
 ## Deployment
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab. Dependabot opens monthly update PRs for npm packages and GitHub Actions.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab.
+
+Dependencies are updated by hand: `npm outdated` lists what is behind, `npm install <package>@latest` moves a package to its latest major version, and `npm update` refreshes everything else in the lockfile. Then run `npm run check` and `npm run build`.
 
 The app builds for root-domain hosting, which matches `https://ornitho2ebird.com/`. If you later deploy it under a subpath again, set Vite's `base` option accordingly in [`vite.config.js`](vite.config.js).
 
