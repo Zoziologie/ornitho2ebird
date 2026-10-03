@@ -290,6 +290,8 @@
   "exportDistanceWarningConfirm": "Wechsle in den angepassten Modus, um Checklisten-Distanzen zu prüfen und zu korrigieren, und exportiere danach erneut.",
   "exportTaxonomyLoading": "Artnamen werden mit der ausgewählten eBird-Taxonomiesprache abgeglichen...",
   "exportTaxonomyLoadFailed": "Der Taxonomieabgleich konnte derzeit nicht geladen werden. Du kannst trotzdem exportieren, aber Artnamen stimmen möglicherweise nicht mit deiner eBird-Sprache überein.",
+  "retry": "Erneut versuchen",
+  "unexpectedError": "Etwas ist schiefgelaufen: {detail}. Lade die Seite neu und versuche es erneut. Wenn es weiterhin passiert, melde es bitte auf GitHub.",
   "exportTaxonomyWarningTitle": "Problem beim Taxonomieabgleich",
   "exportTaxonomyWarningBody": "Für die folgenden Arten aus ornitho konnten wir keinen eBird-Artnamen finden:",
   "exportTaxonomyWarningLine": "{commonName} ({scientificName}) | @id: \"{id}\"",

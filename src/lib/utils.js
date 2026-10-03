@@ -144,6 +144,27 @@ function templateSighting(sighting) {
   );
 }
 
+// The same few expressions are evaluated for every sighting: compile each one once.
+// Returns null for an expression that does not compile.
+const compiledTemplateExpressions = new Map();
+
+function compileTemplateExpression(expression) {
+  if (!compiledTemplateExpressions.has(expression)) {
+    // Editing a template in Settings compiles every partial expression typed: keep it bounded.
+    if (compiledTemplateExpressions.size > 500) {
+      compiledTemplateExpressions.clear();
+    }
+    let evaluate;
+    try {
+      evaluate = Function("context", `with (context) { return String(${expression}); }`);
+    } catch {
+      evaluate = null;
+    }
+    compiledTemplateExpressions.set(expression, evaluate);
+  }
+  return compiledTemplateExpressions.get(expression);
+}
+
 export function speciesComment(speciesCommentTemplate, sightings) {
   if (!speciesCommentTemplate || !sightings?.length) {
     return "";
@@ -173,13 +194,12 @@ export function speciesComment(speciesCommentTemplate, sightings) {
           const expression = chunk.slice(0, end);
           const suffix = chunk.slice(end + 1);
 
+          const evaluate = compileTemplateExpression(expression);
+          if (!evaluate) {
+            return suffix;
+          }
           try {
-            return (
-              Function(
-                "context",
-                `with (context) { return String(${expression}); }`,
-              )(context).replace(/(?:\r\n|\r|\n)/g, "<br>") + suffix
-            );
+            return evaluate(context).replace(/(?:\r\n|\r|\n)/g, "<br>") + suffix;
           } catch {
             return suffix;
           }

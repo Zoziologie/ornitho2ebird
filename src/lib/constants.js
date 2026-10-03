@@ -3,6 +3,8 @@ import ebirdTaxonomyLanguages from "../../data/ebird_taxonomy_languages.json";
 export const APP_STORAGE_PREFIX = "ornitho2ebird";
 export const LANGUAGE_COOKIE_NAME = `${APP_STORAGE_PREFIX}_language`;
 export const LOCATION_NAME_MAX_LENGTH = 128;
+// Public eBird API key used for taxonomy and hotspot lookups.
+export const EBIRD_API_KEY = "vcs68p4j67pt";
 
 export const UI_LANGUAGES = [
   { value: "en", label: "English" },

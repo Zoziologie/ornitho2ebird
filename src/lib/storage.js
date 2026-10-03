@@ -16,7 +16,13 @@ export function writeStorage(key, value) {
     return;
   }
 
-  window.localStorage.setItem(key, JSON.stringify(value));
+  // Storage can be full or blocked (private mode, site data disabled): the app keeps working
+  // without persistence.
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Could not save ${key}`, error);
+  }
 }
 
 export function readCookie(name) {

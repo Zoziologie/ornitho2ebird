@@ -290,6 +290,8 @@
   "exportDistanceWarningConfirm": "Passare alla modalità personalizzata per controllare e correggere le distanze delle checklist, poi esportare di nuovo.",
   "exportTaxonomyLoading": "Abbinamento dei nomi delle specie alla lingua tassonomica eBird selezionata...",
   "exportTaxonomyLoadFailed": "Il caricamento della corrispondenza tassonomica non è riuscito in questo momento. Puoi comunque esportare, ma i nomi delle specie potrebbero non corrispondere alla tua lingua eBird.",
+  "retry": "Riprova",
+  "unexpectedError": "Qualcosa è andato storto: {detail}. Ricarica la pagina e riprova. Se il problema persiste, segnalalo su GitHub.",
   "exportTaxonomyWarningTitle": "Problema di corrispondenza tassonomica",
   "exportTaxonomyWarningBody": "Non siamo riusciti a trovare un nome specie eBird per le seguenti specie di ornitho:",
   "exportTaxonomyWarningLine": "{commonName} ({scientificName}) | @id: \"{id}\"",

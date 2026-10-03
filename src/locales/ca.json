@@ -290,6 +290,8 @@
   "exportDistanceWarningConfirm": "Canvia al mode personalitzat per revisar i corregir les distàncies de les checklists, i després torna a exportar.",
   "exportTaxonomyLoading": "S'estan relacionant els noms d'espècies amb l'idioma taxonòmic d'eBird seleccionat...",
   "exportTaxonomyLoadFailed": "Ara mateix no s'ha pogut carregar l'equivalència taxonòmica. Pots exportar igualment, però els noms d'espècies poden no coincidir amb el teu idioma d'eBird.",
+  "retry": "Torna-ho a provar",
+  "unexpectedError": "Alguna cosa ha fallat: {detail}. Torna a carregar la pàgina i prova-ho de nou. Si continua passant, informa'n a GitHub.",
   "exportTaxonomyWarningTitle": "Problema d'equivalència taxonòmica",
   "exportTaxonomyWarningBody": "No hem pogut trobar un nom d'espècie d'eBird per a les següents espècies d'ornitho:",
   "exportTaxonomyWarningLine": "{commonName} ({scientificName}) | @id: \"{id}\"",

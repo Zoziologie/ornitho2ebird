@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import websitesList from "/data/websites_list.json";
 import { buildSpeciesCommentTemplate } from "../lib/utils";
 import { loadOrnithoSpeciesList } from "../lib/taxonomy";
+import { fetchJson } from "../lib/http";
 import { ImportError, parseImportFile } from "../lib/importers";
 
 const props = defineProps({
@@ -119,11 +120,16 @@ const exportLink = computed(() => {
   return `${website.value.website}index.php?m_id=31&sp_DChoice=${importQueryDate.value}&sp_DFrom=${rangeFrom}&sp_DTo=${rangeTo}&sp_DOffset=${importQueryDateOffset.value}&sp_SChoice=all&sp_PChoice=all&sp_OnlyMyData=1`;
 });
 
+// Dropping a second file while the first is still loading must not let the first one win.
+let importRunId = 0;
+
 watch(file, async (nextFile) => {
   if (!nextFile || !website.value) {
     return;
   }
 
+  const runId = ++importRunId;
+  const isStale = () => runId !== importRunId;
   numberImportedForms.value = 0;
   numberImportedSightings.value = 0;
   errorMessage.value = "";
@@ -135,6 +141,9 @@ watch(file, async (nextFile) => {
     const rawText = await nextFile.text();
     if (website.value.system === "ornitho") {
       await loadOrnithoSpeciesList();
+    }
+    if (isStale()) {
+      return;
     }
     const parsed = parseImportFile(rawText, website.value);
     parsed.website = {
@@ -148,13 +157,20 @@ watch(file, async (nextFile) => {
         ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates)
         : "",
     ].filter(Boolean);
-    verificationWarning.value = await checkWebsite(parsed, website.value);
-
     numberImportedForms.value = parsed.forms.length;
     numberImportedSightings.value = parsed.sightings.length;
     emit("import-data", parsed);
     loadingStatus.value = 1;
+
+    // Only a hint, so it does not hold up the import.
+    const warning = await checkWebsite(parsed, website.value);
+    if (!isStale()) {
+      verificationWarning.value = warning;
+    }
   } catch (error) {
+    if (isStale()) {
+      return;
+    }
     loadingStatus.value = -1;
     errorMessage.value =
       error instanceof ImportError
@@ -236,10 +252,10 @@ async function checkWebsite(exportData, selectedWebsite) {
   }
 
   try {
-    const response = await fetch(
+    const reverse = await fetchJson(
       `https://nominatim.openstreetmap.org/reverse.php?lat=${firstRecord.lat}&lon=${firstRecord.lon}&zoom=8&format=jsonv2&accept-language=en`,
+      { timeoutMs: 8000 },
     );
-    const reverse = await response.json();
 
     if (reverse.address?.[selectedWebsite.osm_level] !== selectedWebsite.osm_region) {
       return t("websiteWarning", {
