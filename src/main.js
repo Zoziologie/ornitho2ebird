@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp, watch } from "vue";
 import Tooltip from "bootstrap/js/dist/tooltip";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -9,7 +9,41 @@ import { alertDialog } from "./lib/dialog";
 import { SETTINGS_STORAGE_KEY } from "./lib/settings";
 import { readStorage } from "./lib/storage";
 
+import { getAnalytics, trackEvent } from "./lib/analytics";
+
 const app = createApp(App);
+
+// A heading entering the viewport is exposure, not proof that its contents were read.
+app.directive("analytics-view", {
+  mounted(element, binding) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries.some((entry) => entry.intersectionRatio === 1) &&
+          getAnalytics().state.choice === "accepted"
+        ) {
+          trackEvent("panel_view", { panel: binding.value });
+          observer.disconnect();
+          element._stopAnalyticsView();
+        }
+      },
+      { threshold: 1 },
+    );
+    element._analyticsObserver = observer;
+    element._stopAnalyticsView = watch(
+      () => getAnalytics().state.choice,
+      (choice) => {
+        if (choice === "accepted") observer.observe(element);
+        else observer.disconnect();
+      },
+      { immediate: true },
+    );
+  },
+  unmounted(element) {
+    element._analyticsObserver.disconnect();
+    element._stopAnalyticsView();
+  },
+});
 
 app.directive("tooltip", {
   mounted(element, binding) {

@@ -22,8 +22,8 @@ const field = (section, label) =>
 // export. The eBird taxonomy API fails here, so this also covers the bundled-names fallback.
 test("checklist edits in Customized mode reach the CSV", async ({ page }) => {
   await stubNetwork(page, { ebirdTaxonomy: false });
-  await openApp(page);
-  await page.getByRole("button", { name: "Accept analytics" }).click();
+  await openApp(page, { chooseConsent: false });
+  await page.getByRole("button", { name: "Allow usage statistics" }).click();
 
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("button", { name: /^Customized mode/ }).click();
@@ -73,7 +73,7 @@ test("checklist edits in Customized mode reach the CSV", async ({ page }) => {
 
   // Withdrawing consent must also preserve manual edits and export selections.
   await page.getByRole("button", { name: "Privacy & cookies", exact: true }).click();
-  await page.getByRole("button", { name: "Reject analytics" }).click();
+  await page.getByRole("button", { name: "No thanks" }).click();
   await page.getByRole("button", { name: "Close", exact: true }).click();
   expect(parseCsv(await downloadCsv(page))).toEqual(expected);
 });

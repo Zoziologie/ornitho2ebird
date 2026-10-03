@@ -315,12 +315,14 @@
   "mapScrollZoomHelp": "Halte {key} gedrückt und scrolle, um die Karte zu zoomen",
   "mapTouchMoveHelp": "Verschiebe die Karte mit zwei Fingern",
   "analyticsTitle": "Datenschutz & Cookies",
-  "analyticsSummary": "Erlaubst du optionale Google-Analytics-Cookies, damit wir verstehen, welche Werkzeuge genutzt werden und wo Importe oder Exporte fehlschlagen? Die Konvertierung funktioniert auch bei Ablehnung genauso gut.",
+  "analyticsSummary": "Dürfen wir optionale Cookies verwenden, um zu verstehen, wie das Werkzeug genutzt wird? Nutzungsstatistiken helfen uns, den Import, die Prüfung der Listen und den Export zu verbessern.",
   "analyticsDetails": "Welche Daten werden erfasst?",
   "analyticsNotice": "Mit deiner Zustimmung erhält Google Besuchs- und Interaktionsdaten, darunter die gewählte Quellwebsite, die Sprache der Oberfläche, den Modus und die Nutzung der Listen- und Kartenwerkzeuge. Unsere Ereignisse enthalten keine Dateinamen, Beobachtungen, Koordinaten, Kommentare, Tokens, Suchbegriffe oder vollständigen URLs. Google verarbeitet auch technische Informationen wie deine IP-Adresse und Browserinformationen und kann Daten im Ausland verarbeiten. Die Zustimmung zu Werbung bleibt verweigert; Google Signals und personalisierte Werbung sind in dieser App deaktiviert. Analytics-Cookies und deine gespeicherte Entscheidung laufen nach sechs Monaten ab. Du kannst deine Entscheidung hier, über Datenschutz & Cookies im Seitenfuß oder in den Einstellungen ändern. Ablehnen stoppt die Messung und entfernt die Analytics-Cookies dieser App, ohne deinen Import zu verlieren. Sprache und App-Einstellungen werden für die Funktion des Werkzeugs separat gespeichert. Google Analytics speichert Ereignisdaten zwei Monate und Nutzerdaten vierzehn Monate; neue Aktivität startet die Aufbewahrungsfrist für Nutzerdaten erneut. Exportereignisse erfassen auch die gewählte Option für Artkommentare und ob die CSV Artkommentare enthält, ohne deren Inhalt zu übermitteln.",
   "analyticsGooglePrivacy": "Googles Datenschutzerklärung",
-  "analyticsAccept": "Analytics akzeptieren",
-  "analyticsReject": "Analytics ablehnen",
-  "analyticsAccepted": "Analytics ist derzeit erlaubt.",
-  "analyticsRejected": "Analytics ist derzeit deaktiviert."
+  "analyticsAccept": "Nutzungsstatistiken erlauben",
+  "analyticsReject": "Nein danke",
+  "analyticsAccepted": "Nutzungsstatistiken sind derzeit erlaubt.",
+  "analyticsRejected": "Nutzungsstatistiken sind derzeit deaktiviert.",
+  "analyticsConsentTitle": "Hilf uns, Ornitho2eBird zu verbessern",
+  "analyticsReassurance": "Deine Beobachtungen und Kommentartexte werden nicht erfasst. Alle Funktionen stehen auch ohne diese Cookies zur Verfügung. Du kannst deine Wahl unter Datenschutz & Cookies ändern."
 }

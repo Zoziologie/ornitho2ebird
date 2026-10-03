@@ -135,6 +135,7 @@ watch(file, async (nextFile) => {
   }
 
   const sourceWebsite = website.value.name;
+  trackEvent("import_start", { source_website: sourceWebsite });
   const runId = ++importRunId;
   const isStale = () => runId !== importRunId;
   numberImportedForms.value = 0;
@@ -180,7 +181,17 @@ watch(file, async (nextFile) => {
     numberImportedSightings.value = parsed.sightings.length;
     emit("import-data", parsed);
     loadingStatus.value = 1;
-    trackEvent("import_file", { source_website: sourceWebsite, outcome: "success" });
+    trackEvent("import_file", {
+      source_website: sourceWebsite,
+      outcome: "success",
+      import_profile: parsed.forms.length
+        ? parsed.sightings.length
+          ? "mixed"
+          : "lists"
+        : parsed.sightings.length
+          ? "casual"
+          : "empty",
+    });
 
     // Only a hint, so it does not hold up the import.
     const warning = await checkWebsite(parsed, website.value);
@@ -192,7 +203,17 @@ watch(file, async (nextFile) => {
       return;
     }
     loadingStatus.value = -1;
-    trackEvent("import_file", { source_website: sourceWebsite, outcome: "failure" });
+    trackEvent("import_file", {
+      source_website: sourceWebsite,
+      outcome: "failure",
+      failure_reason:
+        {
+          importErrorMissingColumns: "missing_columns",
+          importErrorInvalidJson: "invalid_json",
+          importErrorTxtHeader: "txt_header",
+          importErrorUnsupported: "unsupported",
+        }[error.key] || "unexpected",
+    });
     errorMessage.value =
       error instanceof ImportError
         ? t(error.key, error.params)
@@ -295,7 +316,7 @@ async function checkWebsite(exportData, selectedWebsite) {
 <template>
   <section class="card border-0 shadow-sm rounded-3 mb-3">
     <div class="card-body p-3 p-md-4">
-      <h2 class="border-bottom pb-2 mb-3">{{ t("importTitle") }}</h2>
+      <h2 v-analytics-view="'import'" class="border-bottom pb-2 mb-3">{{ t("importTitle") }}</h2>
       <div class="row">
         <div class="col-lg-6 mb-3">
           <label class="form-label" for="import-source-website">{{ t("websiteSelect") }}</label>
@@ -391,7 +412,13 @@ async function checkWebsite(exportData, selectedWebsite) {
                 </div>
               </div>
               <div class="d-flex justify-content-center mt-3">
-                <a class="btn btn-primary" :href="exportLink" target="_blank" rel="noopener">
+                <a
+                  class="btn btn-primary"
+                  :href="exportLink"
+                  target="_blank"
+                  rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'source_export' })"
+                >
                   {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>
@@ -400,7 +427,13 @@ async function checkWebsite(exportData, selectedWebsite) {
             <template v-else-if="website.system === 'observation'">
               <p class="mb-3">{{ t("importHelpObservation") }}</p>
               <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                <a
+                  class="btn btn-primary"
+                  :href="website.website"
+                  target="_blank"
+                  rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'source_export' })"
+                >
                   {{ t("openWebsite", { website: website.name }) }}
                 </a>
               </div>
@@ -409,7 +442,13 @@ async function checkWebsite(exportData, selectedWebsite) {
             <template v-else-if="website.system === 'birdlasser'">
               <p class="mb-3">{{ t("importHelpBirdlasser") }}</p>
               <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                <a
+                  class="btn btn-primary"
+                  :href="website.website"
+                  target="_blank"
+                  rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'source_export' })"
+                >
                   {{ t("openWebsite", { website: website.name }) }}
                 </a>
               </div>
@@ -418,7 +457,13 @@ async function checkWebsite(exportData, selectedWebsite) {
             <template v-else-if="website.system === 'ornitho.net'">
               <p class="mb-3">{{ t("importHelpOrnithoNet") }}</p>
               <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" :href="website.website" target="_blank" rel="noopener">
+                <a
+                  class="btn btn-primary"
+                  :href="website.website"
+                  target="_blank"
+                  rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'source_export' })"
+                >
                   {{ t("openExportPage", { website: website.name }) }}
                 </a>
               </div>

@@ -17,6 +17,7 @@ import ImportPanel from "./components/ImportPanel.vue";
 import {
   APP_STORAGE_PREFIX,
   LANGUAGE_COOKIE_NAME,
+  SPECIES_COMMENT_TEMPLATE_OPTION_KEYS,
   buildSpeciesCommentTemplateFromOptions,
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
@@ -38,7 +39,7 @@ import AppDialog from "./components/AppDialog.vue";
 import AnalyticsConsent from "./components/AnalyticsConsent.vue";
 import { getAnalytics, trackEvent } from "./lib/analytics";
 
-getAnalytics().start();
+const analytics = getAnalytics();
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
 const HelpPanel = defineAsyncComponent(() => import("./components/HelpPanel.vue"));
@@ -63,6 +64,19 @@ function sameSpeciesCommentTemplate(left, right) {
 const { settings: loadedSettings, isReturningUser } = loadSettings();
 const settings = reactive(loadedSettings);
 provide(SETTINGS_INJECTION_KEY, settings);
+watch(
+  () => [settings.advancedEnabled, settings.uiLanguage, settings.websiteName],
+  () => {
+    analytics.setContext({
+      mode: settings.advancedEnabled ? "customized" : "basic",
+      language: settings.uiLanguage,
+      source_website: settings.websiteName,
+      visitor_type: isReturningUser ? "returning" : "new",
+    });
+  },
+  { immediate: true, flush: "sync" },
+);
+analytics.start();
 
 // Track only selected setting names; never send templates, tokens or typed values.
 for (const [name, read] of Object.entries({
@@ -74,7 +88,27 @@ for (const [name, read] of Object.entries({
   staticMap: () => settings.globalStaticMap.show,
   interactiveMap: () => settings.globalStaticMap.interactive,
 })) {
-  watch(read, () => trackEvent("setting_change", { setting_name: name }));
+  watch(read, (value) =>
+    trackEvent("setting_change", {
+      setting_name: name,
+      ...(typeof value === "boolean" ? { enabled: value ? "yes" : "no" } : {}),
+    }),
+  );
+}
+for (const [kind, options] of Object.entries({
+  short: settings.speciesCommentTemplateOptions,
+  long: settings.speciesCommentLongTemplateOptions,
+})) {
+  for (const key of SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.filter((key) => key !== "personalized")) {
+    watch(
+      () => options[key],
+      (value) =>
+        trackEvent("setting_change", {
+          setting_name: `comment_${kind}_${key}`,
+          enabled: value ? "yes" : "no",
+        }),
+    );
+  }
 }
 watch(
   () => settings.uiLanguage,
@@ -237,6 +271,7 @@ async function updateSelectedWebsiteName(nextWebsiteName) {
 
   if (!hasImportedData.value) {
     settings.websiteName = normalizedName;
+    trackEvent("source_select", { source_website: normalizedName });
     return;
   }
 
@@ -252,6 +287,7 @@ async function updateSelectedWebsiteName(nextWebsiteName) {
 
   clearImportedData();
   settings.websiteName = normalizedName;
+  trackEvent("source_select", { source_website: normalizedName });
 }
 
 // In Basic mode the grouping limits apply to the current import too, so the export page's "Change
@@ -319,7 +355,7 @@ window.addEventListener("hashchange", openInfoFromHash);
 onBeforeUnmount(() => window.removeEventListener("hashchange", openInfoFromHash));
 
 function openSettings(section = "") {
-  trackEvent("settings_open");
+  trackEvent("settings_open", { settings_section: section });
   settingsFocusSection.value = section;
   settingsOpen.value = true;
 }

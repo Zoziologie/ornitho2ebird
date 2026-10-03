@@ -9,9 +9,19 @@ const googleRequests = (requests) =>
 // Consent changes must not lose an import or affect the CSV people upload.
 test("acceptance tracks conversion; withdrawal preserves the import and CSV", async ({ page }) => {
   const requests = await stubNetwork(page);
-  await openApp(page);
+  await openApp(page, { chooseConsent: false });
   expect(googleRequests(requests)).toEqual([]);
-  await page.getByRole("button", { name: "Accept analytics" }).click();
+  await expect(page.getByRole("dialog", { name: "Help improve Ornitho2eBird" })).toBeVisible();
+  await expect(page.locator("#analytics-consent-title")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByText("What is collected?", { exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Allow usage statistics" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "No thanks" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByText("What is collected?", { exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Allow usage statistics" }).click();
   await expect.poll(() => googleRequests(requests).length).toBe(1);
   await importFixture(page, "ornitho.ch", FIXTURE);
   expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
@@ -19,8 +29,19 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
     window.dataLayer.filter((entry) => entry[0] === "event").map((entry) => [entry[1], entry[2]]),
   );
   expect(events).toContainEqual([
+    "import_start",
+    expect.objectContaining({ source_website: "ornitho.ch", mode: "basic" }),
+  ]);
+  expect(events).toContainEqual(["export_state", expect.objectContaining({ readiness: "ready" })]);
+  expect(events).toContainEqual(["panel_view", expect.objectContaining({ panel: "export" })]);
+  expect(events).toContainEqual([
     "import_file",
-    expect.objectContaining({ source_website: "ornitho.ch", outcome: "success" }),
+    expect.objectContaining({
+      source_website: "ornitho.ch",
+      outcome: "success",
+      import_profile: "casual",
+      visitor_type: "new",
+    }),
   ]);
   expect(events).toContainEqual([
     "export_csv",
@@ -31,8 +52,20 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
       has_species_comments: "yes",
     }),
   ]);
+  await page.getByRole("button", { name: "Help", exact: true }).click();
+  await page.locator("#help-species-matching summary").click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.dataLayer
+          .filter((entry) => entry[1] === "help_topic")
+          .map((entry) => entry[2].section),
+      ),
+    )
+    .toContain("species-matching");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
   await page.getByRole("button", { name: "Privacy & cookies", exact: true }).click();
-  await page.getByRole("button", { name: "Reject analytics" }).click();
+  await page.getByRole("button", { name: "No thanks" }).click();
   await expect.poll(() => page.evaluate(() => window["ga-disable-G-TJ2TZSXSBW"])).toBe(true);
   await page.getByRole("button", { name: "Close", exact: true }).click();
   const count = await page.evaluate(() => window.dataLayer.length);
@@ -47,15 +80,15 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
 test("mobile rejection allows conversion without Google requests", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const requests = await stubNetwork(page);
-  await openApp(page);
-  await page.getByRole("button", { name: "Reject analytics" }).click();
+  await openApp(page, { chooseConsent: false });
+  await page.getByRole("button", { name: "No thanks" }).click();
   await importFixture(page, "ornitho.ch", FIXTURE);
   expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
   expect(googleRequests(requests)).toEqual([]);
   expect(await page.evaluate(() => typeof window.gtag)).toBe("undefined");
   await page.reload();
   await expect(page.getByRole("button", { name: "Privacy & cookies", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Accept analytics" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Allow usage statistics" })).toHaveCount(0);
   expect(googleRequests(requests)).toEqual([]);
 });
 
@@ -64,8 +97,8 @@ test("exports report personalized and disabled species comments without their co
   page,
 }) => {
   await stubNetwork(page);
-  await openApp(page);
-  await page.getByRole("button", { name: "Accept analytics" }).click();
+  await openApp(page, { chooseConsent: false });
+  await page.getByRole("button", { name: "Allow usage statistics" }).click();
   await importFixture(page, "ornitho.ch", FIXTURE);
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator("#personalized-species-comments").check();

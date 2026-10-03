@@ -145,6 +145,40 @@ describe("optional analytics", () => {
     },
   );
 
+  it("adds only known workflow context and rejects private failure details", () => {
+    const browser = browserWith(savedChoice("accepted"));
+    const analytics = createAnalytics(browser);
+    analytics.setContext({
+      mode: "basic",
+      language: "fr",
+      source_website: "ornitho.ch",
+      visitor_type: "returning",
+      filename: "private.json",
+    });
+    analytics.start();
+    analytics.track("import_file", {
+      outcome: "failure",
+      failure_reason: "invalid_json",
+      error: "private file contents",
+    });
+    expect(commands(browser).at(-1)[2]).toMatchObject({
+      mode: "basic",
+      language: "fr",
+      visitor_type: "returning",
+      source_website: "ornitho.ch",
+      failure_reason: "invalid_json",
+    });
+    expect(JSON.stringify(commands(browser))).not.toContain("private");
+    const count = commands(browser).length;
+    analytics.track("import_file", { failure_reason: "private file contents" });
+    analytics.track("workflow_link", { destination: "https://private.test" });
+    analytics.track("panel_view", { panel: "private checklist title" });
+    expect(commands(browser)).toHaveLength(count);
+    analytics.setContext({ mode: "private", language: "fr" });
+    analytics.track("help_topic", { section: "species-matching" });
+    expect(commands(browser).at(-1)[2]).not.toHaveProperty("mode");
+  });
+
   it("withdraws without reloading and permits later acceptance without another tag", () => {
     const browser = browserWith(savedChoice("accepted"));
     const analytics = createAnalytics(browser);

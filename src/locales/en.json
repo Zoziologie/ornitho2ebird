@@ -315,12 +315,14 @@
   "mapScrollZoomHelp": "Use {key} + scroll to zoom the map",
   "mapTouchMoveHelp": "Use two fingers to move the map",
   "analyticsTitle": "Privacy & cookies",
-  "analyticsSummary": "Allow optional Google Analytics cookies to help us understand which tools people use and where imports or exports fail? Conversion works equally well if you reject.",
+  "analyticsSummary": "May we use optional cookies to learn how people use the tool? Usage statistics help us improve importing, checklist review and exporting.",
   "analyticsDetails": "What is collected?",
   "analyticsNotice": "With your permission, Google receives visit and interaction data, including the source website you select, your interface language, mode, and use of checklist and map tools. We do not send file names, observation data, coordinates, comments, tokens, searches or full URLs in our events. Google also processes technical information such as your IP address and browser information, and may process data outside your country. Advertising consent stays denied and Google Signals and ad personalisation are disabled in this app. Analytics cookies and your saved choice expire after six months. You can change your choice here or through Privacy & cookies in the footer or Settings. Rejecting stops measurement and removes this app’s Analytics cookies without discarding your import. Language and app settings are stored separately to make the tool work. Google Analytics retains event data for two months and user data for fourteen months; new activity restarts the user-data retention period. Export events also record the species-comment option used and whether the CSV includes species comments, without their contents.",
   "analyticsGooglePrivacy": "Google privacy policy",
-  "analyticsAccept": "Accept analytics",
-  "analyticsReject": "Reject analytics",
-  "analyticsAccepted": "Analytics is currently allowed.",
-  "analyticsRejected": "Analytics is currently disabled."
+  "analyticsAccept": "Allow usage statistics",
+  "analyticsReject": "No thanks",
+  "analyticsAccepted": "Usage statistics are currently allowed.",
+  "analyticsRejected": "Usage statistics are currently disabled.",
+  "analyticsConsentTitle": "Help improve Ornitho2eBird",
+  "analyticsReassurance": "Your observations and comment text are not collected. All features work without these cookies. You can change your choice in Privacy & cookies."
 }

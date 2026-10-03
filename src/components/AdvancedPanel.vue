@@ -243,6 +243,7 @@ function computeDateFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { date: earliestSighting()?.date || "" });
+  trackEvent("checklist_action", { action: "compute_date", panel: "checklist" });
 }
 
 function computeTimeFromSightings() {
@@ -251,6 +252,7 @@ function computeTimeFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { time: earliestTimedSighting()?.time || "" });
+  trackEvent("checklist_action", { action: "compute_time", panel: "checklist" });
 }
 
 function computeDurationFromSightings() {
@@ -259,6 +261,7 @@ function computeDurationFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { duration: computedDuration.value || "" });
+  trackEvent("checklist_action", { action: "compute_duration", panel: "checklist" });
 }
 
 async function loadHotspotsForSelectedForm() {
@@ -291,10 +294,12 @@ async function loadHotspotsForSelectedForm() {
 
 function focusReviewMap() {
   reviewMap.value?.focus();
+  trackEvent("checklist_action", { action: "focus_map", panel: "checklist" });
 }
 
 function startPathDraw() {
   reviewMap.value?.startPathDraw();
+  trackEvent("checklist_action", { action: "draw_path", panel: "checklist" });
 }
 
 async function updatePath(path) {
@@ -323,6 +328,7 @@ async function updatePath(path) {
 function startRectangleDraw(mode) {
   creatingChecklist = mode === "create";
   assignmentMap.value?.startSelection();
+  trackEvent("checklist_action", { action: "select_rectangle", panel: "assignment" });
 }
 
 function assignSightings(sightings, formId) {
@@ -361,6 +367,7 @@ function selectAssignmentForm(value) {
 }
 
 function selectReviewForm(value) {
+  trackEvent("checklist_action", { action: "select" });
   emit("update:selectedFormId", value);
   reviewSelectorOpen.value = false;
 }
@@ -561,7 +568,9 @@ onMounted(() => {
   <div class="d-flex flex-column gap-3">
     <section v-if="sightings.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
-        <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
+        <h2 v-analytics-view="'assignment'" class="border-bottom pb-2 mb-3">
+          {{ t("assignmentTitle") }}
+        </h2>
         <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
         <div class="assignment-map-shell mb-3">
@@ -734,7 +743,9 @@ onMounted(() => {
 
     <section v-if="forms.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
-        <h2 class="border-bottom pb-2 mb-3">{{ t("advancedTitle") }}</h2>
+        <h2 v-analytics-view="'checklist'" class="border-bottom pb-2 mb-3">
+          {{ t("advancedTitle") }}
+        </h2>
         <p>{{ t("advancedIntro") }}</p>
 
         <div v-if="selectedForm" class="row align-items-center g-3 mb-3">
@@ -814,7 +825,10 @@ onMounted(() => {
               <button
                 class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2"
                 type="button"
-                @click="observationsModalOpen = true"
+                @click="
+                  observationsModalOpen = true;
+                  trackEvent('checklist_action', { action: 'view_observations' });
+                "
               >
                 <i class="bi bi-list-ul" aria-hidden="true"></i>
                 <span>{{

@@ -315,12 +315,14 @@
   "mapScrollZoomHelp": "Fes servir {key} + roda del ratolí per fer zoom al mapa",
   "mapTouchMoveHelp": "Fes servir dos dits per moure el mapa",
   "analyticsTitle": "Privadesa i galetes",
-  "analyticsSummary": "Permets les galetes opcionals de Google Analytics per ajudar-nos a entendre quines eines s’utilitzen i on fallen les importacions o exportacions? La conversió funciona igual de bé si les rebutges.",
+  "analyticsSummary": "Podem utilitzar galetes opcionals per entendre com s’utilitza l’eina? Les estadístiques d’ús ens ajuden a millorar la importació, la revisió de les llistes i l’exportació.",
   "analyticsDetails": "Quines dades es recullen?",
   "analyticsNotice": "Amb el teu consentiment, Google rep dades de visites i interaccions, com ara el lloc web d’origen seleccionat, la llengua de la interfície, el mode i l’ús de les eines de llistes i mapes. Els nostres esdeveniments no envien noms de fitxers, observacions, coordenades, comentaris, tokens, cerques ni URL complets. Google també tracta informació tècnica com la teva adreça IP i informació del navegador, i pot tractar dades a l’estranger. El consentiment publicitari continua denegat; Google Signals i la personalització d’anuncis estan desactivats en aquesta aplicació. Les galetes Analytics i la teva elecció desada caduquen al cap de sis mesos. Pots canviar-la aquí, a Privadesa i galetes al peu de pàgina o a la configuració. Rebutjar-les atura la mesura i elimina les galetes Analytics d’aquesta aplicació sense perdre la importació. La llengua i la configuració es desen per separat perquè l’eina funcioni. Google Analytics conserva les dades dels esdeveniments durant dos mesos i les dades d’usuari durant catorze mesos; una activitat nova reinicia el període de conservació de les dades d’usuari. Els esdeveniments d’exportació també indiquen l’opció de comentaris d’espècies utilitzada i si el CSV en conté, sense enviar-ne el contingut.",
   "analyticsGooglePrivacy": "Política de privadesa de Google",
-  "analyticsAccept": "Accepta Analytics",
-  "analyticsReject": "Rebutja Analytics",
-  "analyticsAccepted": "Analytics està permès actualment.",
-  "analyticsRejected": "Analytics està desactivat actualment."
+  "analyticsAccept": "Permet les estadístiques",
+  "analyticsReject": "No gràcies",
+  "analyticsAccepted": "Les estadístiques d’ús estan permeses actualment.",
+  "analyticsRejected": "Les estadístiques d’ús estan desactivades actualment.",
+  "analyticsConsentTitle": "Ajuda’ns a millorar Ornitho2eBird",
+  "analyticsReassurance": "No es recullen les teves observacions ni el text dels comentaris. Totes les funcions estan disponibles sense aquestes galetes. Pots canviar la teva elecció a Privadesa i galetes."
 }

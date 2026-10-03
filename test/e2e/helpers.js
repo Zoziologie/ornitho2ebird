@@ -76,8 +76,9 @@ export async function stubNetwork(page, { ebirdTaxonomy = true } = {}) {
   return requested;
 }
 
-export async function openApp(page) {
+export async function openApp(page, { chooseConsent = true } = {}) {
   await page.goto("/?lang=en");
+  if (chooseConsent) await page.getByRole("button", { name: "No thanks" }).click();
   await expect(page.getByRole("heading", { level: 2, name: "Import" })).toBeVisible();
 }
 
