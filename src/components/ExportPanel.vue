@@ -744,12 +744,7 @@ async function downloadFile() {
             </p>
             <p>
               {{ t("finalStepsProcessingPrefix") }}
-              <a
-                href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#long-processing-time"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ t("finalStepsProcessingLink") }} </a
+              <a href="#help/processing">{{ t("finalStepsProcessingLink") }}</a
               >,
               {{ t("finalStepsProcessingMiddle") }}
             </p>

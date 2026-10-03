@@ -117,6 +117,8 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 6. Download the generated CSV.
 7. Upload it through the eBird import page and review the imported checklists carefully.
 
+User help, including an FAQ on pitfalls (duplicates, species to match, hotspots, processing time), is part of the app at [ornitho2ebird.com/#help](https://ornitho2ebird.com/#help); `#help/<id>` opens one section or question, and `?lang=de#help` picks the language. It replaces the GitHub wiki. The help text lives in [`src/components/HelpPage.vue`](src/components/HelpPage.vue) and the locale files, so it is translated and updated together with the app.
+
 ## Features worth knowing
 
 ### Basic mode

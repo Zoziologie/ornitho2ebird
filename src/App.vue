@@ -1,5 +1,13 @@
 <script setup>
-import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
@@ -24,7 +32,7 @@ import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
-const InfoPanel = defineAsyncComponent(() => import("./components/InfoPanel.vue"));
+const HelpPage = defineAsyncComponent(() => import("./components/HelpPage.vue"));
 const AdvancedPanel = defineAsyncComponent(() => import("./components/AdvancedPanel.vue"));
 const ExportPanel = defineAsyncComponent(() => import("./components/ExportPanel.vue"));
 
@@ -160,8 +168,6 @@ const sightings = ref([]);
 const forms = ref([]);
 const formsSightings = ref([]);
 const selectedFormId = ref(null);
-const infoOpen = ref(false);
-const infoSection = ref("");
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
@@ -169,7 +175,7 @@ const version = __APP_VERSION__;
 // One-off announcement of a change returning users should know about. Shown to users who have
 // used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
 // For a new announcement, change NEWS.id.
-const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
+const NEWS = { id: "2026-10-scientific-names", version: "0.3", until: "2027-03-31" };
 const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
 const showNews = ref(
   storedSettings !== null &&
@@ -333,9 +339,49 @@ watch(
   },
 );
 
-function openInfo(section = "") {
-  infoSection.value = section;
-  infoOpen.value = true;
+// The help page lives at #help, or #help/<section> to open one section or FAQ question, so it
+// can be linked to from anywhere (?lang=de#help for German). The app stays mounted underneath,
+// and the browser's back button returns to it.
+const HELP_HASH = /^#help(?:\/([\w-]+))?$/;
+
+function helpSectionFromHash() {
+  const match = window.location.hash.match(HELP_HASH);
+  return match ? match[1] || "" : null;
+}
+
+const helpSection = ref(helpSectionFromHash());
+let helpOpenedFromApp = false;
+let appScrollY = 0;
+
+function onHashChange() {
+  const wasOpen = helpSection.value !== null;
+  const section = helpSectionFromHash();
+  if (!wasOpen && section !== null) {
+    helpOpenedFromApp = true;
+    appScrollY = window.scrollY;
+  }
+  helpSection.value = section;
+  if (wasOpen && section === null) {
+    helpOpenedFromApp = false;
+    nextTick(() => window.scrollTo({ top: appScrollY, behavior: "instant" }));
+  }
+}
+
+window.addEventListener("hashchange", onHashChange);
+onBeforeUnmount(() => window.removeEventListener("hashchange", onHashChange));
+
+function openHelp(section = "") {
+  closeSettings();
+  window.location.hash = section ? `help/${section}` : "help";
+}
+
+function closeHelp() {
+  if (helpOpenedFromApp) {
+    window.history.back();
+    return;
+  }
+  window.history.pushState(null, "", window.location.pathname + window.location.search);
+  onHashChange();
 }
 
 function openSettings(section = "") {
@@ -361,7 +407,7 @@ function openSettingsForSection(section) {
     <AppHeader
       :ui-language="settings.uiLanguage"
       @update:ui-language="settings.uiLanguage = $event"
-      @open-info="openInfo()"
+      @open-info="openHelp()"
       @open-settings="openSettings()"
     />
 
@@ -370,36 +416,11 @@ function openSettingsForSection(section) {
       :settings="settings"
       :focus-section="settingsFocusSection"
       @close="closeSettings"
-      @open-info="openInfo($event)"
+      @open-info="openHelp($event)"
     />
-    <div
-      v-if="infoOpen"
-      class="modal-backdrop d-grid p-3 overflow-x-hidden"
-      @click.self="infoOpen = false"
-    >
-      <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
-        <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
-          <div class="d-flex flex-shrink-0 justify-content-between align-items-center mb-3">
-            <h2 class="modal-title-heading">
-              <i class="bi bi-journal-text" aria-hidden="true"></i>
-              <span>{{ $t("infoTitle") }}</span>
-            </h2>
-            <button
-              class="btn btn-outline-secondary btn-sm"
-              type="button"
-              @click="infoOpen = false"
-            >
-              {{ $t("close") }}
-            </button>
-          </div>
-          <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
-            <InfoPanel :focus-section="infoSection" />
-          </div>
-        </div>
-      </section>
-    </div>
+    <HelpPage v-if="helpSection !== null" :section="helpSection" @close="closeHelp" />
 
-    <main class="main-stack">
+    <main v-show="helpSection === null" class="main-stack">
       <div
         v-if="showNews"
         class="alert alert-info d-flex align-items-start gap-3 mb-0"
@@ -407,16 +428,9 @@ function openSettingsForSection(section) {
       >
         <i class="bi bi-stars fs-5" aria-hidden="true"></i>
         <div class="flex-grow-1">
-          <strong>{{
-            t("newsTitle", { version: version.split(".").slice(0, 2).join(".") })
-          }}</strong>
+          <strong>{{ t("newsTitle", { version: NEWS.version }) }}</strong>
           {{ t("newsBody") }}
-          <a
-            href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#issues-with-taxonomic-matching"
-            target="_blank"
-            rel="noopener"
-            >{{ t("newsLink") }}</a
-          >
+          <a href="#help/species-matching">{{ t("newsLink") }}</a>
         </div>
         <button
           class="btn-close flex-shrink-0"
@@ -446,7 +460,7 @@ function openSettingsForSection(section) {
         :assignment-map-base-layer="settings.assignmentMapBaseLayer"
         @update:selected-form-id="selectedFormId = $event"
         @update:assignment-map-base-layer="settings.assignmentMapBaseLayer = $event"
-        @open-info="openInfo('auto-assignment')"
+        @open-info="openHelp('auto-assignment')"
       />
 
       <ExportPanel

@@ -81,12 +81,7 @@ const supporters = [
         <span>GitHub</span>
       </a>
       <span aria-hidden="true">•</span>
-      <a
-        href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ"
-        target="_blank"
-        rel="noopener"
-        class="footer-brand text-decoration-none text-white"
-      >
+      <a href="#help/faq" class="footer-brand text-decoration-none text-white">
         <i class="bi bi-question-circle" aria-hidden="true"></i>
         <span>FAQ</span>
       </a>
