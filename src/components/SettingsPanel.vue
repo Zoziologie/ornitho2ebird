@@ -1,19 +1,16 @@
 <script setup>
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
   buildSpeciesCommentTemplateFromOptions,
 } from "../lib/constants";
+import { SETTINGS_INJECTION_KEY } from "../lib/settings";
 import { speciesComment } from "../lib/utils";
 
 const props = defineProps({
   open: {
     type: Boolean,
-    required: true,
-  },
-  settings: {
-    type: Object,
     required: true,
   },
   focusSection: {
@@ -23,6 +20,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "open-info"]);
+// The app's settings, edited in place (saved by App.vue).
+const settings = inject(SETTINGS_INJECTION_KEY);
 const { t } = useI18n();
 const staticMapStyleOptions = [
   { value: "satellite-v9", label: "Satellite" },
@@ -96,7 +95,7 @@ const repeatedPreviewSightings = Array.from({ length: 12 }, (_, index) => ({
 }));
 
 const shortPreviewSightings = computed(() => {
-  const limit = Math.max(1, Number(props.settings.speciesCommentTemplate.limit) || 5);
+  const limit = Math.max(1, Number(settings.speciesCommentTemplate.limit) || 5);
   return repeatedPreviewSightings.slice(
     0,
     Math.max(1, Math.min(limit - 1, repeatedPreviewSightings.length - 1)),
@@ -104,16 +103,16 @@ const shortPreviewSightings = computed(() => {
 });
 
 const longPreviewSightings = computed(() => {
-  const limit = Math.max(1, Number(props.settings.speciesCommentTemplate.limit) || 5);
+  const limit = Math.max(1, Number(settings.speciesCommentTemplate.limit) || 5);
   return repeatedPreviewSightings.slice(0, Math.min(limit + 1, repeatedPreviewSightings.length));
 });
 
 const speciesCommentPreview = computed(() => {
-  return speciesComment(props.settings.speciesCommentTemplate, shortPreviewSightings.value);
+  return speciesComment(settings.speciesCommentTemplate, shortPreviewSightings.value);
 });
 
 const speciesCommentLongPreview = computed(() => {
-  return speciesComment(props.settings.speciesCommentTemplate, longPreviewSightings.value);
+  return speciesComment(settings.speciesCommentTemplate, longPreviewSightings.value);
 });
 
 const propertyRows = Object.entries(previewSighting).map(([property, value]) => [
@@ -122,15 +121,15 @@ const propertyRows = Object.entries(previewSighting).map(([property, value]) => 
 ]);
 
 const hasPersonalizedTemplate = computed(() => {
-  return Boolean(props.settings.speciesCommentTemplateOptions?.personalized);
+  return Boolean(settings.speciesCommentTemplateOptions?.personalized);
 });
 
 const speciesCommentLinkWarningVisible = computed(() => {
-  if (!props.settings.customizedSpeciesComments || hasPersonalizedTemplate.value) {
+  if (!settings.customizedSpeciesComments || hasPersonalizedTemplate.value) {
     return false;
   }
 
-  const options = props.settings.speciesCommentTemplateOptions || {};
+  const options = settings.speciesCommentTemplateOptions || {};
   return !options.sourceLink && !(options.time && options.timeSourceLink);
 });
 
@@ -138,7 +137,7 @@ const advancedOptionsRef = ref(null);
 const speciesCommentRef = ref(null);
 
 const speciesCommentLimitError = computed(() => {
-  const limit = Number(props.settings.speciesCommentTemplate.limit);
+  const limit = Number(settings.speciesCommentTemplate.limit);
 
   if (!Number.isInteger(limit) || limit < 1) {
     return t("switchLimitError");
@@ -149,9 +148,9 @@ const speciesCommentLimitError = computed(() => {
 
 watch(
   () => ({
-    options: { ...props.settings.speciesCommentTemplateOptions },
-    longOptions: { ...props.settings.speciesCommentLongTemplateOptions },
-    limit: props.settings.speciesCommentTemplate.limit,
+    options: { ...settings.speciesCommentTemplateOptions },
+    longOptions: { ...settings.speciesCommentLongTemplateOptions },
+    limit: settings.speciesCommentTemplate.limit,
   }),
   (value) => {
     if (value.options.personalized) {
@@ -159,11 +158,11 @@ watch(
     }
 
     Object.assign(
-      props.settings.speciesCommentTemplate,
+      settings.speciesCommentTemplate,
       buildSpeciesCommentTemplateFromOptions(
-        props.settings.speciesCommentTemplateOptions,
-        props.settings.speciesCommentTemplate.limit,
-        props.settings.speciesCommentLongTemplateOptions,
+        settings.speciesCommentTemplateOptions,
+        settings.speciesCommentTemplate.limit,
+        settings.speciesCommentLongTemplateOptions,
       ),
     );
   },

@@ -236,11 +236,12 @@ npm run test:e2e
 - [`src/`](src) application source
 - [`src/components/`](src/components) import, settings, advanced review, and export UI
 - [`src/lib/`](src/lib) conversion logic and helpers
+- [`src/lib/store.js`](src/lib/store.js) the imported checklists and sightings; components read them and change them only through its actions
 - [`src/locales/`](src/locales) interface translations
 - [`data/`](data) source website metadata and species mapping files
 - [`docs/localization-workflow.md`](docs/localization-workflow.md) translation workflow
 - [`test/fixtures/`](test/fixtures) sample exports from each supported source
-- [`test/unit/`](test/unit) unit tests for parsing, comment templates, CSV export and locales
+- [`test/unit/`](test/unit) unit tests for parsing, comment templates, CSV export, settings, the store and locales
 - [`test/golden/`](test/golden) the expected eBird CSV for every fixture (`__snapshots__/`)
 - [`test/e2e/`](test/e2e) Playwright end-to-end tests of the import, Customized mode and download
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import L from "../lib/leaflet";
 import "leaflet/dist/leaflet.css";
@@ -25,9 +25,7 @@ import {
 } from "../lib/advancedPanel";
 import { alertDialog, confirmDialog } from "../lib/dialog";
 import {
-  applyDefaultAutomaticAssignment,
   buildChecklistPayloadFromSightings,
-  buildForm,
   buildSpeciesRows,
   distanceFromPath,
   haversineDistanceKm,
@@ -37,6 +35,7 @@ import {
 import { buildStaticMapUrl } from "../lib/staticMap";
 import { EBIRD_API_KEY, LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
 import { fetchJson } from "../lib/http";
+import { store } from "../lib/store";
 
 const props = defineProps({
   forms: { type: Array, required: true },
@@ -221,6 +220,33 @@ const staticMapPreview = computed(() => {
   });
 });
 
+// The checklist editor's fields. The form is read-only here: v-model writes through the store.
+const EDITABLE_FORM_FIELDS = [
+  "exportable",
+  "location_name",
+  "date",
+  "number_observer",
+  "time",
+  "duration",
+  "distance",
+  "primary_purpose",
+  "full_form",
+  "include_static_map",
+  "static_map_zoom_mode",
+  "static_map_zoom",
+];
+const selectedFormModel = reactive(
+  Object.fromEntries(
+    EDITABLE_FORM_FIELDS.map((key) => [
+      key,
+      computed({
+        get: () => selectedForm.value?.[key],
+        set: (value) => store.updateForm(selectedForm.value?.id, { [key]: value }),
+      }),
+    ]),
+  ),
+);
+
 function selectStyle() {
   return {
     borderColor: "var(--ebird-blue)",
@@ -251,7 +277,7 @@ function computeDateFromSightings() {
     return;
   }
 
-  selectedForm.value.date = earliestSighting()?.date || "";
+  store.updateForm(selectedForm.value.id, { date: earliestSighting()?.date || "" });
 }
 
 function computeTimeFromSightings() {
@@ -259,7 +285,7 @@ function computeTimeFromSightings() {
     return;
   }
 
-  selectedForm.value.time = earliestTimedSighting()?.time || "";
+  store.updateForm(selectedForm.value.id, { time: earliestTimedSighting()?.time || "" });
 }
 
 function computeDurationFromSightings() {
@@ -267,7 +293,7 @@ function computeDurationFromSightings() {
     return;
   }
 
-  selectedForm.value.duration = computedDuration.value || "";
+  store.updateForm(selectedForm.value.id, { duration: computedDuration.value || "" });
 }
 
 async function loadHotspotsForSelectedForm() {
@@ -288,8 +314,10 @@ async function loadHotspotsForSelectedForm() {
     const json = await fetchJson(
       `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=${EBIRD_API_KEY}`,
     );
-    form.hotspots = markRaw(Array.isArray(json) ? json : []);
-    form.hotspot_key = hotspotKey;
+    store.updateForm(form.id, {
+      hotspots: markRaw(Array.isArray(json) ? json : []),
+      hotspot_key: hotspotKey,
+    });
     if (selectedForm.value === form) {
       refreshReviewMap();
     }
@@ -338,8 +366,7 @@ async function updatePath(path) {
     return;
   }
 
-  form.path = markRaw(path);
-  form.distance = newDistance;
+  store.setFormPath(form.id, path);
   refreshReviewMap();
 }
 
@@ -442,18 +469,14 @@ function applyAssignmentSelection(bounds) {
   }
 
   if (isCreateMode) {
-    const newForm = createChecklistFromSightings(matchedSightings);
-    if (newForm) {
-      matchedSightings.forEach((sighting) => {
-        sighting.form_id = newForm.id;
-      });
+    const newFormId = createChecklistFromSightings(matchedSightings);
+    if (newFormId) {
+      store.assignSightings(matchedSightings, newFormId);
     }
     return;
   }
 
-  matchedSightings.forEach((sighting) => {
-    sighting.form_id = assignFormId.value;
-  });
+  store.assignSightings(matchedSightings, assignFormId.value);
 }
 
 function onAssignmentSelectionMouseDown(event) {
@@ -628,34 +651,20 @@ watch(
 
     const normalized = normalizeLocationName(value);
     if (normalized !== value) {
-      selectedForm.value.location_name = normalized;
+      store.updateForm(selectedForm.value.id, { location_name: normalized });
     }
   },
 );
 
+// Returns the id of the new checklist.
 function buildNewChecklist(payload) {
-  const nextId = Math.max(0, ...props.forms.map((form) => form.id)) + 1;
-  const speciesCommentTemplate = {
-    short: props.defaultSpeciesCommentTemplate?.short || "",
-    long: props.defaultSpeciesCommentTemplate?.long || "",
-    limit: Number(props.defaultSpeciesCommentTemplate?.limit) || 5,
-  };
-  const form = buildForm(
-    {
-      ...payload,
-      imported: false,
-      exportable: true,
-      species_comment_template: speciesCommentTemplate,
-      primary_purpose: false,
-      full_form: false,
-    },
-    nextId,
-    { defaultNumberObserver: props.defaultNumberObserver },
-  );
-  props.forms.push(form);
-  emit("update:selectedFormId", form.id);
-  assignFormId.value = form.id;
-  return form;
+  const formId = store.createForm(payload, {
+    defaultNumberObserver: props.defaultNumberObserver,
+    speciesCommentTemplate: props.defaultSpeciesCommentTemplate,
+  });
+  emit("update:selectedFormId", formId);
+  assignFormId.value = formId;
+  return formId;
 }
 
 function createChecklistFromSightings(targetSightings) {
@@ -667,15 +676,7 @@ function createChecklistFromSightings(targetSightings) {
 }
 
 function assignClean() {
-  const usedFormIds = new Set(
-    props.sightings.map((sighting) => sighting.form_id).filter((id) => id > 0),
-  );
-  for (let index = props.forms.length - 1; index >= 0; index -= 1) {
-    const form = props.forms[index];
-    if (!form.imported && !usedFormIds.has(form.id)) {
-      props.forms.splice(index, 1);
-    }
-  }
+  store.deleteUnusedForms();
 }
 
 async function deleteSelectedChecklist() {
@@ -684,12 +685,10 @@ async function deleteSelectedChecklist() {
     return;
   }
 
-  const formIndex = props.forms.findIndex((form) => form.id === formToDelete.id);
+  const formIndex = store.deleteForm(formToDelete.id);
   if (formIndex < 0) {
     return;
   }
-
-  props.forms.splice(formIndex, 1);
 
   if (!props.forms.length) {
     emit("update:selectedFormId", null);
@@ -705,16 +704,7 @@ async function assignReset() {
     return;
   }
 
-  props.sightings.forEach((sighting) => {
-    sighting.form_id = 0;
-  });
-
-  for (let index = props.forms.length - 1; index >= 0; index -= 1) {
-    if (!props.forms[index].imported) {
-      props.forms.splice(index, 1);
-    }
-  }
-
+  store.resetAssignment();
   assignFormId.value = 0;
   emit("update:selectedFormId", props.forms[0]?.id || null);
 }
@@ -740,9 +730,7 @@ async function assignMagic() {
     return;
   }
 
-  applyDefaultAutomaticAssignment({
-    forms: props.forms,
-    sightings: props.sightings,
+  store.autoAssign({
     autoAssignDuration: assignDuration.value,
     autoAssignDistance: assignDistance.value,
     defaultNumberObserver: props.defaultNumberObserver,
@@ -897,7 +885,7 @@ function assignmentClusterPopupContent(latlng) {
       select.appendChild(optionElement);
     });
     select.addEventListener("change", (event) => {
-      sighting.form_id = Number(event.target.value);
+      store.assignSightings([sighting], Number(event.target.value));
       refreshAssignmentMap();
       openAssignmentClusterPopup(latlng);
     });
@@ -1001,10 +989,13 @@ function hotspotPopupContent(hotspot) {
       return;
     }
 
-    selectedForm.value.location_name = hotspot.locName;
-    selectedForm.value.lat = hotspot.lat;
-    selectedForm.value.lon = hotspot.lng;
-    selectedForm.value.hotspot_key = "";
+    // The hotspot's own coordinates, not rounded like a dragged marker.
+    store.updateForm(selectedForm.value.id, {
+      location_name: hotspot.locName,
+      lat: hotspot.lat,
+      lon: hotspot.lng,
+      hotspot_key: "",
+    });
     reviewMap?.closePopup();
     loadHotspotsForSelectedForm();
     refreshReviewMap();
@@ -1051,8 +1042,7 @@ function refreshAssignmentMap({ refit = false } = {}) {
       });
       marker.on("dragend", (drawEvent) => {
         const latlng = drawEvent.target.getLatLng();
-        form.lat = latlng.lat;
-        form.lon = latlng.lng;
+        store.moveForm(form.id, latlng.lat, latlng.lng);
       });
       assignmentFormsLayer.addLayer(marker);
     });
@@ -1136,8 +1126,7 @@ function refreshReviewMap() {
   });
   checklistMarker.on("dragend", (drawEvent) => {
     const latlng = drawEvent.target.getLatLng();
-    selectedForm.value.lat = latlng.lat;
-    selectedForm.value.lon = latlng.lng;
+    store.moveForm(selectedForm.value.id, latlng.lat, latlng.lng);
   });
   reviewMarkerLayer.addLayer(checklistMarker);
 
@@ -1579,7 +1568,7 @@ onMounted(() => {
             <div class="form-check form-switch mt-2">
               <input
                 id="export-ready"
-                v-model="selectedForm.exportable"
+                v-model="selectedFormModel.exportable"
                 class="form-check-input"
                 type="checkbox"
                 :disabled="isInvalid"
@@ -1619,7 +1608,7 @@ onMounted(() => {
               <label class="form-label">{{ t("locationName") }}</label>
               <div class="input-group">
                 <input
-                  v-model="selectedForm.location_name"
+                  v-model="selectedFormModel.location_name"
                   class="form-control"
                   :class="requiredStateClass(selectedForm.location_name)"
                   type="text"
@@ -1654,7 +1643,7 @@ onMounted(() => {
               <label class="form-label">{{ t("date") }}</label>
               <div class="input-group">
                 <input
-                  v-model="selectedForm.date"
+                  v-model="selectedFormModel.date"
                   class="form-control"
                   :class="requiredStateClass(selectedForm.date)"
                   type="date"
@@ -1673,7 +1662,7 @@ onMounted(() => {
             <div class="col-lg-3 col-sm-6">
               <label class="form-label">{{ t("observers") }}</label>
               <input
-                v-model.number="selectedForm.number_observer"
+                v-model.number="selectedFormModel.number_observer"
                 class="form-control"
                 :class="requiredNumberStateClass(selectedForm.number_observer, 1, 100)"
                 type="number"
@@ -1686,7 +1675,7 @@ onMounted(() => {
               <label class="form-label">{{ t("time") }}</label>
               <div class="input-group">
                 <input
-                  v-model="selectedForm.time"
+                  v-model="selectedFormModel.time"
                   class="form-control"
                   :class="requiredTimeStateClass(selectedForm.time)"
                   type="time"
@@ -1707,7 +1696,7 @@ onMounted(() => {
               <label class="form-label">{{ t("durationMinutes") }}</label>
               <div class="input-group">
                 <input
-                  v-model.number="selectedForm.duration"
+                  v-model.number="selectedFormModel.duration"
                   class="form-control"
                   :class="requiredNumberStateClass(selectedForm.duration, 1, 1440)"
                   type="number"
@@ -1729,7 +1718,7 @@ onMounted(() => {
               <label class="form-label">{{ t("checklistDistance") }}</label>
               <div class="input-group">
                 <input
-                  v-model.number="selectedForm.distance"
+                  v-model.number="selectedFormModel.distance"
                   class="form-control"
                   :class="requiredNumberStateClass(selectedForm.distance, 0, 80)"
                   type="number"
@@ -1765,7 +1754,7 @@ onMounted(() => {
               <div class="form-check form-switch mb-0">
                 <input
                   id="primary-purpose"
-                  v-model="selectedForm.primary_purpose"
+                  v-model="selectedFormModel.primary_purpose"
                   class="form-check-input"
                   type="checkbox"
                 />
@@ -1776,7 +1765,7 @@ onMounted(() => {
               <div class="form-check form-switch mb-0">
                 <input
                   id="complete-checklist"
-                  v-model="selectedForm.full_form"
+                  v-model="selectedFormModel.full_form"
                   class="form-check-input"
                   type="checkbox"
                 />
@@ -1815,7 +1804,7 @@ onMounted(() => {
                   <div class="form-check form-switch mb-3">
                     <input
                       id="include-static-map"
-                      v-model="selectedForm.include_static_map"
+                      v-model="selectedFormModel.include_static_map"
                       class="form-check-input"
                       type="checkbox"
                     />
@@ -1856,7 +1845,7 @@ onMounted(() => {
                     <div class="static-map-preview-control">
                       <label class="form-label mb-1">{{ t("staticMapZoomMode") }}</label>
                       <select
-                        v-model="selectedForm.static_map_zoom_mode"
+                        v-model="selectedFormModel.static_map_zoom_mode"
                         class="form-select form-select-sm"
                       >
                         <option value="auto">{{ t("staticMapZoomModeAuto") }}</option>
@@ -1870,7 +1859,7 @@ onMounted(() => {
                     >
                       <label class="form-label mb-1">{{ t("staticMapZoom") }}</label>
                       <input
-                        v-model.number="selectedForm.static_map_zoom"
+                        v-model.number="selectedFormModel.static_map_zoom"
                         class="form-control form-control-sm"
                         type="number"
                         min="0"

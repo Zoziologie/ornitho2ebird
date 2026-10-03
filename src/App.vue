@@ -1,5 +1,14 @@
 <script setup>
-import { computed, defineAsyncComponent, onBeforeUnmount, reactive, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  provide,
+  reactive,
+  ref,
+  toRefs,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
@@ -12,6 +21,7 @@ import {
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
 import {
+  SETTINGS_INJECTION_KEY,
   defaultWebsiteForLanguage,
   loadSettings,
   normalizeSpeciesCommentTemplate,
@@ -19,6 +29,7 @@ import {
 } from "./lib/settings";
 import { setI18nLanguage } from "./i18n";
 import { assembleImport } from "./lib/utils";
+import { store } from "./lib/store";
 import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
 
@@ -44,11 +55,10 @@ function sameSpeciesCommentTemplate(left, right) {
 
 const { settings: loadedSettings, isReturningUser } = loadSettings();
 const settings = reactive(loadedSettings);
+provide(SETTINGS_INJECTION_KEY, settings);
 
 const website = ref(null);
-const sightings = ref([]);
-const forms = ref([]);
-const formsSightings = ref([]);
+const { forms, sightings, formsSightings } = toRefs(store.state);
 const selectedFormId = ref(null);
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
@@ -141,9 +151,7 @@ const hasImportedData = computed(() => {
 
 function clearImportedData() {
   website.value = null;
-  sightings.value = [];
-  forms.value = [];
-  formsSightings.value = [];
+  store.clear();
   selectedFormId.value = null;
 }
 
@@ -179,9 +187,7 @@ function importData(payload) {
   });
 
   website.value = nextWebsite;
-  sightings.value = assembled.sightings;
-  forms.value = assembled.forms;
-  formsSightings.value = assembled.formsSightings;
+  store.loadImport(assembled);
   selectedFormId.value = forms.value[0]?.id || null;
 }
 
@@ -212,13 +218,7 @@ async function updateSelectedWebsiteName(nextWebsiteName) {
 
 watch(
   () => settings.defaultNumberObserver,
-  (value) => {
-    forms.value.forEach((form) => {
-      if (!form.number_observer) {
-        form.number_observer = value;
-      }
-    });
-  },
+  (value) => store.fillNumberObserver(value),
 );
 
 const infoOpen = ref(false);
@@ -280,7 +280,6 @@ function openSettingsForSection(section) {
 
     <SettingsPanel
       :open="settingsOpen"
-      :settings="settings"
       :focus-section="settingsFocusSection"
       @close="closeSettings"
       @open-info="openInfo($event)"

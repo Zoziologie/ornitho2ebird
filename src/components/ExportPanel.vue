@@ -9,6 +9,7 @@ import {
   rowsToCsv,
 } from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
+import { store } from "../lib/store";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
 import {
   MANUAL_MATCH_TAXA,
@@ -396,7 +397,7 @@ async function publishInteractiveMapsForExport() {
         token,
       });
 
-      form.interactive_map_url = result.rawUrl;
+      store.updateForm(form.id, { interactive_map_url: result.rawUrl });
       interactiveMapStatusByFormId.value = {
         ...interactiveMapStatusByFormId.value,
         [form.id]: "ready",

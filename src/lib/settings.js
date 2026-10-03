@@ -14,6 +14,10 @@ import { normalizeLanguage, resolveUiLanguage } from "../i18n";
 
 export const SETTINGS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:settings`;
 
+// App.vue provides its reactive settings under this key to SettingsPanel, which edits them in
+// place.
+export const SETTINGS_INJECTION_KEY = Symbol("settings");
+
 // Bump when the stored shape changes, and add the step that upgrades the previous version to
 // MIGRATIONS.
 export const SETTINGS_VERSION = 1;
