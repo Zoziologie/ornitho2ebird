@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { Marker, Popup } from "maplibre-gl";
-import hotspotMarkerUrl from "../assets/map-marker-hotspot.png";
+import hotspotMarkerUrl from "../assets/map-marker-hotspot.svg";
 import {
   CHECKLIST_COLORS,
   UNASSIGNED_COLOR,
@@ -10,15 +10,19 @@ import {
   checklistMarkerHtml,
   escapeHtml,
   formatSightingPopup,
+  sightingListPopupContent,
 } from "../lib/advancedPanel";
 import {
+  createHoverLabel,
   createMap,
+  drawCountImages,
   emptyFeatureCollection,
   fitToPoints,
   isTypingTarget,
+  panToPopup,
   pointFeature,
 } from "../lib/maps";
-import { distanceFromPath, mathRound } from "../lib/utils";
+import { distanceFromPath, groupByLocation, mathRound } from "../lib/utils";
 
 const props = defineProps({
   // The selected checklist and its observations.
@@ -31,6 +35,8 @@ const emit = defineEmits(["update:baseLayer", "move-form", "path", "use-hotspot"
 const { t } = useI18n();
 
 const PATH_COLOR = "#8b5e3c";
+// Observations closer than this share one dot, as on the assignment map.
+const SAME_LOCATION_METERS = 5;
 
 const shell = ref(null);
 const container = ref(null);
@@ -41,36 +47,37 @@ let mapReady = false;
 // the marker or loading hotspots keeps the user's zoom.
 let fittedFormId = null;
 let markers = [];
+let groups = [];
+let hoverLabel = null;
 
 const drawing = ref(false);
 const drawPoints = ref([]);
 const drawDistance = computed(() => distanceFromPath(drawPoints.value));
 
 const color = (formId) => checklistColor(formId, CHECKLIST_COLORS, UNASSIGNED_COLOR);
+// The count is written in the group's colour on white; yellow is too light for that.
+const countColor = (groupColor) => (groupColor === "#ffff33" ? "#9a8700" : groupColor);
 
 function hotspotPopupContent(hotspot, popup) {
   const content = document.createElement("div");
   content.className = "map-popup";
-
-  const title = document.createElement("a");
-  title.href = `https://ebird.org/hotspot/${hotspot.locId}`;
-  title.target = "_blank";
-  title.rel = "noopener";
-  title.className = "fw-semibold d-inline-block mb-2";
-  title.textContent = hotspot.locName;
-  content.appendChild(title);
-
-  const species = document.createElement("div");
-  species.innerHTML = `<strong>${t("hotspotSpeciesCount")}:</strong> ${escapeHtml(hotspot.numSpeciesAllTime ?? "—")}`;
-  content.appendChild(species);
-
-  const latest = document.createElement("div");
-  latest.innerHTML = `<strong>${t("hotspotLatestChecklist")}:</strong> ${escapeHtml(hotspot.latestObsDt ?? "—")}`;
-  content.appendChild(latest);
+  content.innerHTML = `
+    <a class="map-popup-heading map-popup-heading-link" href="https://ebird.org/hotspot/${encodeURIComponent(hotspot.locId)}" target="_blank" rel="noopener">${escapeHtml(hotspot.locName)} <i class="bi bi-box-arrow-up-right small" aria-hidden="true"></i></a>
+    <div class="map-popup-stack">
+      <div class="map-popup-data-row">
+        <span class="map-popup-data-label">${escapeHtml(t("hotspotSpeciesCount"))}</span>
+        <span class="map-popup-data-value">${escapeHtml(hotspot.numSpeciesAllTime ?? "—")}</span>
+      </div>
+      <div class="map-popup-data-row">
+        <span class="map-popup-data-label">${escapeHtml(t("hotspotLatestChecklist"))}</span>
+        <span class="map-popup-data-value">${escapeHtml(hotspot.latestObsDt ?? "—")}</span>
+      </div>
+    </div>
+  `;
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "btn btn-primary btn-sm mt-2";
+  button.className = "btn btn-primary btn-sm w-100 mt-3";
   button.textContent = t("useHotspotLocation");
   button.addEventListener("click", () => {
     popup.remove();
@@ -98,6 +105,7 @@ function refresh() {
   }
 
   const form = props.form;
+  hoverLabel.hide();
   markers.forEach((marker) => marker.remove());
   markers = [];
   if (!form) {
@@ -106,11 +114,19 @@ function refresh() {
     return;
   }
 
+  groups = groupByLocation(props.sightings, SAME_LOCATION_METERS);
   map.getSource("sightings").setData({
     type: "FeatureCollection",
-    features: props.sightings.map((sighting, index) =>
-      pointFeature(sighting.lat, sighting.lon, { index, color: color(sighting.form_id) }),
-    ),
+    features: groups.map((group, index) => {
+      const count = group.items.length;
+      const groupColor = color(group.items[0].form_id);
+      return pointFeature(group.lat, group.lon, {
+        index,
+        count,
+        color: groupColor,
+        label: count > 1 ? `count:${countColor(groupColor)}:${count > 99 ? "99+" : count}` : "",
+      });
+    }),
   });
 
   map.getSource("path").setData({
@@ -124,7 +140,13 @@ function refresh() {
   const checklistMarker = new Marker({ element: checklistElement, draggable: true })
     .setLngLat([Number(form.lon), Number(form.lat)])
     .addTo(map);
+  showLabelOnHover(checklistElement, checklistMarker, `${form.id}. ${form.location_name || ""}`);
+  checklistMarker.on("dragstart", () => {
+    hoverLabel.hide();
+    checklistElement.classList.add("is-dragging");
+  });
   checklistMarker.on("dragend", () => {
+    checklistElement.classList.remove("is-dragging");
     const { lat, lng } = checklistMarker.getLngLat();
     emit("move-form", form.id, lat, lng);
   });
@@ -134,14 +156,18 @@ function refresh() {
     const element = document.createElement("div");
     element.className = "hotspot-marker-icon";
     element.innerHTML = `<img src="${hotspotMarkerUrl}" alt="" />`;
-    const popup = new Popup({ maxWidth: "420px", focusAfterOpen: false, offset: 26 });
+    const popup = new Popup({ maxWidth: "320px", focusAfterOpen: false, offset: 30 });
     popup.setDOMContent(hotspotPopupContent(hotspot, popup));
-    markers.push(
-      new Marker({ element, anchor: "bottom" })
-        .setLngLat([Number(hotspot.lng), Number(hotspot.lat)])
-        .setPopup(popup)
-        .addTo(map),
-    );
+    popup.on("open", () => {
+      hoverLabel.hide();
+      panToPopup(map, popup);
+    });
+    const marker = new Marker({ element, anchor: "bottom" })
+      .setLngLat([Number(hotspot.lng), Number(hotspot.lat)])
+      .setPopup(popup)
+      .addTo(map);
+    showLabelOnHover(element, marker, hotspot.locName, 30);
+    markers.push(marker);
   });
 
   if (fittedFormId !== form.id) {
@@ -158,18 +184,58 @@ function refresh() {
   }
 }
 
-function onSightingsClick(event) {
-  if (drawing.value) {
+// `offset`: how far above its point the marker reaches.
+function showLabelOnHover(element, marker, text, offset = 14) {
+  element.addEventListener("mouseenter", () => {
+    if (!drawing.value && !element.classList.contains("is-dragging")) {
+      hoverLabel.show(marker.getLngLat(), text, offset);
+    }
+  });
+  element.addEventListener("mouseleave", () => hoverLabel.hide());
+}
+
+function onSightingsHover(event) {
+  const group = groups[event.features[0]?.properties.index];
+  if (!group || drawing.value) {
+    hoverLabel.hide();
     return;
   }
 
-  const sighting = props.sightings[event.features[0]?.properties.index];
-  if (sighting) {
-    new Popup({ maxWidth: "420px", focusAfterOpen: false })
-      .setLngLat([Number(sighting.lon), Number(sighting.lat)])
-      .setHTML(formatSightingPopup(sighting, t))
-      .addTo(map);
+  const [sighting] = group.items;
+  hoverLabel.show(
+    [group.lon, group.lat],
+    group.items.length > 1
+      ? t("observationsAtLocation", { count: group.items.length })
+      : [sighting.common_name || sighting.scientific_name, sighting.time]
+          .filter(Boolean)
+          .join(" · "),
+  );
+}
+
+function onSightingsClick(event) {
+  const group = groups[event.features[0]?.properties.index];
+  if (!group || drawing.value) {
+    return;
   }
+
+  hoverLabel.hide();
+  const popup = new Popup({ maxWidth: "420px", focusAfterOpen: false }).setLngLat([
+    group.lon,
+    group.lat,
+  ]);
+  if (group.items.length === 1) {
+    popup.setHTML(formatSightingPopup(group.items[0], t));
+  } else {
+    popup.setDOMContent(
+      sightingListPopupContent(
+        group.items,
+        t("observationsAtLocation", { count: group.items.length }),
+        t,
+      ),
+    );
+  }
+  popup.addTo(map);
+  panToPopup(map, popup);
 }
 
 function focus() {
@@ -280,7 +346,10 @@ function initialize() {
   map = created.map;
   mapControls = created;
 
-  map.on("load", () => {
+  hoverLabel = createHoverLabel(map);
+  drawCountImages(map);
+  // Again after each basemap change, which replaces the style.
+  map.on("style.load", () => {
     map.addSource("path", { type: "geojson", data: emptyFeatureCollection() });
     map.addSource("sightings", { type: "geojson", data: emptyFeatureCollection() });
     map.addSource("drawing", { type: "geojson", data: emptyFeatureCollection() });
@@ -296,11 +365,22 @@ function initialize() {
       type: "circle",
       source: "sightings",
       paint: {
-        "circle-radius": 8,
-        "circle-color": ["get", "color"],
-        "circle-opacity": 0.85,
-        "circle-stroke-color": ["get", "color"],
-        "circle-stroke-width": 1,
+        // A single observation is a dot, a group a ring around its count.
+        "circle-radius": ["case", [">", ["get", "count"], 1], 9, 6],
+        "circle-color": ["case", [">", ["get", "count"], 1], "#ffffff", ["get", "color"]],
+        "circle-stroke-color": ["case", [">", ["get", "count"], 1], ["get", "color"], "#ffffff"],
+        "circle-stroke-width": ["case", [">", ["get", "count"], 1], 2.5, 1.5],
+      },
+    });
+    map.addLayer({
+      id: "sighting-counts",
+      type: "symbol",
+      source: "sightings",
+      filter: ["!=", ["get", "label"], ""],
+      layout: {
+        "icon-image": ["get", "label"],
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
       },
     });
     map.addLayer({
@@ -325,6 +405,7 @@ function initialize() {
     });
     mapReady = true;
     refresh();
+    showDrawing(null);
   });
 
   map.on("click", "sightings", onSightingsClick);
@@ -333,8 +414,10 @@ function initialize() {
       map.getCanvas().style.cursor = "pointer";
     }
   });
+  map.on("mousemove", "sightings", onSightingsHover);
   map.on("mouseleave", "sightings", () => {
     map.getCanvas().style.cursor = "";
+    hoverLabel.hide();
   });
   map.on("click", onMapClick);
   map.on("dblclick", onMapDoubleClick);

@@ -8,13 +8,16 @@ import {
   checklistColor,
   checklistMarkerHtml,
   formatSightingPopup,
+  sightingListPopupContent,
 } from "../lib/advancedPanel";
 import {
   createMap,
   emptyFeatureCollection,
   fitToPoints,
+  createHoverLabel,
+  drawCountImages,
   isTypingTarget,
-  plusImage,
+  panToPopup,
   pointFeature,
 } from "../lib/maps";
 import { groupByLocation, haversineDistanceKm } from "../lib/utils";
@@ -23,6 +26,8 @@ const props = defineProps({
   sightings: { type: Array, required: true },
   forms: { type: Array, required: true },
   baseLayer: { type: String, default: "OpenStreetMap" },
+  // The checklist chosen in the assignment tools, highlighted on the map.
+  selectedFormId: { type: Number, default: 0 },
   // The choices in the select of each observation in a group: { value, label }.
   assignOptions: { type: Array, required: true },
 });
@@ -42,29 +47,34 @@ let hasInitialView = false;
 let groups = [];
 let checklistMarkers = [];
 let popup = null;
+let hoverLabel = null;
 
-let selecting = false;
+const selecting = ref(false);
 let selectionStart = null;
 let selectionBox = null;
 
 const color = (formId) => checklistColor(formId, CHECKLIST_COLORS, UNASSIGNED_COLOR);
-const textColorOn = (background) => (background === "#ffff33" ? "#223846" : "#ffffff");
+// The count is written in the group's colour on white; yellow is too light for that.
+const countColor = (groupColor) => (groupColor === "#ffff33" ? "#9a8700" : groupColor);
 
 function refresh({ refit = false } = {}) {
   if (!map || !mapReady) {
     return;
   }
 
+  hoverLabel.hide();
   groups = groupByLocation(props.sightings, SAME_LOCATION_METERS);
   map.getSource("sightings").setData({
     type: "FeatureCollection",
     features: groups.map((group, index) => {
       const formIds = [...new Set(group.items.map((sighting) => Number(sighting.form_id)))];
       const groupColor = formIds.length === 1 ? color(formIds[0]) : MIXED_GROUP_COLOR;
+      const count = group.items.length;
       return pointFeature(group.lat, group.lon, {
         index,
+        count,
         color: groupColor,
-        plus: group.items.length > 1 ? `plus-${textColorOn(groupColor)}` : "",
+        label: count > 1 ? `count:${countColor(groupColor)}:${count > 99 ? "99+" : count}` : "",
       });
     }),
   });
@@ -75,16 +85,27 @@ function refresh({ refit = false } = {}) {
     .map((form) => {
       const element = document.createElement("div");
       element.className = "assignment-checklist-icon";
+      element.classList.toggle("is-selected", form.id === props.selectedFormId);
       element.innerHTML = checklistMarkerHtml(form.id, CHECKLIST_COLORS, UNASSIGNED_COLOR);
       const marker = new Marker({ element, draggable: true })
         .setLngLat([Number(form.lon), Number(form.lat)])
         .addTo(map);
+      const name = `${form.id}. ${form.location_name || ""}`;
+      element.addEventListener("mouseenter", () => {
+        if (!element.classList.contains("is-dragging")) {
+          hoverLabel.show(marker.getLngLat(), name);
+        }
+      });
+      element.addEventListener("mouseleave", () => hoverLabel.hide());
       // A drag ends with a click on the marker: don't select the checklist then.
       let dragged = false;
       marker.on("dragstart", () => {
         dragged = true;
+        hoverLabel.hide();
+        element.classList.add("is-dragging");
       });
       marker.on("dragend", () => {
+        element.classList.remove("is-dragging");
         const { lat, lng } = marker.getLngLat();
         emit("move-form", form.id, lat, lng);
       });
@@ -125,110 +146,45 @@ function sightingsNear(lat, lon) {
 
 // The observations of one place, each with a select to move it to another checklist.
 function groupPopupContent(lat, lon) {
-  const sameLocationSightings = sightingsNear(lat, lon);
-  const content = document.createElement("div");
-  content.className = "map-popup map-popup-cluster";
-
-  const title = document.createElement("div");
-  title.className = "map-popup-heading";
-  title.textContent = t("assignmentClusterTitle", { count: sameLocationSightings.length });
-  content.appendChild(title);
-
-  const list = document.createElement("div");
-  list.className = "map-popup-stack";
-
-  sameLocationSightings.forEach((sighting) => {
-    const row = document.createElement("div");
-    row.className = "map-popup-card";
-
-    const details = document.createElement("div");
-    details.className = "map-popup-card-body";
-
-    const species = document.createElement("div");
-    species.className = "map-popup-card-title";
-    if (sighting.common_name || sighting.scientific_name) {
-      if (sighting.common_name) {
-        species.appendChild(document.createTextNode(sighting.common_name));
-      }
-      if (sighting.scientific_name) {
-        if (sighting.common_name) {
-          species.appendChild(document.createTextNode(" "));
-        }
-        const scientificName = document.createElement("span");
-        scientificName.className = "map-popup-species-scientific";
-        scientificName.textContent = sighting.scientific_name;
-        species.appendChild(scientificName);
-      }
-    } else {
-      species.textContent = t("records");
-    }
-    details.appendChild(species);
-
-    const meta = document.createElement("div");
-    meta.className = "map-popup-compact-meta";
-
-    const datetimeValue = document.createElement("span");
-    datetimeValue.className = "map-popup-compact-item";
-    datetimeValue.textContent = [sighting.date, sighting.time].filter(Boolean).join(" ") || "—";
-    meta.appendChild(datetimeValue);
-
-    const countValue = document.createElement("span");
-    countValue.className = "map-popup-compact-item";
-    const countParts = [sighting.count_precision, sighting.count].filter(
-      (value) => value !== null && value !== "",
-    );
-    countValue.textContent = countParts.length ? countParts.join("") : "—";
-    meta.appendChild(countValue);
-
-    const permalinkValue = document.createElement("span");
-    permalinkValue.className = "map-popup-compact-item";
-    if (sighting.permalink) {
-      const permalink = document.createElement("a");
-      permalink.href = sighting.permalink;
-      permalink.target = "_blank";
-      permalink.rel = "noopener";
-      permalink.textContent = String(sighting.id ?? "—");
-      permalinkValue.appendChild(permalink);
-    } else {
-      permalinkValue.textContent = String(sighting.id ?? "—");
-    }
-    meta.appendChild(permalinkValue);
-
-    details.appendChild(meta);
-
-    const select = document.createElement("select");
-    select.className = "form-select form-select-sm map-popup-select";
-    props.assignOptions.forEach((option) => {
-      const optionElement = document.createElement("option");
-      optionElement.value = String(option.value);
-      optionElement.textContent = option.label;
-      optionElement.selected = Number(option.value) === Number(sighting.form_id);
-      select.appendChild(optionElement);
-    });
-    select.addEventListener("change", (event) => {
-      emit("assign", [sighting], Number(event.target.value));
+  const sightings = sightingsNear(lat, lon);
+  const title = t("assignmentClusterTitle", { count: sightings.length });
+  return sightingListPopupContent(sightings, title, t, {
+    options: props.assignOptions,
+    onChange: (sighting, formId) => {
+      emit("assign", [sighting], formId);
       // The store has changed: show the new checklist of each observation.
       popup?.setDOMContent(groupPopupContent(lat, lon));
-    });
-    details.appendChild(select);
-
-    row.appendChild(details);
-    list.appendChild(row);
+    },
   });
-
-  content.appendChild(list);
-  return content;
 }
 
 function openPopup(lngLat, setContent) {
   popup?.remove();
-  popup = setContent(
-    new Popup({ maxWidth: "420px", focusAfterOpen: false }).setLngLat(lngLat),
-  ).addTo(map);
+  popup = setContent(new Popup({ maxWidth: "420px", focusAfterOpen: false }).setLngLat(lngLat));
+  popup.addTo(map);
+  panToPopup(map, popup);
+}
+
+function onSightingsHover(event) {
+  const group = groups[event.features[0]?.properties.index];
+  if (!group || selecting.value) {
+    hoverLabel.hide();
+    return;
+  }
+
+  const [sighting] = group.items;
+  hoverLabel.show(
+    [group.lon, group.lat],
+    group.items.length > 1
+      ? t("assignmentClusterTitle", { count: group.items.length })
+      : [sighting.common_name || sighting.scientific_name, sighting.date, sighting.time]
+          .filter(Boolean)
+          .join(" · "),
+  );
 }
 
 function onSightingsClick(event) {
-  if (selecting) {
+  if (selecting.value) {
     return;
   }
 
@@ -237,6 +193,7 @@ function onSightingsClick(event) {
     return;
   }
 
+  hoverLabel.hide();
   if (group.items.length === 1) {
     openPopup([group.lon, group.lat], (newPopup) =>
       newPopup.setHTML(formatSightingPopup(group.items[0], t)),
@@ -257,7 +214,7 @@ function startSelection() {
 
   stopSelection();
   popup?.remove();
-  selecting = true;
+  selecting.value = true;
   map.dragPan.disable();
   map.doubleClickZoom.disable();
   container.value.classList.add("map-picking");
@@ -265,11 +222,11 @@ function startSelection() {
 }
 
 function stopSelection() {
-  if (!selecting) {
+  if (!selecting.value) {
     return;
   }
 
-  selecting = false;
+  selecting.value = false;
   selectionStart = null;
   selectionBox?.remove();
   selectionBox = null;
@@ -286,7 +243,7 @@ function onSelectionKeydown(event) {
 }
 
 function onMouseDown(event) {
-  if (!selecting || event.originalEvent.button !== 0) {
+  if (!selecting.value || event.originalEvent.button !== 0) {
     return;
   }
 
@@ -298,7 +255,7 @@ function onMouseDown(event) {
 }
 
 function onMouseMove(event) {
-  if (!selecting || !selectionStart) {
+  if (!selecting.value || !selectionStart) {
     return;
   }
 
@@ -311,7 +268,7 @@ function onMouseMove(event) {
 }
 
 function onMouseUp(event) {
-  if (!selecting || !selectionStart) {
+  if (!selecting.value || !selectionStart) {
     return;
   }
 
@@ -343,44 +300,48 @@ function initialize() {
   map = created.map;
   mapControls = created;
 
-  map.on("load", () => {
-    map.addImage("plus-#ffffff", plusImage("#ffffff"), { pixelRatio: 2 });
-    map.addImage("plus-#223846", plusImage("#223846"), { pixelRatio: 2 });
+  hoverLabel = createHoverLabel(map);
+  drawCountImages(map);
+  // Again after each basemap change, which replaces the style.
+  map.on("style.load", () => {
     map.addSource("sightings", { type: "geojson", data: emptyFeatureCollection() });
     map.addLayer({
       id: "sightings",
       type: "circle",
       source: "sightings",
       paint: {
-        "circle-radius": 7,
-        "circle-color": ["get", "color"],
-        "circle-stroke-color": "rgba(0, 0, 0, 0.35)",
-        "circle-stroke-width": 1,
+        // A single observation is a dot, a group a ring around its count.
+        "circle-radius": ["case", [">", ["get", "count"], 1], 9, 6],
+        "circle-color": ["case", [">", ["get", "count"], 1], "#ffffff", ["get", "color"]],
+        "circle-stroke-color": ["case", [">", ["get", "count"], 1], ["get", "color"], "#ffffff"],
+        "circle-stroke-width": ["case", [">", ["get", "count"], 1], 2.5, 1.5],
       },
     });
     map.addLayer({
-      id: "sighting-groups",
+      id: "sighting-counts",
       type: "symbol",
       source: "sightings",
-      filter: ["!=", ["get", "plus"], ""],
+      filter: ["!=", ["get", "label"], ""],
       layout: {
-        "icon-image": ["get", "plus"],
+        "icon-image": ["get", "label"],
         "icon-allow-overlap": true,
         "icon-ignore-placement": true,
       },
     });
     mapReady = true;
-    refresh({ refit: true });
+    refresh();
   });
 
   map.on("click", "sightings", onSightingsClick);
   map.on("mouseenter", "sightings", () => {
-    if (!selecting) {
+    if (!selecting.value) {
       map.getCanvas().style.cursor = "pointer";
     }
   });
+  map.on("mousemove", "sightings", onSightingsHover);
   map.on("mouseleave", "sightings", () => {
     map.getCanvas().style.cursor = "";
+    hoverLabel.hide();
   });
   map.on("mousedown", onMouseDown);
   map.on("mousemove", onMouseMove);
@@ -391,7 +352,8 @@ function initialize() {
 watch(
   () => [
     props.sightings.map((sighting) => [sighting.id, sighting.form_id, sighting.lat, sighting.lon]),
-    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon]),
+    props.forms.map((form) => [form.id, form.imported, form.lat, form.lon, form.location_name]),
+    props.selectedFormId,
   ],
   () => refresh(),
 );
@@ -413,5 +375,7 @@ defineExpose({ startSelection, stopSelection });
 </script>
 
 <template>
-  <div ref="container"></div>
+  <div ref="container">
+    <div v-if="selecting" class="map-hint" role="status">{{ t("assignSelectionHint") }}</div>
+  </div>
 </template>

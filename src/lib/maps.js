@@ -1,4 +1,4 @@
-import { LngLatBounds, Map, NavigationControl, setWorkerUrl } from "maplibre-gl";
+import { LngLatBounds, Map, NavigationControl, Popup, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 // MapLibre 6 looks for its worker next to its own module, which the bundler moves. `?worker&url`
 // makes Vite bundle the worker with the code it imports and give its URL (plain `?url` breaks the
@@ -53,39 +53,21 @@ export function baseLayerName(name) {
   return ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(name) ? name : "OpenStreetMap";
 }
 
-const baseLayerId = (name) => `base-${ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.indexOf(name)}`;
-
-// Every basemap is in the style, and only the chosen one is visible: switching never reloads the
-// style, so our own sources and layers stay. A hidden layer loads no tiles.
-function baseStyle(selectedName) {
-  const style = { version: 8, sources: {}, layers: [] };
-  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.forEach((name) => {
-    const id = baseLayerId(name);
-    const { retina, ...source } = BASE_LAYERS[name];
-    const tileSize = retina && window.devicePixelRatio > 1 ? 128 : 256;
-    style.sources[id] = { type: "raster", tileSize, ...source };
-    style.layers.push({
-      id,
-      type: "raster",
-      source: id,
-      layout: { visibility: name === selectedName ? "visible" : "none" },
-    });
-  });
-  return style;
+function rasterStyle(name) {
+  const { retina, ...source } = BASE_LAYERS[name];
+  const tileSize = retina && window.devicePixelRatio > 1 ? 128 : 256;
+  return {
+    version: 8,
+    sources: { basemap: { type: "raster", tileSize, ...source } },
+    layers: [{ id: "basemap", type: "raster", source: "basemap" }],
+  };
 }
 
-export function setBaseLayer(map, name) {
-  const selectedName = baseLayerName(name);
-  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.forEach((option) => {
-    map.setLayoutProperty(
-      baseLayerId(option),
-      "visibility",
-      option === selectedName ? "visible" : "none",
-    );
-  });
+function styleFor(name) {
+  return rasterStyle(baseLayerName(name));
 }
 
-// A select in the map's corner, under the zoom buttons.
+// The basemap select, styled like the zoom buttons above it.
 class BaseLayerControl {
   constructor({ name, label, onChange }) {
     this.name = name;
@@ -94,12 +76,12 @@ class BaseLayerControl {
   }
 
   onAdd() {
-    this.container = document.createElement("div");
-    this.container.className = "maplibregl-ctrl map-base-layer-control";
+    this.container = document.createElement("label");
+    this.container.className = "maplibregl-ctrl maplibregl-ctrl-group map-base-layer-control";
+    this.container.title = this.label;
+    this.container.innerHTML = '<i class="bi bi-layers" aria-hidden="true"></i>';
     this.select = document.createElement("select");
-    this.select.className = "form-select form-select-sm";
     this.select.setAttribute("aria-label", this.label);
-    this.select.title = this.label;
     ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.forEach((name) => {
       const option = document.createElement("option");
       option.value = name;
@@ -129,7 +111,7 @@ export function createMap(container, { baseLayer, baseLayerLabel, onBaseLayerCha
   const selectedName = baseLayerName(baseLayer);
   const map = new Map({
     container,
-    style: baseStyle(selectedName),
+    style: styleFor(selectedName),
     center: [0, 20],
     zoom: 1,
     maxZoom: 19,
@@ -148,11 +130,17 @@ export function createMap(container, { baseLayer, baseLayerLabel, onBaseLayerCha
   });
   map.addControl(baseLayerControl, "top-left");
 
+  let shownName = selectedName;
   return {
     map,
+    // Replaces the whole style: the maps add their own sources and layers again on "style.load".
     setBaseLayer(name) {
-      baseLayerControl.setValue(baseLayerName(name));
-      setBaseLayer(map, name);
+      const nextName = baseLayerName(name);
+      baseLayerControl.setValue(nextName);
+      if (nextName !== shownName) {
+        shownName = nextName;
+        map.setStyle(styleFor(nextName), { diff: false });
+      }
     },
   };
 }
@@ -178,22 +166,77 @@ export function pointFeature(lat, lon, properties = {}) {
   };
 }
 
-// A "+" drawn on a transparent square, for the groups of observations at one place.
-export function plusImage(color) {
-  const size = 28;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const context = canvas.getContext("2d");
-  context.strokeStyle = color;
-  context.lineWidth = 3;
-  context.beginPath();
-  context.moveTo(size / 2, 7);
-  context.lineTo(size / 2, size - 7);
-  context.moveTo(7, size / 2);
-  context.lineTo(size - 7, size / 2);
-  context.stroke();
-  return context.getImageData(0, 0, size, size);
+// Number labels drawn on demand, so the map needs no font (raster basemaps have none). An icon
+// named `count:<colour>:<text>` is created the first time a layer asks for it.
+export function drawCountImages(map) {
+  map.on("styleimagemissing", ({ id }) => {
+    const [kind, color, text] = id.split(":");
+    if (kind !== "count" || map.hasImage(id)) {
+      return;
+    }
+
+    const pixelRatio = 2;
+    const height = 12 * pixelRatio;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const font = `700 ${10 * pixelRatio}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+    context.font = font;
+    canvas.width = Math.ceil(context.measureText(text).width) + 2 * pixelRatio;
+    canvas.height = height;
+    context.font = font;
+    context.fillStyle = color;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(text, canvas.width / 2, height / 2 + pixelRatio / 2);
+    map.addImage(id, context.getImageData(0, 0, canvas.width, canvas.height), { pixelRatio });
+  });
+}
+
+// Pans the map so an open popup is fully visible, like Leaflet's autoPan.
+export function panToPopup(map, popup, margin = 12) {
+  const element = popup.getElement();
+  if (!element) {
+    return;
+  }
+
+  const box = element.getBoundingClientRect();
+  const frame = map.getContainer().getBoundingClientRect();
+  const shift = (start, end, frameStart, frameEnd) => {
+    if (start < frameStart + margin) {
+      return start - frameStart - margin;
+    }
+    return end > frameEnd - margin
+      ? Math.min(end - frameEnd + margin, start - frameStart - margin)
+      : 0;
+  };
+  const dx = shift(box.left, box.right, frame.left, frame.right);
+  const dy = shift(box.top, box.bottom, frame.top, frame.bottom);
+  if (dx || dy) {
+    map.panBy([dx, dy], { duration: 250 });
+  }
+}
+
+// A small label that follows the pointer over a feature or marker.
+export function createHoverLabel(map) {
+  const label = new Popup({
+    closeButton: false,
+    closeOnClick: false,
+    focusAfterOpen: false,
+    className: "map-hover-label",
+    offset: 14,
+    maxWidth: "280px",
+  });
+  return {
+    show(lngLat, text, offset = 14) {
+      label.setOffset(offset).setLngLat(lngLat).setText(text);
+      if (!label.isOpen()) {
+        label.addTo(map);
+      }
+    },
+    hide() {
+      label.remove();
+    },
+  };
 }
 
 // True when a key press belongs to a text field rather than to the map.

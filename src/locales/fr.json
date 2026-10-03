@@ -182,6 +182,8 @@
   "assignmentMapEnterFullscreen": "Passer en plein écran",
   "assignmentMapExitFullscreen": "Quitter le plein écran",
   "assignmentClusterTitle": "{count} observations occasionnelles à cet emplacement",
+  "observationsAtLocation": "{count} observations à cet endroit",
+  "assignSelectionHint": "Tracez un rectangle autour des observations. Appuyez sur Échap pour annuler.",
   "checklist": "Liste",
   "readyForExport": "Exporter la liste",
   "checklistWarnings": "Avertissements",

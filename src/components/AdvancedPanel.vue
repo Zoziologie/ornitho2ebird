@@ -594,6 +594,7 @@ onMounted(() => {
             :sightings="sightings"
             :forms="forms"
             :assign-options="clusterAssignmentOptions"
+            :selected-form-id="assignFormId"
             :base-layer="assignmentMapBaseLayer"
             @update:base-layer="emit('update:assignmentMapBaseLayer', $event)"
             @select-form="selectChecklistOnMap"

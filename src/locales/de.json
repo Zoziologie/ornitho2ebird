@@ -182,6 +182,8 @@
   "assignmentMapEnterFullscreen": "Vollbild aktivieren",
   "assignmentMapExitFullscreen": "Vollbild beenden",
   "assignmentClusterTitle": "{count} Gelegenheitsbeobachtungen an diesem Ort",
+  "observationsAtLocation": "{count} Beobachtungen an diesem Ort",
+  "assignSelectionHint": "Ziehe ein Rechteck über die Beobachtungen. Drücke Esc, um abzubrechen.",
   "checklist": "Checkliste",
   "readyForExport": "Checkliste exportieren",
   "checklistWarnings": "Warnungen",

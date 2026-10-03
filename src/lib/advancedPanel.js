@@ -138,3 +138,102 @@ export function formatSightingPopup(sighting, t) {
     </div>
   `;
 }
+
+// The observations of one place as a list, under `title`. With `assign` ({ options, onChange }),
+// each has a select to move it to another checklist.
+export function sightingListPopupContent(sightings, title, t, assign = null) {
+  const content = document.createElement("div");
+  content.className = "map-popup map-popup-cluster";
+
+  const heading = document.createElement("div");
+  heading.className = "map-popup-heading";
+  heading.textContent = title;
+  content.appendChild(heading);
+
+  const list = document.createElement("div");
+  list.className = "map-popup-stack";
+
+  sightings.forEach((sighting) => {
+    const row = document.createElement("div");
+    row.className = "map-popup-card";
+
+    const details = document.createElement("div");
+    details.className = "map-popup-card-body";
+
+    const species = document.createElement("div");
+    species.className = "map-popup-card-title";
+    if (sighting.common_name || sighting.scientific_name) {
+      if (sighting.common_name) {
+        species.appendChild(document.createTextNode(sighting.common_name));
+      }
+      if (sighting.scientific_name) {
+        if (sighting.common_name) {
+          species.appendChild(document.createTextNode(" "));
+        }
+        const scientificName = document.createElement("span");
+        scientificName.className = "map-popup-species-scientific";
+        scientificName.textContent = sighting.scientific_name;
+        species.appendChild(scientificName);
+      }
+    } else {
+      species.textContent = t("records");
+    }
+    details.appendChild(species);
+
+    const meta = document.createElement("div");
+    meta.className = "map-popup-compact-meta";
+
+    const datetimeValue = document.createElement("span");
+    datetimeValue.className = "map-popup-compact-item";
+    datetimeValue.textContent = [sighting.date, sighting.time].filter(Boolean).join(" ") || "—";
+    meta.appendChild(datetimeValue);
+
+    const countValue = document.createElement("span");
+    countValue.className = "map-popup-compact-item";
+    const countParts = [sighting.count_precision, sighting.count].filter(
+      (value) => value !== null && value !== "",
+    );
+    countValue.textContent = countParts.length ? countParts.join("") : "—";
+    meta.appendChild(countValue);
+
+    const permalinkValue = document.createElement("span");
+    permalinkValue.className = "map-popup-compact-item";
+    if (sighting.permalink) {
+      const permalink = document.createElement("a");
+      permalink.href = sighting.permalink;
+      permalink.target = "_blank";
+      permalink.rel = "noopener";
+      permalink.textContent = String(sighting.id ?? "—");
+      permalinkValue.appendChild(permalink);
+    } else {
+      permalinkValue.textContent = String(sighting.id ?? "—");
+    }
+    meta.appendChild(permalinkValue);
+
+    details.appendChild(meta);
+
+    if (assign) {
+      details.appendChild(assignSelect(sighting, assign));
+    }
+
+    row.appendChild(details);
+    list.appendChild(row);
+  });
+
+  content.appendChild(list);
+  return content;
+}
+
+function assignSelect(sighting, { options, onChange }) {
+  const select = document.createElement("select");
+  select.className = "form-select form-select-sm map-popup-select";
+  options.forEach((option) => {
+    const optionElement = document.createElement("option");
+    optionElement.value = String(option.value);
+    optionElement.textContent = option.label;
+    optionElement.selected = Number(option.value) === Number(sighting.form_id);
+    select.appendChild(optionElement);
+  });
+  select.addEventListener("change", (event) => onChange(sighting, Number(event.target.value)));
+  return select;
+}

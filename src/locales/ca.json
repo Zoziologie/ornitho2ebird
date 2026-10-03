@@ -182,6 +182,8 @@
   "assignmentMapEnterFullscreen": "Activa la pantalla completa",
   "assignmentMapExitFullscreen": "Surt de la pantalla completa",
   "assignmentClusterTitle": "{count} observacions casuals en aquesta ubicació",
+  "observationsAtLocation": "{count} observacions en aquest lloc",
+  "assignSelectionHint": "Arrossega un rectangle sobre les observacions. Prem Esc per cancel·lar.",
   "checklist": "Llista",
   "readyForExport": "Exporta la llista",
   "checklistWarnings": "Avisos",

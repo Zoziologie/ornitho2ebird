@@ -182,6 +182,8 @@
   "assignmentMapEnterFullscreen": "Enter fullscreen",
   "assignmentMapExitFullscreen": "Exit fullscreen",
   "assignmentClusterTitle": "{count} casual observations at this location",
+  "observationsAtLocation": "{count} observations at this location",
+  "assignSelectionHint": "Drag a rectangle over the observations. Press Escape to cancel.",
   "checklist": "Checklist",
   "readyForExport": "Export checklist",
   "checklistWarnings": "Checklist warnings",
