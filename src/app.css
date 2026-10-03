@@ -1061,6 +1061,20 @@ h6 {
   backdrop-filter: blur(2px);
 }
 
+.assignment-map-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.assignment-map-secondary-actions .btn {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
 .assignment-map-shell:fullscreen,
 .assignment-map-shell:-webkit-full-screen {
   width: 100%;
@@ -1190,10 +1204,12 @@ h6 {
   border: 0;
 }
 
+/* Dark grey rather than eBird's red, which is also the colour of checklist 1. */
 .hotspot-marker-icon img {
   display: block;
   width: 28px;
-  height: 36px;
+  height: 28px;
+  filter: grayscale(1) brightness(0.55);
 }
 
 .custom-checklist-select {
