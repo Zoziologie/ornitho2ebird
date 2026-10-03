@@ -6,19 +6,18 @@ import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
 import ImportPanel from "./components/ImportPanel.vue";
 import {
-  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
   APP_STORAGE_PREFIX,
-  DEFAULT_SETTINGS,
-  DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
-  DEFAULT_SPECIES_COMMENT_TEMPLATE,
-  DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,
-  DEFAULT_WEBSITE_BY_LANGUAGE,
   LANGUAGE_COOKIE_NAME,
-  SPECIES_COMMENT_TEMPLATE_OPTION_KEYS,
   buildSpeciesCommentTemplateFromOptions,
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
-import { normalizeLanguage, resolveUiLanguage, setI18nLanguage } from "./i18n";
+import {
+  defaultWebsiteForLanguage,
+  loadSettings,
+  normalizeSpeciesCommentTemplate,
+  saveSettings,
+} from "./lib/settings";
+import { setI18nLanguage } from "./i18n";
 import { assembleImport } from "./lib/utils";
 import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
@@ -27,14 +26,6 @@ const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPa
 const HelpPanel = defineAsyncComponent(() => import("./components/HelpPanel.vue"));
 const AdvancedPanel = defineAsyncComponent(() => import("./components/AdvancedPanel.vue"));
 const ExportPanel = defineAsyncComponent(() => import("./components/ExportPanel.vue"));
-
-function normalizeSpeciesCommentTemplate(template) {
-  return {
-    short: template?.short || DEFAULT_SPECIES_COMMENT_TEMPLATE.short,
-    long: template?.long || DEFAULT_SPECIES_COMMENT_TEMPLATE.long,
-    limit: Number(template?.limit) || 5,
-  };
-}
 
 function speciesCommentTemplateHasContent(template) {
   return Boolean(template?.short || template?.long);
@@ -51,109 +42,8 @@ function sameSpeciesCommentTemplate(left, right) {
   );
 }
 
-function hasSpeciesCommentTemplateOptions(options) {
-  return (
-    options &&
-    typeof options === "object" &&
-    SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.some((key) => key in options)
-  );
-}
-
-function normalizeSpeciesCommentSettings(savedSettings) {
-  const savedOptions = savedSettings.speciesCommentTemplateOptions;
-  const savedLongOptions = savedSettings.speciesCommentLongTemplateOptions;
-  const hasSavedOptions = hasSpeciesCommentTemplateOptions(savedOptions);
-
-  if (!hasSavedOptions) {
-    return {
-      options: structuredClone(DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS),
-      longOptions: structuredClone(DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS),
-      template: structuredClone(DEFAULT_SPECIES_COMMENT_TEMPLATE),
-    };
-  }
-
-  const normalizeOptions = (value, defaults) =>
-    Object.fromEntries(
-      SPECIES_COMMENT_TEMPLATE_OPTION_KEYS.map((key) => [
-        key,
-        key in (value || {}) ? Boolean(value[key]) : Boolean(defaults[key]),
-      ]),
-    );
-  const options = normalizeOptions(savedOptions, DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS);
-  const longOptions = normalizeOptions(savedLongOptions, options);
-  longOptions.personalized = false;
-  const template = options.personalized
-    ? normalizeSpeciesCommentTemplate(savedSettings.speciesCommentTemplate)
-    : buildSpeciesCommentTemplateFromOptions(
-        options,
-        savedSettings.speciesCommentTemplate?.limit || DEFAULT_SPECIES_COMMENT_TEMPLATE.limit,
-        longOptions,
-      );
-
-  return { options, longOptions, template };
-}
-
-function normalizeGlobalStaticMap(settings) {
-  const defaults = DEFAULT_SETTINGS.globalStaticMap;
-  const normalized = settings && typeof settings === "object" ? settings : {};
-
-  return {
-    show: Boolean(normalized.show),
-    interactive: Boolean(normalized.interactive),
-    style:
-      typeof normalized.style === "string" && normalized.style ? normalized.style : defaults.style,
-    pathStyle: {
-      ...defaults.pathStyle,
-      ...(normalized.pathStyle || {}),
-    },
-    markerStyle: {
-      ...defaults.markerStyle,
-      ...(normalized.markerStyle || {}),
-    },
-  };
-}
-
-function normalizeAssignmentMapBaseLayer(value) {
-  return ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(value)
-    ? value
-    : DEFAULT_SETTINGS.assignmentMapBaseLayer;
-}
-
-function defaultWebsiteForLanguage(language) {
-  return DEFAULT_WEBSITE_BY_LANGUAGE[language] || DEFAULT_WEBSITE_BY_LANGUAGE.en;
-}
-
-const storedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, null);
-const savedSettings = storedSettings || DEFAULT_SETTINGS;
-const queryLanguage = normalizeLanguage(
-  typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
-);
-const resolvedUiLanguage = resolveUiLanguage(savedSettings);
-const initialWebsiteName =
-  queryLanguage || !savedSettings.websiteName
-    ? defaultWebsiteForLanguage(resolvedUiLanguage)
-    : savedSettings.websiteName;
-// Dropped settings: assignmentMap, and ebirdLanguage/language (the export now writes scientific
-// names, which eBird matches whatever the account language).
-const {
-  assignmentMap: _legacyAssignmentMap,
-  ebirdLanguage: _legacyEbirdLanguage,
-  language: _legacyLanguage,
-  ...savedSettingsWithoutLegacyKeys
-} = savedSettings;
-const normalizedSpeciesCommentSettings = normalizeSpeciesCommentSettings(savedSettings);
-
-const settings = reactive({
-  ...DEFAULT_SETTINGS,
-  ...savedSettingsWithoutLegacyKeys,
-  uiLanguage: resolvedUiLanguage,
-  websiteName: initialWebsiteName,
-  assignmentMapBaseLayer: normalizeAssignmentMapBaseLayer(savedSettings.assignmentMapBaseLayer),
-  speciesCommentTemplateOptions: normalizedSpeciesCommentSettings.options,
-  speciesCommentLongTemplateOptions: normalizedSpeciesCommentSettings.longOptions,
-  speciesCommentTemplate: normalizedSpeciesCommentSettings.template,
-  globalStaticMap: normalizeGlobalStaticMap(savedSettings.globalStaticMap),
-});
+const { settings: loadedSettings, isReturningUser } = loadSettings();
+const settings = reactive(loadedSettings);
 
 const website = ref(null);
 const sightings = ref([]);
@@ -170,7 +60,7 @@ const version = __APP_VERSION__;
 const NEWS = { id: "2026-10-scientific-names", version: "0.3", until: "2027-03-31" };
 const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
 const showNews = ref(
-  storedSettings !== null &&
+  isReturningUser &&
     new Date() < new Date(NEWS.until) &&
     readStorage(NEWS_STORAGE_KEY, "") !== NEWS.id,
 );
@@ -210,7 +100,7 @@ let settingsWriteTimer = null;
 function writeSettings() {
   clearTimeout(settingsWriteTimer);
   settingsWriteTimer = null;
-  writeStorage(`${APP_STORAGE_PREFIX}:settings`, settings);
+  saveSettings(settings);
 }
 watch(
   settings,

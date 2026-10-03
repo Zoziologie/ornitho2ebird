@@ -6,6 +6,7 @@ import App from "./App.vue";
 import { i18n, resolveUiLanguage, setI18nLanguage } from "./i18n";
 import { APP_STORAGE_PREFIX } from "./lib/constants";
 import { alertDialog } from "./lib/dialog";
+import { SETTINGS_STORAGE_KEY } from "./lib/settings";
 import { readStorage } from "./lib/storage";
 
 const app = createApp(App);
@@ -84,8 +85,6 @@ app.config.errorHandler = (error, _instance, info) => {
 };
 
 // Load the user's language before the first render to avoid a flash of English.
-setI18nLanguage(resolveUiLanguage(readStorage(`${APP_STORAGE_PREFIX}:settings`, {}))).finally(
-  () => {
-    app.use(i18n).mount("#app");
-  },
-);
+setI18nLanguage(resolveUiLanguage(readStorage(SETTINGS_STORAGE_KEY, {}))).finally(() => {
+  app.use(i18n).mount("#app");
+});
