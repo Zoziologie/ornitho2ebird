@@ -57,6 +57,8 @@
 
 ## Tests
 
+Keep tests few and fast (all of them run in a few seconds). The layout will change ([#40](https://github.com/Zoziologie/ornitho2ebird/issues/40)), so test what users upload rather than the UI text: add an end-to-end test only for a flow that changes the CSV.
+
 - **Golden files are the contract with eBird.** `test/golden/__snapshots__/*.csv` is the exact CSV for every fixture in `test/fixtures/`.
   - A diff there changes what users upload. Only update the snapshots (`npx vitest run -u`) when the change is intended, and say so in the pull request.
 - **End-to-end tests (`test/e2e/`)** run the production build with `vite preview` on port 4179. `stubNetwork` stubs every external request: eBird, Nominatim, tiles, analytics.
