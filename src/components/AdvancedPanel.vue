@@ -86,6 +86,11 @@ let reviewMarkerLayer = null;
 let reviewPathLayer = null;
 let reviewHotspotLayer = null;
 let reviewDrawPolyline = null;
+let reviewBaseLayers = null;
+let reviewActiveBaseLayer = null;
+// The checklist the review map was last fitted to: refit only when another one is selected, so
+// dragging the marker or loading hotspots keeps the user's zoom.
+let reviewMapFittedFormId = null;
 
 const unassignedColor = "#6c757d";
 const checklistColors = markerColors.slice(1).filter((color) => color.toLowerCase() !== "#999999");
@@ -638,7 +643,7 @@ watch(
 watch(
   () => props.assignmentMapBaseLayer,
   (value) => {
-    applyAssignmentBaseLayer(value);
+    applyBaseLayer(value);
   },
 );
 
@@ -942,22 +947,38 @@ function createAssignmentSightingsLayer() {
   return assignmentSightingsLayer;
 }
 
-function applyAssignmentBaseLayer(layerName) {
-  if (!assignmentMap || !assignmentBaseLayers) {
-    return;
+// Returns the base layer now shown on `map`.
+function switchBaseLayer(map, baseLayers, activeLayer, layerName) {
+  if (!map || !baseLayers) {
+    return activeLayer;
   }
 
-  const nextLayer = assignmentBaseLayers[layerName] || assignmentBaseLayers.OpenStreetMap;
-  if (!nextLayer || assignmentActiveBaseLayer === nextLayer) {
-    return;
+  const nextLayer = baseLayers[layerName] || baseLayers.OpenStreetMap;
+  if (!nextLayer || activeLayer === nextLayer) {
+    return activeLayer;
   }
 
-  if (assignmentActiveBaseLayer && assignmentMap.hasLayer(assignmentActiveBaseLayer)) {
-    assignmentMap.removeLayer(assignmentActiveBaseLayer);
+  if (activeLayer && map.hasLayer(activeLayer)) {
+    map.removeLayer(activeLayer);
   }
 
-  nextLayer.addTo(assignmentMap);
-  assignmentActiveBaseLayer = nextLayer;
+  nextLayer.addTo(map);
+  return nextLayer;
+}
+
+function applyBaseLayer(layerName) {
+  assignmentActiveBaseLayer = switchBaseLayer(
+    assignmentMap,
+    assignmentBaseLayers,
+    assignmentActiveBaseLayer,
+    layerName,
+  );
+  reviewActiveBaseLayer = switchBaseLayer(
+    reviewMap,
+    reviewBaseLayers,
+    reviewActiveBaseLayer,
+    layerName,
+  );
 }
 
 function hotspotPopupContent(hotspot) {
@@ -1136,9 +1157,9 @@ function refreshReviewMap() {
       icon: L.divIcon({
         className: "hotspot-marker-icon",
         html: `<img src="${hotspotMarkerUrl}" alt="" />`,
-        iconSize: [28, 36],
-        iconAnchor: [14, 36],
-        popupAnchor: [0, -32],
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -26],
       }),
     });
     marker.bindPopup(hotspotPopupContent(hotspot));
@@ -1160,8 +1181,9 @@ function refreshReviewMap() {
     ...(selectedForm.value.path || []).map((point) => [point[0], point[1]]),
   ];
 
-  if (points.length) {
+  if (points.length && reviewMapFittedFormId !== selectedForm.value.id) {
     reviewMap.fitBounds(points, { padding: [20, 20], maxZoom: 13 });
+    reviewMapFittedFormId = selectedForm.value.id;
   }
 }
 
@@ -1171,7 +1193,13 @@ function initializeReviewMap() {
   }
 
   reviewMap = L.map(reviewMapElement.value);
-  addBaseLayerControl(reviewMap);
+  const reviewLayerControl = addBaseLayerControl(reviewMap, props.assignmentMapBaseLayer);
+  reviewBaseLayers = reviewLayerControl.baseLayers;
+  reviewActiveBaseLayer = reviewLayerControl.activeLayer;
+  reviewMap.on("baselayerchange", (event) => {
+    reviewActiveBaseLayer = event.layer;
+    emit("update:assignmentMapBaseLayer", event.name);
+  });
 
   reviewSightingsLayer = L.layerGroup().addTo(reviewMap);
   reviewMarkerLayer = L.layerGroup().addTo(reviewMap);
@@ -1230,6 +1258,9 @@ function destroyReviewMap() {
   reviewPathLayer = null;
   reviewHotspotLayer = null;
   reviewDrawPolyline = null;
+  reviewBaseLayers = null;
+  reviewActiveBaseLayer = null;
+  reviewMapFittedFormId = null;
 }
 
 watch(
@@ -1396,24 +1427,24 @@ onMounted(() => {
                 <i class="bi bi-bounding-box-circles" aria-hidden="true"></i>
               </button>
             </div>
-            <div class="btn-group w-100">
+            <div class="assignment-map-secondary-actions">
               <button
                 v-tooltip:top="t('assignCleanTooltip')"
-                class="btn btn-outline-warning btn-icon"
+                class="btn btn-outline-secondary btn-sm"
                 type="button"
-                :aria-label="t('assignCleanTooltip')"
                 @click="assignClean"
               >
                 <i class="bi bi-eraser" aria-hidden="true"></i>
+                <span>{{ t("assignClean") }}</span>
               </button>
               <button
                 v-tooltip:top="t('assignResetTooltip')"
-                class="btn btn-outline-danger btn-icon"
+                class="btn btn-outline-danger btn-sm"
                 type="button"
-                :aria-label="t('assignResetTooltip')"
                 @click="assignReset"
               >
                 <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                <span>{{ t("assignReset") }}</span>
               </button>
             </div>
           </div>
