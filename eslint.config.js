@@ -18,9 +18,6 @@ export default [
     rules: {
       "no-unused-vars": ["error", { ignoreRestSiblings: true, caughtErrors: "none" }],
       "vue/multi-word-component-names": "off",
-      // Panels still edit the forms and settings they receive. Turn back on once they go
-      // through a store (see the structure checklist in PR #27).
-      "vue/no-mutating-props": "off",
     },
   },
   {

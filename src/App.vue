@@ -1,5 +1,14 @@
 <script setup>
-import { computed, defineAsyncComponent, onBeforeUnmount, reactive, ref, toRefs, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  provide,
+  reactive,
+  ref,
+  toRefs,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
@@ -12,6 +21,7 @@ import {
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
 import {
+  SETTINGS_INJECTION_KEY,
   defaultWebsiteForLanguage,
   loadSettings,
   normalizeSpeciesCommentTemplate,
@@ -45,6 +55,7 @@ function sameSpeciesCommentTemplate(left, right) {
 
 const { settings: loadedSettings, isReturningUser } = loadSettings();
 const settings = reactive(loadedSettings);
+provide(SETTINGS_INJECTION_KEY, settings);
 
 const website = ref(null);
 const { forms, sightings, formsSightings } = toRefs(store.state);
@@ -269,7 +280,6 @@ function openSettingsForSection(section) {
 
     <SettingsPanel
       :open="settingsOpen"
-      :settings="settings"
       :focus-section="settingsFocusSection"
       @close="closeSettings"
       @open-info="openInfo($event)"
