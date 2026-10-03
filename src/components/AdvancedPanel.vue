@@ -642,19 +642,19 @@ watch(
   },
 );
 
-watch(
-  () => selectedForm.value?.location_name,
-  (value) => {
-    if (!selectedForm.value || typeof value !== "string") {
-      return;
-    }
+// On change, not on every keystroke: normalising while typing would drop a space typed at the
+// end ("Le Pont" typed key by key became "LePont").
+function normalizeSelectedLocationName() {
+  const value = selectedForm.value?.location_name;
+  if (typeof value !== "string") {
+    return;
+  }
 
-    const normalized = normalizeLocationName(value);
-    if (normalized !== value) {
-      store.updateForm(selectedForm.value.id, { location_name: normalized });
-    }
-  },
-);
+  const normalized = normalizeLocationName(value);
+  if (normalized !== value) {
+    store.updateForm(selectedForm.value.id, { location_name: normalized });
+  }
+}
 
 // Returns the id of the new checklist.
 function buildNewChecklist(payload) {
@@ -1613,6 +1613,7 @@ onMounted(() => {
                   :class="requiredStateClass(selectedForm.location_name)"
                   type="text"
                   :maxlength="LOCATION_NAME_MAX_LENGTH"
+                  @change="normalizeSelectedLocationName"
                 />
                 <button
                   v-tooltip:top="t('focusMapTooltip')"

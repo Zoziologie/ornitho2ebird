@@ -135,6 +135,7 @@ const speciesCommentLinkWarningVisible = computed(() => {
 
 const advancedOptionsRef = ref(null);
 const speciesCommentRef = ref(null);
+const aggregationRef = ref(null);
 
 const speciesCommentLimitError = computed(() => {
   const limit = Number(settings.speciesCommentTemplate.limit);
@@ -180,6 +181,7 @@ watch(
     const sectionMap = {
       "advanced-options": advancedOptionsRef.value,
       "species-comment-template": speciesCommentRef.value,
+      aggregation: aggregationRef.value,
     };
     const target = sectionMap[section];
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -247,7 +249,7 @@ watch(
             </div>
           </div>
 
-          <div class="settings-section">
+          <div ref="aggregationRef" class="settings-section">
             <h3 class="modal-section-title">{{ t("advancedSettingsTitle") }}</h3>
             <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
             <button

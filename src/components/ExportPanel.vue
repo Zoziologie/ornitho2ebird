@@ -9,6 +9,7 @@ import {
   rowsToCsv,
 } from "../lib/exportCsv";
 import { alertDialog } from "../lib/dialog";
+import LinkedText from "./LinkedText.vue";
 import { store } from "../lib/store";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
 import {
@@ -51,6 +52,18 @@ const props = defineProps({
   customizedSpeciesComments: {
     type: Boolean,
     required: true,
+  },
+  advancedEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  autoAssignDuration: {
+    type: Number,
+    default: 0,
+  },
+  autoAssignDistance: {
+    type: Number,
+    default: 0,
   },
 });
 const emit = defineEmits(["open-settings-section"]);
@@ -342,6 +355,16 @@ function protocolSummaryIcon(name) {
   );
 }
 
+// What Basic mode decided on its own, which users would otherwise only discover in eBird.
+const basicModeSummary = computed(() => {
+  const createdForms = exportableForms.value.filter(({ form }) => !form.imported);
+  const createdSightings = createdForms.reduce(
+    (total, { form }) => total + (exportableSightingsByFormId.value.get(form.id)?.length || 0),
+    0,
+  );
+  return { createdChecklists: createdForms.length, createdSightings };
+});
+
 function openCustomizedMode() {
   emit("open-settings-section", "advanced-options");
 }
@@ -451,23 +474,6 @@ async function downloadFile() {
       </div>
 
       <div v-else>
-        <div v-if="speciesToMatchOnce.length > 0" class="alert alert-info small mb-3">
-          {{ t("exportManualMatchNote") }}
-          <ul class="mb-0 mt-1">
-            <li v-for="species in displayedSpeciesToMatchOnce" :key="species.name">
-              <i v-if="species.scientific">{{ species.name }}</i
-              ><template v-else>{{ species.name }}</template
-              ><template v-if="species.hint"> → {{ species.hint }}</template>
-            </li>
-            <li v-if="speciesToMatchOnce.length > displayedSpeciesToMatchOnce.length">
-              {{
-                t("exportTaxonomyWarningMore", {
-                  count: speciesToMatchOnce.length - displayedSpeciesToMatchOnce.length,
-                })
-              }}
-            </li>
-          </ul>
-        </div>
         <div
           v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'"
           class="alert alert-secondary mb-3"
@@ -571,54 +577,43 @@ async function downloadFile() {
                 <span class="export-protocol-label">{{
                   t(`protocolLabel${item.name}`, item.count)
                 }}</span>
+                <span
+                  v-if="item.name === 'Incidental' && basicModeSummary.createdChecklists > 0"
+                  class="export-protocol-note"
+                >
+                  {{
+                    t(
+                      "exportIncidentalNote",
+                      {
+                        sightings: formatNumber(basicModeSummary.createdSightings),
+                        hours: autoAssignDuration,
+                        km: autoAssignDistance,
+                      },
+                      basicModeSummary.createdSightings,
+                    )
+                  }}
+                  ·
+                  <button
+                    class="btn btn-link btn-sm p-0 align-baseline"
+                    type="button"
+                    @click="emit('open-settings-section', 'aggregation')"
+                  >
+                    {{ t("exportBasicChangeGrouping") }}
+                  </button>
+                </span>
+                <span v-else-if="item.name === 'Historical'" class="export-protocol-note">
+                  <LinkedText :text="t('exportHistoricalNote')" :links="['#help/conversion']" />
+                </span>
               </div>
             </div>
-          </section>
-
-          <section class="export-panel export-panel-stats">
-            <div class="export-panel-eyebrow">{{ t("exportPanelSnapshot") }}</div>
-            <div class="export-stat-grid">
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-feather" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalSpecies)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummarySpecies", exportSummaryStats.totalSpecies)
-                }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-binoculars" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalSightings)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummarySightings", exportSummaryStats.totalSightings)
-                }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-check2-square" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{ exportSummaryStats.completePercent }}%</span>
-                <span class="export-stat-label">{{ t("exportSummaryComplete") }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-geo-alt" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalLocations)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummaryLocations", exportSummaryStats.totalLocations)
-                }}</span>
-              </div>
-            </div>
+            <button
+              v-if="!advancedEnabled"
+              class="btn btn-link btn-sm p-0 align-self-start export-protocol-review"
+              type="button"
+              @click="openCustomizedMode"
+            >
+              {{ t("exportBasicReview") }}
+            </button>
           </section>
 
           <section class="export-panel export-panel-action">
@@ -686,6 +681,15 @@ async function downloadFile() {
             >
               {{ interactiveMapPublishing ? t("interactiveMapPublishing") : t("downloadCsv") }}
             </button>
+            <p class="export-snapshot small mb-0">
+              {{ formatNumber(exportSummaryStats.totalSpecies) }}
+              {{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }} ·
+              {{ formatNumber(exportSummaryStats.totalSightings) }}
+              {{ t("exportSummarySightings", exportSummaryStats.totalSightings) }} ·
+              {{ formatNumber(exportSummaryStats.totalLocations) }}
+              {{ t("exportSummaryLocations", exportSummaryStats.totalLocations) }} ·
+              {{ exportSummaryStats.completePercent }}% {{ t("exportSummaryComplete") }}
+            </p>
           </section>
         </div>
 
@@ -729,32 +733,54 @@ async function downloadFile() {
                 <h5 class="mb-0">{{ t("finalStepsTitle") }}</h5>
               </div>
             </div>
-            <p>
-              {{ t("finalStepsImportPrefix") }}
-              <a
-                href="https://ebird.org/ebird/import/upload.form?theme=ebird"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ t("finalStepsImportLink") }} </a
-              >,
-              {{ t("finalStepsImportMiddle") }}
-              <strong>{{ t("openEbirdImport") }}</strong>
-              ,
-              {{ t("finalStepsImportSuffix") }}
-            </p>
-            <p>
-              {{ t("finalStepsProcessingPrefix") }}
-              <a href="#help/processing">{{ t("finalStepsProcessingLink") }}</a
-              >,
-              {{ t("finalStepsProcessingMiddle") }}
-            </p>
-            <p class="mb-0">
-              {{ t("finalStepsReviewPrefix") }}
-              <a href="https://ebird.org/import/status/all.htm" target="_blank" rel="noopener">
-                {{ t("finalStepsReviewLink") }}
-              </a>
-              {{ t("finalStepsReviewSuffix") }}
+            <ol class="final-steps-list mb-2">
+              <li>
+                {{ t("finalStepsImportPrefix") }}
+                <a
+                  href="https://ebird.org/ebird/import/upload.form?theme=ebird"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {{ t("finalStepsImportLink") }} </a
+                >,
+                {{ t("finalStepsImportMiddle") }}
+                <strong>{{ t("openEbirdImport") }}</strong
+                >,
+                {{ t("finalStepsImportSuffix") }}
+                <div v-if="speciesToMatchOnce.length > 0" class="small mt-1">
+                  {{ t("exportManualMatchNote") }}
+                  <ul class="mb-0">
+                    <li v-for="species in displayedSpeciesToMatchOnce" :key="species.name">
+                      <i v-if="species.scientific">{{ species.name }}</i
+                      ><template v-else>{{ species.name }}</template
+                      ><template v-if="species.hint"> → {{ species.hint }}</template>
+                    </li>
+                    <li v-if="speciesToMatchOnce.length > displayedSpeciesToMatchOnce.length">
+                      {{
+                        t("exportTaxonomyWarningMore", {
+                          count: speciesToMatchOnce.length - displayedSpeciesToMatchOnce.length,
+                        })
+                      }}
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                {{ t("finalStepsProcessingPrefix") }}
+                <a href="#help/processing">{{ t("finalStepsProcessingLink") }}</a
+                >,
+                {{ t("finalStepsProcessingMiddle") }}
+              </li>
+              <li>
+                {{ t("finalStepsReviewPrefix") }}
+                <a href="https://ebird.org/import/status/all.htm" target="_blank" rel="noopener">
+                  {{ t("finalStepsReviewLink") }}
+                </a>
+                {{ t("finalStepsReviewSuffix") }}
+              </li>
+            </ol>
+            <p class="mb-0 small">
+              <LinkedText :text="t('finalStepsFaq')" :links="['#help/faq']" />
             </p>
           </section>
         </div>
