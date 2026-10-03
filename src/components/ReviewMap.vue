@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { Marker, Popup } from "maplibre-gl";
-import hotspotMarkerUrl from "../assets/map-marker-hotspot.svg";
+import hotspotMarkerUrl from "../assets/map-marker-hotspot.png";
 import {
   CHECKLIST_COLORS,
   UNASSIGNED_COLOR,
@@ -474,7 +474,7 @@ defineExpose({ focus, startPathDraw });
     <div class="review-map-controls">
       <button
         v-if="!drawing"
-        v-tooltip:left="t('drawPathTooltip')"
+        v-tooltip:top="t('drawPathTooltip')"
         class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
         type="button"
         :aria-label="t('drawPathTooltip')"
