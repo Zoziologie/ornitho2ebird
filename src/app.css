@@ -1167,6 +1167,14 @@ h6 {
   z-index: 1000;
 }
 
+.review-map-drawing {
+  max-width: 20rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.97);
+}
+
 .static-map-preview-card {
   min-height: 100%;
 }
@@ -1200,8 +1208,7 @@ h6 {
 }
 
 .hotspot-marker-icon {
-  background: transparent;
-  border: 0;
+  cursor: pointer;
 }
 
 /* Dark grey rather than eBird's red, which is also the colour of checklist 1. */
@@ -1315,8 +1322,7 @@ h6 {
 }
 
 .assignment-checklist-icon {
-  background: transparent;
-  border: 0;
+  cursor: pointer;
 }
 
 .assignment-checklist-icon span {
@@ -1331,57 +1337,56 @@ h6 {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.assignment-sighting-icon {
-  background: transparent;
-  border: 0;
-}
-
-.assignment-sighting-icon span {
-  display: block;
-  width: 14px;
-  height: 14px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
-}
-
-.assignment-cluster-icon {
-  background: transparent;
-  border: 0;
-}
-
-.assignment-cluster-icon-dot {
-  display: grid;
-  place-items: center;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  margin: 0;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: #89a0b1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
-  color: #ffffff;
-  font-size: 0.62rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.leaflet-container .leaflet-popup-content-wrapper {
+.maplibregl-popup-content {
   overflow: hidden;
+  padding: 0;
   border-radius: 1rem;
   border: 1px solid rgba(41, 67, 86, 0.08);
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 18px 40px rgba(30, 54, 69, 0.18);
+  font-family: inherit;
 }
 
-.leaflet-container .leaflet-popup-content {
-  margin: 0;
+.maplibregl-popup-close-button {
+  z-index: 1;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1.25rem;
+  border-radius: 0 1rem 0 0.5rem;
 }
 
-.leaflet-container .leaflet-popup-tip {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 10px 24px rgba(30, 54, 69, 0.12);
+.maplibregl-map {
+  font-family: inherit;
+}
+
+/* While selecting a rectangle or drawing a path, clicks go to the map, not to the markers. */
+.map-picking .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: crosshair;
+}
+
+.map-picking .maplibregl-marker {
+  pointer-events: none;
+}
+
+/* MapLibre does not pan the map to fit a popup, so a long list scrolls. */
+.map-popup-cluster .map-popup-stack {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.map-selection-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid #0d6efd;
+  background: rgba(13, 110, 253, 0.08);
+  pointer-events: none;
+}
+
+.map-base-layer-control .form-select {
+  width: auto;
+  max-width: 11rem;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .map-popup {

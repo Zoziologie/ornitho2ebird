@@ -1,63 +1,10 @@
-import L from "leaflet";
-import { ASSIGNMENT_MAP_BASE_LAYER_OPTIONS } from "./constants";
+import markerColors from "/data/marker_color.json";
 import { protocol } from "./utils";
 
-export function createBaseLayers() {
-  return {
-    OpenStreetMap: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 19,
-    }),
-    Satellite: L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      {
-        attribution: "Tiles &copy; Esri",
-        maxZoom: 19,
-      },
-    ),
-    "Swiss (swisstopo)": L.tileLayer(
-      "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-      {
-        attribution: "&copy; swisstopo",
-        maxZoom: 18,
-        detectRetina: true,
-      },
-    ),
-    "France (IGN)": L.tileLayer(
-      "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
-      {
-        attribution: "&copy; IGN/Geoportail",
-        maxZoom: 19,
-        tileSize: 256,
-        detectRetina: true,
-      },
-    ),
-    "Germany (BKG)": L.tileLayer(
-      "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png",
-      {
-        attribution: "&copy; basemap.de / BKG",
-        maxZoom: 18,
-      },
-    ),
-  };
-}
-
-export function addBaseLayerControl(map, initialLayerName = "OpenStreetMap") {
-  const baseLayers = createBaseLayers();
-  const selectedLayerName = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(initialLayerName)
-    ? initialLayerName
-    : "OpenStreetMap";
-  const activeLayer = baseLayers[selectedLayerName];
-  activeLayer.addTo(map);
-  const control = L.control.layers(baseLayers, null, { position: "topleft" }).addTo(map);
-
-  return {
-    activeLayer,
-    baseLayers,
-    control,
-    selectedLayerName,
-  };
-}
+export const UNASSIGNED_COLOR = "#6c757d";
+export const CHECKLIST_COLORS = markerColors
+  .slice(1)
+  .filter((color) => color.toLowerCase() !== "#999999");
 
 export function protocolBadgeClass(form) {
   const state = protocol(form);
@@ -89,11 +36,6 @@ export function checklistMarkerHtml(formId, checklistColors, unassignedColor) {
   const color = checklistColor(formId, checklistColors, unassignedColor);
   const textColor = color === "#ffff33" ? "#212529" : "#ffffff";
   return `<span style="background:${color};color:${textColor};border-color:${color}">${formId}</span>`;
-}
-
-export function sightingMarkerHtml(formId, checklistColors, unassignedColor) {
-  const color = checklistColor(formId, checklistColors, unassignedColor);
-  return `<span style="background:${color};border-color:${color}"></span>`;
 }
 
 export function buildAssignmentOptions(forms, t, checklistColors, unassignedColor) {

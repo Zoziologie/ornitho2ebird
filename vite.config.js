@@ -7,22 +7,18 @@ import bootstrapIconsSubset from "./build/bootstrapIconsSubset.js";
 export default defineConfig({
   plugins: [vue(), bootstrapIconsSubset()],
   build: {
-    // data/ebird_scientific_names.json is one ~660 KB chunk (~180 KB compressed), loaded only
-    // when an import has sightings without an eBird code.
-    chunkSizeWarningLimit: 700,
+    // Two chunks are large and loaded only when needed: MapLibre (~1 MB, ~280 KB compressed) with
+    // the Customized-mode panel, and data/ebird_scientific_names.json (~660 KB, ~180 KB
+    // compressed) when an import has sightings without an eBird code.
+    chunkSizeWarningLimit: 1100,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // The global-L shim must run before the Leaflet plugins, so it goes in their chunk.
-          if (id.endsWith("/src/lib/leaflet.js")) {
-            return "map-vendor";
-          }
-
           if (!id.includes("node_modules")) {
             return;
           }
 
-          if (id.includes("leaflet")) {
+          if (id.includes("maplibre-gl")) {
             return "map-vendor";
           }
 

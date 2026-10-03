@@ -1,6 +1,6 @@
 {
   "name": "ornitho2ebird",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "homepage": "https://ornitho2ebird.com/",
   "repository": {
     "type": "git",
@@ -31,9 +31,7 @@
   "dependencies": {
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
-    "leaflet": "^1.9.4",
-    "leaflet-draw": "^1.0.4",
-    "leaflet.markercluster": "^1.5.3",
+    "maplibre-gl": "^6.11.2",
     "papaparse": "^5.7.0",
     "vue": "^3.5.43",
     "vue-i18n": "^11.4.13"
