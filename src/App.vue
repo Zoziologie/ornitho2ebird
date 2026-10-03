@@ -15,7 +15,6 @@ import {
   DEFAULT_WEBSITE_BY_LANGUAGE,
   LANGUAGE_COOKIE_NAME,
   SPECIES_COMMENT_TEMPLATE_OPTION_KEYS,
-  EBIRD_LANGUAGES,
   buildSpeciesCommentTemplateFromOptions,
 } from "./lib/constants";
 import { readStorage, writeCookie, writeStorage } from "./lib/storage";
@@ -120,33 +119,8 @@ function normalizeAssignmentMapBaseLayer(value) {
     : DEFAULT_SETTINGS.assignmentMapBaseLayer;
 }
 
-const LEGACY_EBIRD_LANGUAGE_CODES = {
-  id: "in",
-  pa: "pa_IN",
-  en_HAW: "haw",
-};
-
 function defaultWebsiteForLanguage(language) {
   return DEFAULT_WEBSITE_BY_LANGUAGE[language] || DEFAULT_WEBSITE_BY_LANGUAGE.en;
-}
-
-function normalizeEbirdLanguage(value) {
-  if (typeof value !== "string" || value.length === 0) {
-    return null;
-  }
-
-  return LEGACY_EBIRD_LANGUAGE_CODES[value] || value;
-}
-
-const LANGUAGE_MISMATCH_ALERT_STORAGE_KEY = `${APP_STORAGE_PREFIX}:ebird-language-mismatch-alert`;
-const LANGUAGE_MISMATCH_ALERT_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
-
-function languageFamily(value) {
-  if (typeof value !== "string" || value.length === 0) {
-    return "";
-  }
-
-  return value.split(/[-_]/)[0].toLowerCase();
 }
 
 const storedSettings = readStorage(`${APP_STORAGE_PREFIX}:settings`, null);
@@ -155,30 +129,24 @@ const queryLanguage = normalizeLanguage(
   typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
 );
 const resolvedUiLanguage = resolveUiLanguage(savedSettings);
-const supportedEbirdLanguages = new Set(EBIRD_LANGUAGES.map((language) => language.value));
-// storedSettings, not savedSettings: the defaults' "en" must not count as a user choice.
-const savedEbirdLanguage = normalizeEbirdLanguage(storedSettings?.ebirdLanguage);
-const legacySavedLanguage = normalizeEbirdLanguage(savedSettings.language);
-// With nothing saved, guess the UI language: most users display eBird names in the language they use here.
-const resolvedEbirdLanguage = supportedEbirdLanguages.has(savedEbirdLanguage)
-  ? savedEbirdLanguage
-  : supportedEbirdLanguages.has(legacySavedLanguage)
-    ? legacySavedLanguage
-    : supportedEbirdLanguages.has(resolvedUiLanguage)
-      ? resolvedUiLanguage
-      : "en";
 const initialWebsiteName =
   queryLanguage || !savedSettings.websiteName
     ? defaultWebsiteForLanguage(resolvedUiLanguage)
     : savedSettings.websiteName;
-const { assignmentMap: _legacyAssignmentMap, ...savedSettingsWithoutAssignmentMap } = savedSettings;
+// Dropped settings: assignmentMap, and ebirdLanguage/language (the export now writes scientific
+// names, which eBird matches whatever the account language).
+const {
+  assignmentMap: _legacyAssignmentMap,
+  ebirdLanguage: _legacyEbirdLanguage,
+  language: _legacyLanguage,
+  ...savedSettingsWithoutLegacyKeys
+} = savedSettings;
 const normalizedSpeciesCommentSettings = normalizeSpeciesCommentSettings(savedSettings);
 
 const settings = reactive({
   ...DEFAULT_SETTINGS,
-  ...savedSettingsWithoutAssignmentMap,
+  ...savedSettingsWithoutLegacyKeys,
   uiLanguage: resolvedUiLanguage,
-  ebirdLanguage: resolvedEbirdLanguage,
   websiteName: initialWebsiteName,
   assignmentMapBaseLayer: normalizeAssignmentMapBaseLayer(savedSettings.assignmentMapBaseLayer),
   speciesCommentTemplateOptions: normalizedSpeciesCommentSettings.options,
@@ -197,32 +165,23 @@ const infoSection = ref("");
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
-const { t } = useI18n({ useScope: "global" });
-const dismissedLanguageMismatchAlert = ref(
-  readStorage(LANGUAGE_MISMATCH_ALERT_STORAGE_KEY, { key: "", expiresAt: 0 }),
+
+// One-off announcement of a change returning users should know about. Shown to users who have
+// used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
+// For a new announcement, change NEWS.id.
+const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
+const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
+const showNews = ref(
+  storedSettings !== null &&
+    new Date() < new Date(NEWS.until) &&
+    readStorage(NEWS_STORAGE_KEY, "") !== NEWS.id,
 );
 
-const currentLanguageMismatchKey = computed(() => {
-  return `${languageFamily(settings.uiLanguage)}:${languageFamily(settings.ebirdLanguage)}`;
-});
-const showLanguageMismatchAlert = computed(() => {
-  const currentUiLanguageFamily = languageFamily(settings.uiLanguage);
-  const currentEbirdLanguageFamily = languageFamily(settings.ebirdLanguage);
-
-  if (!currentUiLanguageFamily || !currentEbirdLanguageFamily) {
-    return false;
-  }
-
-  if (currentUiLanguageFamily === currentEbirdLanguageFamily) {
-    return false;
-  }
-
-  const dismissed = dismissedLanguageMismatchAlert.value || {};
-  return !(
-    dismissed.key === currentLanguageMismatchKey.value && Number(dismissed.expiresAt) > Date.now()
-  );
-});
-
+function dismissNews() {
+  showNews.value = false;
+  writeStorage(NEWS_STORAGE_KEY, NEWS.id);
+}
+const { t } = useI18n({ useScope: "global" });
 function updateDocumentMetadata(language) {
   if (typeof document === "undefined") {
     return;
@@ -384,14 +343,6 @@ function openSettings(section = "") {
   settingsOpen.value = true;
 }
 
-function dismissLanguageMismatchAlert() {
-  dismissedLanguageMismatchAlert.value = {
-    key: currentLanguageMismatchKey.value,
-    expiresAt: Date.now() + LANGUAGE_MISMATCH_ALERT_DURATION_MS,
-  };
-  writeStorage(LANGUAGE_MISMATCH_ALERT_STORAGE_KEY, dismissedLanguageMismatchAlert.value);
-}
-
 function closeSettings() {
   settingsOpen.value = false;
   settingsFocusSection.value = "";
@@ -450,41 +401,30 @@ function openSettingsForSection(section) {
 
     <main class="main-stack">
       <div
-        v-if="showLanguageMismatchAlert"
-        class="alert alert-warning app-language-alert mb-0"
-        role="alert"
+        v-if="showNews"
+        class="alert alert-info d-flex align-items-start gap-3 mb-0"
+        role="status"
       >
-        <div class="d-flex align-items-start justify-content-between gap-3">
-          <div>
-            <h5 class="alert-heading mb-1 d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-              <span>{{ t("importLanguageMismatchTitle") }}</span>
-            </h5>
-            <p class="mb-0">
-              <span>{{ t("importLanguageMismatchBodyPrefix") }}</span>
-              <button
-                class="btn btn-link p-0 align-baseline"
-                type="button"
-                @click="openSettings('ebird-language')"
-              >
-                {{ t("importLanguageMismatchSettingsInlineLink") }}
-              </button>
-              <span>{{ t("importLanguageMismatchRecommendationMiddle") }}</span>
-              <a href="https://ebird.org/prefs" target="_blank" rel="noopener">
-                {{ t("importLanguageMismatchPrefsInlineLink") }}
-              </a>
-              <span>{{ t("importLanguageMismatchBodySuffix") }}</span>
-            </p>
-          </div>
-          <button
-            class="btn-close flex-shrink-0"
-            type="button"
-            :aria-label="t('close')"
-            @click="dismissLanguageMismatchAlert"
-          ></button>
+        <i class="bi bi-stars fs-5" aria-hidden="true"></i>
+        <div class="flex-grow-1">
+          <strong>{{
+            t("newsTitle", { version: version.split(".").slice(0, 2).join(".") })
+          }}</strong>
+          {{ t("newsBody") }}
+          <a
+            href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#issues-with-taxonomic-matching"
+            target="_blank"
+            rel="noopener"
+            >{{ t("newsLink") }}</a
+          >
         </div>
+        <button
+          class="btn-close flex-shrink-0"
+          type="button"
+          :aria-label="t('close')"
+          @click="dismissNews"
+        ></button>
       </div>
-
       <ImportPanel
         :selected-website-name="settings.websiteName"
         @update:selected-website-name="updateSelectedWebsiteName"
@@ -514,7 +454,6 @@ function openSettingsForSection(section) {
         :forms="forms"
         :sightings="sightings"
         :forms-sightings="formsSightings"
-        :selected-ebird-language="settings.ebirdLanguage"
         :mapbox-token="settings.mapboxToken"
         :github-token="settings.githubToken"
         :global-static-map="settings.globalStaticMap"

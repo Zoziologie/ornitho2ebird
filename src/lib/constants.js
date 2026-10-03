@@ -1,5 +1,3 @@
-import ebirdTaxonomyLanguages from "../../data/ebird_taxonomy_languages.json";
-
 export const APP_STORAGE_PREFIX = "ornitho2ebird";
 export const LANGUAGE_COOKIE_NAME = `${APP_STORAGE_PREFIX}_language`;
 export const LOCATION_NAME_MAX_LENGTH = 128;
@@ -13,8 +11,6 @@ export const UI_LANGUAGES = [
   { value: "de", label: "Deutsch" },
   { value: "it", label: "Italiano" },
 ];
-
-export const EBIRD_LANGUAGES = ebirdTaxonomyLanguages;
 
 // English has no obvious default source: the import panel shows a placeholder instead.
 export const DEFAULT_WEBSITE_BY_LANGUAGE = {
@@ -129,7 +125,6 @@ export const DEFAULT_SPECIES_COMMENT_TEMPLATE = {
 
 export const DEFAULT_SETTINGS = {
   uiLanguage: "en",
-  ebirdLanguage: "en",
   autoAssignDuration: 24,
   autoAssignDistance: 3,
   assignmentMapBaseLayer: "OpenStreetMap",

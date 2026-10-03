@@ -24,7 +24,7 @@
 23,Northern Gannet,Morus bassanus,norgan
 24,Great Cormorant,Phalacrocorax carbo,grecor
 25,Great Cormorant (P.c.carbo),Phalacrocorax carbo carbo,grecor1
-26,Great Cormorant (P.c.sinensis),Phalacrocorax carbo sinensis,
+26,Great Cormorant (P.c.sinensis),Phalacrocorax carbo sinensis,grecor6
 27,European Shag,Phalacrocorax aristotelis,eursha1
 28,Pygmy Cormorant,Phalacrocorax pygmeus,pygcor2
 29,Grey Heron,Ardea cinerea,graher1
@@ -465,7 +465,7 @@
 467,Tree Pipit,Anthus trivialis,trepip
 468,Red-throated Pipit,Anthus cervinus,retpip
 469,Water Pipit,Anthus spinoletta,watpip1
-470,Rock Pipit (A.p.petrosus),Anthus petrosus petrosus,
+470,Rock Pipit (A.p.petrosus),Anthus petrosus petrosus,rocpip3
 471,Rock Pipit (A.p.littoralis),Anthus petrosus littoralis,rocpip2
 472,White Wagtail,Motacilla alba,whiwag
 473,Pied Wagtail,Motacilla alba yarrellii,whiwag3
@@ -499,7 +499,7 @@
 501,Eurasian Siskin,Carduelis spinus,eursis
 502,Common Linnet,Carduelis cannabina,eurlin1
 503,Twite,Carduelis flavirostris,twite1
-504,Lesser Redpoll,Carduelis cabaret,lesred
+504,Lesser Redpoll,Carduelis cabaret,lesred1
 505,Common Redpoll,Carduelis flammea,redpol1
 506,Arctic Redpoll,Carduelis hornemanni,hoared
 507,Citril Finch,Serinus citrinella,citfin1
@@ -709,7 +709,7 @@
 1144,Masked Booby,Sula dactylatra,masboo
 1145,unidentified Diver,Gavia sp.,loon
 1146,"Grebe, unidentified",Podicipedidae sp.,grebe1
-1147,Héron strié,Butorides striata,strher
+1147,Héron strié,Butorides striata,strher2
 1148,Abdim's Stork,Ciconia abdimii,abdsto1
 1149,"Dabbling Duck, unidentified",Anatidae sp. (superficiem),dabduc1
 1150,"Diving Duck, unidentified",Aythya sp. (emersus),aythya1
@@ -730,7 +730,7 @@
 1168,Great Grey Owl,Strix nebulosa,grgowl
 1169,Syrian Woodpecker,Dendrocopos syriacus,syrwoo1
 1171,Western Jackdaw (C.m.spermologus),Corvus monedula spermologus,eurjac
-1172,Eastern Jackdaw (ssp. soemmerringii),Corvus monedula soemmerringii,
+1172,Eastern Jackdaw (ssp. soemmerringii),Corvus monedula soemmerringii,eurjac
 1173,Spotted Nutcracker (N.c.caryocadactes),Nucifraga caryocatactes caryocatactes,eurnut3
 1174,Spotted Nutcracker (ssp. macrorhynchos),Nucifraga caryocatactes macrorhynchos,
 1175,Western Rock Nuthatch,Sitta neumayer,rocnut1
@@ -877,7 +877,7 @@
 1388,Levant Sparrowhawk,Accipiter brevipes,levspa1
 1390,Tawny Eagle,Aquila rapax,taweag1
 1392,Sooty Falcon,Falco concolor,soofal1
-1393,Peregrine Falcon (ssp. calidus),Falco peregrinus calidus,
+1393,Peregrine Falcon (ssp. calidus),Falco peregrinus calidus,tupfal1
 1394,Peregrine Falcon (F.p.brookei),Falco peregrinus brookei,perfal3
 1395,Common Buttonquail,Turnix sylvaticus,smabut2
 1399,Grey-headed Swamphen,Porphyrio porphyrio poliocephalus,
@@ -1199,7 +1199,7 @@
 11276,Piranga rouge-sang,Piranga flava haemalea,heptan2
 11277,Summer Tanager,Piranga rubra,sumtan
 11281,Piranga bifascié,Piranga leucoptera,whwtan1
-11293,Granatelle de Pelzeln,Granatellus pelzelni,robcha1
+11293,Granatelle de Pelzeln,Granatellus pelzelni,robcha2
 11294,Vermilion Cardinal,Cardinalis phoeniceus,vercar1
 11295,Cardinal flavert,Caryothraustes canadensis,yeggro1
 11296,Cardinal érythromèle,Periporphyrus erythromelas,rabgro1
@@ -1223,7 +1223,7 @@
 11342,Ruddy Ground-Dove,Columbina talpacoti,rugdov
 11344,Colombe écaillée,Columbina squammata,scadov1
 11348,Colombe bleutée,Claravis pretiosa,blgdov1
-11357,Corvus monedula monedula / soemmeringgii,Corvus monedula monedula / soemmeringgii,
+11357,Corvus monedula monedula / soemmeringgii,Corvus monedula monedula / soemmeringgii,eurjac
 11360,Pigeon ramiret,Patagioenas speciosa,scapig2
 11367,Pigeon rousset,Patagioenas cayennensis,pavpig2
 11369,Pigeon plombé,Patagioenas plumbea,plupig2
@@ -1281,7 +1281,7 @@
 11658,Large-billed Seed-Finch,Sporophila crassirostris,lbsfin1
 11659,Sporophile crassirostre / de Maximilien,Sporophila crassirostris / maximiliani,
 11660,Sporophile de Maximilien,Sporophila maximiliani,gbsfin1
-11668,Tohi silencieux,Arremon taciturnus,pecspa1
+11668,Tohi silencieux,Arremon taciturnus,pecspa3
 11713,Araguira gris,Coryphospingus pileatus,pilfin1
 11714,Red-crested Finch,Coryphospingus cucullatus,recfin1
 11724,Estrildidae sp.,,
@@ -1637,7 +1637,7 @@
 13478,Calliste varié,Tangara velia,oprtan1
 13486,Calliste rouverdin,Tangara gyrola,bahtan1
 13496,Tersine hirondelle,Tersina viridis,swatan1
-13498,Dacnis à coiffe bleue,Dacnis lineata,blfdac1
+13498,Dacnis à coiffe bleue,Dacnis lineata,bkfdac2
 13503,Dacnis bleu,Dacnis cayana,bludac1
 13508,Guit-guit céruléen,Cyanerpes caeruleus,purhon1
 13509,Guit-guit saï,Cyanerpes cyaneus,relhon1
@@ -1825,7 +1825,7 @@
 14409,Viréon à gorge grise,Hylophilus semicinereus,gycgre1
 14410,Viréon à tête cendrée,Hylophilus pectoralis,ashgre1
 14416,Viréon fardé,Pachysylvia muscicapina,bucgre1
-14419,Viréon à calotte rousse,Tunchiornis ochraceiceps,tacgre1
+14419,Viréon à calotte rousse,Tunchiornis ochraceiceps,tacgre2
 15060,Blue-headed Hummingbird,Cyanophaia bicolor,blhhum1
 15096,Lepidochelys olivacea,,
 15148,House Finch,Haemorhous mexicanus,houfin
@@ -2844,7 +2844,7 @@
 19592,Lesser Black-backed x Yellow Legged Gull,Larus fuscus x michahellis,
 19593,Herring x Glaucous Gull,Larus argentatus x hyperboreus,nelgul
 19594,Herring x Lesser Black-backed Gull,Larus argentatus x fuscus,x00057
-19595,Herring x Yellow-legged Gull,Larus argentatus x michahellis,
+19595,Herring x Yellow-legged Gull,Larus argentatus x michahellis,x01182
 19596,Hybrid European Herring x Caspian Gull,Larus argentatus x cachinnans,x00915
 19597,Red-tailed Hawk,Buteo jamaicensis,rethaw
 19599,White-spotted Bluethroat / L.s.namnetum,Luscinia svecica cyanecula / namnetum,
@@ -3682,13 +3682,13 @@
 35924,Caspian Tit,Poecile hyrcanus,castit2
 35928,Black-capped Chickadee,Poecile atricapillus,bkcchi
 35931,Grey-headed Chickadee,Poecile cinctus,gyhchi
-35935,Japanese Tit,Parus minor,gretit4
+35935,Japanese Tit,Parus minor,japtit4
 35959,White-crowned Penduline Tit,Remiz coronatus,wcptit1
 36008,Flappet Lark,Mirafra rufocinnamomea,flalar1
 36047,Mongolian Lark,Melanocorypha mongolica,monlar1
 36053,Sand Lark,Alaudala raytal,sanlar1
 36160,Puff-throated Bulbul,Alophoixus pallidus,putbul1
-36234,Rock Martin,Ptyonoprogne fuligula,rocmar2
+36234,Rock Martin,Ptyonoprogne fuligula,rocmar5
 36303,Asian Stubtail,Urosphena squameiceps,asistu1
 36319,Rufous-fronted Bushtit,Aegithalos iouschistos,bkbtit3
 36326,American Bushtit,Psaltriparus minimus,bushti
@@ -3766,7 +3766,7 @@
 38646,Paracordulia sp.,,
 38647,Agriogomphus sp.,,
 38657,Hybrid Grey-headed x Green Woodpecker,Picus canus x viridis,x00855
-38658,Balearic Spotted Flycatcher,Muscicapa striata balearica,
+38658,Balearic Spotted Flycatcher,Muscicapa striata balearica,spofly3
 38659,Muscicapa striata tyrrhenica / balearica,Muscicapa striata tyrrhenica / balearica,spofly3
 38665,Gastropoda sp.,,
 38682,Rhopalocera sp.,,
@@ -3873,7 +3873,7 @@
 48726,Phasmatodea sp.,,
 49081,Common Chaffinch (Canaries Is.),Fringilla coelebs canariensis,
 49084,Linnet (E Canaries Is.),Carduelis cannabina harterti,
-49086,Common Kestrel (ssp. canariensis),Falco tinnunculus canariensis,
+49086,Common Kestrel (ssp. canariensis),Falco tinnunculus canariensis,eurkes3
 49090,Robin (Canaries Is.),Erithacus rubecula superbus,
 49091,Blackbird (Canaries Is.),Turdus merula cabrerae,
 49092,Eurasian Stone-Curlew (W Canaries Is.),Burhinus oedicnemus distinctus,

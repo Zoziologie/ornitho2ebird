@@ -95,9 +95,19 @@ function maxStaticMapUrlLengthForComment(
   return Math.max(0, EBIRD_COMMENT_MAX_LENGTH - commentWithoutMap.length - staticMapWrapperLength);
 }
 
+// eBird's import matches a scientific name in any account language, but a common name only in
+// the account's own display language. So when the eBird scientific name is known, the row
+// gets only that ("Acanthis" + "flammea cabaret"), and the common name is left empty.
+export function splitScientificName(scientificName) {
+  const [genus, ...rest] = String(scientificName || "")
+    .trim()
+    .split(/\s+/);
+  return { Genus: genus || "", Species: rest.join(" ") };
+}
+
 function rowHasError(row) {
   return (
-    !row.common_name ||
+    !(row.common_name || row.Genus) ||
     (row.count !== "X" && Number(row.count) > EBIRD_MAX_COUNT) ||
     (row.count !== "X" && Number(row.count) < 0) ||
     (row.species_comment || "").length > EBIRD_COMMENT_MAX_LENGTH ||
@@ -112,6 +122,7 @@ export function buildExportRows({
   sightingsByFormId,
   speciesCommentTemplate,
   commonNameForSighting,
+  scientificNameForSighting = () => "",
   importedWithText,
   mapboxToken = "",
   globalStaticMap = null,
@@ -148,10 +159,10 @@ export function buildExportRows({
     });
     return buildSpeciesRows(formSightings, speciesCommentTemplate, commonNameForSighting).map(
       (speciesRow) => {
+        const scientificName = scientificNameForSighting(speciesRow.sightings[0]);
         const row = {
-          common_name: speciesRow.common_name,
-          Genus: "",
-          Species: "",
+          common_name: scientificName ? "" : speciesRow.common_name,
+          ...splitScientificName(scientificName),
           count: speciesRow.count,
           species_comment: speciesRow.species_comment,
           location_name: normalizeLocationName(form.location_name),

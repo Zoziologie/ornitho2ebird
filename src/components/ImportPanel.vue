@@ -3,9 +3,14 @@ import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import websitesList from "/data/websites_list.json";
 import { buildSpeciesCommentTemplate } from "../lib/utils";
-import { loadOrnithoSpeciesList } from "../lib/taxonomy";
+import { loadOrnithoSpeciesList, loadScientificNameIndex } from "../lib/taxonomy";
 import { fetchJson } from "../lib/http";
-import { ImportError, parseImportFile } from "../lib/importers";
+import {
+  ImportError,
+  assignEbirdCodesFromScientificNames,
+  needsScientificNameLookup,
+  parseImportFile,
+} from "../lib/importers";
 
 const props = defineProps({
   selectedWebsiteName: {
@@ -146,6 +151,18 @@ watch(file, async (nextFile) => {
       return;
     }
     const parsed = parseImportFile(rawText, website.value);
+    if (needsScientificNameLookup(parsed)) {
+      try {
+        await loadScientificNameIndex();
+        assignEbirdCodesFromScientificNames(parsed);
+      } catch (error) {
+        // Not fatal: these sightings keep their source names in the export.
+        console.warn("Could not load the eBird scientific names", error);
+      }
+      if (isStale()) {
+        return;
+      }
+    }
     parsed.website = {
       ...website.value,
       species_comment_template: buildSpeciesCommentTemplate(website.value),

@@ -7,6 +7,9 @@ import bootstrapIconsSubset from "./build/bootstrapIconsSubset.js";
 export default defineConfig({
   plugins: [vue(), bootstrapIconsSubset()],
   build: {
+    // data/ebird_scientific_names.json is one ~660 KB chunk (~180 KB compressed), loaded only
+    // when an import has sightings without an eBird code.
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
         manualChunks(id) {

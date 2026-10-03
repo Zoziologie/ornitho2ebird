@@ -1,3 +1,9 @@
 **/node_modules
 dist
 .DS_Store
+
+# Local Claude Code preview config
+.claude/
+
+# Output of npm run taxonomy:test-file
+ebird_matching_test.csv
