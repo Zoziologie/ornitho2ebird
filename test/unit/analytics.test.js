@@ -119,6 +119,32 @@ describe("optional analytics", () => {
     expect(commands(browser)).toHaveLength(count);
   });
 
+  it.each(["disabled", "options", "personalized"])(
+    "allows export comment mode %s without transmitting contents",
+    (mode) => {
+      const browser = browserWith(savedChoice("accepted"));
+      const analytics = createAnalytics(browser);
+      analytics.start();
+      analytics.track("export_csv", {
+        mode: "basic",
+        outcome: "success",
+        comment_mode: mode,
+        has_species_comments: "yes",
+        template: "private",
+        comment: "private",
+      });
+      expect(commands(browser).at(-1)[2]).toMatchObject({
+        comment_mode: mode,
+        has_species_comments: "yes",
+      });
+      expect(JSON.stringify(commands(browser))).not.toContain("private");
+      const count = commands(browser).length;
+      analytics.track("export_csv", { comment_mode: "private template" });
+      analytics.track("export_csv", { has_species_comments: "private comment" });
+      expect(commands(browser)).toHaveLength(count);
+    },
+  );
+
   it("withdraws without reloading and permits later acceptance without another tag", () => {
     const browser = browserWith(savedChoice("accepted"));
     const analytics = createAnalytics(browser);

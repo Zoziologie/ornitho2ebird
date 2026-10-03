@@ -26,7 +26,7 @@ connection/browser data; the translated notice links to Google's privacy policy.
 | --- | --- | --- |
 | `page_view` | Fixed page context | Once when the tag starts |
 | `import_file` | `source_website`, `outcome` | Latest import succeeds or fails |
-| `export_csv` | `mode`, `outcome` | Download initiated, or map publishing blocks it |
+| `export_csv` | `mode`, `outcome`, `comment_mode`, `has_species_comments` | Download initiated, or map publishing blocks it |
 | `publish_maps` | `outcome` | Interactive maps published, or publishing fails |
 | `mode_change` | `mode` | Basic/customized mode changed |
 | `language_change` | `language` | Interface language changed |
@@ -37,8 +37,32 @@ connection/browser data; the translated notice links to Google's privacy policy.
 | `checklist_action` | `action` | Create/delete/assign/clean/reset/auto-assign/path/hotspot/move/edit tools used |
 
 Downloads measure the browser initiating a download, not a later eBird upload.
+For successful downloads, `comment_mode` records the actual selected species-comment
+configuration: `disabled`, `options` (the standard checkbox-based template, enabled
+by default), or `personalized` (a typed template). `has_species_comments` is `yes`
+when at least one exported species row has a nonempty comment, otherwise `no`.
+Neither parameter contains comment or template text. These are attached to successful
+download events, so unchanged saved settings are represented too.
+
 Reports cover consenting visitors only, so compare pre-consent totals cautiously.
 Golden CSV files are unchanged.
+
+## Reading usage reports
+
+In GA, filter to stream **ornitho2ebird** and use event counts for actions and
+**Total users** for people. One person can import or export several times.
+
+- Imports: `import_file`, `outcome = success`; use `failure` to see failed attempts.
+- Downloads: `export_csv`, `outcome = success`.
+- Basic versus Customized use: split successful downloads by `mode`.
+- Species comments: split successful downloads by `comment_mode` and
+  `has_species_comments`. The checkbox options are enabled by default, so a high
+  `options` count does not mean people manually edited them.
+- Feature interactions: `setting_change` by `setting_name`, `checklist_action` by
+  `action`, and `help_open` by `section`.
+
+The new usage events begin only after deployment; old page views do not provide
+historical conversion counts. Custom dimensions may take time to appear in reports.
 
 ## Verified GA administrator setup
 
@@ -52,6 +76,8 @@ Ornitho2eBird stream in the shared **Zoziologie** property (`269867498`):
 - Created four event-scoped dimensions: **O2E source website** (`source_website`),
   **O2E interface language** (`language`), **O2E help section** (`section`), and
   **O2E checklist action** (`action`).
+- Also registered **O2E comment mode** (`comment_mode`) and **O2E species comments
+  included** (`has_species_comments`) for successful downloads.
 - Four parameters were already registered for Global Rare eBird. Reuse those
   property-wide definitions: **GRE outcome** (`outcome`), **GRE mode** (`mode`),
   **GRE map layer** (`layer`), and **GRE setting name** (`setting_name`). Their

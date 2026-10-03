@@ -1,3 +1,4 @@
+import Papa from "papaparse";
 import { expect, test } from "@playwright/test";
 import { downloadCsv, importFixture, openApp, readGolden, stubNetwork } from "./helpers";
 
@@ -23,7 +24,12 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
   ]);
   expect(events).toContainEqual([
     "export_csv",
-    expect.objectContaining({ mode: "basic", outcome: "success" }),
+    expect.objectContaining({
+      mode: "basic",
+      outcome: "success",
+      comment_mode: "options",
+      has_species_comments: "yes",
+    }),
   ]);
   await page.getByRole("button", { name: "Privacy & cookies", exact: true }).click();
   await page.getByRole("button", { name: "Reject analytics" }).click();
@@ -51,4 +57,38 @@ test("mobile rejection allows conversion without Google requests", async ({ page
   await expect(page.getByRole("button", { name: "Privacy & cookies", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Accept analytics" })).toHaveCount(0);
   expect(googleRequests(requests)).toEqual([]);
+});
+
+// The usage categories should describe the comments actually included in the CSV.
+test("exports report personalized and disabled species comments without their contents", async ({
+  page,
+}) => {
+  await stubNetwork(page);
+  await openApp(page);
+  await page.getByRole("button", { name: "Accept analytics" }).click();
+  await importFixture(page, "ornitho.ch", FIXTURE);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#personalized-species-comments").check();
+  await page.locator("#short-template-textarea").fill("Private template text");
+  await page.locator("#long-template-textarea").fill("Private template text");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  expect(
+    Papa.parse(await downloadCsv(page)).data.every((row) =>
+      row[4].split(/<br\/>|, /).every((comment) => comment === "Private template text"),
+    ),
+  ).toBe(true);
+  let payload = await page.evaluate(
+    () => window.dataLayer.filter((entry) => entry[1] === "export_csv").at(-1)[2],
+  );
+  expect(payload).toMatchObject({ comment_mode: "personalized", has_species_comments: "yes" });
+  expect(JSON.stringify(payload)).not.toContain("Private template text");
+
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#customized-species-comments").uncheck();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  expect(Papa.parse(await downloadCsv(page)).data.every((row) => row[4] === "")).toBe(true);
+  payload = await page.evaluate(
+    () => window.dataLayer.filter((entry) => entry[1] === "export_csv").at(-1)[2],
+  );
+  expect(payload).toMatchObject({ comment_mode: "disabled", has_species_comments: "no" });
 });

@@ -20,6 +20,8 @@ const allowedValues = {
   source_website: websites.map(({ name }) => name),
   outcome: ["success", "failure", "blocked"],
   mode: ["basic", "customized"],
+  comment_mode: ["disabled", "options", "personalized"],
+  has_species_comments: ["yes", "no"],
   language: ["en", "fr", "de", "it", "ca"],
   section: [
     "",
@@ -63,7 +65,7 @@ const allowedValues = {
 };
 const eventFields = {
   import_file: ["source_website", "outcome"],
-  export_csv: ["mode", "outcome"],
+  export_csv: ["mode", "outcome", "comment_mode", "has_species_comments"],
   publish_maps: ["outcome"],
   mode_change: ["mode"],
   language_change: ["language"],

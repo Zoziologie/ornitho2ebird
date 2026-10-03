@@ -54,6 +54,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  personalizedSpeciesComments: {
+    type: Boolean,
+    default: false,
+  },
   advancedEnabled: {
     type: Boolean,
     default: false,
@@ -473,6 +477,14 @@ async function downloadFile() {
   trackEvent("export_csv", {
     mode: props.advancedEnabled ? "customized" : "basic",
     outcome: "success",
+    comment_mode: !props.customizedSpeciesComments
+      ? "disabled"
+      : props.personalizedSpeciesComments
+        ? "personalized"
+        : "options",
+    has_species_comments: exportState.value.rows.some((row) => row.species_comment.trim())
+      ? "yes"
+      : "no",
   });
 }
 </script>

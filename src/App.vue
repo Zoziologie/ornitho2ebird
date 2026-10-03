@@ -446,6 +446,7 @@ function openSettingsForSection(section) {
         :global-static-map="settings.globalStaticMap"
         :species-comment-template="settings.speciesCommentTemplate"
         :customized-species-comments="settings.customizedSpeciesComments"
+        :personalized-species-comments="settings.speciesCommentTemplateOptions.personalized"
         :advanced-enabled="settings.advancedEnabled"
         :auto-assign-duration="settings.autoAssignDuration"
         :auto-assign-distance="settings.autoAssignDistance"
