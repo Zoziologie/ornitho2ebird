@@ -453,7 +453,8 @@ async function downloadFile() {
     return;
   }
 
-  const blob = new Blob(["\ufeff", exportState.value.csv], { type: "text/csv" });
+  // eBird reads a UTF-8 BOM as a one-character common name in the first empty cell.
+  const blob = new Blob([exportState.value.csv], { type: "text/csv;charset=utf-8" });
   const link = document.createElement("a");
   const objectUrl = URL.createObjectURL(blob);
   link.href = objectUrl;

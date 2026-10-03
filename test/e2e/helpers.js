@@ -87,13 +87,13 @@ export async function importFixture(page, websiteName, fixture) {
   await expect(page.locator(".alert-success")).toContainText("Data loaded successfully");
 }
 
-// Clicks "Download CSV" and returns the file's text, without the BOM the app adds for Excel.
+// Clicks "Download CSV" and returns the exact file text uploaded to eBird.
 export async function downloadCsv(page) {
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download CSV" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^ornitho2ebird_\d{8}_\d{6}\.csv$/);
   const text = readFileSync(await download.path(), "utf8");
-  expect(text.startsWith("﻿")).toBe(true);
-  return text.slice(1);
+  expect(text.startsWith("\ufeff")).toBe(false);
+  return text;
 }
