@@ -13,7 +13,7 @@
   - [#32](https://github.com/Zoziologie/ornitho2ebird/issues/32) tracks the refactor steps.
   - No login and no backend: the app stays a static site.
   - Customized mode is for desktop only: don't spend effort on making its maps work on phones. Basic mode must work on phones.
-  - The map library is to be chosen before #40 and the maps rebuilt as part of it ([#34](https://github.com/Zoziologie/ornitho2ebird/issues/34)). Leaflet 2 is not planned.
+  - The maps move from Leaflet to MapLibre GL JS, rebuilt as part of #40 ([#34](https://github.com/Zoziologie/ornitho2ebird/issues/34) has the comparison). Until then, don't invest in the Leaflet code or its plugins. With Vite, MapLibre 6 needs `setWorkerUrl()` with a `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` import.
   - Better analytics come later.
 - **User help lives in the app, not in a wiki.** The GitHub wiki is disabled.
 
