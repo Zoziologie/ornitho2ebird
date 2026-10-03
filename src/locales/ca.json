@@ -309,5 +309,9 @@
   "exportBasicChangeGrouping": "canvia",
   "exportBasicReview": "Revisa en mode personalitzat",
   "finalStepsFaq": "Alguna cosa inesperada? Consulta les [preguntes freqüents].",
-  "importedWith": "Importat amb ornitho2eBird."
+  "importedWith": "Importat amb ornitho2eBird.",
+  "mapZoomIn": "Apropa",
+  "mapZoomOut": "Allunya",
+  "mapScrollZoomHelp": "Fes servir {key} + roda del ratolí per fer zoom al mapa",
+  "mapTouchMoveHelp": "Fes servir dos dits per moure el mapa"
 }

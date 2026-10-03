@@ -48,7 +48,6 @@ const assignDuration = ref(props.defaultAssignDuration || 1);
 const assignDistance = ref(props.defaultAssignDistance || 3);
 const assignFormId = ref(0);
 let creatingChecklist = false;
-const assignmentMapShellElement = ref(null);
 const assignmentMap = ref(null);
 const reviewMap = ref(null);
 const assignSelectorOpen = ref(false);
@@ -56,7 +55,6 @@ const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
 const observationsModalOpen = ref(false);
-const assignmentMapFullscreen = ref(false);
 
 const unassignedColor = UNASSIGNED_COLOR;
 const checklistColors = CHECKLIST_COLORS;
@@ -365,40 +363,6 @@ function handleDocumentClick(event) {
   }
 }
 
-function fullscreenElement() {
-  return document.fullscreenElement || document.webkitFullscreenElement || null;
-}
-
-function syncAssignmentMapFullscreenState() {
-  assignmentMapFullscreen.value = fullscreenElement() === assignmentMapShellElement.value;
-}
-
-async function toggleAssignmentMapFullscreen() {
-  const shell = assignmentMapShellElement.value;
-  if (!shell) {
-    return;
-  }
-
-  try {
-    if (fullscreenElement() === shell) {
-      if (document.exitFullscreen) {
-        await document.exitFullscreen();
-      } else {
-        document.webkitExitFullscreen?.();
-      }
-      return;
-    }
-
-    if (shell.requestFullscreen) {
-      await shell.requestFullscreen();
-    } else {
-      shell.webkitRequestFullscreen?.();
-    }
-  } catch {
-    syncAssignmentMapFullscreenState();
-  }
-}
-
 watch(
   () => props.forms.map((form) => form.id),
   (formIds) => {
@@ -568,14 +532,10 @@ watch(
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleDocumentClick);
-  document.removeEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
-  document.removeEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
 });
 
 onMounted(() => {
   document.addEventListener("click", handleDocumentClick);
-  document.addEventListener("fullscreenchange", syncAssignmentMapFullscreenState);
-  document.addEventListener("webkitfullscreenchange", syncAssignmentMapFullscreenState);
 });
 </script>
 
@@ -586,7 +546,7 @@ onMounted(() => {
         <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
         <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
-        <div ref="assignmentMapShellElement" class="assignment-map-shell mb-3">
+        <div class="assignment-map-shell mb-3">
           <AssignmentMap
             ref="assignmentMap"
             class="assignment-map rounded border"
@@ -602,29 +562,6 @@ onMounted(() => {
             @assign="store.assignSightings"
             @selection="applyAssignmentSelection"
           />
-
-          <button
-            class="assignment-map-fullscreen btn btn-light btn-sm"
-            type="button"
-            :aria-label="
-              assignmentMapFullscreen
-                ? t('assignmentMapExitFullscreen')
-                : t('assignmentMapEnterFullscreen')
-            "
-            :title="
-              assignmentMapFullscreen
-                ? t('assignmentMapExitFullscreen')
-                : t('assignmentMapEnterFullscreen')
-            "
-            :aria-pressed="assignmentMapFullscreen"
-            @click="toggleAssignmentMapFullscreen"
-          >
-            <i
-              class="bi"
-              :class="assignmentMapFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"
-              aria-hidden="true"
-            ></i>
-          </button>
 
           <div class="assignment-map-controls">
             <button

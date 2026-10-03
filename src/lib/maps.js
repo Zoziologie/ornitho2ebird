@@ -1,4 +1,11 @@
-import { LngLatBounds, Map, NavigationControl, Popup, setWorkerUrl } from "maplibre-gl";
+import {
+  FullscreenControl,
+  LngLatBounds,
+  Map,
+  NavigationControl,
+  Popup,
+  setWorkerUrl,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 // MapLibre 6 looks for its worker next to its own module, which the bundler moves. `?worker&url`
 // makes Vite bundle the worker with the code it imports and give its URL (plain `?url` breaks the
@@ -23,7 +30,7 @@ function styleFor(id) {
   };
 }
 
-// The basemap select, styled like the zoom buttons above it. `groups`: see basemapGroups.
+// The basemap select, styled like the zoom buttons. `groups`: see basemapGroups.
 class BaseLayerControl {
   constructor({ value, groups, label, onChange }) {
     this.value = value;
@@ -67,11 +74,13 @@ class BaseLayerControl {
   }
 }
 
-// A map like the Leaflet ones it replaces: no rotation or tilt, zoom buttons and the basemap select
-// at the top left. `onBaseLayerChange` gets the name chosen in the select.
+// A map without rotation or tilt: the basemap select at the top left, the zoom buttons at the top
+// right, with a fullscreen button below them when `fullscreenContainer` is given (the element shown
+// fullscreen). The scroll wheel zooms only with Ctrl (⌘ on a Mac), so scrolling the page does not
+// zoom the map. `t` translates the controls; `onBaseLayerChange` gets the name chosen in the select.
 export function createMap(
   container,
-  { baseLayer, baseLayerGroups, baseLayerLabel, onBaseLayerChange },
+  { baseLayer, baseLayerGroups, onBaseLayerChange, fullscreenContainer, t },
 ) {
   const selectedName = findBasemap(baseLayer).id;
   const map = new Map({
@@ -83,18 +92,31 @@ export function createMap(
     dragRotate: false,
     pitchWithRotate: false,
     touchPitch: false,
+    cooperativeGestures: true,
     attributionControl: { compact: true },
+    locale: {
+      "NavigationControl.ZoomIn": t("mapZoomIn"),
+      "NavigationControl.ZoomOut": t("mapZoomOut"),
+      "FullscreenControl.Enter": t("assignmentMapEnterFullscreen"),
+      "FullscreenControl.Exit": t("assignmentMapExitFullscreen"),
+      "CooperativeGesturesHandler.WindowsHelpText": t("mapScrollZoomHelp", { key: "Ctrl" }),
+      "CooperativeGesturesHandler.MacHelpText": t("mapScrollZoomHelp", { key: "⌘" }),
+      "CooperativeGesturesHandler.MobileHelpText": t("mapTouchMoveHelp"),
+    },
   });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
-  map.addControl(new NavigationControl({ showCompass: false }), "top-left");
   const baseLayerControl = new BaseLayerControl({
     value: selectedName,
     groups: baseLayerGroups,
-    label: baseLayerLabel,
+    label: t("assignmentMapBaseLayer"),
     onChange: onBaseLayerChange,
   });
   map.addControl(baseLayerControl, "top-left");
+  map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+  if (fullscreenContainer) {
+    map.addControl(new FullscreenControl({ container: fullscreenContainer }), "top-right");
+  }
 
   let shownName = selectedName;
   return {

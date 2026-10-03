@@ -296,8 +296,10 @@ function initialize() {
   const created = createMap(container.value, {
     baseLayer: props.baseLayer,
     baseLayerGroups: basemapGroups(t, locale.value),
-    baseLayerLabel: t("assignmentMapBaseLayer"),
     onBaseLayerChange: (name) => emit("update:baseLayer", name),
+    // The parent also holds the assignment tools, which stay on the map in fullscreen.
+    fullscreenContainer: container.value.parentElement,
+    t,
   });
   map = created.map;
   mapControls = created;

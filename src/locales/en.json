@@ -309,5 +309,9 @@
   "exportBasicChangeGrouping": "change",
   "exportBasicReview": "Review in Customized mode",
   "finalStepsFaq": "Something unexpected? See the [frequently asked questions].",
-  "importedWith": "Imported with ornitho2eBird."
+  "importedWith": "Imported with ornitho2eBird.",
+  "mapZoomIn": "Zoom in",
+  "mapZoomOut": "Zoom out",
+  "mapScrollZoomHelp": "Use {key} + scroll to zoom the map",
+  "mapTouchMoveHelp": "Use two fingers to move the map"
 }

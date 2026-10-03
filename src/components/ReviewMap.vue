@@ -342,8 +342,8 @@ function initialize() {
   const created = createMap(container.value, {
     baseLayer: props.baseLayer,
     baseLayerGroups: basemapGroups(t, locale.value),
-    baseLayerLabel: t("assignmentMapBaseLayer"),
     onBaseLayerChange: (name) => emit("update:baseLayer", name),
+    t,
   });
   map = created.map;
   mapControls = created;

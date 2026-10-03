@@ -309,5 +309,9 @@
   "exportBasicChangeGrouping": "modifica",
   "exportBasicReview": "Controlla in modalità personalizzata",
   "finalStepsFaq": "Qualcosa di inatteso? Consulta le [domande frequenti].",
-  "importedWith": "Importato con ornitho2eBird."
+  "importedWith": "Importato con ornitho2eBird.",
+  "mapZoomIn": "Ingrandisci",
+  "mapZoomOut": "Riduci",
+  "mapScrollZoomHelp": "Usa {key} + rotellina per ingrandire la mappa",
+  "mapTouchMoveHelp": "Usa due dita per spostare la mappa"
 }
