@@ -362,10 +362,7 @@ const basicModeSummary = computed(() => {
     (total, { form }) => total + (exportableSightingsByFormId.value.get(form.id)?.length || 0),
     0,
   );
-  const historical = exportableForms.value.filter(
-    ({ protocolState }) => protocolState.name === "Historical",
-  ).length;
-  return { createdChecklists: createdForms.length, createdSightings, historical };
+  return { createdChecklists: createdForms.length, createdSightings };
 });
 
 function openCustomizedMode() {
@@ -477,23 +474,6 @@ async function downloadFile() {
       </div>
 
       <div v-else>
-        <div v-if="speciesToMatchOnce.length > 0" class="alert alert-info small mb-3">
-          {{ t("exportManualMatchNote") }}
-          <ul class="mb-0 mt-1">
-            <li v-for="species in displayedSpeciesToMatchOnce" :key="species.name">
-              <i v-if="species.scientific">{{ species.name }}</i
-              ><template v-else>{{ species.name }}</template
-              ><template v-if="species.hint"> → {{ species.hint }}</template>
-            </li>
-            <li v-if="speciesToMatchOnce.length > displayedSpeciesToMatchOnce.length">
-              {{
-                t("exportTaxonomyWarningMore", {
-                  count: speciesToMatchOnce.length - displayedSpeciesToMatchOnce.length,
-                })
-              }}
-            </li>
-          </ul>
-        </div>
         <div
           v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'"
           class="alert alert-secondary mb-3"
@@ -573,55 +553,6 @@ async function downloadFile() {
           </ul>
         </div>
 
-        <div
-          v-if="
-            !advancedEnabled &&
-            (basicModeSummary.createdChecklists > 0 || basicModeSummary.historical > 0)
-          "
-          class="alert alert-light border small mb-3"
-        >
-          <template v-if="basicModeSummary.createdChecklists > 0">
-            <p class="mb-1">
-              {{
-                t(
-                  "exportBasicCreated",
-                  {
-                    checklists: formatNumber(basicModeSummary.createdChecklists),
-                    sightings: formatNumber(basicModeSummary.createdSightings),
-                  },
-                  basicModeSummary.createdSightings,
-                )
-              }}
-              {{ t("exportBasicGrouping", { hours: autoAssignDuration, km: autoAssignDistance }) }}
-            </p>
-          </template>
-          <p v-if="basicModeSummary.historical > 0" class="mb-1">
-            <LinkedText
-              :text="
-                t(
-                  'exportBasicHistorical',
-                  { count: formatNumber(basicModeSummary.historical) },
-                  basicModeSummary.historical,
-                )
-              "
-              :links="['#help/conversion']"
-            />
-          </p>
-          <div class="d-flex flex-wrap gap-3">
-            <button
-              v-if="basicModeSummary.createdChecklists > 0"
-              class="btn btn-link btn-sm p-0"
-              type="button"
-              @click="emit('open-settings-section', 'aggregation')"
-            >
-              {{ t("exportBasicChangeGrouping") }}
-            </button>
-            <button class="btn btn-link btn-sm p-0" type="button" @click="openCustomizedMode">
-              {{ t("exportBasicReview") }}
-            </button>
-          </div>
-        </div>
-
         <div class="export-overview mb-3">
           <section class="export-panel export-panel-protocol">
             <div class="export-panel-eyebrow">{{ t("exportPanelProtocols") }}</div>
@@ -646,54 +577,43 @@ async function downloadFile() {
                 <span class="export-protocol-label">{{
                   t(`protocolLabel${item.name}`, item.count)
                 }}</span>
+                <span
+                  v-if="item.name === 'Incidental' && basicModeSummary.createdChecklists > 0"
+                  class="export-protocol-note"
+                >
+                  {{
+                    t(
+                      "exportIncidentalNote",
+                      {
+                        sightings: formatNumber(basicModeSummary.createdSightings),
+                        hours: autoAssignDuration,
+                        km: autoAssignDistance,
+                      },
+                      basicModeSummary.createdSightings,
+                    )
+                  }}
+                  ·
+                  <button
+                    class="btn btn-link btn-sm p-0 align-baseline"
+                    type="button"
+                    @click="emit('open-settings-section', 'aggregation')"
+                  >
+                    {{ t("exportBasicChangeGrouping") }}
+                  </button>
+                </span>
+                <span v-else-if="item.name === 'Historical'" class="export-protocol-note">
+                  <LinkedText :text="t('exportHistoricalNote')" :links="['#help/conversion']" />
+                </span>
               </div>
             </div>
-          </section>
-
-          <section class="export-panel export-panel-stats">
-            <div class="export-panel-eyebrow">{{ t("exportPanelSnapshot") }}</div>
-            <div class="export-stat-grid">
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-feather" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalSpecies)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummarySpecies", exportSummaryStats.totalSpecies)
-                }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-binoculars" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalSightings)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummarySightings", exportSummaryStats.totalSightings)
-                }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-check2-square" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{ exportSummaryStats.completePercent }}%</span>
-                <span class="export-stat-label">{{ t("exportSummaryComplete") }}</span>
-              </div>
-              <div class="export-stat-tile">
-                <span class="export-stat-icon"
-                  ><i class="bi bi-geo-alt" aria-hidden="true"></i
-                ></span>
-                <span class="export-stat-value">{{
-                  formatNumber(exportSummaryStats.totalLocations)
-                }}</span>
-                <span class="export-stat-label">{{
-                  t("exportSummaryLocations", exportSummaryStats.totalLocations)
-                }}</span>
-              </div>
-            </div>
+            <button
+              v-if="!advancedEnabled"
+              class="btn btn-link btn-sm p-0 align-self-start export-protocol-review"
+              type="button"
+              @click="openCustomizedMode"
+            >
+              {{ t("exportBasicReview") }}
+            </button>
           </section>
 
           <section class="export-panel export-panel-action">
@@ -761,6 +681,15 @@ async function downloadFile() {
             >
               {{ interactiveMapPublishing ? t("interactiveMapPublishing") : t("downloadCsv") }}
             </button>
+            <p class="export-snapshot small mb-0">
+              {{ formatNumber(exportSummaryStats.totalSpecies) }}
+              {{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }} ·
+              {{ formatNumber(exportSummaryStats.totalSightings) }}
+              {{ t("exportSummarySightings", exportSummaryStats.totalSightings) }} ·
+              {{ formatNumber(exportSummaryStats.totalLocations) }}
+              {{ t("exportSummaryLocations", exportSummaryStats.totalLocations) }} ·
+              {{ exportSummaryStats.completePercent }}% {{ t("exportSummaryComplete") }}
+            </p>
           </section>
         </div>
 
@@ -818,6 +747,23 @@ async function downloadFile() {
                 <strong>{{ t("openEbirdImport") }}</strong
                 >,
                 {{ t("finalStepsImportSuffix") }}
+                <div v-if="speciesToMatchOnce.length > 0" class="small mt-1">
+                  {{ t("exportManualMatchNote") }}
+                  <ul class="mb-0">
+                    <li v-for="species in displayedSpeciesToMatchOnce" :key="species.name">
+                      <i v-if="species.scientific">{{ species.name }}</i
+                      ><template v-else>{{ species.name }}</template
+                      ><template v-if="species.hint"> → {{ species.hint }}</template>
+                    </li>
+                    <li v-if="speciesToMatchOnce.length > displayedSpeciesToMatchOnce.length">
+                      {{
+                        t("exportTaxonomyWarningMore", {
+                          count: speciesToMatchOnce.length - displayedSpeciesToMatchOnce.length,
+                        })
+                      }}
+                    </li>
+                  </ul>
+                </div>
               </li>
               <li>
                 {{ t("finalStepsProcessingPrefix") }}

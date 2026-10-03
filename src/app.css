@@ -298,7 +298,7 @@ h6 {
 
 .export-overview {
   display: grid;
-  grid-template-columns: 1.15fr 1fr 0.9fr;
+  grid-template-columns: 1.4fr 1fr;
   gap: 1rem;
 }
 
@@ -379,7 +379,6 @@ h6 {
 }
 
 .export-protocol-icon,
-.export-stat-icon,
 .export-action-icon {
   display: inline-flex;
   align-items: center;
@@ -402,8 +401,8 @@ h6 {
 }
 
 .export-protocol-label,
-.export-stat-label,
-.export-filename {
+.export-filename,
+.export-snapshot {
   color: #5d7283;
 }
 
@@ -411,37 +410,22 @@ h6 {
   text-transform: capitalize;
 }
 
-.export-stat-grid {
+/* What Basic mode did, or why checklists are historical: under the count and label. */
+.export-protocol-note {
+  grid-column: 2 / -1;
+  margin-top: -0.35rem;
+  font-size: 0.85rem;
+  color: #5d7283;
+}
+
+.export-protocol-review {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
 }
 
-.export-stat-tile {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.8rem 0.9rem;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(41, 67, 86, 0.08);
-}
-
-.export-stat-icon {
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 0.7rem;
-  background: rgba(251, 203, 50, 0.22);
-  font-size: 1rem;
-}
-
-.export-stat-value {
-  font-family: "Montserrat", sans-serif;
-  font-size: 1.45rem;
-  font-weight: 800;
-  line-height: 1;
-  color: #1e3645;
+.export-snapshot {
+  position: relative;
+  z-index: 1;
 }
 
 .export-panel-action {
