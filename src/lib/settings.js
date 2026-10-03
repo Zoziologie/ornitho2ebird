@@ -172,8 +172,9 @@ export function loadSettings() {
   const stored = readStorage(SETTINGS_STORAGE_KEY, null);
   const settings = migrateSettings(stored);
 
-  // ?lang= and the language cookie win over the saved language.
-  settings.uiLanguage = resolveUiLanguage(settings);
+  // ?lang= and the language cookie win over the saved language. On a first visit nothing is
+  // saved, so the browser's language decides rather than the default English.
+  settings.uiLanguage = resolveUiLanguage(stored === null ? {} : settings);
   const queryLanguage = normalizeLanguage(
     typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lang") : "",
   );

@@ -14,8 +14,9 @@ import {
   saveSettings,
 } from "../../src/lib/settings";
 
-// A browser with this localStorage content and URL query.
-function stubBrowser(stored = {}, search = "") {
+// A browser with this localStorage content, URL query and language.
+function stubBrowser(stored = {}, search = "", language = "en-US") {
+  vi.stubGlobal("navigator", { language });
   const storage = new Map(
     Object.entries(stored).map(([key, value]) => [key, JSON.stringify(value)]),
   );
@@ -259,6 +260,14 @@ describe("loadSettings", () => {
       uiLanguage: "fr",
       websiteName: "faune-france.org",
     });
+  });
+
+  it("uses the browser's language on a first visit only", () => {
+    stubBrowser({}, "", "de-CH");
+    expect(loadSettings().settings).toMatchObject({ uiLanguage: "de", websiteName: "ornitho.de" });
+
+    stubBrowser({ [SETTINGS_STORAGE_KEY]: savedBy041 }, "", "de-CH");
+    expect(loadSettings().settings.uiLanguage).toBe("fr");
   });
 
   it("lets ?lang= choose the language and its website", () => {
