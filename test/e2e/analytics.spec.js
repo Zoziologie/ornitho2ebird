@@ -11,16 +11,11 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
   const requests = await stubNetwork(page);
   await openApp(page, { chooseConsent: false });
   expect(googleRequests(requests)).toEqual([]);
-  await expect(page.getByRole("dialog", { name: "Help improve Ornitho2eBird" })).toBeVisible();
-  await expect(page.locator("#analytics-consent-title")).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByText("What is collected?", { exact: true })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Allow usage statistics" })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "No thanks" })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByText("What is collected?", { exact: true })).toBeFocused();
+  await expect(page.getByRole("region", { name: "Privacy & cookies" })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  // Import controls remain usable before answering the cookie box.
+  await page.locator("#import-source-website").selectOption("ornitho.ch");
+  expect(googleRequests(requests)).toEqual([]);
   await page.getByRole("button", { name: "Allow usage statistics" }).click();
   await expect.poll(() => googleRequests(requests).length).toBe(1);
   await importFixture(page, "ornitho.ch", FIXTURE);
@@ -82,6 +77,12 @@ test("mobile rejection allows conversion without Google requests", async ({ page
   const requests = await stubNetwork(page);
   await openApp(page, { chooseConsent: false });
   await page.getByRole("button", { name: "No thanks" }).click();
+  await page.getByRole("button", { name: "Usage statistics", exact: true }).click();
+  await expect(
+    page.getByText("Usage statistics are currently disabled.", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Usage statistics", exact: true })).toBeFocused();
   await importFixture(page, "ornitho.ch", FIXTURE);
   expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
   expect(googleRequests(requests)).toEqual([]);
@@ -90,6 +91,11 @@ test("mobile rejection allows conversion without Google requests", async ({ page
   await expect(page.getByRole("button", { name: "Privacy & cookies", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Allow usage statistics" })).toHaveCount(0);
   expect(googleRequests(requests)).toEqual([]);
+  await importFixture(page, "ornitho.ch", FIXTURE);
+  await page.getByRole("button", { name: "Usage statistics", exact: true }).click();
+  await page.getByRole("button", { name: "Allow usage statistics" }).click();
+  await expect.poll(() => googleRequests(requests).length).toBe(1);
+  expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
 });
 
 // The usage categories should describe the comments actually included in the CSV.

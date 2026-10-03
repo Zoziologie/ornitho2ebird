@@ -324,5 +324,6 @@
   "analyticsAccepted": "Les estadístiques d’ús estan permeses actualment.",
   "analyticsRejected": "Les estadístiques d’ús estan desactivades actualment.",
   "analyticsConsentTitle": "Ajuda’ns a millorar Ornitho2eBird",
-  "analyticsReassurance": "No es recullen les teves observacions ni el text dels comentaris. Totes les funcions estan disponibles sense aquestes galetes. Pots canviar la teva elecció a Privadesa i galetes."
+  "analyticsReassurance": "No es recullen les teves observacions ni el text dels comentaris. Totes les funcions estan disponibles sense aquestes galetes.",
+  "analyticsPreferences": "Estadístiques d’ús"
 }

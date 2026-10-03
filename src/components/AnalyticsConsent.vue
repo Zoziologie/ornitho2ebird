@@ -1,77 +1,63 @@
 <script setup>
-import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { nextTick, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getAnalytics } from "../lib/analytics";
 
-const props = defineProps({ preferences: { type: Boolean, default: false } });
+defineProps({ preferences: { type: Boolean, default: false } });
 const { t } = useI18n();
 const analytics = getAnalytics();
-const panel = ref(null);
+const reopened = ref(false);
 const heading = ref(null);
-let previousOverflow;
+const launcher = ref(null);
 
-function keepFocus(event) {
-  if (props.preferences || event.key !== "Tab") return;
-  const controls = [...panel.value.querySelectorAll("summary, a, button")].filter(
-    (element) => element.getClientRects().length,
-  );
-  if (event.shiftKey && [heading.value, controls[0]].includes(document.activeElement)) {
-    event.preventDefault();
-    controls.at(-1).focus();
-  } else if (!event.shiftKey && document.activeElement === controls.at(-1)) {
-    event.preventDefault();
-    controls[0].focus();
+async function openPreferences() {
+  reopened.value = true;
+  await nextTick();
+  heading.value.focus();
+}
+
+async function choose(choice, preferences) {
+  analytics.choose(choice);
+  reopened.value = false;
+  if (!preferences) {
+    await nextTick();
+    launcher.value.focus();
   }
 }
 
-watch(
-  () => analytics.state.choice,
-  async (choice) => {
-    if (props.preferences) return;
-    await nextTick();
-    if (!choice) {
-      previousOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      panel.value.showModal();
-      heading.value.focus();
-    } else {
-      panel.value.close();
-      if (previousOverflow !== undefined) document.body.style.overflow = previousOverflow;
-    }
-  },
-  { immediate: true },
-);
-onBeforeUnmount(() => {
-  if (!props.preferences && previousOverflow !== undefined)
-    document.body.style.overflow = previousOverflow;
-});
+async function closePreferences() {
+  reopened.value = false;
+  await nextTick();
+  launcher.value.focus();
+}
 </script>
 
 <template>
   <Teleport to="body" :disabled="preferences">
-    <component
-      :is="preferences ? 'section' : 'dialog'"
-      ref="panel"
-      :class="preferences ? 'card border-0 bg-light p-3' : 'analytics-dialog p-4'"
-      :aria-labelledby="preferences ? undefined : 'analytics-consent-title'"
-      :aria-label="preferences ? t('analyticsTitle') : undefined"
-      @keydown="keepFocus"
-      @cancel.prevent="analytics.choose('rejected')"
+    <section
+      v-if="preferences || !analytics.state.choice || reopened"
+      :class="preferences ? 'card border-0 bg-light p-3' : 'analytics-box p-3'"
+      :aria-label="t('analyticsTitle')"
+      @keydown.esc="reopened && closePreferences()"
     >
-      <h3
-        :id="preferences ? undefined : 'analytics-consent-title'"
-        ref="heading"
-        :class="preferences ? 'h6' : 'h4'"
-        tabindex="-1"
-      >
-        {{ t(preferences ? "analyticsTitle" : "analyticsConsentTitle") }}
-      </h3>
-      <p>{{ t("analyticsSummary") }}</p>
-      <p class="small text-secondary">{{ t("analyticsReassurance") }}</p>
-      <p v-if="preferences" class="small mb-2">
+      <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+        <h3 ref="heading" class="h6 mb-0" tabindex="-1">
+          {{ t(preferences ? "analyticsTitle" : "analyticsConsentTitle") }}
+        </h3>
+        <button
+          v-if="reopened"
+          type="button"
+          class="btn-close"
+          :aria-label="t('close')"
+          @click="closePreferences"
+        />
+      </div>
+      <p class="small mb-2">{{ t("analyticsSummary") }}</p>
+      <p class="small text-secondary mb-2">{{ t("analyticsReassurance") }}</p>
+      <p v-if="preferences || reopened" class="small mb-2">
         {{ t(analytics.state.choice === "accepted" ? "analyticsAccepted" : "analyticsRejected") }}
       </p>
-      <details class="small mb-4">
+      <details class="small mb-3">
         <summary>{{ t("analyticsDetails") }}</summary>
         <p class="mt-2 mb-1">{{ t("analyticsNotice") }}</p>
         <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">{{
@@ -81,38 +67,57 @@ onBeforeUnmount(() => {
       <div class="analytics-choices">
         <button
           type="button"
-          class="btn btn-outline-secondary"
-          @click="analytics.choose('accepted')"
+          class="btn btn-outline-secondary btn-sm"
+          @click="choose('accepted', preferences)"
         >
           {{ t("analyticsAccept") }}
         </button>
         <button
           type="button"
-          class="btn btn-outline-secondary"
-          @click="analytics.choose('rejected')"
+          class="btn btn-outline-secondary btn-sm"
+          @click="choose('rejected', preferences)"
         >
           {{ t("analyticsReject") }}
         </button>
       </div>
-    </component>
+    </section>
+    <button
+      v-else
+      ref="launcher"
+      type="button"
+      class="analytics-launcher btn btn-light btn-sm"
+      :aria-expanded="false"
+      @click="openPreferences"
+    >
+      <i class="bi bi-cookie me-1" aria-hidden="true"></i>
+      {{ t("analyticsPreferences") }}
+    </button>
   </Teleport>
 </template>
 
 <style scoped>
-.analytics-dialog {
-  width: min(32rem, calc(100vw - 2rem));
+.analytics-box,
+.analytics-launcher {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1040;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: 0 0.25rem 1rem #0002;
+}
+.analytics-box {
+  width: min(24rem, calc(100vw - 2rem));
   max-height: calc(100dvh - 2rem);
   overflow: auto;
-  border: 0;
-  border-radius: 1rem;
-  box-shadow: 0 1rem 3rem #0003;
-  color: var(--bs-body-color);
+  border-radius: 0.75rem;
 }
-.analytics-dialog h3:focus {
+.analytics-box h3:focus {
   outline: none;
 }
-.analytics-dialog::backdrop {
-  background: #21252999;
+.analytics-launcher {
+  border-radius: 0.5rem;
 }
 .analytics-choices {
   display: grid;

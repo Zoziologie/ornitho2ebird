@@ -2,10 +2,12 @@
 
 This app keeps GA4 property stream `G-TJ2TZSXSBW`. The Google tag is loaded only
 following acceptance, including a saved choice less than 180 days old. Rejection
-sends no analytics. A compact first-visit modal makes the choice visible before import, with equal-weight
-“Allow usage statistics” and “No thanks” buttons. Escape declines; keyboard focus
-stays in the dialog. The purpose is explained in plain language, with provider
-details inside the expandable notice. Both choices remain available in
+sends no analytics. A compact bottom-left cookie box offers equal-weight “Allow usage statistics”
+and “No thanks” buttons without blocking import, moving focus or dimming the app.
+After either choice, a persistent “Usage statistics” button in the same corner
+reopens the box directly, including the current status. Closing that reopened box
+does not change consent. The purpose is explained in plain language, with provider
+details inside the expandable notice. Both choices also remain available in
 Settings and the footer. Storage failures do not block conversion.
 
 Consent Mode v2 denies all advertising purposes. The app disables Google Signals
@@ -119,7 +121,7 @@ consent design after a prototype. Keep #40's user feedback/testing alongside the
 signals: observed paths suggest what to investigate, not why a person stopped.
 No session recording, heatmaps, unload/abandonment beacons or pre-consent events
 are used. Statistics cannot measure how many people rejected or ignored consent;
-that choice remains local. A first-visit dialog also changes the sampled audience,
+that choice remains local. Changing the consent presentation also changes the sampled audience,
 so do not interpret a before/after rise in events as increased feature use alone.
 
 ## Verified GA administrator setup

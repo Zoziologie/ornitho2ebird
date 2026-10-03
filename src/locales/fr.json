@@ -324,5 +324,6 @@
   "analyticsAccepted": "Les statistiques d’utilisation sont actuellement autorisées.",
   "analyticsRejected": "Les statistiques d’utilisation sont actuellement désactivées.",
   "analyticsConsentTitle": "Aidez-nous à améliorer Ornitho2eBird",
-  "analyticsReassurance": "Vos observations et le texte de vos commentaires ne sont pas collectés. Toutes les fonctions restent disponibles sans ces cookies. Vous pouvez modifier votre choix dans Confidentialité et cookies."
+  "analyticsReassurance": "Vos observations et le texte de vos commentaires ne sont pas collectés. Toutes les fonctions restent disponibles sans ces cookies.",
+  "analyticsPreferences": "Statistiques d’utilisation"
 }
