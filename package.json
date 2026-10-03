@@ -1,6 +1,6 @@
 {
   "name": "ornitho2ebird",
-  "version": "0.2.41",
+  "version": "0.2.42",
   "homepage": "https://ornitho2ebird.com/",
   "repository": {
     "type": "git",
@@ -24,7 +24,8 @@
     "check": "npm run lint && npm run format:check && npm test",
     "splist": "node build/compile-species-list.js",
     "splist:check": "node build/check-species-list.js",
-    "taxonomy:update": "node build/update-taxonomy.js"
+    "taxonomy:update": "node build/update-taxonomy.js",
+    "taxonomy:test-file": "node build/make-matching-test.js"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

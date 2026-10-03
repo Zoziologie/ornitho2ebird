@@ -4,3 +4,6 @@ dist
 
 # Local Claude Code preview config
 .claude/
+
+# Output of npm run taxonomy:test-file
+ebird_matching_test.csv

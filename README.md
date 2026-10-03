@@ -219,6 +219,7 @@ npm run check
 - `npm run splist` validates [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv) and regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from it
 - `npm run splist:check` checks every eBird code in the species list against the current eBird taxonomy (needs network; run it after each yearly eBird taxonomy update)
 - `npm run taxonomy:update` brings the eBird data up to date (needs network): replaces ornitho codes that eBird renamed, lists the ones that need a decision, and regenerates [`data/ebird_scientific_names.json`](data/ebird_scientific_names.json) and the short list
+- `npm run taxonomy:test-file` writes a CSV with every eBird taxon the ornitho list maps to, to check on eBird's import page that all of them match (see #38)
 
 ## Project structure
 
