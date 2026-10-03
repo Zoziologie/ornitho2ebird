@@ -25,10 +25,6 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  selectedEbirdLanguage: {
-    type: String,
-    required: true,
-  },
   mapboxToken: {
     type: String,
     default: "",
@@ -92,8 +88,11 @@ const exportSpeciesCodes = computed(() => {
   return [...codes].sort();
 });
 
+// Only the scientific names go into the CSV, so the locale does not matter.
+const TAXONOMY_LOCALE = "en";
+
 async function loadTaxonomy() {
-  const language = props.selectedEbirdLanguage;
+  const language = TAXONOMY_LOCALE;
   const codes = exportSpeciesCodes.value;
   const requestId = taxonomyRequestId + 1;
   taxonomyRequestId = requestId;
@@ -126,9 +125,11 @@ async function loadTaxonomy() {
   }
 }
 
-watch([() => props.selectedEbirdLanguage, () => exportSpeciesCodes.value.join()], loadTaxonomy, {
-  immediate: true,
-});
+watch(() => exportSpeciesCodes.value.join(), loadTaxonomy, { immediate: true });
+
+function taxonomyScientificName(sighting) {
+  return taxonByCode.value.get(sighting?.ebird_species_code)?.sciName || "";
+}
 
 function taxonomyMatchedCommonName(sighting) {
   const speciesCode = sighting?.ebird_species_code || "";
@@ -139,11 +140,7 @@ function taxonomyMatchedCommonName(sighting) {
   return taxonByCode.value.get(speciesCode)?.comName || sighting?.common_name || "";
 }
 
-const taxonomyNeededForExport = computed(() => {
-  return [...exportableSightingsByFormId.value.values()].some((group) => {
-    return group.some((sighting) => sighting.system === "ornitho");
-  });
-});
+const taxonomyNeededForExport = computed(() => exportSpeciesCodes.value.length > 0);
 
 function buildExportFilename() {
   const now = new Date();
@@ -187,6 +184,7 @@ const exportState = computed(() => {
     sightingsByFormId: exportableSightingsByFormId.value,
     speciesCommentTemplate: activeSpeciesCommentTemplate.value,
     commonNameForSighting: taxonomyMatchedCommonName,
+    scientificNameForSighting: taxonomyScientificName,
     importedWithText: t("importedWith"),
     mapboxToken: props.mapboxToken,
     globalStaticMap: props.globalStaticMap,
@@ -309,8 +307,11 @@ const exportSummaryStats = computed(() => {
     }))
     .filter((item) => item.count > 0);
 
-  const totalSpecies = new Set(exportState.value.rows.map((row) => row.common_name).filter(Boolean))
-    .size;
+  const totalSpecies = new Set(
+    exportState.value.rows
+      .map((row) => row.common_name || `${row.Genus} ${row.Species}`.trim())
+      .filter(Boolean),
+  ).size;
   const completeChecklists = exportableForms.value.filter(({ form }) => form.full_form).length;
   const completePercent = exportableForms.value.length
     ? Math.round((completeChecklists / exportableForms.value.length) * 100)

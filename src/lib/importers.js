@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import { buildSpeciesCommentTemplate, createSighting, distanceFromPath, mathMode } from "./utils";
-import { getOrnithoEbirdSpeciesCode } from "./taxonomy";
+import { ebirdCodeForScientificName, getOrnithoEbirdSpeciesCode } from "./taxonomy";
 
 const precisionMatchOrnitho = {
   MINIMUM: ">",
@@ -18,7 +18,6 @@ const precisionMatchObservation = {
   abundance: "~",
 };
 
-// Import failure with a user-facing reason: `key` is an i18n message key, `params` its values.
 // Reads a WKT "LINESTRING(lon lat, lon lat, ...)" into [[lat, lon], ...]. Returns null for
 // anything else (other geometry types, 3D points, fewer than two points).
 export function parseWktLineString(wkt) {
@@ -38,6 +37,7 @@ export function parseWktLineString(wkt) {
   return path.length >= 2 ? path : null;
 }
 
+// Import failure with a user-facing reason: `key` is an i18n message key, `params` its values.
 export class ImportError extends Error {
   constructor(key, params = {}) {
     super(key);
@@ -45,6 +45,40 @@ export class ImportError extends Error {
     this.key = key;
     this.params = params;
   }
+}
+
+// BirdLasser exports the species name in up to three user-chosen languages, one of which may be
+// the scientific name: take the first value that looks like one.
+const SCIENTIFIC_NAME_PATTERN = /^[A-Z][a-z]+ [a-z]+(?: [a-z]+)*$/;
+function birdlasserScientificName(sighting) {
+  const candidates = [
+    "Species secondary name",
+    "Species tertiary name",
+    "Secondary language",
+    "Tertiary language",
+    "Species primary name",
+    "Primary language",
+  ].map((column) => String(sighting[column] || "").trim());
+  return candidates.find((name) => SCIENTIFIC_NAME_PATTERN.test(name)) || "";
+}
+
+// Sightings without an eBird code that have a scientific name to look up.
+export function needsScientificNameLookup(exportData) {
+  return [exportData.sightings, ...exportData.formsSightings]
+    .flat()
+    .some((sighting) => !sighting.ebird_species_code && sighting.scientific_name);
+}
+
+// Fills in the eBird code from the scientific name where the source has none (Observation.org,
+// BirdLasser, ornitho.net, and ornitho taxa missing from the species list).
+// Call loadScientificNameIndex() first.
+export function assignEbirdCodesFromScientificNames(exportData) {
+  [exportData.sightings, ...exportData.formsSightings].flat().forEach((sighting) => {
+    if (!sighting.ebird_species_code && sighting.scientific_name) {
+      sighting.ebird_species_code = ebirdCodeForScientificName(sighting.scientific_name);
+    }
+  });
+  return exportData;
 }
 
 // Each entry is a column name, or a list of alternative names of which one must be present.
@@ -209,7 +243,7 @@ export function parseImportFile(rawText, selectedWebsite) {
           sighting.Fieldsheet ||
           `New location ${sighting.Latitude}-${sighting.Longitude}`,
         common_name: sighting["Species primary name"] || sighting["Primary language"],
-        scientific_name: "",
+        scientific_name: birdlasserScientificName(sighting),
         count: sighting.Count,
         count_precision: sighting["Count Type"] === "Not specified" ? "" : sighting["Count Type"],
         comment: sighting.Notes,
@@ -237,7 +271,7 @@ export function parseImportFile(rawText, selectedWebsite) {
         lon: Number.parseFloat(sighting.lng),
         location_name: sighting.location,
         common_name: sighting["species name"],
-        scientific_name: "",
+        scientific_name: sighting["scientific name"] || "",
         count: sighting["counting method"] === "seen not counted" ? "x" : sighting.number,
         count_precision: precisionMatchObservation[sighting["counting method"]],
         comment: sighting.notes,

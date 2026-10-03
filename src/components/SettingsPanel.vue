@@ -3,7 +3,6 @@ import { computed, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
-  EBIRD_LANGUAGES,
   buildSpeciesCommentTemplateFromOptions,
 } from "../lib/constants";
 import { speciesComment } from "../lib/utils";
@@ -136,7 +135,6 @@ const speciesCommentLinkWarningVisible = computed(() => {
 });
 
 const advancedOptionsRef = ref(null);
-const ebirdLanguageInputRef = ref(null);
 const speciesCommentRef = ref(null);
 
 const speciesCommentLimitError = computed(() => {
@@ -182,7 +180,6 @@ watch(
     await nextTick();
     const sectionMap = {
       "advanced-options": advancedOptionsRef.value,
-      "ebird-language": ebirdLanguageInputRef.value,
       "species-comment-template": speciesCommentRef.value,
     };
     const target = sectionMap[section];
@@ -210,34 +207,6 @@ watch(
           <div class="settings-section mt-0 pt-0 border-top-0">
             <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
             <div>
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
-                <label class="form-label mb-0 flex-shrink-0" for="ebird-language-input">{{
-                  t("ebirdLanguage")
-                }}</label>
-                <select
-                  id="ebird-language-input"
-                  ref="ebirdLanguageInputRef"
-                  v-model="settings.ebirdLanguage"
-                  class="form-select"
-                >
-                  <option
-                    v-for="language in EBIRD_LANGUAGES"
-                    :key="language.value"
-                    :value="language.value"
-                  >
-                    {{ language.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="form-text">
-                {{ t("ebirdLanguageHelp") }}
-                <a href="https://ebird.org/prefs" target="_blank" rel="noopener">{{
-                  t("ebirdLanguagePrefsLink")
-                }}</a>
-              </div>
-            </div>
-
-            <div class="mt-3">
               <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-1">
                 <label class="form-label mb-0 flex-shrink-0" for="default-observers-input">{{
                   t("partySize")

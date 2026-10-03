@@ -78,7 +78,7 @@ Convert exports from ornitho, ornitho network sites, Observation websites, and B
 - Automatically groups casual observations into draft eBird checklists
 - Lets you review and edit checklist metadata in a map-based advanced workflow
 - Exports a CSV that can be uploaded through eBird import
-- Supports multiple interface languages and localized eBird taxonomy names
+- Writes eBird's scientific names, so eBird recognises the species whatever your eBird language
 
 ## Supported sources
 
@@ -138,9 +138,16 @@ Customized mode unlocks the review tools:
 
 Species comments are customizable. The app can generate concise or expanded comments and switch between templates when many duplicate sightings of the same species are merged into one eBird row.
 
-### Localized taxonomy
+### Species matching
 
-The UI supports English, French, Catalan, German, and Italian. eBird taxonomy names can also be requested in many eBird locales so imported species names better match the language you use in eBird.
+eBird's importer matches a common name only in the species-name language of your eBird account (and not reliably even then, for example with accented names), but it matches a scientific name in any language. So the app finds the eBird taxon of every sighting and writes eBird's scientific name in the Genus and Species columns, leaving the common name empty:
+
+- ornitho: through the ornitho id → eBird code list in [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv).
+- Observation.org, BirdLasser, ornitho.net, and ornitho taxa missing from that list: through the scientific name, looked up in [`data/ebird_scientific_names.json`](data/ebird_scientific_names.json) (eBird's names plus older names used by ornitho; a subspecies eBird does not list falls back to its species).
+
+The current scientific name of each code comes from the eBird API at export time. Sightings without a match keep the source common name, and eBird asks you to match them during import.
+
+The interface is available in English, French, Catalan, German, and Italian.
 
 ## Privacy and external services
 
@@ -148,7 +155,7 @@ This project is a static front-end app. The conversion itself happens in the bro
 
 The app calls these services from the browser:
 
-- the eBird API, to retrieve the localized names of the species in your export and suggest nearby hotspots
+- the eBird API, to retrieve the current scientific names of the species in your export and suggest nearby hotspots
 - OpenStreetMap Nominatim, with the coordinates of the first imported record, to check that the file matches the selected website
 - map tile servers (OpenStreetMap, Esri, swisstopo, IGN, BKG) for the review maps
 - Mapbox, only if you add a Mapbox token, to render static checklist maps
@@ -211,6 +218,7 @@ npm run check
 - `npm run check` runs lint, format check and tests together
 - `npm run splist` validates [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv) and regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from it
 - `npm run splist:check` checks every eBird code in the species list against the current eBird taxonomy (needs network; run it after each yearly eBird taxonomy update)
+- `npm run taxonomy:update` regenerates [`data/ebird_scientific_names.json`](data/ebird_scientific_names.json) from the current eBird taxonomy (needs network; also after each yearly update)
 
 ## Project structure
 

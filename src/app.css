@@ -715,18 +715,6 @@ h6 {
   gap: 1rem;
 }
 
-.app-language-alert {
-  padding: 0.9rem 1rem;
-}
-
-.app-language-alert .alert-heading {
-  margin-bottom: 0.35rem;
-}
-
-.app-language-alert .btn-close {
-  margin-top: 0.1rem;
-}
-
 .modal-backdrop {
   position: fixed;
   inset: 0;

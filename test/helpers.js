@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import ebirdScientificNames from "../data/ebird_scientific_names.json";
 import { fileURLToPath } from "node:url";
 import websitesList from "../data/websites_list.json";
 import en from "../src/locales/en.json";
@@ -15,8 +16,12 @@ import {
   groupSightingsByForm,
   rowsToCsv,
 } from "../src/lib/exportCsv";
-import { parseImportFile } from "../src/lib/importers";
-import { loadOrnithoSpeciesList } from "../src/lib/taxonomy";
+import {
+  assignEbirdCodesFromScientificNames,
+  needsScientificNameLookup,
+  parseImportFile,
+} from "../src/lib/importers";
+import { loadOrnithoSpeciesList, loadScientificNameIndex } from "../src/lib/taxonomy";
 import { assembleImport } from "../src/lib/utils";
 
 export function readFixture(name) {
@@ -38,14 +43,25 @@ export const defaultSpeciesCommentTemplate = buildSpeciesCommentTemplateFromOpti
   DEFAULT_SPECIES_COMMENT_LONG_TEMPLATE_OPTIONS,
 );
 
+// eBird species code → scientific name, from the bundled index: an offline stand-in for the
+// eBird API the export queries. Synonyms are left out, they are not eBird names.
+export const ebirdScientificNameByCode = new Map(
+  Object.entries(ebirdScientificNames.names).map(([name, code]) => [code, name]),
+);
+
+// As ImportPanel.vue does it.
 export async function parseFixture(fixture, websiteName) {
   await loadOrnithoSpeciesList();
-  return parseImportFile(readFixture(fixture), website(websiteName));
+  const parsed = parseImportFile(readFixture(fixture), website(websiteName));
+  if (needsScientificNameLookup(parsed)) {
+    await loadScientificNameIndex();
+    assignEbirdCodesFromScientificNames(parsed);
+  }
+  return parsed;
 }
 
 // The whole import -> export pipeline with default settings, as App.vue and ExportPanel.vue run it.
-// Species names are not matched against the eBird taxonomy (that needs the eBird API), so
-// rows keep the source names.
+// Species get the eBird scientific name from the bundled index instead of the eBird API.
 export async function exportFixture(fixture, websiteName) {
   const parsed = await parseFixture(fixture, websiteName);
   const { forms, sightings, formsSightings } = assembleImport(parsed, {
@@ -60,6 +76,8 @@ export async function exportFixture(fixture, websiteName) {
     sightingsByFormId: groupSightingsByForm(exportableForms, sightings, formsSightings),
     speciesCommentTemplate: defaultSpeciesCommentTemplate,
     commonNameForSighting: (sighting) => sighting.common_name || "",
+    scientificNameForSighting: (sighting) =>
+      ebirdScientificNameByCode.get(sighting.ebird_species_code) || "",
     importedWithText: en.importedWith,
     mapboxToken: "",
     globalStaticMap: DEFAULT_SETTINGS.globalStaticMap,

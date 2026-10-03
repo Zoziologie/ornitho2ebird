@@ -17,6 +17,62 @@ export function loadOrnithoSpeciesList() {
   return ornithoSpeciesListPromise;
 }
 
+// eBird scientific name → species code (~700 KB, ~180 KB compressed), for sightings that come
+// without a code. Regenerate with `npm run taxonomy:update`.
+let scientificNameIndex = null;
+let scientificNameIndexPromise = null;
+
+export function loadScientificNameIndex() {
+  scientificNameIndexPromise ??= import("/data/ebird_scientific_names.json")
+    .then((module) => {
+      const { names, synonyms } = module.default;
+      scientificNameIndex = new Map([...Object.entries(synonyms), ...Object.entries(names)]);
+    })
+    .catch((error) => {
+      scientificNameIndexPromise = null;
+      throw error;
+    });
+  return scientificNameIndexPromise;
+}
+
+// The eBird species code for a scientific name, or "". Besides eBird's own names it accepts the
+// older names used by ornitho, "spec." for "sp.", "forma domestica", and a subspecies (or a list
+// of subspecies) of a species eBird knows, which falls back to the species.
+// Call loadScientificNameIndex() first.
+export function ebirdCodeForScientificName(scientificName) {
+  if (!scientificNameIndex) {
+    throw new Error("The eBird scientific name index is not loaded yet.");
+  }
+  const name = String(scientificName || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/ spec\.?$/, " sp.");
+  if (!name) {
+    return "";
+  }
+  if (scientificNameIndex.has(name)) {
+    return scientificNameIndex.get(name);
+  }
+
+  const match = /^([A-Z][a-z]+ [a-z]+) (.+)$/.exec(name);
+  if (!match) {
+    return "";
+  }
+  const [, species, rest] = match;
+  if (rest === "forma domestica") {
+    return (
+      scientificNameIndex.get(`${species} (Domestic type)`) ||
+      scientificNameIndex.get(`${species} (Feral Pigeon)`) ||
+      ""
+    );
+  }
+  // Subspecies only: no hybrid ("x") and no second genus ("Pernis apivorus / Buteo buteo").
+  if (/^[a-z][a-z /-]*$/.test(rest) && !/(^| )x( |$)/.test(rest)) {
+    return scientificNameIndex.get(species) || "";
+  }
+  return "";
+}
+
 // eBird taxa already fetched, per locale: species code → { comName, sciName, category }, or
 // null for a code eBird does not know (stale after a taxonomy update).
 const taxaByLocale = new Map();
