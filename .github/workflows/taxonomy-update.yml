@@ -1,0 +1,55 @@
+# Keeps the app's eBird taxonomy data current. Once a month (and on demand from the Actions
+# tab) it runs `npm run taxonomy:update`. Nothing happens unless eBird changed something; then
+# it opens (or updates) a pull request listing the codes it fixed and the ones that need a
+# decision. eBird publishes its taxonomy update once a year, usually in October.
+name: Taxonomy update
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: taxonomy-update
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run taxonomy:update -- --report "$RUNNER_TEMP/report.md"
+
+      - name: Open a pull request if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: chore/ebird-taxonomy-update
+        run: |
+          if git diff --quiet -- data; then
+            echo "The taxonomy data is up to date."
+            exit 0
+          fi
+          # Pull requests opened with the workflow token do not start CI, so check here.
+          npm run check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git commit -am "Update the eBird taxonomy data"
+          git push --force origin "$BRANCH"
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --body-file "$RUNNER_TEMP/report.md"
+          else
+            gh pr create --head "$BRANCH" --title "Update the eBird taxonomy data" \
+              --body-file "$RUNNER_TEMP/report.md"
+          fi

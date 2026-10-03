@@ -218,7 +218,7 @@ npm run check
 - `npm run check` runs lint, format check and tests together
 - `npm run splist` validates [`data/ornitho_species_list_full.csv`](data/ornitho_species_list_full.csv) and regenerates [`data/ornitho_species_list_short.json`](data/ornitho_species_list_short.json) from it
 - `npm run splist:check` checks every eBird code in the species list against the current eBird taxonomy (needs network; run it after each yearly eBird taxonomy update)
-- `npm run taxonomy:update` regenerates [`data/ebird_scientific_names.json`](data/ebird_scientific_names.json) from the current eBird taxonomy (needs network; also after each yearly update)
+- `npm run taxonomy:update` brings the eBird data up to date (needs network): replaces ornitho codes that eBird renamed, lists the ones that need a decision, and regenerates [`data/ebird_scientific_names.json`](data/ebird_scientific_names.json) and the short list
 
 ## Project structure
 
@@ -235,6 +235,8 @@ npm run check
 ## Deployment
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab.
+
+The [Taxonomy update](.github/workflows/taxonomy-update.yml) workflow runs `npm run taxonomy:update` on the first of each month and opens a pull request only when eBird changed something (usually once a year, after eBird's taxonomy update in October). The pull request lists the ornitho codes it replaced and those that need a decision. Rock Pigeon and Common Snipe are listed in `MANUAL_MATCH_TAXA` ([`src/lib/taxonomy.js`](src/lib/taxonomy.js)) because eBird's importer does not match them by scientific name; see #38 for the tests behind this.
 
 Dependencies are updated by hand: `npm outdated` lists what is behind, `npm install <package>@latest` moves a package to its latest major version, and `npm update` refreshes everything else in the lockfile. Then run `npm run check` and `npm run build`.
 

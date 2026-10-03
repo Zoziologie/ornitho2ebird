@@ -513,10 +513,6 @@ h6 {
   color: #ffffff !important;
 }
 
-.export-report-summary {
-  cursor: pointer;
-}
-
 @media (max-width: 575.98px) {
   .export-warning-item {
     flex-direction: column;

@@ -57,13 +57,9 @@ const { t } = useI18n();
 const DISTANCE_WARNING_THRESHOLD_KM = 20;
 const DISTANCE_WARNING_LIST_LIMIT = 10;
 const TAXONOMY_WARNING_LIST_LIMIT = 12;
-const TAXONOMY_NEW_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues/new";
-const TAXONOMY_REPORT_LABEL = "Taxonomy issue";
-const EBIRD_MAP_URL = "https://ebird.org/map/";
 // eBird species code → taxon, for the codes in the export. Always replaced as a whole.
 const taxonByCode = shallowRef(new Map());
 const taxonomyStatus = ref("idle");
-const taxonomyReportCodeByIssue = ref({});
 const exportFilename = ref(buildExportFilename());
 const exportFilenameDraft = ref("");
 const exportFilenameEditing = ref(false);
@@ -229,83 +225,32 @@ const exportState = computed(() => {
   };
 });
 
-const unmatchedTaxonomy = computed(() => {
+// Species eBird's importer will not match on its own, so the user matches them once on its
+// "Fix species" page (eBird remembers the match): the two names it cannot resolve (see
+// MANUAL_MATCH_TAXA), and sightings without an eBird taxon, which keep their source name.
+const speciesToMatchOnce = computed(() => {
   if (!taxonomyNeededForExport.value || taxonomyStatus.value !== "ready") {
     return [];
   }
 
-  const issuesByKey = new Map();
-  [...exportableSightingsByFormId.value.values()].forEach((group) => {
-    group
-      .filter((sighting) => sighting.system === "ornitho")
-      .forEach((sighting) => {
-        const speciesCode = sighting.ebird_species_code || "";
-        const hasMatch = speciesCode && taxonByCode.value.has(speciesCode);
-        if (hasMatch) {
-          return;
-        }
-
-        const speciesId = sighting.source_species_id || "";
-        const key =
-          speciesId ||
-          speciesCode ||
-          `name:${sighting.common_name || "?"}|scientific:${sighting.scientific_name || "?"}`;
-        if (!issuesByKey.has(key)) {
-          issuesByKey.set(key, {
-            sourceName: sighting.common_name || "?",
-            scientificName: sighting.scientific_name || "-",
-            speciesId,
-            speciesCode,
-          });
-        }
-      });
-  });
-
-  return [...issuesByKey.values()].sort((left, right) => {
-    if (left.sourceName !== right.sourceName) {
-      return left.sourceName.localeCompare(right.sourceName);
-    }
-    return left.scientificName.localeCompare(right.scientificName);
-  });
-});
-
-// Exported taxa eBird will ask the user to match once (see MANUAL_MATCH_TAXA).
-const manualMatchTaxa = computed(() =>
-  exportSpeciesCodes.value
-    .filter((code) => code in MANUAL_MATCH_TAXA && taxonByCode.value.has(code))
-    .map((code) => MANUAL_MATCH_TAXA[code]),
-);
-
-const displayedUnmatchedTaxonomy = computed(() => {
-  return unmatchedTaxonomy.value.slice(0, TAXONOMY_WARNING_LIST_LIMIT);
-});
-
-const hiddenUnmatchedTaxonomyCount = computed(() => {
-  return Math.max(0, unmatchedTaxonomy.value.length - displayedUnmatchedTaxonomy.value.length);
-});
-
-function taxonomyIssueKey(issue) {
-  return `${issue.speciesId || issue.speciesCode || issue.sourceName}::${issue.scientificName}`;
-}
-
-const taxonomyReportRows = computed(() => {
-  return unmatchedTaxonomy.value.map((issue) => ({
-    ...issue,
-    reportKey: taxonomyIssueKey(issue),
-  }));
-});
-
-watch(
-  unmatchedTaxonomy,
-  (issues) => {
-    const nextCodeByIssue = {};
-    issues.forEach((issue) => {
-      const key = taxonomyIssueKey(issue);
-      nextCodeByIssue[key] = taxonomyReportCodeByIssue.value[key] || "";
+  const byName = new Map();
+  exportableSightingsByFormId.value.forEach((group) => {
+    group.forEach((sighting) => {
+      const code = sighting.ebird_species_code;
+      if (code in MANUAL_MATCH_TAXA && taxonByCode.value.has(code)) {
+        const { sciName, comName } = MANUAL_MATCH_TAXA[code];
+        byName.set(sciName, { name: sciName, hint: comName, scientific: true });
+      } else if (!taxonByCode.value.has(code)) {
+        const name = sighting.common_name || sighting.scientific_name || "?";
+        byName.set(name, { name, hint: "", scientific: !sighting.common_name });
+      }
     });
-    taxonomyReportCodeByIssue.value = nextCodeByIssue;
-  },
-  { immediate: true },
+  });
+  return [...byName.values()].sort((left, right) => left.name.localeCompare(right.name));
+});
+
+const displayedSpeciesToMatchOnce = computed(() =>
+  speciesToMatchOnce.value.slice(0, TAXONOMY_WARNING_LIST_LIMIT),
 );
 
 watch(
@@ -398,41 +343,6 @@ function protocolSummaryIcon(name) {
 
 function openCustomizedMode() {
   emit("open-settings-section", "advanced-options");
-}
-
-function updateTaxonomyReportCode(reportKey, rawValue) {
-  taxonomyReportCodeByIssue.value[reportKey] = String(rawValue || "").trim();
-}
-
-const taxonomyReportTemplate = computed(() => {
-  if (!taxonomyReportRows.value.length) {
-    return "";
-  }
-
-  const normalizeCell = (value) => String(value || "").replaceAll("|", "\\|");
-  const lines = taxonomyReportRows.value.map((issue) => {
-    const ebirdCode = taxonomyReportCodeByIssue.value[issue.reportKey] || "";
-    return `| ${normalizeCell(issue.speciesId || "?")} | ${normalizeCell(issue.sourceName)} | ${normalizeCell(issue.scientificName)} | ${normalizeCell(ebirdCode)} |`;
-  });
-
-  return [
-    "| ornitho_id | ornitho_common_name | ornitho_scientific_name | ebird_species_code |",
-    "| --- | --- | --- | --- |",
-    ...lines,
-  ].join("\n");
-});
-
-const githubReportUrl = computed(() => {
-  const params = new URLSearchParams({
-    title: t("exportTaxonomyReportIssueTitle", { count: taxonomyReportRows.value.length }),
-    body: taxonomyReportTemplate.value,
-    labels: TAXONOMY_REPORT_LABEL,
-  });
-  return `${TAXONOMY_NEW_ISSUE_URL}?${params.toString()}`;
-});
-
-function openTaxonomyIssue() {
-  window.open(githubReportUrl.value, "_blank", "noopener");
 }
 
 function hasInteractiveMapCoordinates(form, sightings) {
@@ -540,11 +450,20 @@ async function downloadFile() {
       </div>
 
       <div v-else>
-        <div v-if="manualMatchTaxa.length > 0" class="alert alert-info small mb-3">
+        <div v-if="speciesToMatchOnce.length > 0" class="alert alert-info small mb-3">
           {{ t("exportManualMatchNote") }}
           <ul class="mb-0 mt-1">
-            <li v-for="taxon in manualMatchTaxa" :key="taxon.sciName">
-              <i>{{ taxon.sciName }}</i> → {{ taxon.comName }}
+            <li v-for="species in displayedSpeciesToMatchOnce" :key="species.name">
+              <i v-if="species.scientific">{{ species.name }}</i
+              ><template v-else>{{ species.name }}</template
+              ><template v-if="species.hint"> → {{ species.hint }}</template>
+            </li>
+            <li v-if="speciesToMatchOnce.length > displayedSpeciesToMatchOnce.length">
+              {{
+                t("exportTaxonomyWarningMore", {
+                  count: speciesToMatchOnce.length - displayedSpeciesToMatchOnce.length,
+                })
+              }}
             </li>
           </ul>
         </div>
@@ -580,100 +499,6 @@ async function downloadFile() {
           class="alert alert-warning mb-3"
         >
           {{ interactiveMapError }}
-        </div>
-        <div
-          v-else-if="unmatchedTaxonomy.length > 0"
-          class="alert alert-warning export-warning-box mb-3"
-        >
-          <h4 class="alert-heading h6 mb-2 d-flex align-items-center gap-2 export-warning-title">
-            <span class="export-warning-icon" aria-hidden="true">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-            </span>
-            <span>{{ t("exportTaxonomyWarningTitle") }}</span>
-          </h4>
-          <p class="mb-2">{{ t("exportTaxonomyWarningBody") }}</p>
-          <ul class="list-unstyled mb-2 export-warning-list">
-            <li
-              v-for="issue in displayedUnmatchedTaxonomy"
-              :key="`${issue.speciesId || issue.speciesCode || issue.sourceName}-${issue.scientificName}`"
-              class="export-warning-item"
-            >
-              <div>
-                <div class="fw-semibold">{{ issue.sourceName }}</div>
-                <div class="small text-muted fst-italic">{{ issue.scientificName }}</div>
-              </div>
-            </li>
-            <li v-if="hiddenUnmatchedTaxonomyCount > 0" class="small text-muted">
-              {{ t("exportTaxonomyWarningMore", { count: hiddenUnmatchedTaxonomyCount }) }}
-            </li>
-          </ul>
-          <p class="mb-0">{{ t("exportTaxonomyWarningContinue") }}</p>
-          <details class="mt-2">
-            <summary class="small fw-semibold export-report-summary">
-              {{ t("exportTaxonomyReportSummary") }}
-            </summary>
-            <div class="mt-2 small">
-              <p class="mb-2">{{ t("exportTaxonomyReportBody") }}</p>
-              <ol class="ps-3 mb-2">
-                <li>
-                  {{ t("exportTaxonomyReportStepMapPrefix") }}
-                  <a :href="EBIRD_MAP_URL" target="_blank" rel="noopener">eBird Map</a>
-                  {{ t("exportTaxonomyReportStepMapSuffix") }}
-                </li>
-                <li>
-                  {{ t("exportTaxonomyReportStepFillTable") }}
-                  <div class="table-responsive mt-2">
-                    <table class="table table-sm table-striped align-middle mb-0">
-                      <thead>
-                        <tr>
-                          <th>{{ t("exportTaxonomyReportTableOrnithoId") }}</th>
-                          <th>{{ t("exportTaxonomyReportTableEbirdCode") }}</th>
-                          <th>{{ t("exportTaxonomyReportTableCommonName") }}</th>
-                          <th>{{ t("exportTaxonomyReportTableScientificName") }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="issue in taxonomyReportRows" :key="issue.reportKey">
-                          <td>
-                            <code>{{ issue.speciesId || "?" }}</code>
-                          </td>
-                          <td>
-                            <input
-                              class="form-control form-control-sm"
-                              :class="
-                                (taxonomyReportCodeByIssue[issue.reportKey] || '').trim()
-                                  ? 'is-valid'
-                                  : 'is-invalid'
-                              "
-                              :value="taxonomyReportCodeByIssue[issue.reportKey] || ''"
-                              :placeholder="t('speciesCodePrompt')"
-                              @input="
-                                updateTaxonomyReportCode(issue.reportKey, $event.target.value)
-                              "
-                            />
-                          </td>
-                          <td>{{ issue.sourceName }}</td>
-                          <td>
-                            <em>{{ issue.scientificName }}</em>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </li>
-                <li>
-                  {{ t("exportTaxonomyReportStepIssuePrefix") }}
-                  <button
-                    class="btn btn-outline-danger btn-sm ms-1"
-                    type="button"
-                    @click="openTaxonomyIssue"
-                  >
-                    {{ t("exportTaxonomyReportCreateIssueAll") }}</button
-                  >{{ t("exportTaxonomyReportStepIssueSuffix") }}
-                </li>
-              </ol>
-            </div>
-          </details>
         </div>
         <div
           v-if="distanceWarningForms.length > 0"
@@ -920,21 +745,13 @@ async function downloadFile() {
             <p>
               {{ t("finalStepsProcessingPrefix") }}
               <a
-                href="https://github.com/Zoziologie/biolovision2ebird/wiki/FAQ#long-processing-time"
+                href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#long-processing-time"
                 target="_blank"
                 rel="noopener"
               >
                 {{ t("finalStepsProcessingLink") }} </a
               >,
               {{ t("finalStepsProcessingMiddle") }}
-              <a
-                href="https://support.ebird.org/en/support/solutions/articles/48000907878-upload-spreadsheet-data-to-ebird#anchorCleanData"
-                target="_blank"
-                rel="noopener"
-              >
-                {{ t("finalStepsSpeciesLink") }}
-              </a>
-              {{ t("finalStepsProcessingSuffix") }}
             </p>
             <p class="mb-0">
               {{ t("finalStepsReviewPrefix") }}
