@@ -40,24 +40,35 @@ Downloads measure the browser initiating a download, not a later eBird upload.
 Reports cover consenting visitors only, so compare pre-consent totals cautiously.
 Golden CSV files are unchanged.
 
-## GA administrator setup before deployment
+## Verified GA administrator setup
 
-These settings cannot be enforced entirely in the repository and have **not** been
-changed by this PR:
+On 3 October 2026, the signed-in Chrome session was used to configure the
+Ornitho2eBird stream in the shared **Zoziologie** property (`269867498`):
 
-- Disable Enhanced measurement for this app's stream, including automatic form,
-  search, download and outbound-link events. Otherwise Google's automatic events
-  can bypass the application's field allowlist.
-- Disable user-provided data collection for this tag/stream. Review Google Signals,
-  advertising and account data-sharing settings with the property owner, especially
-  if the property is shared by other tools.
-- Confirm and document event/user retention and its reset setting for this property.
-  This app's six-month cookie lifetime does not change Google's server retention.
-- Register event-scoped custom dimensions for `source_website`, `outcome`, `mode`,
-  `language`, `section`, `setting_name`, `layer`, and `action`. Prefix display names
-  with `O2E` if this property serves multiple apps; parameter names stay as above.
-- Verify rejection makes no Google requests and acceptance sends only the intended
-  stream's events in DebugView/Tag Assistant after the stream settings are applied.
+- Stream `14305240349`, measurement ID `G-TJ2TZSXSBW`, URL
+  `https://ornitho2ebird.com/`: Enhanced measurement disabled and verified.
+- Its Google tag (`GT-5D4XGMWZ`): user-provided data capabilities disabled, saved
+  and reopened to verify. This tag has only the Ornitho2eBird destination.
+- Created four event-scoped dimensions: **O2E source website** (`source_website`),
+  **O2E interface language** (`language`), **O2E help section** (`section`), and
+  **O2E checklist action** (`action`).
+- Four parameters were already registered for Global Rare eBird. Reuse those
+  property-wide definitions: **GRE outcome** (`outcome`), **GRE mode** (`mode`),
+  **GRE map layer** (`layer`), and **GRE setting name** (`setting_name`). Their
+  display names and definitions were preserved. Filter reports by the
+  Ornitho2eBird stream to separate the tools.
+- Retention verified: events **2 months**, user data **14 months**, **Reset on new
+  user activity enabled**. These shared retention settings were preserved. The
+  six-month cookie lifetime in this app does not change server retention.
+
+Google Signals, advertising and account data-sharing settings are shared by all
+nine streams. Google Signals is currently enabled at property level; this app
+blocks it and advertising in code. Property-wide changes remain subject to the
+owner's decision.
+
+After deployment, verify rejection makes no Google requests and acceptance sends
+only the intended stream's events in DebugView/Tag Assistant. The local browser
+tests stub external requests; the PR has not been deployed.
 
 This implements the analytics part of #10. The Content-Security-Policy remains a
 separate follow-up; it needs testing across all external map providers and optional
