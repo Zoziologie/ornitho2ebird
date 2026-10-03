@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
@@ -24,7 +24,7 @@ import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
-const InfoPanel = defineAsyncComponent(() => import("./components/InfoPanel.vue"));
+const HelpPanel = defineAsyncComponent(() => import("./components/HelpPanel.vue"));
 const AdvancedPanel = defineAsyncComponent(() => import("./components/AdvancedPanel.vue"));
 const ExportPanel = defineAsyncComponent(() => import("./components/ExportPanel.vue"));
 
@@ -160,8 +160,6 @@ const sightings = ref([]);
 const forms = ref([]);
 const formsSightings = ref([]);
 const selectedFormId = ref(null);
-const infoOpen = ref(false);
-const infoSection = ref("");
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
@@ -169,7 +167,7 @@ const version = __APP_VERSION__;
 // One-off announcement of a change returning users should know about. Shown to users who have
 // used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
 // For a new announcement, change NEWS.id.
-const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
+const NEWS = { id: "2026-10-scientific-names", version: "0.3", until: "2027-03-31" };
 const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
 const showNews = ref(
   storedSettings !== null &&
@@ -333,10 +331,35 @@ watch(
   },
 );
 
+const infoOpen = ref(false);
+const infoSection = ref("");
+
 function openInfo(section = "") {
   infoSection.value = section;
   infoOpen.value = true;
 }
+
+// Links can open the help too: #help, or #help/<id> for one section or FAQ question
+// (?lang=de#help for German), so eBird's documentation can link to it.
+const HELP_HASH = /^#help(?:\/([\w-]+))?$/;
+
+function openInfoFromHash() {
+  const match = window.location.hash.match(HELP_HASH);
+  if (match) {
+    openInfo(match[1] || "");
+  }
+}
+
+function closeInfo() {
+  infoOpen.value = false;
+  if (HELP_HASH.test(window.location.hash)) {
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+}
+
+openInfoFromHash();
+window.addEventListener("hashchange", openInfoFromHash);
+onBeforeUnmount(() => window.removeEventListener("hashchange", openInfoFromHash));
 
 function openSettings(section = "") {
   settingsFocusSection.value = section;
@@ -375,7 +398,7 @@ function openSettingsForSection(section) {
     <div
       v-if="infoOpen"
       class="modal-backdrop d-grid p-3 overflow-x-hidden"
-      @click.self="infoOpen = false"
+      @click.self="closeInfo"
     >
       <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
         <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
@@ -384,16 +407,12 @@ function openSettingsForSection(section) {
               <i class="bi bi-journal-text" aria-hidden="true"></i>
               <span>{{ $t("infoTitle") }}</span>
             </h2>
-            <button
-              class="btn btn-outline-secondary btn-sm"
-              type="button"
-              @click="infoOpen = false"
-            >
+            <button class="btn btn-outline-secondary btn-sm" type="button" @click="closeInfo">
               {{ $t("close") }}
             </button>
           </div>
           <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
-            <InfoPanel :focus-section="infoSection" />
+            <HelpPanel :section="infoSection" />
           </div>
         </div>
       </section>
@@ -407,16 +426,9 @@ function openSettingsForSection(section) {
       >
         <i class="bi bi-stars fs-5" aria-hidden="true"></i>
         <div class="flex-grow-1">
-          <strong>{{
-            t("newsTitle", { version: version.split(".").slice(0, 2).join(".") })
-          }}</strong>
+          <strong>{{ t("newsTitle", { version: NEWS.version }) }}</strong>
           {{ t("newsBody") }}
-          <a
-            href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#issues-with-taxonomic-matching"
-            target="_blank"
-            rel="noopener"
-            >{{ t("newsLink") }}</a
-          >
+          <a href="#help/species-matching">{{ t("newsLink") }}</a>
         </div>
         <button
           class="btn-close flex-shrink-0"

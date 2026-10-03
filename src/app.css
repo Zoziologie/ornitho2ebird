@@ -141,6 +141,35 @@ h6 {
   padding-bottom: 0;
 }
 
+.help-panel [id] {
+  scroll-margin-top: 1rem;
+}
+
+.help-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+.help-faq-group {
+  margin-bottom: 1.25rem;
+}
+
+.help-faq-item {
+  border-bottom: 1px solid rgba(41, 67, 86, 0.14);
+  padding: 0.6rem 0;
+}
+
+.help-faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #253846;
+}
+
+.help-faq-item[open] summary {
+  margin-bottom: 0.5rem;
+}
+
 .instruction-list,
 .instruction-icon-list {
   display: grid;

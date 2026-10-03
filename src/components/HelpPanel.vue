@@ -1,16 +1,21 @@
 <script setup>
-import { nextTick, ref, watch } from "vue";
+import { nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import LinkedText from "./LinkedText.vue";
 
 const props = defineProps({
-  focusSection: {
+  // Section or FAQ question to scroll to (#help/<id> in the address).
+  section: {
     type: String,
     default: "",
   },
 });
 
 const { t } = useI18n();
-const autoAssignmentRef = ref(null);
+
+const EBIRD_PURPOSE_URL =
+  "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists";
+const EBIRD_IMPORTS_URL = "https://ebird.org/import/status/all.htm";
 
 const workflowSteps = [
   { id: "import", icon: "bi-box-arrow-down", labelKey: "introWorkflowImport" },
@@ -33,15 +38,13 @@ const sightingsPoints = [
     id: "primary",
     icon: "bi-bullseye",
     labelKey: "infoHowItWorksSightingsPointThree",
-    linkText: "primary purpose",
-    href: "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists",
+    links: [EBIRD_PURPOSE_URL],
   },
   {
     id: "incomplete",
     icon: "bi-square",
     labelKey: "infoHowItWorksSightingsPointFour",
-    linkText: "complete",
-    href: "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists",
+    links: [EBIRD_PURPOSE_URL],
   },
 ];
 
@@ -52,23 +55,6 @@ const autoAssignmentPoints = [
   { id: "default-time", icon: "bi-clock", labelKey: "infoAutoAssignPointFive" },
   { id: "settings", icon: "bi-sliders", labelKey: "infoAutoAssignPointSix" },
 ];
-
-function linkedLabelParts(item) {
-  const label = t(item.labelKey);
-  const linkText = item.linkText || "";
-  const index = label.toLowerCase().indexOf(linkText.toLowerCase());
-
-  if (!item.href || !linkText || index === -1) {
-    return { hasLink: false, label };
-  }
-
-  return {
-    hasLink: true,
-    before: label.slice(0, index),
-    link: label.slice(index, index + linkText.length),
-    after: label.slice(index + linkText.length),
-  };
-}
 
 const learnMoreLinks = [
   {
@@ -83,30 +69,89 @@ const learnMoreLinks = [
   },
   {
     id: "purpose",
-    href: "https://support.ebird.org/en/support/solutions/articles/48000967748-birding-as-your-primary-purpose-and-complete-checklists",
+    href: EBIRD_PURPOSE_URL,
     labelKey: "prerequisitePurpose",
   },
 ];
 
+// Pitfalls and unusual cases only; the normal workflow is described above. Each question's
+// text is faq<key>Question / faq<key>Answer, with links as in LinkedText. The id is the address of the question: #help/<id>.
+const faqGroups = [
+  {
+    id: "before",
+    titleKey: "faqBeforeTitle",
+    questions: [
+      { id: "duplicates", key: "Duplicates", links: ["https://ebird.org/mychecklists"] },
+      {
+        id: "large-imports",
+        key: "LargeImports",
+        links: ["https://support.ebird.org/en/support/tickets/new"],
+      },
+      {
+        id: "not-for-ebird",
+        key: "NotForEbird",
+        links: [
+          "https://support.ebird.org/en/support/solutions/articles/48000795623-ebird-rules-and-best-practices",
+        ],
+      },
+    ],
+  },
+  {
+    id: "during",
+    titleKey: "faqDuringTitle",
+    questions: [
+      { id: "species-matching", key: "SpeciesMatching", links: [] },
+      {
+        id: "hotspots",
+        key: "Hotspots",
+        links: [
+          "https://support.ebird.org/en/support/solutions/articles/48000850891-choosing-and-managing-locations-in-ebird#anchorMergeLocation",
+        ],
+      },
+    ],
+  },
+  {
+    id: "after",
+    titleKey: "faqAfterTitle",
+    questions: [
+      { id: "processing", key: "Processing", links: [EBIRD_IMPORTS_URL] },
+      { id: "mistakes", key: "Mistakes", links: [EBIRD_IMPORTS_URL] },
+      { id: "rarities", key: "Rarities", links: [] },
+      { id: "distance", key: "Distance", links: [] },
+    ],
+  },
+];
+const FAQ_ISSUE_URL = "https://github.com/Zoziologie/ornitho2ebird/issues";
+
 watch(
-  () => props.focusSection,
-  async (value) => {
-    if (value !== "auto-assignment") {
+  () => props.section,
+  async (section) => {
+    await nextTick();
+    const target = section ? document.getElementById(`help-${section}`) : null;
+    if (!target) {
       return;
     }
-
-    await nextTick();
-    autoAssignmentRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (target.tagName === "DETAILS") {
+      target.open = true;
+    }
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   },
   { immediate: true },
 );
 </script>
 
 <template>
-  <div>
-    <p class="mb-4">{{ t("infoDescription") }}</p>
+  <div class="help-panel">
+    <p class="mb-3">{{ t("infoDescription") }}</p>
+    <nav class="help-toc mb-4" :aria-label="t('infoTitle')">
+      <a href="#help/workflow">{{ t("infoWorkflowTitle") }}</a>
+      <a href="#help/conversion">{{ t("infoHowItWorksTitle") }}</a>
+      <a href="#help/auto-assignment">{{ t("infoAutoAssignTitle") }}</a>
+      <a href="#help/customize">{{ t("infoCustomizeTitle") }}</a>
+      <a href="#help/faq">{{ t("faqTitle") }}</a>
+    </nav>
 
-    <section class="instruction-section">
+    <section id="help-workflow" class="instruction-section">
       <h3 class="modal-section-title">{{ t("infoWorkflowTitle") }}</h3>
       <ol class="instruction-list">
         <li v-for="step in workflowSteps" :key="step.id" class="instruction-list-item">
@@ -118,7 +163,7 @@ watch(
       </ol>
     </section>
 
-    <section class="instruction-section">
+    <section id="help-conversion" class="instruction-section">
       <h3 class="modal-section-title">{{ t("infoHowItWorksTitle") }}</h3>
       <p>{{ t("infoHowItWorksIntro") }}</p>
       <div class="conversion-grid">
@@ -148,14 +193,7 @@ watch(
                 <i :class="['bi', item.icon]" aria-hidden="true"></i>
               </span>
               <span>
-                <template v-if="linkedLabelParts(item).hasLink">
-                  {{ linkedLabelParts(item).before
-                  }}<a :href="item.href" target="_blank" rel="noopener">{{
-                    linkedLabelParts(item).link
-                  }}</a
-                  >{{ linkedLabelParts(item).after }}
-                </template>
-                <template v-else>{{ t(item.labelKey) }}</template>
+                <LinkedText :text="t(item.labelKey)" :links="item.links" />
               </span>
             </li>
           </ul>
@@ -163,7 +201,7 @@ watch(
       </div>
     </section>
 
-    <section ref="autoAssignmentRef" class="instruction-section">
+    <section id="help-auto-assignment" class="instruction-section">
       <h3 class="modal-section-title">{{ t("infoAutoAssignTitle") }}</h3>
       <p>{{ t("infoAutoAssignIntro") }}</p>
       <ul class="instruction-icon-list mb-0">
@@ -176,10 +214,31 @@ watch(
       </ul>
     </section>
 
-    <section class="instruction-section">
+    <section id="help-customize" class="instruction-section">
       <h3 class="modal-section-title">{{ t("infoCustomizeTitle") }}</h3>
       <p>{{ t("infoCustomizeBody") }}</p>
       <p class="mb-0">{{ t("infoCustomizeSpeciesComments") }}</p>
+    </section>
+
+    <section id="help-faq" class="instruction-section">
+      <h3 class="modal-section-title">{{ t("faqTitle") }}</h3>
+      <div v-for="group in faqGroups" :key="group.id" class="help-faq-group">
+        <h4 class="h6 text-uppercase text-secondary mb-2">{{ t(group.titleKey) }}</h4>
+        <details
+          v-for="question in group.questions"
+          :id="`help-${question.id}`"
+          :key="question.id"
+          class="help-faq-item"
+        >
+          <summary>{{ t(`faq${question.key}Question`) }}</summary>
+          <p class="mb-0">
+            <LinkedText :text="t(`faq${question.key}Answer`)" :links="question.links" />
+          </p>
+        </details>
+      </div>
+      <p class="mb-0">
+        <LinkedText :text="t('faqMore')" :links="[FAQ_ISSUE_URL]" />
+      </p>
     </section>
 
     <section class="instruction-section instruction-section-alert">
