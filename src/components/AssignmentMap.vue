@@ -20,6 +20,7 @@ import {
   panToPopup,
   pointFeature,
 } from "../lib/maps";
+import { basemapGroups } from "../lib/basemaps";
 import { groupByLocation, haversineDistanceKm } from "../lib/utils";
 
 const props = defineProps({
@@ -33,7 +34,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:baseLayer", "select-form", "move-form", "assign", "selection"]);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 // Observations closer than this share one dot, and its popup lists them.
 const SAME_LOCATION_METERS = 5;
@@ -294,6 +295,7 @@ function onMouseUp(event) {
 function initialize() {
   const created = createMap(container.value, {
     baseLayer: props.baseLayer,
+    baseLayerGroups: basemapGroups(t, locale.value),
     baseLayerLabel: t("assignmentMapBaseLayer"),
     onBaseLayerChange: (name) => emit("update:baseLayer", name),
   });

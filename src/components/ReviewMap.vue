@@ -22,6 +22,7 @@ import {
   panToPopup,
   pointFeature,
 } from "../lib/maps";
+import { basemapGroups } from "../lib/basemaps";
 import { distanceFromPath, groupByLocation, mathRound } from "../lib/utils";
 
 const props = defineProps({
@@ -32,7 +33,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:baseLayer", "move-form", "path", "use-hotspot"]);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const PATH_COLOR = "#8b5e3c";
 // Observations closer than this share one dot, as on the assignment map.
@@ -340,6 +341,7 @@ function onMapDoubleClick(event) {
 function initialize() {
   const created = createMap(container.value, {
     baseLayer: props.baseLayer,
+    baseLayerGroups: basemapGroups(t, locale.value),
     baseLayerLabel: t("assignmentMapBaseLayer"),
     onBaseLayerChange: (name) => emit("update:baseLayer", name),
   });

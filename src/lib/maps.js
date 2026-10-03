@@ -4,73 +4,30 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // makes Vite bundle the worker with the code it imports and give its URL (plain `?url` breaks the
 // production build).
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-import { ASSIGNMENT_MAP_BASE_LAYER_OPTIONS } from "./constants";
+import { findBasemap } from "./basemaps";
 
 setWorkerUrl(workerUrl);
 
-// Keys are the names saved in settings (ASSIGNMENT_MAP_BASE_LAYER_OPTIONS). `retina`: on a
-// high-density screen, use the tiles of the next zoom level at half size, so the labels stay small
-// and sharp (Leaflet's detectRetina).
-const BASE_LAYERS = {
-  OpenStreetMap: {
-    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-    attribution: "&copy; OpenStreetMap contributors",
-    maxzoom: 19,
-  },
-  Satellite: {
-    tiles: [
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    ],
-    attribution: "Tiles &copy; Esri",
-    maxzoom: 19,
-  },
-  "Swiss (swisstopo)": {
-    tiles: [
-      "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-    ],
-    attribution: "&copy; swisstopo",
-    maxzoom: 18,
-    retina: true,
-  },
-  "France (IGN)": {
-    tiles: [
-      "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
-    ],
-    attribution: "&copy; IGN/Geoportail",
-    maxzoom: 19,
-    retina: true,
-  },
-  "Germany (BKG)": {
-    tiles: [
-      "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_farbe/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png",
-    ],
-    attribution: "&copy; basemap.de / BKG",
-    maxzoom: 18,
-  },
-};
+// A vector basemap is its style URL; a raster one a style with one source.
+function styleFor(id) {
+  const basemap = findBasemap(id);
+  if (basemap.style) {
+    return basemap.style;
+  }
 
-export function baseLayerName(name) {
-  return ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.includes(name) ? name : "OpenStreetMap";
-}
-
-function rasterStyle(name) {
-  const { retina, ...source } = BASE_LAYERS[name];
-  const tileSize = retina && window.devicePixelRatio > 1 ? 128 : 256;
+  const tileSize = basemap.retina && window.devicePixelRatio > 1 ? 128 : 256;
   return {
     version: 8,
-    sources: { basemap: { type: "raster", tileSize, ...source } },
+    sources: { basemap: { type: "raster", tileSize, ...basemap.raster } },
     layers: [{ id: "basemap", type: "raster", source: "basemap" }],
   };
 }
 
-function styleFor(name) {
-  return rasterStyle(baseLayerName(name));
-}
-
-// The basemap select, styled like the zoom buttons above it.
+// The basemap select, styled like the zoom buttons above it. `groups`: see basemapGroups.
 class BaseLayerControl {
-  constructor({ name, label, onChange }) {
-    this.name = name;
+  constructor({ value, groups, label, onChange }) {
+    this.value = value;
+    this.groups = groups;
     this.label = label;
     this.onChange = onChange;
   }
@@ -82,13 +39,18 @@ class BaseLayerControl {
     this.container.innerHTML = '<i class="bi bi-layers" aria-hidden="true"></i>';
     this.select = document.createElement("select");
     this.select.setAttribute("aria-label", this.label);
-    ASSIGNMENT_MAP_BASE_LAYER_OPTIONS.forEach((name) => {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      this.select.appendChild(option);
+    this.groups.forEach((group) => {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+      group.options.forEach(({ value, label }) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        optgroup.appendChild(option);
+      });
+      this.select.appendChild(optgroup);
     });
-    this.select.value = this.name;
+    this.select.value = this.value;
     this.select.addEventListener("change", () => this.onChange(this.select.value));
     this.container.appendChild(this.select);
     return this.container;
@@ -98,17 +60,20 @@ class BaseLayerControl {
     this.container.remove();
   }
 
-  setValue(name) {
+  setValue(value) {
     if (this.select) {
-      this.select.value = name;
+      this.select.value = value;
     }
   }
 }
 
 // A map like the Leaflet ones it replaces: no rotation or tilt, zoom buttons and the basemap select
 // at the top left. `onBaseLayerChange` gets the name chosen in the select.
-export function createMap(container, { baseLayer, baseLayerLabel, onBaseLayerChange }) {
-  const selectedName = baseLayerName(baseLayer);
+export function createMap(
+  container,
+  { baseLayer, baseLayerGroups, baseLayerLabel, onBaseLayerChange },
+) {
+  const selectedName = findBasemap(baseLayer).id;
   const map = new Map({
     container,
     style: styleFor(selectedName),
@@ -124,7 +89,8 @@ export function createMap(container, { baseLayer, baseLayerLabel, onBaseLayerCha
   map.keyboard.disableRotation();
   map.addControl(new NavigationControl({ showCompass: false }), "top-left");
   const baseLayerControl = new BaseLayerControl({
-    name: selectedName,
+    value: selectedName,
+    groups: baseLayerGroups,
     label: baseLayerLabel,
     onChange: onBaseLayerChange,
   });
@@ -135,7 +101,7 @@ export function createMap(container, { baseLayer, baseLayerLabel, onBaseLayerCha
     map,
     // Replaces the whole style: the maps add their own sources and layers again on "style.load".
     setBaseLayer(name) {
-      const nextName = baseLayerName(name);
+      const nextName = findBasemap(name).id;
       baseLayerControl.setValue(nextName);
       if (nextName !== shownName) {
         shownName = nextName;

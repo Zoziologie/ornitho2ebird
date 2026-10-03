@@ -1,10 +1,8 @@
 <script setup>
 import { computed, inject, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  ASSIGNMENT_MAP_BASE_LAYER_OPTIONS,
-  buildSpeciesCommentTemplateFromOptions,
-} from "../lib/constants";
+import { buildSpeciesCommentTemplateFromOptions } from "../lib/constants";
+import { basemapGroups } from "../lib/basemaps";
 import { SETTINGS_INJECTION_KEY } from "../lib/settings";
 import { speciesComment } from "../lib/utils";
 
@@ -22,14 +20,14 @@ const props = defineProps({
 const emit = defineEmits(["close", "open-info"]);
 // The app's settings, edited in place (saved by App.vue).
 const settings = inject(SETTINGS_INJECTION_KEY);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const staticMapStyleOptions = [
   { value: "satellite-v9", label: "Satellite" },
   { value: "streets-v11", label: "Street" },
   { value: "outdoors-v12", label: "Outdoor" },
   { value: "satellite-streets-v12", label: "Satellite-Street" },
 ];
-const assignmentMapBaseLayerOptions = ASSIGNMENT_MAP_BASE_LAYER_OPTIONS;
+const basemapOptionGroups = computed(() => basemapGroups(t, locale.value));
 const markerSymbolOptions = ["circle", "triangle", "square", "star"];
 const speciesCommentOptionItems = [
   {
@@ -309,13 +307,20 @@ watch(
                     v-model="settings.assignmentMapBaseLayer"
                     class="form-select"
                   >
-                    <option
-                      v-for="option in assignmentMapBaseLayerOptions"
-                      :key="option"
-                      :value="option"
+                    <option value="">{{ t("basemapAutomatic") }}</option>
+                    <optgroup
+                      v-for="group in basemapOptionGroups"
+                      :key="group.label"
+                      :label="group.label"
                     >
-                      {{ option }}
-                    </option>
+                      <option
+                        v-for="option in group.options"
+                        :key="option.value"
+                        :value="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
+                    </optgroup>
                   </select>
                 </div>
               </div>

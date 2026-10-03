@@ -21,14 +21,6 @@ export const DEFAULT_WEBSITE_BY_LANGUAGE = {
   it: "ornitho.it",
 };
 
-export const ASSIGNMENT_MAP_BASE_LAYER_OPTIONS = [
-  "OpenStreetMap",
-  "Satellite",
-  "Swiss (swisstopo)",
-  "France (IGN)",
-  "Germany (BKG)",
-];
-
 export const BASIC_SPECIES_COMMENT_TEMPLATE = {
   short:
     '${ s.count_precision }${ s.count } ind.${ s.time ? " - " + s.time : "" }${ s.comment ? " - " + s.comment : "" }',
@@ -127,7 +119,8 @@ export const DEFAULT_SETTINGS = {
   uiLanguage: "en",
   autoAssignDuration: 24,
   autoAssignDistance: 3,
-  assignmentMapBaseLayer: "OpenStreetMap",
+  // "": the national map of the source website (resolveBasemap).
+  assignmentMapBaseLayer: "",
   defaultNumberObserver: 1,
   customizedSpeciesComments: true,
   speciesCommentTemplateOptions: DEFAULT_SPECIES_COMMENT_TEMPLATE_OPTIONS,

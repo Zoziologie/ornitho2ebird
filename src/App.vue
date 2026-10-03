@@ -29,6 +29,7 @@ import {
 } from "./lib/settings";
 import { setI18nLanguage } from "./i18n";
 import { assembleImport } from "./lib/utils";
+import { resolveBasemap } from "./lib/basemaps";
 import { store } from "./lib/store";
 import { confirmDialog } from "./lib/dialog";
 import { WORKFLOW_STEPS } from "./lib/workflow";
@@ -145,6 +146,11 @@ watch(
     }
   },
   { immediate: true },
+);
+
+// The saved basemap, or the national map of the source website when none was chosen.
+const basemap = computed(() =>
+  resolveBasemap(settings.assignmentMapBaseLayer, settings.websiteName),
 );
 
 const hasImportedData = computed(() => {
@@ -392,7 +398,7 @@ function openSettingsForSection(section) {
         :default-number-observer="settings.defaultNumberObserver"
         :default-assign-duration="settings.autoAssignDuration"
         :default-assign-distance="settings.autoAssignDistance"
-        :assignment-map-base-layer="settings.assignmentMapBaseLayer"
+        :assignment-map-base-layer="basemap"
         @update:selected-form-id="selectedFormId = $event"
         @update:assignment-map-base-layer="settings.assignmentMapBaseLayer = $event"
         @open-info="openInfo('auto-assignment')"
