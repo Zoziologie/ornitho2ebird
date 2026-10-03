@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import websitesList from "/data/websites_list.json";
 import { buildSpeciesCommentTemplate } from "../lib/utils";
 import { loadOrnithoSpeciesList, loadScientificNameIndex } from "../lib/taxonomy";
+import { trackEvent } from "../lib/analytics";
 import { fetchJson } from "../lib/http";
 import {
   ImportError,
@@ -133,6 +134,7 @@ watch(file, async (nextFile) => {
     return;
   }
 
+  const sourceWebsite = website.value.name;
   const runId = ++importRunId;
   const isStale = () => runId !== importRunId;
   numberImportedForms.value = 0;
@@ -178,6 +180,7 @@ watch(file, async (nextFile) => {
     numberImportedSightings.value = parsed.sightings.length;
     emit("import-data", parsed);
     loadingStatus.value = 1;
+    trackEvent("import_file", { source_website: sourceWebsite, outcome: "success" });
 
     // Only a hint, so it does not hold up the import.
     const warning = await checkWebsite(parsed, website.value);
@@ -189,6 +192,7 @@ watch(file, async (nextFile) => {
       return;
     }
     loadingStatus.value = -1;
+    trackEvent("import_file", { source_website: sourceWebsite, outcome: "failure" });
     errorMessage.value =
       error instanceof ImportError
         ? t(error.key, error.params)

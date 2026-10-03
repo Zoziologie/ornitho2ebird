@@ -8,6 +8,7 @@ defineProps({
   },
 });
 
+const emit = defineEmits(["open-privacy"]);
 const { t } = useI18n({ useScope: "global" });
 const baseUrl = import.meta.env.BASE_URL;
 const poweredByLogo = `${baseUrl}logo_w.svg`;
@@ -69,6 +70,10 @@ const supporters = [
     <div
       class="footer-meta d-flex flex-wrap justify-content-center align-items-center gap-2 small mt-3"
     >
+      <button type="button" class="btn btn-link text-white p-0 small" @click="emit('open-privacy')">
+        {{ t("analyticsTitle") }}
+      </button>
+      <span aria-hidden="true">•</span>
       <span>v{{ version }}</span>
       <span aria-hidden="true">•</span>
       <a

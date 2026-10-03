@@ -8,6 +8,7 @@ import {
   groupSightingsByForm,
   rowsToCsv,
 } from "../lib/exportCsv";
+import { trackEvent } from "../lib/analytics";
 import { alertDialog } from "../lib/dialog";
 import LinkedText from "./LinkedText.vue";
 import { store } from "../lib/store";
@@ -426,8 +427,10 @@ async function publishInteractiveMapsForExport() {
         [form.id]: "ready",
       };
     }
+    trackEvent("publish_maps", { outcome: "success" });
     return true;
   } catch (error) {
+    trackEvent("publish_maps", { outcome: "failure" });
     interactiveMapError.value = t("interactiveMapPublishFailed", {
       message: error?.message || "Unknown error",
     });
@@ -450,6 +453,10 @@ async function downloadFile() {
 
   const interactiveMapsReady = await publishInteractiveMapsForExport();
   if (!interactiveMapsReady || !exportState.value.csv) {
+    trackEvent("export_csv", {
+      mode: props.advancedEnabled ? "customized" : "basic",
+      outcome: "blocked",
+    });
     return;
   }
 
@@ -463,6 +470,10 @@ async function downloadFile() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(objectUrl);
+  trackEvent("export_csv", {
+    mode: props.advancedEnabled ? "customized" : "basic",
+    outcome: "success",
+  });
 }
 </script>
 

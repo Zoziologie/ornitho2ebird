@@ -35,6 +35,10 @@ import { confirmDialog } from "./lib/dialog";
 import { WORKFLOW_STEPS } from "./lib/workflow";
 import LinkedText from "./components/LinkedText.vue";
 import AppDialog from "./components/AppDialog.vue";
+import AnalyticsConsent from "./components/AnalyticsConsent.vue";
+import { getAnalytics, trackEvent } from "./lib/analytics";
+
+getAnalytics().start();
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
 const HelpPanel = defineAsyncComponent(() => import("./components/HelpPanel.vue"));
@@ -60,6 +64,31 @@ const { settings: loadedSettings, isReturningUser } = loadSettings();
 const settings = reactive(loadedSettings);
 provide(SETTINGS_INJECTION_KEY, settings);
 
+// Track only selected setting names; never send templates, tokens or typed values.
+for (const [name, read] of Object.entries({
+  defaultNumberObserver: () => settings.defaultNumberObserver,
+  autoAssignDuration: () => settings.autoAssignDuration,
+  autoAssignDistance: () => settings.autoAssignDistance,
+  customizedSpeciesComments: () => settings.customizedSpeciesComments,
+  personalizedComments: () => settings.speciesCommentTemplateOptions.personalized,
+  staticMap: () => settings.globalStaticMap.show,
+  interactiveMap: () => settings.globalStaticMap.interactive,
+})) {
+  watch(read, () => trackEvent("setting_change", { setting_name: name }));
+}
+watch(
+  () => settings.uiLanguage,
+  (language) => trackEvent("language_change", { language }),
+);
+watch(
+  () => settings.advancedEnabled,
+  (enabled) => trackEvent("mode_change", { mode: enabled ? "customized" : "basic" }),
+);
+watch(
+  () => settings.assignmentMapBaseLayer,
+  (layer) => trackEvent("map_layer_change", { layer }),
+);
+
 const website = ref(null);
 const { forms, sightings, formsSightings } = toRefs(store.state);
 const selectedFormId = ref(null);
@@ -70,7 +99,7 @@ const version = __APP_VERSION__;
 // One-off announcement of a change returning users should know about. Shown to users who have
 // used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
 // For a new announcement, change NEWS.id.
-const NEWS = { id: "2026-10-scientific-names", version: "0.3", until: "2027-03-31" };
+const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
 const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
 const showNews = ref(
   isReturningUser &&
@@ -262,6 +291,7 @@ const infoOpen = ref(false);
 const infoSection = ref("");
 
 function openInfo(section = "") {
+  trackEvent("help_open", { section });
   infoSection.value = section;
   infoOpen.value = true;
 }
@@ -289,6 +319,7 @@ window.addEventListener("hashchange", openInfoFromHash);
 onBeforeUnmount(() => window.removeEventListener("hashchange", openInfoFromHash));
 
 function openSettings(section = "") {
+  trackEvent("settings_open");
   settingsFocusSection.value = section;
   settingsOpen.value = true;
 }
@@ -345,6 +376,7 @@ function openSettingsForSection(section) {
     </div>
 
     <main class="main-stack">
+      <AnalyticsConsent v-if="!settingsOpen" />
       <div
         v-if="showNews"
         class="alert alert-info d-flex align-items-start gap-3 mb-0"
@@ -352,7 +384,7 @@ function openSettingsForSection(section) {
       >
         <i class="bi bi-stars fs-5" aria-hidden="true"></i>
         <div class="flex-grow-1">
-          <strong>{{ t("newsTitle", { version: NEWS.version }) }}</strong>
+          <strong>{{ t("newsTitle") }}</strong>
           {{ t("newsBody") }}
           <a href="#help/species-matching">{{ t("newsLink") }}</a>
         </div>
@@ -421,7 +453,7 @@ function openSettingsForSection(section) {
       />
     </main>
 
-    <AppFooter :version="version" />
+    <AppFooter :version="version" @open-privacy="openSettings('privacy')" />
     <AppDialog />
   </div>
 </template>

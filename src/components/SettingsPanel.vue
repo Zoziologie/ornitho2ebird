@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { buildSpeciesCommentTemplateFromOptions } from "../lib/constants";
 import { basemapGroups } from "../lib/basemaps";
 import { SETTINGS_INJECTION_KEY } from "../lib/settings";
+import AnalyticsConsent from "./AnalyticsConsent.vue";
 import { speciesComment } from "../lib/utils";
 
 const props = defineProps({
@@ -20,6 +21,7 @@ const props = defineProps({
 const emit = defineEmits(["close", "open-info"]);
 // The app's settings, edited in place (saved by App.vue).
 const settings = inject(SETTINGS_INJECTION_KEY);
+const privacyRef = ref(null);
 const { t, locale } = useI18n();
 const staticMapStyleOptions = [
   { value: "satellite-v9", label: "Satellite" },
@@ -177,6 +179,7 @@ watch(
 
     await nextTick();
     const sectionMap = {
+      privacy: privacyRef.value,
       "advanced-options": advancedOptionsRef.value,
       "species-comment-template": speciesCommentRef.value,
       aggregation: aggregationRef.value,
@@ -203,6 +206,9 @@ watch(
         </div>
 
         <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
+          <div ref="privacyRef" tabindex="-1" class="settings-section mt-0 pt-0 border-top-0">
+            <AnalyticsConsent preferences />
+          </div>
           <div class="settings-section mt-0 pt-0 border-top-0">
             <h3 class="modal-section-title">{{ t("basicSettingsTitle") }}</h3>
             <div>
