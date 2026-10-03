@@ -93,7 +93,6 @@
   "infoCustomizeBody": "Turn on Customized mode in Settings to manually assign casual observations to checklists and edit checklist metadata before export, including primary purpose, protocol, date, time, duration, distance, observers, location and checklist comments.",
   "infoCustomizeSpeciesComments": "You can also modify species comments. Use the template settings to decide what information is added to each eBird species comment, such as count, time, links to the source observation, map links and original notes.",
   "infoLearnMoreTitle": "Useful eBird references",
-  "helpBack": "Back to the app",
   "faqTitle": "Frequently asked questions",
   "faqBeforeTitle": "Before importing",
   "faqDuringTitle": "During the eBird import",

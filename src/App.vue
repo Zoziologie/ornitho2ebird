@@ -1,13 +1,5 @@
 <script setup>
-import {
-  computed,
-  defineAsyncComponent,
-  nextTick,
-  onBeforeUnmount,
-  reactive,
-  ref,
-  watch,
-} from "vue";
+import { computed, defineAsyncComponent, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import "./app.css";
 import AppHeader from "./components/AppHeader.vue";
@@ -32,7 +24,7 @@ import { confirmDialog } from "./lib/dialog";
 import AppDialog from "./components/AppDialog.vue";
 
 const SettingsPanel = defineAsyncComponent(() => import("./components/SettingsPanel.vue"));
-const HelpPage = defineAsyncComponent(() => import("./components/HelpPage.vue"));
+const HelpPanel = defineAsyncComponent(() => import("./components/HelpPanel.vue"));
 const AdvancedPanel = defineAsyncComponent(() => import("./components/AdvancedPanel.vue"));
 const ExportPanel = defineAsyncComponent(() => import("./components/ExportPanel.vue"));
 
@@ -339,50 +331,35 @@ watch(
   },
 );
 
-// The help page lives at #help, or #help/<section> to open one section or FAQ question, so it
-// can be linked to from anywhere (?lang=de#help for German). The app stays mounted underneath,
-// and the browser's back button returns to it.
+const infoOpen = ref(false);
+const infoSection = ref("");
+
+function openInfo(section = "") {
+  infoSection.value = section;
+  infoOpen.value = true;
+}
+
+// Links can open the help too: #help, or #help/<id> for one section or FAQ question
+// (?lang=de#help for German), so eBird's documentation can link to it.
 const HELP_HASH = /^#help(?:\/([\w-]+))?$/;
 
-function helpSectionFromHash() {
+function openInfoFromHash() {
   const match = window.location.hash.match(HELP_HASH);
-  return match ? match[1] || "" : null;
-}
-
-const helpSection = ref(helpSectionFromHash());
-let helpOpenedFromApp = false;
-let appScrollY = 0;
-
-function onHashChange() {
-  const wasOpen = helpSection.value !== null;
-  const section = helpSectionFromHash();
-  if (!wasOpen && section !== null) {
-    helpOpenedFromApp = true;
-    appScrollY = window.scrollY;
-  }
-  helpSection.value = section;
-  if (wasOpen && section === null) {
-    helpOpenedFromApp = false;
-    nextTick(() => window.scrollTo({ top: appScrollY, behavior: "instant" }));
+  if (match) {
+    openInfo(match[1] || "");
   }
 }
 
-window.addEventListener("hashchange", onHashChange);
-onBeforeUnmount(() => window.removeEventListener("hashchange", onHashChange));
-
-function openHelp(section = "") {
-  closeSettings();
-  window.location.hash = section ? `help/${section}` : "help";
-}
-
-function closeHelp() {
-  if (helpOpenedFromApp) {
-    window.history.back();
-    return;
+function closeInfo() {
+  infoOpen.value = false;
+  if (HELP_HASH.test(window.location.hash)) {
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }
-  window.history.pushState(null, "", window.location.pathname + window.location.search);
-  onHashChange();
 }
+
+openInfoFromHash();
+window.addEventListener("hashchange", openInfoFromHash);
+onBeforeUnmount(() => window.removeEventListener("hashchange", openInfoFromHash));
 
 function openSettings(section = "") {
   settingsFocusSection.value = section;
@@ -407,7 +384,7 @@ function openSettingsForSection(section) {
     <AppHeader
       :ui-language="settings.uiLanguage"
       @update:ui-language="settings.uiLanguage = $event"
-      @open-info="openHelp()"
+      @open-info="openInfo()"
       @open-settings="openSettings()"
     />
 
@@ -416,11 +393,32 @@ function openSettingsForSection(section) {
       :settings="settings"
       :focus-section="settingsFocusSection"
       @close="closeSettings"
-      @open-info="openHelp($event)"
+      @open-info="openInfo($event)"
     />
-    <HelpPage v-if="helpSection !== null" :section="helpSection" @close="closeHelp" />
+    <div
+      v-if="infoOpen"
+      class="modal-backdrop d-grid p-3 overflow-x-hidden"
+      @click.self="closeInfo"
+    >
+      <section class="modal-panel card border-0 shadow d-flex flex-column overflow-hidden">
+        <div class="card-body modal-body-shell d-flex flex-column flex-grow-1 p-4">
+          <div class="d-flex flex-shrink-0 justify-content-between align-items-center mb-3">
+            <h2 class="modal-title-heading">
+              <i class="bi bi-journal-text" aria-hidden="true"></i>
+              <span>{{ $t("infoTitle") }}</span>
+            </h2>
+            <button class="btn btn-outline-secondary btn-sm" type="button" @click="closeInfo">
+              {{ $t("close") }}
+            </button>
+          </div>
+          <div class="modal-content-scroll flex-grow-1 overflow-x-hidden overflow-y-auto">
+            <HelpPanel :section="infoSection" />
+          </div>
+        </div>
+      </section>
+    </div>
 
-    <main v-show="helpSection === null" class="main-stack">
+    <main class="main-stack">
       <div
         v-if="showNews"
         class="alert alert-info d-flex align-items-start gap-3 mb-0"
@@ -460,7 +458,7 @@ function openSettingsForSection(section) {
         :assignment-map-base-layer="settings.assignmentMapBaseLayer"
         @update:selected-form-id="selectedFormId = $event"
         @update:assignment-map-base-layer="settings.assignmentMapBaseLayer = $event"
-        @open-info="openHelp('auto-assignment')"
+        @open-info="openInfo('auto-assignment')"
       />
 
       <ExportPanel

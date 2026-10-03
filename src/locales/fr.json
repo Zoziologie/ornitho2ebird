@@ -93,7 +93,6 @@
   "infoCustomizeBody": "Activez le mode personnalisé dans les paramètres pour assigner manuellement les observations occasionnelles aux checklistes et modifier les métadonnées de la checklist avant l'export, notamment l'objectif principal, le protocole, la date, l'heure, la durée, la distance, les observateurs, le lieu et les commentaires de checklist.",
   "infoCustomizeSpeciesComments": "Vous pouvez aussi modifier les commentaires d'espèces. Les paramètres de modèle permettent de choisir les informations ajoutées à chaque commentaire d'espèce eBird, comme l'effectif, l'heure, les liens vers l'observation source, les liens cartographiques et les notes d'origine.",
   "infoLearnMoreTitle": "Références utiles eBird",
-  "helpBack": "Retour à l'application",
   "faqTitle": "Questions fréquentes",
   "faqBeforeTitle": "Avant l'import",
   "faqDuringTitle": "Pendant l'import dans eBird",

@@ -93,7 +93,6 @@
   "infoCustomizeBody": "Activa el mode personalitzat a l'apartat de configuració per assignar manualment les observacions casuals a checklists i modificar les metadades de la checklist abans de l'exportació, incloent-hi l'objectiu principal, el protocol, la data, l'hora, la durada, la distància, el nombre d'observadors, la ubicació i els comentaris de la checklist.",
   "infoCustomizeSpeciesComments": "També pots modificar els comentaris d'espècies. Fes servir els paràmetres de plantilla per decidir quina informació s'afegeix a cada comentari d'espècie d'eBird, com ara el recompte, l'hora, els enllaços a l'observació d'origen, els enllaços de mapa i les notes originals.",
   "infoLearnMoreTitle": "Referències útils d'eBird",
-  "helpBack": "Torna a l'aplicació",
   "faqTitle": "Preguntes freqüents",
   "faqBeforeTitle": "Abans d'importar",
   "faqDuringTitle": "Durant la importació a eBird",
