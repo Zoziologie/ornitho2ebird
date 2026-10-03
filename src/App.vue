@@ -165,6 +165,22 @@ const infoSection = ref("");
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
 const version = __APP_VERSION__;
+
+// One-off announcement of a change returning users should know about. Shown to users who have
+// used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
+// For a new announcement, change NEWS.id.
+const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
+const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
+const showNews = ref(
+  storedSettings !== null &&
+    new Date() < new Date(NEWS.until) &&
+    readStorage(NEWS_STORAGE_KEY, "") !== NEWS.id,
+);
+
+function dismissNews() {
+  showNews.value = false;
+  writeStorage(NEWS_STORAGE_KEY, NEWS.id);
+}
 const { t } = useI18n({ useScope: "global" });
 function updateDocumentMetadata(language) {
   if (typeof document === "undefined") {
@@ -384,6 +400,31 @@ function openSettingsForSection(section) {
     </div>
 
     <main class="main-stack">
+      <div
+        v-if="showNews"
+        class="alert alert-info d-flex align-items-start gap-3 mb-0"
+        role="status"
+      >
+        <i class="bi bi-stars fs-5" aria-hidden="true"></i>
+        <div class="flex-grow-1">
+          <strong>{{
+            t("newsTitle", { version: version.split(".").slice(0, 2).join(".") })
+          }}</strong>
+          {{ t("newsBody") }}
+          <a
+            href="https://github.com/Zoziologie/ornitho2ebird/wiki/FAQ#issues-with-taxonomic-matching"
+            target="_blank"
+            rel="noopener"
+            >{{ t("newsLink") }}</a
+          >
+        </div>
+        <button
+          class="btn-close flex-shrink-0"
+          type="button"
+          :aria-label="t('close')"
+          @click="dismissNews"
+        ></button>
+      </div>
       <ImportPanel
         :selected-website-name="settings.websiteName"
         @update:selected-website-name="updateSelectedWebsiteName"

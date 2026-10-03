@@ -1,6 +1,9 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Convertir des exports ornitho en listes eBird",
+  "newsTitle": "Nouveau dans la version {version} :",
+  "newsBody": "Les espèces sont désormais exportées avec leur nom scientifique : eBird les reconnaît quelle que soit la langue de votre compte eBird. Le réglage de langue eBird n'est plus nécessaire.",
+  "newsLink": "En savoir plus",
   "settings": "Paramètres",
   "globalSettings": "Paramètres",
   "close": "Fermer",

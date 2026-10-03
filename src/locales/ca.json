@@ -1,6 +1,9 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Converteix les teves dades d'ornitho en llistes d'eBird",
+  "newsTitle": "Novetat de la versió {version}:",
+  "newsBody": "Ara les espècies s'exporten amb el nom científic, de manera que eBird les reconeix sigui quin sigui l'idioma del teu compte d'eBird. Ja no cal la configuració d'idioma d'eBird.",
+  "newsLink": "Més informació",
   "settings": "Configuració",
   "globalSettings": "Configuració",
   "close": "Tanca",
