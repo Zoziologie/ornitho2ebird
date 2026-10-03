@@ -1,5 +1,6 @@
 <script setup>
 import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { trackEvent } from "../lib/analytics";
 import { useI18n } from "vue-i18n";
 import AssignmentMap from "./AssignmentMap.vue";
 import ReviewMap from "./ReviewMap.vue";
@@ -242,6 +243,7 @@ function computeDateFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { date: earliestSighting()?.date || "" });
+  trackEvent("checklist_action", { action: "compute_date", panel: "checklist" });
 }
 
 function computeTimeFromSightings() {
@@ -250,6 +252,7 @@ function computeTimeFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { time: earliestTimedSighting()?.time || "" });
+  trackEvent("checklist_action", { action: "compute_time", panel: "checklist" });
 }
 
 function computeDurationFromSightings() {
@@ -258,6 +261,7 @@ function computeDurationFromSightings() {
   }
 
   store.updateForm(selectedForm.value.id, { duration: computedDuration.value || "" });
+  trackEvent("checklist_action", { action: "compute_duration", panel: "checklist" });
 }
 
 async function loadHotspotsForSelectedForm() {
@@ -290,10 +294,12 @@ async function loadHotspotsForSelectedForm() {
 
 function focusReviewMap() {
   reviewMap.value?.focus();
+  trackEvent("checklist_action", { action: "focus_map", panel: "checklist" });
 }
 
 function startPathDraw() {
   reviewMap.value?.startPathDraw();
+  trackEvent("checklist_action", { action: "draw_path", panel: "checklist" });
 }
 
 async function updatePath(path) {
@@ -316,11 +322,23 @@ async function updatePath(path) {
   }
 
   store.setFormPath(form.id, path);
+  trackEvent("checklist_action", { action: "path" });
 }
 
 function startRectangleDraw(mode) {
   creatingChecklist = mode === "create";
   assignmentMap.value?.startSelection();
+  trackEvent("checklist_action", { action: "select_rectangle", panel: "assignment" });
+}
+
+function assignSightings(sightings, formId) {
+  store.assignSightings(sightings, formId);
+  trackEvent("checklist_action", { action: "assign" });
+}
+
+function moveChecklist(formId, lat, lon) {
+  store.moveForm(formId, lat, lon);
+  trackEvent("checklist_action", { action: "move" });
 }
 
 function applyAssignmentSelection(matchedSightings) {
@@ -335,12 +353,12 @@ function applyAssignmentSelection(matchedSightings) {
   if (isCreateMode) {
     const newFormId = createChecklistFromSightings(matchedSightings);
     if (newFormId) {
-      store.assignSightings(matchedSightings, newFormId);
+      assignSightings(matchedSightings, newFormId);
     }
     return;
   }
 
-  store.assignSightings(matchedSightings, assignFormId.value);
+  assignSightings(matchedSightings, assignFormId.value);
 }
 
 function selectAssignmentForm(value) {
@@ -349,6 +367,7 @@ function selectAssignmentForm(value) {
 }
 
 function selectReviewForm(value) {
+  trackEvent("checklist_action", { action: "select" });
   emit("update:selectedFormId", value);
   reviewSelectorOpen.value = false;
 }
@@ -424,6 +443,7 @@ function buildNewChecklist(payload) {
     speciesCommentTemplate: props.defaultSpeciesCommentTemplate,
   });
   emit("update:selectedFormId", formId);
+  trackEvent("checklist_action", { action: "create" });
   assignFormId.value = formId;
   return formId;
 }
@@ -438,6 +458,7 @@ function createChecklistFromSightings(targetSightings) {
 
 function assignClean() {
   store.deleteUnusedForms();
+  trackEvent("checklist_action", { action: "clean" });
 }
 
 async function deleteSelectedChecklist() {
@@ -447,6 +468,7 @@ async function deleteSelectedChecklist() {
   }
 
   const formIndex = store.deleteForm(formToDelete.id);
+  trackEvent("checklist_action", { action: "delete" });
   if (formIndex < 0) {
     return;
   }
@@ -466,6 +488,7 @@ async function assignReset() {
   }
 
   store.resetAssignment();
+  trackEvent("checklist_action", { action: "reset" });
   assignFormId.value = 0;
   emit("update:selectedFormId", props.forms[0]?.id || null);
 }
@@ -497,6 +520,7 @@ async function assignMagic() {
     defaultNumberObserver: props.defaultNumberObserver,
     speciesCommentTemplate: props.defaultSpeciesCommentTemplate,
   });
+  trackEvent("checklist_action", { action: "auto_assign" });
 }
 
 // The hotspot's own coordinates, not rounded like a dragged marker.
@@ -511,6 +535,7 @@ function useHotspot(hotspot) {
     lon: hotspot.lng,
     hotspot_key: "",
   });
+  trackEvent("checklist_action", { action: "hotspot" });
   loadHotspotsForSelectedForm();
 }
 
@@ -543,7 +568,9 @@ onMounted(() => {
   <div class="d-flex flex-column gap-3">
     <section v-if="sightings.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
-        <h2 class="border-bottom pb-2 mb-3">{{ t("assignmentTitle") }}</h2>
+        <h2 v-analytics-view="'assignment'" class="border-bottom pb-2 mb-3">
+          {{ t("assignmentTitle") }}
+        </h2>
         <p class="mb-3">{{ t("assignmentIntro") }}</p>
 
         <div class="assignment-map-shell mb-3">
@@ -558,8 +585,8 @@ onMounted(() => {
             :base-layer="assignmentMapBaseLayer"
             @update:base-layer="emit('update:assignmentMapBaseLayer', $event)"
             @select-form="selectChecklistOnMap"
-            @move-form="store.moveForm"
-            @assign="store.assignSightings"
+            @move-form="moveChecklist"
+            @assign="assignSightings"
             @selection="applyAssignmentSelection"
           />
 
@@ -716,7 +743,9 @@ onMounted(() => {
 
     <section v-if="forms.length > 0" class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-3 p-md-4">
-        <h2 class="border-bottom pb-2 mb-3">{{ t("advancedTitle") }}</h2>
+        <h2 v-analytics-view="'checklist'" class="border-bottom pb-2 mb-3">
+          {{ t("advancedTitle") }}
+        </h2>
         <p>{{ t("advancedIntro") }}</p>
 
         <div v-if="selectedForm" class="row align-items-center g-3 mb-3">
@@ -796,7 +825,10 @@ onMounted(() => {
               <button
                 class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2"
                 type="button"
-                @click="observationsModalOpen = true"
+                @click="
+                  observationsModalOpen = true;
+                  trackEvent('checklist_action', { action: 'view_observations' });
+                "
               >
                 <i class="bi bi-list-ul" aria-hidden="true"></i>
                 <span>{{
@@ -811,6 +843,7 @@ onMounted(() => {
                 class="form-check-input"
                 type="checkbox"
                 :disabled="isInvalid"
+                @change="trackEvent('checklist_action', { action: 'edit' })"
               />
               <label class="form-check-label" for="export-ready">{{ t("readyForExport") }}</label>
             </div>
@@ -852,7 +885,10 @@ onMounted(() => {
                   :class="requiredStateClass(selectedForm.location_name)"
                   type="text"
                   :maxlength="LOCATION_NAME_MAX_LENGTH"
-                  @change="normalizeSelectedLocationName"
+                  @change="
+                    normalizeSelectedLocationName();
+                    trackEvent('checklist_action', { action: 'edit' });
+                  "
                 />
                 <button
                   v-tooltip:top="t('focusMapTooltip')"
@@ -887,6 +923,7 @@ onMounted(() => {
                   class="form-control"
                   :class="requiredStateClass(selectedForm.date)"
                   type="date"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <button
                   v-tooltip:top="t('computeDateTooltip')"
@@ -909,6 +946,7 @@ onMounted(() => {
                 min="1"
                 max="100"
                 step="1"
+                @change="trackEvent('checklist_action', { action: 'edit' })"
               />
             </div>
             <div class="col-lg-3 col-sm-6">
@@ -920,6 +958,7 @@ onMounted(() => {
                   :class="requiredTimeStateClass(selectedForm.time)"
                   type="time"
                   step="60"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <button
                   v-tooltip:top="t('computeTimeTooltip')"
@@ -942,6 +981,7 @@ onMounted(() => {
                   type="number"
                   min="1"
                   max="1440"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <button
                   v-tooltip:top="t('computeDurationTooltip')"
@@ -965,6 +1005,7 @@ onMounted(() => {
                   min="0"
                   max="80"
                   step="0.1"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <button
                   v-tooltip:top="t('drawPathTooltip')"
@@ -997,6 +1038,7 @@ onMounted(() => {
                   v-model="selectedFormModel.primary_purpose"
                   class="form-check-input"
                   type="checkbox"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <label class="form-check-label" for="primary-purpose">{{
                   t("primaryPurpose")
@@ -1008,6 +1050,7 @@ onMounted(() => {
                   v-model="selectedFormModel.full_form"
                   class="form-check-input"
                   type="checkbox"
+                  @change="trackEvent('checklist_action', { action: 'edit' })"
                 />
                 <label class="form-check-label" for="complete-checklist">{{
                   t("completeChecklist")
@@ -1024,7 +1067,7 @@ onMounted(() => {
                 :sightings="selectedSightings"
                 :base-layer="assignmentMapBaseLayer"
                 @update:base-layer="emit('update:assignmentMapBaseLayer', $event)"
-                @move-form="store.moveForm"
+                @move-form="moveChecklist"
                 @path="updatePath"
                 @use-hotspot="useHotspot"
               />
@@ -1042,6 +1085,7 @@ onMounted(() => {
                       v-model="selectedFormModel.include_static_map"
                       class="form-check-input"
                       type="checkbox"
+                      @change="trackEvent('checklist_action', { action: 'edit' })"
                     />
                     <label class="form-check-label" for="include-static-map">
                       {{ t("staticMapChecklistEnabled") }}
@@ -1082,6 +1126,7 @@ onMounted(() => {
                       <select
                         v-model="selectedFormModel.static_map_zoom_mode"
                         class="form-select form-select-sm"
+                        @change="trackEvent('checklist_action', { action: 'edit' })"
                       >
                         <option value="auto">{{ t("staticMapZoomModeAuto") }}</option>
                         <option value="manual">{{ t("staticMapZoomModeManual") }}</option>
@@ -1100,6 +1145,7 @@ onMounted(() => {
                         min="0"
                         max="22"
                         step="0.5"
+                        @change="trackEvent('checklist_action', { action: 'edit' })"
                       />
                     </div>
                   </div>

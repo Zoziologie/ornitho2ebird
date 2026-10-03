@@ -1,7 +1,7 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Convertir des exports ornitho en listes eBird",
-  "newsTitle": "Nouveau dans la version {version} :",
+  "newsTitle": "Correspondance des espèces :",
   "newsBody": "Les espèces sont désormais exportées avec leur nom scientifique : eBird les reconnaît quelle que soit la langue de votre compte eBird. Le réglage de langue eBird n'est plus nécessaire.",
   "newsLink": "En savoir plus",
   "settings": "Paramètres",
@@ -313,5 +313,17 @@
   "mapZoomIn": "Zoomer",
   "mapZoomOut": "Dézoomer",
   "mapScrollZoomHelp": "Utilisez {key} + molette pour zoomer sur la carte",
-  "mapTouchMoveHelp": "Utilisez deux doigts pour déplacer la carte"
+  "mapTouchMoveHelp": "Utilisez deux doigts pour déplacer la carte",
+  "analyticsTitle": "Confidentialité et cookies",
+  "analyticsSummary": "Pouvons-nous utiliser des cookies facultatifs pour comprendre comment vous utilisez cet outil ? Les statistiques d’utilisation nous aident à améliorer l’import, la vérification des listes et l’export.",
+  "analyticsDetails": "Quelles données sont collectées ?",
+  "analyticsNotice": "Avec votre accord, Google reçoit des données de visite et d’interaction, dont le site source choisi, la langue de l’interface, le mode et l’utilisation des outils de listes et de cartes. Nos événements ne transmettent ni noms de fichiers, ni observations, coordonnées, commentaires, jetons, recherches ou URL complètes. Google traite aussi des informations techniques telles que votre adresse IP et des informations sur votre navigateur, et peut traiter les données à l’étranger. Le consentement publicitaire reste refusé ; Google Signals et la personnalisation des annonces sont désactivés dans cette application. Les cookies Analytics et votre choix enregistré expirent après six mois. Vous pouvez modifier votre choix ici, dans Confidentialité et cookies en bas de page ou dans les paramètres. Refuser arrête la mesure et supprime les cookies Analytics de cette application sans perdre votre import. La langue et les paramètres sont enregistrés séparément pour le fonctionnement de l’outil. Google Analytics conserve les données d’événements pendant deux mois et les données utilisateur pendant quatorze mois ; une nouvelle activité renouvelle la période de conservation des données utilisateur. Les événements d’export indiquent aussi l’option de commentaires d’espèces utilisée et si le CSV contient des commentaires d’espèces, sans leur contenu.",
+  "analyticsGooglePrivacy": "Politique de confidentialité de Google",
+  "analyticsAccept": "Autoriser les statistiques",
+  "analyticsReject": "Non merci",
+  "analyticsAccepted": "Les statistiques d’utilisation sont actuellement autorisées.",
+  "analyticsRejected": "Les statistiques d’utilisation sont actuellement désactivées.",
+  "analyticsConsentTitle": "Aidez-nous à améliorer Ornitho2eBird",
+  "analyticsReassurance": "Vos observations et le texte de vos commentaires ne sont pas collectés. Toutes les fonctions restent disponibles sans ces cookies.",
+  "analyticsPreferences": "Statistiques d’utilisation"
 }

@@ -162,7 +162,7 @@ The app calls these services from the browser:
 - map tile servers (OpenStreetMap, Esri, swisstopo, IGN, BKG) for the review maps
 - Mapbox, only if you add a Mapbox token, to render static checklist maps
 - GitHub Gists, only if you add a GitHub token and enable interactive maps, to publish each checklist's map data as a secret gist
-- Google Analytics, for page-view statistics (see [#10](https://github.com/Zoziologie/ornitho2ebird/issues/10))
+- Google Analytics, only after you accept, for page views and predefined usage events (imports, exports, modes, help, settings and checklist/map tools). You can reject or change your choice in Settings or through Privacy & cookies in the footer. Conversion works without analytics; withdrawing consent preserves your current import. See [the event contract and administrator setup](docs/analytics.md).
 
 If the eBird requests fail, the export keeps the source species names.
 

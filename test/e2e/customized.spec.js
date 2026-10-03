@@ -22,7 +22,8 @@ const field = (section, label) =>
 // export. The eBird taxonomy API fails here, so this also covers the bundled-names fallback.
 test("checklist edits in Customized mode reach the CSV", async ({ page }) => {
   await stubNetwork(page, { ebirdTaxonomy: false });
-  await openApp(page);
+  await openApp(page, { chooseConsent: false });
+  await page.getByRole("button", { name: "Allow usage statistics" }).click();
 
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("button", { name: /^Customized mode/ }).click();
@@ -59,5 +60,20 @@ test("checklist edits in Customized mode reach the CSV", async ({ page }) => {
         : row,
     );
   expect(expected.length).toBeLessThan(golden.length);
+  expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+  const events = await page.evaluate(() =>
+    window.dataLayer.filter((entry) => entry[0] === "event").map((entry) => [entry[1], entry[2]]),
+  );
+  expect(events).toContainEqual(["mode_change", expect.objectContaining({ mode: "customized" })]);
+  expect(events).toContainEqual(["checklist_action", expect.objectContaining({ action: "edit" })]);
+  expect(events).toContainEqual([
+    "export_csv",
+    expect.objectContaining({ mode: "customized", outcome: "success" }),
+  ]);
+
+  // Withdrawing consent must also preserve manual edits and export selections.
+  await page.getByRole("button", { name: "Privacy & cookies", exact: true }).click();
+  await page.getByRole("button", { name: "No thanks" }).click();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
   expect(parseCsv(await downloadCsv(page))).toEqual(expected);
 });

@@ -8,6 +8,7 @@ import {
   groupSightingsByForm,
   rowsToCsv,
 } from "../lib/exportCsv";
+import { getAnalytics, trackEvent } from "../lib/analytics";
 import { alertDialog } from "../lib/dialog";
 import LinkedText from "./LinkedText.vue";
 import { store } from "../lib/store";
@@ -52,6 +53,10 @@ const props = defineProps({
   customizedSpeciesComments: {
     type: Boolean,
     required: true,
+  },
+  personalizedSpeciesComments: {
+    type: Boolean,
+    default: false,
   },
   advancedEnabled: {
     type: Boolean,
@@ -426,8 +431,10 @@ async function publishInteractiveMapsForExport() {
         [form.id]: "ready",
       };
     }
+    trackEvent("publish_maps", { outcome: "success" });
     return true;
   } catch (error) {
+    trackEvent("publish_maps", { outcome: "failure" });
     interactiveMapError.value = t("interactiveMapPublishFailed", {
       message: error?.message || "Unknown error",
     });
@@ -437,6 +444,21 @@ async function publishInteractiveMapsForExport() {
     interactiveMapPublishing.value = false;
   }
 }
+
+const exportReadiness = computed(() =>
+  !exportableForms.value.length
+    ? "no_checklists"
+    : taxonomyNeededForExport.value && taxonomyStatus.value === "loading"
+      ? "loading_taxonomy"
+      : exportState.value.errors.length
+        ? "invalid_checklists"
+        : "ready",
+);
+watch(
+  [exportReadiness, () => getAnalytics().state.choice],
+  ([readiness]) => trackEvent("export_state", { readiness }),
+  { immediate: true },
+);
 
 async function downloadFile() {
   if (!exportState.value.csv) {
@@ -450,6 +472,10 @@ async function downloadFile() {
 
   const interactiveMapsReady = await publishInteractiveMapsForExport();
   if (!interactiveMapsReady || !exportState.value.csv) {
+    trackEvent("export_csv", {
+      mode: props.advancedEnabled ? "customized" : "basic",
+      outcome: "blocked",
+    });
     return;
   }
 
@@ -463,13 +489,25 @@ async function downloadFile() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(objectUrl);
+  trackEvent("export_csv", {
+    mode: props.advancedEnabled ? "customized" : "basic",
+    outcome: "success",
+    comment_mode: !props.customizedSpeciesComments
+      ? "disabled"
+      : props.personalizedSpeciesComments
+        ? "personalized"
+        : "options",
+    has_species_comments: exportState.value.rows.some((row) => row.species_comment.trim())
+      ? "yes"
+      : "no",
+  });
 }
 </script>
 
 <template>
   <section class="card border-0 shadow-sm rounded-3 mb-3">
     <div class="card-body p-3 p-md-4">
-      <h2 class="border-bottom pb-2 mb-3">{{ t("exportTitle") }}</h2>
+      <h2 v-analytics-view="'export'" class="border-bottom pb-2 mb-3">{{ t("exportTitle") }}</h2>
       <div v-if="exportableForms.length === 0" class="alert alert-secondary mb-0">
         {{ t("notReady") }}
       </div>
@@ -731,7 +769,7 @@ async function downloadFile() {
               </span>
               <div>
                 <div class="feature-panel-eyebrow">{{ t("exportTitle") }}</div>
-                <h5 class="mb-0">{{ t("finalStepsTitle") }}</h5>
+                <h5 v-analytics-view="'next_steps'" class="mb-0">{{ t("finalStepsTitle") }}</h5>
               </div>
             </div>
             <ol class="final-steps-list mb-2">
@@ -741,6 +779,7 @@ async function downloadFile() {
                   href="https://ebird.org/ebird/import/upload.form?theme=ebird"
                   target="_blank"
                   rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'ebird_import' })"
                 >
                   {{ t("finalStepsImportLink") }} </a
                 >,
@@ -774,7 +813,12 @@ async function downloadFile() {
               </li>
               <li>
                 {{ t("finalStepsReviewPrefix") }}
-                <a href="https://ebird.org/import/status/all.htm" target="_blank" rel="noopener">
+                <a
+                  href="https://ebird.org/import/status/all.htm"
+                  target="_blank"
+                  rel="noopener"
+                  @click="trackEvent('workflow_link', { destination: 'ebird_status' })"
+                >
                   {{ t("finalStepsReviewLink") }}
                 </a>
                 {{ t("finalStepsReviewSuffix") }}

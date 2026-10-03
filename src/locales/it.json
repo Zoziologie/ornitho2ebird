@@ -1,7 +1,7 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Converti le esportazioni di ornitho in checklist eBird",
-  "newsTitle": "Novità della versione {version}:",
+  "newsTitle": "Abbinamento delle specie:",
   "newsBody": "Le specie vengono ora esportate con il loro nome scientifico, così eBird le riconosce qualunque sia la lingua del tuo account eBird. L'impostazione della lingua eBird non è più necessaria.",
   "newsLink": "Scopri di più",
   "settings": "Impostazioni",
@@ -313,5 +313,17 @@
   "mapZoomIn": "Ingrandisci",
   "mapZoomOut": "Riduci",
   "mapScrollZoomHelp": "Usa {key} + rotellina per ingrandire la mappa",
-  "mapTouchMoveHelp": "Usa due dita per spostare la mappa"
+  "mapTouchMoveHelp": "Usa due dita per spostare la mappa",
+  "analyticsTitle": "Privacy e cookie",
+  "analyticsSummary": "Possiamo usare cookie facoltativi per capire come viene usato lo strumento? Le statistiche di utilizzo ci aiutano a migliorare l’importazione, la revisione delle liste e l’esportazione.",
+  "analyticsDetails": "Quali dati vengono raccolti?",
+  "analyticsNotice": "Con il tuo consenso, Google riceve dati sulle visite e sulle interazioni, tra cui il sito di origine scelto, la lingua dell’interfaccia, la modalità e l’uso degli strumenti per liste e mappe. I nostri eventi non inviano nomi di file, osservazioni, coordinate, commenti, token, ricerche o URL completi. Google tratta anche informazioni tecniche come il tuo indirizzo IP e informazioni sul browser e può trattare dati all’estero. Il consenso pubblicitario resta negato; Google Signals e la personalizzazione degli annunci sono disattivati in questa app. I cookie Analytics e la tua scelta salvata scadono dopo sei mesi. Puoi cambiare la scelta qui, tramite Privacy e cookie in fondo alla pagina o nelle impostazioni. Rifiutare interrompe la misurazione e rimuove i cookie Analytics di questa app senza perdere la tua importazione. La lingua e le impostazioni dell’app vengono salvate separatamente per il funzionamento dello strumento. Google Analytics conserva i dati degli eventi per due mesi e i dati utente per quattordici mesi; una nuova attività fa ripartire il periodo di conservazione dei dati utente. Gli eventi di esportazione indicano anche l’opzione usata per i commenti sulle specie e se il CSV contiene tali commenti, senza inviarne il contenuto.",
+  "analyticsGooglePrivacy": "Informativa sulla privacy di Google",
+  "analyticsAccept": "Consenti le statistiche",
+  "analyticsReject": "No grazie",
+  "analyticsAccepted": "Le statistiche di utilizzo sono attualmente consentite.",
+  "analyticsRejected": "Le statistiche di utilizzo sono attualmente disattivate.",
+  "analyticsConsentTitle": "Aiutaci a migliorare Ornitho2eBird",
+  "analyticsReassurance": "Le tue osservazioni e il testo dei commenti non vengono raccolti. Tutte le funzioni sono disponibili anche senza questi cookie.",
+  "analyticsPreferences": "Statistiche di utilizzo"
 }

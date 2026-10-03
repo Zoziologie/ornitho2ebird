@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { trackEvent } from "../lib/analytics";
 import LinkedText from "./LinkedText.vue";
 import { WORKFLOW_STEPS } from "../lib/workflow";
 
@@ -222,6 +223,7 @@ watch(
           :id="`help-${question.id}`"
           :key="question.id"
           class="help-faq-item"
+          @toggle="$event.target.open && trackEvent('help_topic', { section: question.id })"
         >
           <summary>{{ t(`faq${question.key}Question`) }}</summary>
           <p class="mb-0">
