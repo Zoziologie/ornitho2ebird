@@ -312,6 +312,7 @@
   "exportTaxonomyWarningLineCode": "{name} (code: {code})",
   "exportTaxonomyWarningLineName": "{name} (no species code found)",
   "exportTaxonomyWarningMore": "... and {count} more species.",
+  "exportManualMatchNote": "eBird's importer does not recognise these species on its own. On the first import, match them on eBird's “Fix species” page; eBird remembers the match for later imports.",
   "exportReady": "CSV ready",
   "exportBlocked": "Fix export issues",
   "downloadCsv": "Download CSV",

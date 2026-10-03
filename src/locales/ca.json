@@ -312,6 +312,7 @@
   "exportTaxonomyWarningLineCode": "{name} (codi: {code})",
   "exportTaxonomyWarningLineName": "{name} (no s'ha trobat codi d'espècie)",
   "exportTaxonomyWarningMore": "... i {count} espècies més.",
+  "exportManualMatchNote": "La importació d'eBird no reconeix aquestes espècies per si sola. A la primera importació, relaciona-les a la pàgina «Fix species» d'eBird; eBird ho recordarà per a les importacions següents.",
   "exportReady": "CSV a punt",
   "exportBlocked": "Corregeix els errors",
   "downloadCsv": "Descarrega el CSV",

@@ -312,6 +312,7 @@
   "exportTaxonomyWarningLineCode": "{name} (Code: {code})",
   "exportTaxonomyWarningLineName": "{name} (kein Artcode gefunden)",
   "exportTaxonomyWarningMore": "... und {count} weitere Arten.",
+  "exportManualMatchNote": "Der eBird-Import erkennt diese Arten nicht von selbst. Ordne sie beim ersten Import auf der eBird-Seite „Fix species“ zu; eBird merkt sich die Zuordnung für spätere Importe.",
   "exportReady": "CSV bereit",
   "exportBlocked": "Exportfehler beheben",
   "downloadCsv": "CSV herunterladen",

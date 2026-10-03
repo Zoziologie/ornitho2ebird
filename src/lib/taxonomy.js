@@ -91,6 +91,15 @@ export function ebirdCodeForScientificName(scientificName) {
   return "";
 }
 
+// eBird's importer matches every scientific name the export writes, except these two, which it
+// does not recognise in any form (scientific name, English or local name, or both; tested
+// Oct 2026). Probably old names that still point to several taxa in its synonym table. The user
+// matches them once on eBird's "Fix species" page and eBird remembers it for later imports.
+export const MANUAL_MATCH_TAXA = {
+  rocpig: { sciName: "Columba livia", comName: "Rock Pigeon" },
+  comsni: { sciName: "Gallinago gallinago", comName: "Common Snipe" },
+};
+
 // eBird taxa already fetched, per locale: species code → { comName, sciName, category }, or
 // null for a code eBird does not know (stale after a taxonomy update).
 const taxaByLocale = new Map();

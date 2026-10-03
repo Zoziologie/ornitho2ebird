@@ -11,6 +11,7 @@ import {
 import { alertDialog } from "../lib/dialog";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
 import {
+  MANUAL_MATCH_TAXA,
   bundledEbirdTaxa,
   cachedEbirdTaxa,
   getEbirdTaxa,
@@ -267,6 +268,13 @@ const unmatchedTaxonomy = computed(() => {
     return left.scientificName.localeCompare(right.scientificName);
   });
 });
+
+// Exported taxa eBird will ask the user to match once (see MANUAL_MATCH_TAXA).
+const manualMatchTaxa = computed(() =>
+  exportSpeciesCodes.value
+    .filter((code) => code in MANUAL_MATCH_TAXA && taxonByCode.value.has(code))
+    .map((code) => MANUAL_MATCH_TAXA[code]),
+);
 
 const displayedUnmatchedTaxonomy = computed(() => {
   return unmatchedTaxonomy.value.slice(0, TAXONOMY_WARNING_LIST_LIMIT);
@@ -532,6 +540,14 @@ async function downloadFile() {
       </div>
 
       <div v-else>
+        <div v-if="manualMatchTaxa.length > 0" class="alert alert-info small mb-3">
+          {{ t("exportManualMatchNote") }}
+          <ul class="mb-0 mt-1">
+            <li v-for="taxon in manualMatchTaxa" :key="taxon.sciName">
+              <i>{{ taxon.sciName }}</i> → {{ taxon.comName }}
+            </li>
+          </ul>
+        </div>
         <div
           v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'"
           class="alert alert-secondary mb-3"
