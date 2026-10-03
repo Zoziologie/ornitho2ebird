@@ -1,5 +1,5 @@
 # One workflow for checks and deployment:
-# - pull requests: lint, format check, tests and build
+# - pull requests: lint, format check, tests, build and end-to-end tests
 # - pushes to the default branch: the same checks, then the built `dist/` is
 #   uploaded as a Pages artifact and deployed (no gh-pages branch involved)
 name: CI and deploy
@@ -55,10 +55,42 @@ jobs:
         with:
           path: dist
 
+  # Playwright tests on the production build, with all external requests stubbed.
+  # A separate job, so the checks above report without waiting for the browser install.
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
   deploy:
     name: Deploy to GitHub Pages
     if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
-    needs: check
+    needs: [check, e2e]
     runs-on: ubuntu-latest
     permissions:
       pages: write

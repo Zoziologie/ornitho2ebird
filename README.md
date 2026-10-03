@@ -209,12 +209,20 @@ npm run check
 
 `npm run check` runs ESLint, the Prettier format check and the tests, the same checks CI runs. `npm run format` and `npm run lint:fix` fix most of what they report. Editors with the ESLint and Prettier extensions pick up the config automatically.
 
+The end-to-end tests run the built app in Chromium with [Playwright](https://playwright.dev/): they import fixtures, download the CSV and compare it with the golden files, in the default and in Customized mode. Every request outside the local server is stubbed (eBird API, Nominatim, map tiles, analytics), so they need no network once Chromium is installed:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
 ## Available scripts
 
 - `npm run dev` starts Vite in development mode
 - `npm run build` creates the production build
 - `npm run preview` serves the built app locally
 - `npm test` runs the unit and golden-file tests once (`npm run test:watch` re-runs them on change)
+- `npm run test:e2e` builds the app and runs the Playwright end-to-end tests in [`test/e2e/`](test/e2e)
 - `npm run lint` / `npm run lint:fix` runs ESLint (Vue and JavaScript rules)
 - `npm run format` / `npm run format:check` runs Prettier
 - `npm run check` runs lint, format check and tests together
@@ -234,10 +242,11 @@ npm run check
 - [`test/fixtures/`](test/fixtures) sample exports from each supported source
 - [`test/unit/`](test/unit) unit tests for parsing, comment templates, CSV export and locales
 - [`test/golden/`](test/golden) the expected eBird CSV for every fixture (`__snapshots__/`)
+- [`test/e2e/`](test/e2e) Playwright end-to-end tests of the import, Customized mode and download
 
 ## Deployment
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, the format check, the tests and the build on every pull request, and the end-to-end tests in a separate job. On a push to the default branch it runs the same checks, uploads `dist/` as a GitHub Pages artifact and, once the end-to-end tests pass too, deploys it; there is no `gh-pages` branch. It can also be started by hand from the Actions tab.
 
 The [Taxonomy update](.github/workflows/taxonomy-update.yml) workflow runs `npm run taxonomy:update` on the first of each month and opens a pull request only when eBird changed something (usually once a year, after eBird's taxonomy update in October). The pull request lists the ornitho codes it replaced and those that need a decision. Rock Pigeon and Common Snipe are listed in `MANUAL_MATCH_TAXA` ([`src/lib/taxonomy.js`](src/lib/taxonomy.js)) because eBird's importer does not match them by scientific name; see #38 for the tests behind this.
 
