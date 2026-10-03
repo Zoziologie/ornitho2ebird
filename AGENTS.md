@@ -53,7 +53,7 @@
   - Basic mode: Mode basique, Basis-Modus, Modalità base, Mode bàsic.
   - Customized mode: Mode personnalisé, Benutzerdefinierter Modus, Modalità personalizzata, Mode personalitzat.
 - **vue-i18n syntax:** `a | b` is a plural (call `t(key, named, count)`). The characters `{ } @ $ |` have meanings in messages, so escape them in plain text.
-- **Unused keys:** about 50 keys look unused and are waiting for review (#32).
+- **Remove keys you stop using** from all five files. Keys built in code (`protocolLabel${name}`, `faq${key}Question`/`Answer`) or stored as `labelKey` strings look unused to a plain search.
 
 ## Tests
 
