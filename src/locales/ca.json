@@ -1,9 +1,10 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Converteix les teves dades d'ornitho en llistes d'eBird",
-  "newsTitle": "Correspondència de les espècies:",
-  "newsBody": "Ara les espècies s'exporten amb el nom científic, de manera que eBird les reconeix sigui quin sigui l'idioma del teu compte d'eBird. Ja no cal la configuració d'idioma d'eBird.",
-  "newsLink": "Més informació",
+  "newsTitle": "Importacions més fàcils a eBird:",
+  "newsBody": "La correspondència de les espècies ara funciona sigui quin sigui l’idioma del teu compte d’eBird, i les llistes s’enllacen directament amb els hotspots que tries en Mode personalitzat.",
+  "newsSpeciesLink": "Correspondència de les espècies",
+  "newsHotspotsLink": "Hotspots",
   "settings": "Configuració",
   "globalSettings": "Configuració",
   "close": "Tanca",

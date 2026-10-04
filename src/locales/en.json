@@ -1,9 +1,10 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Convert ornitho exports into eBird checklists",
-  "newsTitle": "Species matching:",
-  "newsBody": "Species are now exported with their scientific name, so eBird recognises them whatever the language of your eBird account. The eBird language setting is no longer needed.",
-  "newsLink": "Learn more",
+  "newsTitle": "Easier imports into eBird:",
+  "newsBody": "Species matching now works across eBird account languages, and checklists link directly to the hotspots you select in Customized mode.",
+  "newsSpeciesLink": "Species matching",
+  "newsHotspotsLink": "Hotspots",
   "settings": "Settings",
   "globalSettings": "Settings",
   "close": "Close",

@@ -1,9 +1,10 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Convertir des exports ornitho en listes eBird",
-  "newsTitle": "Correspondance des espèces :",
-  "newsBody": "Les espèces sont désormais exportées avec leur nom scientifique : eBird les reconnaît quelle que soit la langue de votre compte eBird. Le réglage de langue eBird n'est plus nécessaire.",
-  "newsLink": "En savoir plus",
+  "newsTitle": "Des imports plus simples dans eBird :",
+  "newsBody": "La correspondance des espèces fonctionne désormais quelle que soit la langue de votre compte eBird, et les listes sont directement associées aux hotspots que vous choisissez en Mode personnalisé.",
+  "newsSpeciesLink": "Correspondance des espèces",
+  "newsHotspotsLink": "Hotspots",
   "settings": "Paramètres",
   "globalSettings": "Paramètres",
   "close": "Fermer",

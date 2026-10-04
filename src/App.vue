@@ -133,7 +133,7 @@ const version = __APP_VERSION__;
 // One-off announcement of a change returning users should know about. Shown to users who have
 // used the app before (they have saved settings) until they dismiss it or NEWS.until passes.
 // For a new announcement, change NEWS.id.
-const NEWS = { id: "2026-10-scientific-names", until: "2027-03-31" };
+const NEWS = { id: "2026-10-species-hotspots", until: "2027-03-31" };
 const NEWS_STORAGE_KEY = `${APP_STORAGE_PREFIX}:dismissed-news`;
 const showNews = ref(
   isReturningUser &&
@@ -422,7 +422,9 @@ function openSettingsForSection(section) {
         <div class="flex-grow-1">
           <strong>{{ t("newsTitle") }}</strong>
           {{ t("newsBody") }}
-          <a href="#help/species-matching">{{ t("newsLink") }}</a>
+          <a href="#help/species-matching">{{ t("newsSpeciesLink") }}</a>
+          <span aria-hidden="true"> · </span>
+          <a href="#help/hotspots">{{ t("newsHotspotsLink") }}</a>
         </div>
         <button
           class="btn-close flex-shrink-0"
