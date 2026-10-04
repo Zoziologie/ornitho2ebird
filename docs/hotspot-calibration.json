@@ -1,0 +1,1222 @@
+{
+  "fixture": "export_mixed_large.json",
+  "method": "Frozen eBird inventory; candidate-ID grouped holdout, fixed before fitting. Wrong selections cost five times abstentions. This is exploratory validation on one import, not general accuracy.",
+  "parameters": {
+    "minimumScore": 25,
+    "minimumDominance": 0.4
+  },
+  "calibration": {
+    "total": 47,
+    "correct": 47,
+    "wrongMatches": 0,
+    "missedMatches": 0
+  },
+  "validation": {
+    "total": 21,
+    "correct": 20,
+    "wrongMatches": 0,
+    "missedMatches": 1
+  },
+  "cases": [
+    {
+      "id": 1,
+      "location": "Le Pont – Lac Brenet",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5287486",
+      "topName": "Lac de Joux--Le Pont",
+      "score": 51.04940479343529,
+      "margin": 1.9547847144035941,
+      "selected": null
+    },
+    {
+      "id": 2,
+      "location": "Sursee Triechter",
+      "split": "calibration",
+      "accepted": [
+        "L10483319"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10483319",
+      "topName": "Triechter",
+      "score": 61.87013102430667,
+      "margin": 59.438793665700075,
+      "selected": "L10483319"
+    },
+    {
+      "id": 3,
+      "location": "Promenade Robert Hainard",
+      "split": "calibration",
+      "accepted": [
+        "L1166823"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L1166823",
+      "topName": "Promenade Robert Hainard",
+      "score": 79.32655448885968,
+      "margin": 37.468711159339634,
+      "selected": "L1166823"
+    },
+    {
+      "id": 4,
+      "location": "Bonvillars [542/186]",
+      "split": "validation",
+      "accepted": [
+        "L4188461"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L4188461",
+      "topName": "Embouchure de l'Arnon",
+      "score": 81.54136471957689,
+      "margin": 50.05166304869796,
+      "selected": "L4188461"
+    },
+    {
+      "id": 5,
+      "location": "Creux de Terre",
+      "split": "calibration",
+      "accepted": [
+        "L3012485"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.13148143865864068,
+      "top": "L3012485",
+      "topName": "Le Creux de Terre",
+      "score": 35.39248537712469,
+      "margin": 34.893430095981955,
+      "selected": "L3012485"
+    },
+    {
+      "id": 6,
+      "location": "Creux de Terre",
+      "split": "calibration",
+      "accepted": [
+        "L3012485"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.11765710031053428,
+      "top": "L3012485",
+      "topName": "Le Creux de Terre",
+      "score": 66.8587496091258,
+      "margin": 66.18145996109666,
+      "selected": "L3012485"
+    },
+    {
+      "id": 7,
+      "location": "Les Saars",
+      "split": "calibration",
+      "accepted": [
+        "L4446431"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0008895594132808107,
+      "top": "L4446431",
+      "topName": "Rives de Neuchâtel--Les Saars",
+      "score": 82.05600115400297,
+      "margin": 73.04968133296794,
+      "selected": "L4446431"
+    },
+    {
+      "id": 8,
+      "location": "Lac Coffy",
+      "split": "validation",
+      "accepted": [
+        "L4379692"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.09384585420699265,
+      "top": "L4379692",
+      "topName": "Lac Coffy",
+      "score": 55.35930849535989,
+      "margin": 40.1368704696022,
+      "selected": "L4379692"
+    },
+    {
+      "id": 9,
+      "location": "Etang de Bioley-Orjulaz",
+      "split": "calibration",
+      "accepted": [
+        "L3642659"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.008612736041916863,
+      "top": "L3642659",
+      "topName": "Gravière de Bioley-Orjulaz",
+      "score": 63.750466336247,
+      "margin": 37.9672062709749,
+      "selected": "L3642659"
+    },
+    {
+      "id": 10,
+      "location": "Parcelle du projet \"Escale limicoles\"",
+      "split": "calibration",
+      "accepted": [
+        "L6296888"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.1649182173620585,
+      "top": "L6296888",
+      "topName": "Basse Plaine de l'Orbe--Parcelle du projet \"Escale limicoles\"",
+      "score": 35.49136849724157,
+      "margin": 34.28356476354097,
+      "selected": "L6296888"
+    },
+    {
+      "id": 11,
+      "location": "Etang des Douves",
+      "split": "calibration",
+      "accepted": [
+        "L4834608"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.08754420324079187,
+      "top": "L4834608",
+      "topName": "Les Douves",
+      "score": 42.581750231895334,
+      "margin": 38.445407438423054,
+      "selected": "L4834608"
+    },
+    {
+      "id": 12,
+      "location": "Préverenges [530/152]",
+      "split": "calibration",
+      "accepted": [
+        "L3872486"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.005662006127387354,
+      "top": "L3872486",
+      "topName": "Le Monteiron  (migration)",
+      "score": 48.760339277541455,
+      "margin": 41.5521024496654,
+      "selected": "L3872486"
+    },
+    {
+      "id": 13,
+      "location": "Chablais de Cudrefin",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.21519430716554763,
+      "top": "L975146",
+      "topName": "Fanel--Centre Nature Birdlife de La Sauge (paid reserve only)",
+      "score": 45.41637093148707,
+      "margin": 12.606819574550642,
+      "selected": null
+    },
+    {
+      "id": 14,
+      "location": "Vieille Thielle",
+      "split": "validation",
+      "accepted": [
+        "L3884517"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.02451299436372959,
+      "top": "L3884517",
+      "topName": "Vieille Thielle",
+      "score": 37.78093076461748,
+      "margin": 25.132711097556257,
+      "selected": "L3884517"
+    },
+    {
+      "id": 15,
+      "location": "Champ-Pittet",
+      "split": "calibration",
+      "accepted": [
+        "L1763098"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.008880758810513492,
+      "top": "L1763098",
+      "topName": "Champ Pittet",
+      "score": 71.28148951324472,
+      "margin": 52.723164873525945,
+      "selected": "L1763098"
+    },
+    {
+      "id": 16,
+      "location": "Observatoire îles de Cheseaux",
+      "split": "calibration",
+      "accepted": [
+        "L5385575"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.3244705120874456,
+      "top": "L5385575",
+      "topName": "Observatoire îles de Cheseaux",
+      "score": 82.94855689858292,
+      "margin": 82.63561538100734,
+      "selected": "L5385575"
+    },
+    {
+      "id": 17,
+      "location": "Les Rochettes",
+      "split": "validation",
+      "accepted": [
+        "L12688816"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0022675676384851296,
+      "top": "L12688816",
+      "topName": "Carrières de Balmes et Les Rapilles",
+      "score": 74.42180928151889,
+      "margin": 72.74884088976869,
+      "selected": "L12688816"
+    },
+    {
+      "id": 18,
+      "location": "Epalinges [541/155]",
+      "split": "calibration",
+      "accepted": [
+        "L3092254"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0007208731409497593,
+      "top": "L3092254",
+      "topName": "Bois de la Chapelle",
+      "score": 32.810569640547314,
+      "margin": 31.315495303408067,
+      "selected": "L3092254"
+    },
+    {
+      "id": 19,
+      "location": "Lausanne [540/158]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0014093474251735136,
+      "top": "L3092254",
+      "topName": "Bois de la Chapelle",
+      "score": 43.97708543973143,
+      "margin": 11.56625227043618,
+      "selected": null
+    },
+    {
+      "id": 20,
+      "location": "Etang du Milieu",
+      "split": "calibration",
+      "accepted": [
+        "L5298617"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.003324279702917323,
+      "top": "L5298617",
+      "topName": "Etangs de Bonfol",
+      "score": 55.476215190370205,
+      "margin": 54.5678517230311,
+      "selected": "L5298617"
+    },
+    {
+      "id": 21,
+      "location": "Sulgen [731/267]",
+      "split": "calibration",
+      "accepted": [
+        "L10884455"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.00820894874696888,
+      "top": "L10884455",
+      "topName": "stakeout Oriental Turtle Dove, Sulgen (2020)",
+      "score": 86.93477339740186,
+      "margin": 86.14900597924586,
+      "selected": "L10884455"
+    },
+    {
+      "id": 22,
+      "location": "Arbon / Hafen-Quai",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": true,
+      "source": "sightings",
+      "trackRejected": true,
+      "trackSeparationKm": 19.283847388574458,
+      "top": "L5165265",
+      "topName": "Steinacher Bucht--Schlosshafen",
+      "score": 78.44688573679272,
+      "margin": 27.170664624250747,
+      "selected": null,
+      "note": "Reject current suggestions; a closer hotspot may exist, identity unresolved."
+    },
+    {
+      "id": 23,
+      "location": "Arbon / Seepark",
+      "split": "validation",
+      "accepted": [
+        "L5165267"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.2096772287748754,
+      "top": "L5165267",
+      "topName": "Seepark Arbon",
+      "score": 75.57421462464117,
+      "margin": 67.57480413212663,
+      "selected": "L5165267"
+    },
+    {
+      "id": 24,
+      "location": "Egnach / Luxburg",
+      "split": "validation",
+      "accepted": [
+        "L5165262"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": true,
+      "trackSeparationKm": 4.722687768485759,
+      "top": "L5165262",
+      "topName": "Luxburger Bucht--Luxburg",
+      "score": 83.14150499144435,
+      "margin": 21.547309092665934,
+      "selected": null
+    },
+    {
+      "id": 25,
+      "location": "Ermatinger Becken TG / S-E",
+      "split": "validation",
+      "accepted": [
+        "L4067650"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.3850686920805493,
+      "top": "L4067650",
+      "topName": "Ermatinger Becken--Triboltingen",
+      "score": 70.48758875611378,
+      "margin": 62.31934280228427,
+      "selected": "L4067650"
+    },
+    {
+      "id": 26,
+      "location": "Stein am Rhein / Werd",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.3539939293749209,
+      "top": "L12847727",
+      "topName": "Eschenz--Pontonierweg",
+      "score": 65.33158413360849,
+      "margin": 25.934869955512077,
+      "selected": null
+    },
+    {
+      "id": 27,
+      "location": "Embouchure de la Venoge",
+      "split": "calibration",
+      "accepted": [
+        "L2815445"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0053989491506994,
+      "top": "L2815445",
+      "topName": "Île de Préverenges",
+      "score": 29.679182387365387,
+      "margin": 20.301840418068856,
+      "selected": "L2815445"
+    },
+    {
+      "id": 28,
+      "location": "Weissenau / Alte Aare",
+      "split": "calibration",
+      "accepted": [
+        "L2342192"
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.15898697630558095,
+      "top": "L2342192",
+      "topName": "Naturschutzgebiet Weissenau",
+      "score": 63.68788541011694,
+      "margin": 59.67774133885588,
+      "selected": "L2342192"
+    },
+    {
+      "id": 29,
+      "location": "Tenniken [629/254]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.07086006723187761,
+      "top": "L5578810",
+      "topName": "Aussichtsturm Liestal",
+      "score": 0.007939101693173302,
+      "margin": 0.006659446599124731,
+      "selected": null
+    },
+    {
+      "id": 30,
+      "location": "Ollon [568/127]",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "track",
+      "trackRejected": false,
+      "trackSeparationKm": 0.0003994041119420464,
+      "top": "L64731784",
+      "topName": "Le Montet",
+      "score": 2.049864001620396,
+      "margin": 1.198978517521274,
+      "selected": null
+    },
+    {
+      "id": 31,
+      "location": "La Dullive",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": true,
+      "source": "sightings",
+      "trackRejected": true,
+      "trackSeparationKm": 58.001293461783625,
+      "top": "L4190315",
+      "topName": "Plage de la Dullive",
+      "score": 48.88747072082911,
+      "margin": 12.16530587292337,
+      "selected": null,
+      "note": "Ignore incorrect GPS track; nearby hotspot identity unresolved."
+    },
+    {
+      "id": 32,
+      "location": "Pizy [517/149]",
+      "split": "validation",
+      "accepted": [
+        "L10430857"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10430857",
+      "topName": "Signal de Bougy (migration)",
+      "score": 63.36906263091845,
+      "margin": 62.914620581758975,
+      "selected": "L10430857"
+    },
+    {
+      "id": 33,
+      "location": "Larrit",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10110439",
+      "topName": "Dent de Vaulion",
+      "score": 0.0002946339778257065,
+      "margin": 0.00008086056610494808,
+      "selected": null
+    },
+    {
+      "id": 34,
+      "location": "Tête du Lac",
+      "split": "calibration",
+      "accepted": [
+        "L4188336"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L4188336",
+      "topName": "Lac de Joux--Tête du Lac",
+      "score": 59.35457999283948,
+      "margin": 31.248438279922063,
+      "selected": "L4188336"
+    },
+    {
+      "id": 35,
+      "location": "Sempach / Festhalle",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L21595508",
+      "topName": "Sempach--Schweizerische Vogelwarte (office)",
+      "score": 67.70150752759285,
+      "margin": 26.498834280626745,
+      "selected": null,
+      "note": "No match with current sightings only; Festhalle would be acceptable with a supporting track."
+    },
+    {
+      "id": 36,
+      "location": "Sursee Triechter",
+      "split": "calibration",
+      "accepted": [
+        "L10483319"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10483319",
+      "topName": "Triechter",
+      "score": 77.53015568100352,
+      "margin": 75.60798046192438,
+      "selected": "L10483319"
+    },
+    {
+      "id": 37,
+      "location": "Geuensee / Moos",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L4456045",
+      "topName": "Mauensee",
+      "score": 0.18402454021406084,
+      "margin": 0.066180717155847,
+      "selected": null
+    },
+    {
+      "id": 38,
+      "location": "Leysin",
+      "split": "calibration",
+      "accepted": [
+        "L7477068"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L7477068",
+      "topName": "Leysin (general area)",
+      "score": 30.76538932295079,
+      "margin": 30.729239901970036,
+      "selected": "L7477068"
+    },
+    {
+      "id": 39,
+      "location": "Ormont-Dessous [574/138]",
+      "split": "calibration",
+      "accepted": [
+        "L5565145"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5565145",
+      "topName": "Col des Mosses",
+      "score": 59.63188701580291,
+      "margin": 44.13015616946515,
+      "selected": "L5565145"
+    },
+    {
+      "id": 40,
+      "location": "Jouxtens-Mézery [535/155]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L27998191",
+      "topName": "La cascade de la Mèbre",
+      "score": 0.4783458119301728,
+      "margin": 0.37889735661997803,
+      "selected": null
+    },
+    {
+      "id": 41,
+      "location": "Etang de Tioleire",
+      "split": "calibration",
+      "accepted": [
+        "L4547632"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L4547632",
+      "topName": "Haute Plaine de l'Orbe* general area",
+      "score": 46.36333204415469,
+      "margin": 36.58165915188159,
+      "selected": "L4547632"
+    },
+    {
+      "id": 42,
+      "location": "Saint-Sulpice [532/151]",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3289598",
+      "topName": "Port des Pierrettes",
+      "score": 76.47590839792639,
+      "margin": 3.2006228652091835,
+      "selected": null
+    },
+    {
+      "id": 43,
+      "location": "Chavannes-près-Renens",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3292272",
+      "topName": "Université de Lausanne/EPFL",
+      "score": 8.057783545193951,
+      "margin": 4.6009974101078015,
+      "selected": null
+    },
+    {
+      "id": 44,
+      "location": "Parc de Valency",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10017527",
+      "topName": "Vallée de la Jeunesse",
+      "score": 2.068413719277714,
+      "margin": 1.2103311187629333,
+      "selected": null
+    },
+    {
+      "id": 45,
+      "location": "Les Tannes",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L975146",
+      "topName": "Fanel--Centre Nature Birdlife de La Sauge (paid reserve only)",
+      "score": 25.05279881034605,
+      "margin": 8.434052026225437,
+      "selected": null
+    },
+    {
+      "id": 46,
+      "location": "Le Moulin",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L20050939",
+      "topName": "Iles de Vaumarcus",
+      "score": 8.864229701585247,
+      "margin": 8.671716141981433,
+      "selected": null
+    },
+    {
+      "id": 47,
+      "location": "Camp de Vaumarcus",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L20050939",
+      "topName": "Iles de Vaumarcus",
+      "score": 16.67036036803507,
+      "margin": 16.134243599241607,
+      "selected": null
+    },
+    {
+      "id": 48,
+      "location": "Yvonand [544/180]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5385575",
+      "topName": "Observatoire îles de Cheseaux",
+      "score": 0.07885128988198095,
+      "margin": 0.0554707045921235,
+      "selected": null
+    },
+    {
+      "id": 49,
+      "location": "Embouchure du Mujon",
+      "split": "calibration",
+      "accepted": [
+        "L1166823"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L1166823",
+      "topName": "Promenade Robert Hainard",
+      "score": 31.252331589531092,
+      "margin": 25.27156336644413,
+      "selected": "L1166823"
+    },
+    {
+      "id": 50,
+      "location": "Creux de Terre",
+      "split": "calibration",
+      "accepted": [
+        "L3012485"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3012485",
+      "topName": "Le Creux de Terre",
+      "score": 52.288716336723475,
+      "margin": 52.108698135234796,
+      "selected": "L3012485"
+    },
+    {
+      "id": 51,
+      "location": "Riond-Bosson",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3642659",
+      "topName": "Gravière de Bioley-Orjulaz",
+      "score": 0.15158432278814302,
+      "margin": 0.0908807563039332,
+      "selected": null
+    },
+    {
+      "id": 52,
+      "location": "Parc de Valency",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10017527",
+      "topName": "Vallée de la Jeunesse",
+      "score": 1.9155768852472144,
+      "margin": 1.1147690724038264,
+      "selected": null
+    },
+    {
+      "id": 53,
+      "location": "Epalinges [541/155]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3092254",
+      "topName": "Bois de la Chapelle",
+      "score": 6.618439950161955,
+      "margin": 6.497582491365149,
+      "selected": null
+    },
+    {
+      "id": 54,
+      "location": "La Gouille",
+      "split": "validation",
+      "accepted": [
+        null,
+        "L5844168"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5844168",
+      "topName": "Val d'Arolla",
+      "score": 52.12265079605598,
+      "margin": 33.74241055672407,
+      "selected": "L5844168",
+      "note": "No match or Val d’Arolla are both acceptable."
+    },
+    {
+      "id": 55,
+      "location": "Martigny-Combe [566/100]",
+      "split": "calibration",
+      "accepted": [
+        null,
+        "L5844150"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5844150",
+      "topName": "Col de la Forclaz",
+      "score": 43.7159978227994,
+      "margin": 35.38986699392751,
+      "selected": "L5844150"
+    },
+    {
+      "id": 56,
+      "location": "Epalinges [541/155]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3092254",
+      "topName": "Bois de la Chapelle",
+      "score": 6.564825973985009,
+      "margin": 6.4431326469339405,
+      "selected": null
+    },
+    {
+      "id": 57,
+      "location": "Mézery",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L27998191",
+      "topName": "La cascade de la Mèbre",
+      "score": 1.9039979527247,
+      "margin": 1.6066797427590038,
+      "selected": null
+    },
+    {
+      "id": 58,
+      "location": "Le Chenit [507/155]",
+      "split": "calibration",
+      "accepted": [
+        null,
+        "L37194693"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L37194693",
+      "topName": "Sèche des Amburnex",
+      "score": 33.77178436662862,
+      "margin": 25.697862765606004,
+      "selected": "L37194693"
+    },
+    {
+      "id": 59,
+      "location": "Paquoille",
+      "split": "calibration",
+      "accepted": [
+        "L12807117"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L12807117",
+      "topName": "Falaise et Viaduc de St Ursanne",
+      "score": 66.18697736068921,
+      "margin": 57.67751268520115,
+      "selected": "L12807117"
+    },
+    {
+      "id": 60,
+      "location": "Alle [577/252]",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L69166488",
+      "topName": "Les Esserts",
+      "score": 0.1519171535316785,
+      "margin": 0.15097576587806594,
+      "selected": null
+    },
+    {
+      "id": 61,
+      "location": "Sulgen [731/267]",
+      "split": "calibration",
+      "accepted": [
+        "L10884455"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10884455",
+      "topName": "stakeout Oriental Turtle Dove, Sulgen (2020)",
+      "score": 54.758139057509176,
+      "margin": 54.46791655850417,
+      "selected": "L10884455"
+    },
+    {
+      "id": 62,
+      "location": "Graströchni",
+      "split": "validation",
+      "accepted": [
+        null,
+        "L7976906"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L7976906",
+      "topName": "Graströchni",
+      "score": 10.791314626939506,
+      "margin": 10.788935333349814,
+      "selected": null
+    },
+    {
+      "id": 63,
+      "location": "Vaulion [518/171]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L10110439",
+      "topName": "Dent de Vaulion",
+      "score": 1.7609732488644645,
+      "margin": 0.9408739605108988,
+      "selected": null
+    },
+    {
+      "id": 64,
+      "location": "Grand Rosey",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L3587432",
+      "topName": "Gravière de Colliare",
+      "score": 1.3855990314078506,
+      "margin": 1.3334767577055355,
+      "selected": null
+    },
+    {
+      "id": 65,
+      "location": "La Rueyre",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L27998191",
+      "topName": "La cascade de la Mèbre",
+      "score": 1.1392081229645685,
+      "margin": 0.9261576330469995,
+      "selected": null
+    },
+    {
+      "id": 66,
+      "location": "Les Moillets",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L6206930",
+      "topName": "Estavayer-le-Lac--La Grève",
+      "score": 24.360983429141136,
+      "margin": 5.071379618541027,
+      "selected": null
+    },
+    {
+      "id": 67,
+      "location": "Genève [499/120]",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L12009409",
+      "topName": "Domaine de Penthes",
+      "score": 8.426757686009763,
+      "margin": 2.1788652610430175,
+      "selected": null
+    },
+    {
+      "id": 68,
+      "location": "Perly-Certoux [495/113]",
+      "split": "calibration",
+      "accepted": [
+        null,
+        "L5168447"
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5168447",
+      "topName": "Plaine de l'Aire",
+      "score": 15.950362077474262,
+      "margin": 9.733374673125416,
+      "selected": null
+    },
+    {
+      "id": 69,
+      "location": "Noyers Léonard",
+      "split": "calibration",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L5168514",
+      "topName": "Champagne Genevoise--Ferrage",
+      "score": 52.02042454417016,
+      "margin": 4.789639123180002,
+      "selected": null,
+      "note": "Nearby overlapping hotspots cannot be distinguished."
+    },
+    {
+      "id": 70,
+      "location": "Ollon [568/127]",
+      "split": "validation",
+      "accepted": [
+        null
+      ],
+      "unresolved": false,
+      "source": "sightings",
+      "trackRejected": false,
+      "trackSeparationKm": null,
+      "top": "L64731784",
+      "topName": "Le Montet",
+      "score": 0.020356865631988345,
+      "margin": 0.01891402279990245,
+      "selected": null
+    }
+  ]
+}

@@ -144,6 +144,12 @@ Choosing a hotspot exports its eBird location ID in the CSV's location-name colu
 so eBird can match the hotspot directly. The app still displays its readable name.
 Renaming or moving the location clears that hotspot association.
 
+Hotspots are selected automatically in both modes when one candidate fits the route or
+observation positions and clearly beats the alternatives. Uncertain matches keep the
+original location. Unrelated GPS tracks are ignored for matching. Customized mode lets
+you review the result and choose another hotspot on the map. The calibration workflow and
+reference choices remain in [`docs/hotspot-scoring.md`](docs/hotspot-scoring.md).
+
 ### Species comment templates
 
 Species comments are customizable. The app can generate concise or expanded comments and switch between templates when many duplicate sightings of the same species are merged into one eBird row.

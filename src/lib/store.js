@@ -1,10 +1,12 @@
 import { markRaw, reactive, readonly, toRaw } from "vue";
+import { hotspotEvidence, rankHotspots } from "./hotspotMatching";
 import {
   applyDefaultAutomaticAssignment,
   buildForm,
   checklistReview,
   uniqueDistanceFromPath,
   mathRound,
+  normalizeLocationName,
 } from "./utils";
 
 // The imported data: checklists (`forms`), casual sightings (`sightings`, assigned to a checklist
@@ -126,6 +128,34 @@ export function createStore() {
     }
   }
 
+  function selectHotspot(formId, hotspot) {
+    updateForm(formId, {
+      hotspot_id: hotspot.locId,
+      location_name: normalizeLocationName(hotspot.locName),
+      lat: hotspot.lat,
+      lon: hotspot.lng,
+    });
+  }
+
+  async function matchHotspot(form, loadHotspots) {
+    form = toRaw(form);
+    if (form.hotspot_id) return;
+    const evidence = () =>
+      hotspotEvidence(form, [
+        ...(data.formsSightings[form.id - 1] || []),
+        ...data.sightings.filter((sighting) => sighting.form_id === form.id),
+      ]);
+    const signature = () =>
+      JSON.stringify([form.location_name, form.lat, form.lon, form.hotspot_id, evidence()]);
+    const before = signature();
+    const hotspots = await loadHotspots(evidence());
+    // Import replacement and manual edits take precedence over an in-flight lookup.
+    if (toRaw(findForm(form.id)) !== form || signature() !== before) return;
+    updateForm(form.id, { hotspots: markRaw(hotspots) });
+    const ranking = rankHotspots(evidence(), hotspots);
+    if (ranking.status === "clear") selectHotspot(form.id, ranking.candidates[0].hotspot);
+  }
+
   // Traces can be large and are only ever replaced as a whole, so they are not made reactive.
   function setFormPath(formId, path) {
     updateForm(formId, { path: markRaw(path), distance: uniqueDistanceFromPath(path) });
@@ -193,6 +223,8 @@ export function createStore() {
     autoAssign,
     moveForm,
     updateForm,
+    selectHotspot,
+    matchHotspot,
     setFormPath,
     splitFormByDate,
     fillNumberObserver,
