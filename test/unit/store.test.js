@@ -148,6 +148,24 @@ describe("store", () => {
     expect(store.state.forms[1]).toMatchObject({ lat: 46.123457, lon: 7.987654 });
   });
 
+  it("keeps a selected hotspot through effort edits and rebuilding, but clears it when moved", () => {
+    const store = loadedStore();
+    store.updateForm(2, {
+      hotspot_id: "L5860421",
+      location_name: "Rochers de Clé",
+      lat: 46.4159672,
+      lon: 7.2082329,
+    });
+    store.updateForm(2, { duration: 30 });
+    expect(buildForm(store.state.forms[1], 2)).toMatchObject({
+      hotspot_id: "L5860421",
+      lat: 46.4159672,
+      lon: 7.2082329,
+    });
+    store.moveForm(2, 46.4, 7.2);
+    expect(store.state.forms[1]).toMatchObject({ hotspot_id: "", lat: 46.4, lon: 7.2 });
+  });
+
   it("updateForm changes the given fields of one checklist", () => {
     const store = loadedStore();
     store.updateForm(2, { location_name: "Renamed", exportable: false });

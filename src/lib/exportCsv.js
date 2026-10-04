@@ -166,7 +166,8 @@ export function buildExportRows({
           ...splitScientificName(scientificName),
           count: speciesRow.count,
           species_comment: speciesRow.species_comment,
-          location_name: normalizeLocationName(form.location_name),
+          // eBird recognizes a hotspot ID here; its name and coordinates alone may not match.
+          location_name: form.hotspot_id || normalizeLocationName(form.location_name),
           latitude: form.lat ?? "",
           longitude: form.lon ?? "",
           date: formatDate(form.date, "/"),

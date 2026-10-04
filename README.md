@@ -140,6 +140,10 @@ Customized mode unlocks the review tools:
 - inspect nearby eBird hotspots
 - choose which checklists are exportable
 
+Choosing a hotspot exports its eBird location ID in the CSV's location-name column,
+so eBird can match the hotspot directly. The app still displays its readable name.
+Renaming or moving the location clears that hotspot association.
+
 ### Species comment templates
 
 Species comments are customizable. The app can generate concise or expanded comments and switch between templates when many duplicate sightings of the same species are merged into one eBird row.
