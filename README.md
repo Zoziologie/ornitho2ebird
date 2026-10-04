@@ -104,8 +104,11 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 
 - A default party size is used because some source systems do not store observer count
 - Same-day casual observations can be grouped into one checklist if they remain within configurable time and distance limits
-- Generated sighting-based checklists are marked as primary purpose by default and incomplete by default
+- Generated sighting-based checklists default to non-primary-purpose birding and incomplete (Incidental)
 - If a checklist has no track or distance, it may end up as a historical checklist in eBird
+- Track distance estimates exclude near-exact backtracking; review GPS drift and adjust the unique-distance estimate if needed
+- Dead and zero-count records stay available for review but are excluded from the CSV; unclear mortality information requires confirmation
+- Date mismatches and overnight effort require confirmation; timestamped lists can be split by date, with effort reviewed afterward
 
 ## Workflow
 

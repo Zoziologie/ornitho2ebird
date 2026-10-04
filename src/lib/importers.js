@@ -1,5 +1,10 @@
 import Papa from "papaparse";
-import { buildSpeciesCommentTemplate, createSighting, distanceFromPath, mathMode } from "./utils";
+import {
+  buildSpeciesCommentTemplate,
+  createSighting,
+  uniqueDistanceFromPath,
+  mathMode,
+} from "./utils";
 import { ebirdCodeForScientificName, getOrnithoEbirdSpeciesCode } from "./taxonomy";
 
 const precisionMatchOrnitho = {
@@ -145,6 +150,8 @@ function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
       count_precision: precisionMatchOrnitho[observer.estimation_code],
       atlas_code: observer.atlas_code?.["#text"] || "",
       auditory_contact: observer.auditory_contact,
+      has_death: observer.has_death || "",
+      extended_info: observer.extended_info || {},
       comment,
     });
   });
@@ -182,14 +189,15 @@ export function parseImportFile(rawText, selectedWebsite) {
       const date = form.sightings[0].observers[0].timing["@ISO8601"].split("T")[0];
       const timeStart = `${date}T${form.time_start}`;
       const timeStop = `${date}T${form.time_stop}`;
-      let duration = (new Date(timeStop) - new Date(timeStart)) / 1000 / 60;
+      let duration = (new Date(`${timeStop}Z`) - new Date(`${timeStart}Z`)) / 1000 / 60;
+      const crossesMidnight = duration < 0;
       if (duration < 0) {
         // The checklist ended after midnight.
         duration += 24 * 60;
       }
 
       const path = parseWktLineString(form.protocol?.wkt || form.trace);
-      const distance = path ? distanceFromPath(path) : null;
+      const distance = path ? uniqueDistanceFromPath(path) : null;
 
       return {
         id: index + 1,
@@ -200,6 +208,7 @@ export function parseImportFile(rawText, selectedWebsite) {
         date,
         time: form.time_start,
         duration,
+        crosses_midnight: crossesMidnight,
         distance,
         number_observer: null,
         full_form: form.full_form === "1",
@@ -283,28 +292,29 @@ export function parseImportFile(rawText, selectedWebsite) {
       header: true,
     }).data;
 
-    if (!parsed[0]?.Timing) {
+    const headers = Object.keys(parsed[0] || {});
+    if (!headers.includes("Timing") && !headers.includes("Horaire")) {
       throw new ImportError("importErrorTxtHeader");
     }
 
     exportData.sightings = parsed.map((sighting) => {
-      const dateSplit = sighting.Date.split(".");
+      const [day, month, year] = sighting.Date.split(".");
       return createSighting({
-        id: sighting["Universal observation ID"],
+        id: sighting["Universal observation ID"] || sighting["ID universel observation"],
         form_id: 0,
         website: selectedWebsite.name,
         source_website_name: selectedWebsite.name,
         system: selectedWebsite.system,
-        date: `${dateSplit[2]}-${dateSplit[0]}-${dateSplit[1]}`,
-        time: sighting.Timing,
-        lat: Number.parseFloat(sighting["Latitude (N)"]),
-        lon: Number.parseFloat(sighting["Longitude (E)"]),
-        location_name: sighting.Site,
-        common_name: sighting.Species,
-        scientific_name: sighting["Latin name"],
-        count: sighting.Estimation === "×" ? "x" : sighting.Number,
+        date: `${sighting.Year || sighting.Annee || year}-${String(sighting.Month || sighting.Mois || month).padStart(2, "0")}-${String(sighting.Day || sighting.Jour || day).padStart(2, "0")}`,
+        time: sighting.Timing || sighting.Horaire,
+        lat: Number.parseFloat(sighting["Latitude (N)"] || sighting["Lat (WGS84)"]),
+        lon: Number.parseFloat(sighting["Longitude (E)"] || sighting["Lon (WGS84)"]),
+        location_name: sighting.Site || sighting.Lieudit,
+        common_name: sighting.Species || sighting["Nom espèce"],
+        scientific_name: sighting["Latin name"] || sighting["Nom latin"],
+        count: sighting.Estimation === "×" ? "x" : (sighting.Number ?? sighting.Nombre),
         count_precision: sighting.Estimation,
-        comment: sighting.Comment,
+        comment: sighting.Comment || sighting.Observation,
       });
     });
   } else {

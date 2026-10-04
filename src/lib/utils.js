@@ -89,6 +89,74 @@ export function distanceFromPath(path) {
   return mathRound(distance, 2);
 }
 
+// Estimate unique route length by removing nearly collinear overlaps (within 1 m).
+// Keep the original track: parallel nearby trails and larger GPS drift still need review.
+export function uniqueDistanceFromPath(path) {
+  if (!path || path.length < 2) return 0;
+  const scale = Math.cos((path[0][0] * Math.PI) / 180);
+  const points = path.map(([lat, lon]) => [lon * scale * 111195, lat * 111195]);
+  const segments = [];
+  let distance = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    const start = points[index - 1];
+    const end = points[index];
+    const dx = end[0] - start[0];
+    const dy = end[1] - start[1];
+    const length = Math.hypot(dx, dy);
+    if (length === 0) continue;
+    const overlaps = [];
+    for (const [a, b] of segments) {
+      const previousLength = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const cross = Math.abs(dx * (b[1] - a[1]) - dy * (b[0] - a[0]));
+      if (cross / (length * previousLength) > Math.sin(Math.PI / 180)) continue;
+      const offsetA = Math.abs(dx * (a[1] - start[1]) - dy * (a[0] - start[0])) / length;
+      const offsetB = Math.abs(dx * (b[1] - start[1]) - dy * (b[0] - start[0])) / length;
+      if (offsetA > 1 || offsetB > 1) continue;
+      const alongA = ((a[0] - start[0]) * dx + (a[1] - start[1]) * dy) / length;
+      const alongB = ((b[0] - start[0]) * dx + (b[1] - start[1]) * dy) / length;
+      const from = Math.max(0, Math.min(alongA, alongB));
+      const to = Math.min(length, Math.max(alongA, alongB));
+      if (to > from) overlaps.push([from, to]);
+    }
+    overlaps.sort((a, b) => a[0] - b[0]);
+    let covered = 0;
+    let previousEnd = 0;
+    for (const [from, to] of overlaps) {
+      covered += Math.max(0, to - Math.max(from, previousEnd));
+      previousEnd = Math.max(previousEnd, to);
+    }
+    distance += haversineDistanceKm(...path[index - 1], ...path[index]) * (1 - covered / length);
+    segments.push([start, end]);
+  }
+  return mathRound(distance, 3);
+}
+
+export function mortalityStatus(sighting) {
+  const wounded = sighting.extended_info?.mortality?.wounded;
+  if (wounded === "0") return "dead";
+  if (wounded === "1") return "injured";
+  return sighting.has_death && sighting.has_death !== "0" ? "unknown" : "none";
+}
+
+export function isExportableSighting(sighting) {
+  return (
+    mortalityStatus(sighting) !== "dead" &&
+    !(sighting.count !== null && sighting.count !== "" && Number(sighting.count) === 0)
+  );
+}
+
+export function checklistReview(form, sightings) {
+  const dates = [...new Set(sightings.map((sighting) => sighting.date))].sort();
+  const [hour, minute] = (form.time || "00:00").split(":").map(Number);
+  const crossesMidnight =
+    form.crosses_midnight || hour * 60 + minute + Number(form.duration) > 1440;
+  return {
+    dateWarning: Boolean(crossesMidnight || dates.some((date) => date !== form.date)),
+    canSplit: dates.length > 1 && sightings.every((sighting) => sighting.date && sighting.time),
+    dates,
+  };
+}
+
 export function protocol(form) {
   const stationaryDistanceThresholdKm = 0.03;
 
@@ -116,7 +184,15 @@ export function protocol(form) {
     Number(form.distance) >= 0;
 
   if (form.time && hasDistance && Number(form.duration) > 0 && Number(form.number_observer) > 0) {
-    return Number(form.distance) > stationaryDistanceThresholdKm
+    const stationary =
+      Number(form.distance) === 0 ||
+      (form.path?.length > 1
+        ? form.path.every(
+            (point) =>
+              haversineDistanceKm(...form.path[0], ...point) <= stationaryDistanceThresholdKm,
+          )
+        : Number(form.distance) <= stationaryDistanceThresholdKm);
+    return !stationary
       ? { name: "Traveling", letter: "T", variant: "success" }
       : { name: "Stationary", letter: "S", variant: "success" };
   }
@@ -425,9 +501,10 @@ export function buildForm(form, id, options = {}) {
     date: form.date || "",
     time: form.time ? form.time.substring(0, 5) : "",
     duration: form.duration || "",
+    crosses_midnight: Boolean(form.crosses_midnight),
     distance: form.distance === 0 ? 0 : (form.distance ?? ""),
     number_observer: form.number_observer || options.defaultNumberObserver || 1,
-    full_form: Boolean(form.full_form),
+    full_form: form.primary_purpose !== false && Boolean(form.full_form),
     primary_purpose: form.primary_purpose !== false,
     include_static_map: form.include_static_map !== false,
     checklist_comment: form.checklist_comment || "",
@@ -497,10 +574,12 @@ export function createSighting(raw) {
     scientific_name: raw.scientific_name || "",
     source_species_id: raw.source_species_id || "",
     ebird_species_code: raw.ebird_species_code || "",
-    count: raw.count || null,
+    count: raw.count ?? null,
     count_precision: raw.count_precision || "",
     atlas_code: raw.atlas_code ?? "",
     auditory_contact: raw.auditory_contact ?? "",
+    has_death: raw.has_death || "",
+    extended_info: raw.extended_info || {},
     // Stored as HTML: escape the imported text, keep line breaks.
     comment: raw.comment
       ? String(raw.comment).replaceAll("<", "&lt;").replace(/\r?\n/g, "<br>")

@@ -1,0 +1,356 @@
+{
+  "data": {
+    "sightings": [
+      {
+        "date": {
+          "@timestamp": "1791064800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-04T00:00:00+02:00",
+          "#text": "dimanche, 4. octobre 2026"
+        },
+        "species": {
+          "@id": "375",
+          "sys_order": "7510",
+          "taxonomy": "1",
+          "rarity": "verycommon",
+          "name": "Mésange nonnette",
+          "latin_name": "Poecile palustris",
+          "category": "C",
+          "atlas_13_16": {
+            "@id": "V",
+            "#text": "V"
+          }
+        },
+        "place": {
+          "@id": "96371",
+          "name": "Les Verrats",
+          "altitude": "1220",
+          "place_type": "place",
+          "loc_precision": "750",
+          "coord_lat": "47.096949019501",
+          "coord_lon": "6.9130779396197",
+          "municipality": "Cernier",
+          "county": "NE",
+          "country": ""
+        },
+        "observers": [
+          {
+            "anonymous": "0",
+            "anonymous_in_export": "0",
+            "second_hand": "0",
+            "id_sighting": "38238182",
+            "id_universal": "1_38238182",
+            "timing": {
+              "@timestamp": "1791064800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-04T00:00:00+02:00",
+              "#text": "dimanche, 4. octobre 2026"
+            },
+            "coord_lat": "47.096949019501",
+            "coord_lon": "6.9130779396197",
+            "altitude": "1220",
+            "atlas_grid_name": "56 21 (Villiers)",
+            "precision": "place",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "flight_number": "1",
+            "source": "WEB",
+            "insert_date": {
+              "@timestamp": "1791115831",
+              "@notime": "0",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-04T14:10:31+02:00",
+              "#text": "dimanche, 4. octobre 2026, 14:10:31"
+            },
+            "has_death": "2",
+            "auditory_contact": "0",
+            "extended_info": {
+              "mortality": {
+                "comment": "test",
+                "death_cause2": "ROAD_VEHICLE",
+                "wounded": "0",
+                "road_type2": "PRINCIPAL_ROAD",
+                "physical_changes_location": [
+                  {
+                    "@id": "714_1",
+                    "name": "BEAK",
+                    "#text": "DISPLAY_PAGE_TEXT_DEATH_PHYSICAL_CHANGES_LOCATION_BEAK"
+                  }
+                ],
+                "physical_changes_location_beak": [
+                  {
+                    "@id": "715_3",
+                    "name": "ADHESIONS",
+                    "#text": "Écoulement / Adhérences"
+                  },
+                  {
+                    "@id": "715_6",
+                    "name": "LUMBS",
+                    "#text": "Verrues, croissances tumorales"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791064800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-04T00:00:00+02:00",
+          "#text": "dimanche, 4. octobre 2026"
+        },
+        "species": {
+          "@id": "54",
+          "sys_order": "40",
+          "taxonomy": "1",
+          "rarity": "verycommon",
+          "name": "Cygne tuberculé",
+          "latin_name": "Cygnus olor",
+          "category": "C",
+          "atlas_13_16": {
+            "@id": "V",
+            "#text": "V"
+          }
+        },
+        "place": {
+          "@id": "96371",
+          "name": "Les Verrats",
+          "altitude": "1220",
+          "place_type": "place",
+          "loc_precision": "750",
+          "coord_lat": "47.096949019501",
+          "coord_lon": "6.9130779396197",
+          "municipality": "Cernier",
+          "county": "NE",
+          "country": ""
+        },
+        "observers": [
+          {
+            "anonymous": "0",
+            "anonymous_in_export": "0",
+            "second_hand": "0",
+            "id_sighting": "38238187",
+            "id_universal": "1_38238187",
+            "timing": {
+              "@timestamp": "1791064800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-04T00:00:00+02:00",
+              "#text": "dimanche, 4. octobre 2026"
+            },
+            "coord_lat": "47.096949019501",
+            "coord_lon": "6.9130779396197",
+            "altitude": "1220",
+            "atlas_grid_name": "56 21 (Villiers)",
+            "precision": "place",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "flight_number": "1",
+            "source": "WEB",
+            "insert_date": {
+              "@timestamp": "1791115860",
+              "@notime": "0",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-04T14:11:00+02:00",
+              "#text": "dimanche, 4. octobre 2026, 14:11:00"
+            },
+            "has_death": "2",
+            "auditory_contact": "0",
+            "extended_info": {
+              "mortality": {
+                "death_cause2": "TRAP",
+                "wounded": "1",
+                "trap2": "POTEAU",
+                "behaviour_changes": [
+                  {
+                    "@id": "713_3",
+                    "name": "ATYPICAL",
+                    "#text": "Comportement atypique"
+                  }
+                ],
+                "physical_changes_location": [
+                  {
+                    "@id": "714_1",
+                    "name": "BEAK",
+                    "#text": "DISPLAY_PAGE_TEXT_DEATH_PHYSICAL_CHANGES_LOCATION_BEAK"
+                  }
+                ],
+                "physical_changes_location_beak": [
+                  {
+                    "@id": "715_3",
+                    "name": "ADHESIONS",
+                    "#text": "Écoulement / Adhérences"
+                  },
+                  {
+                    "@id": "715_6",
+                    "name": "LUMBS",
+                    "#text": "Verrues, croissances tumorales"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "forms": [
+      {
+        "@id": "503235",
+        "id_form_universal": "1_503235",
+        "time_start": "23:20:00",
+        "time_stop": "10:00:00",
+        "full_form": "0",
+        "version": "0",
+        "lat": "47.000512113492",
+        "lon": "7.3400260418024",
+        "place_type": "place",
+        "comment": "test",
+        "sightings": [
+          {
+            "date": {
+              "@timestamp": "1790892000",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-02T00:00:00+02:00",
+              "#text": "vendredi, 2. octobre 2026"
+            },
+            "species": {
+              "@id": "81",
+              "sys_order": "206",
+              "taxonomy": "1",
+              "rarity": "escaped",
+              "name": "Ouette d'Égypte",
+              "latin_name": "Alopochen aegyptiaca",
+              "category": "A",
+              "atlas_13_16": {
+                "@id": "S",
+                "#text": "S"
+              }
+            },
+            "place": {
+              "@id": "21617",
+              "name": "Wohlen bei Bern [592/205]",
+              "altitude": "680",
+              "place_type": "square",
+              "loc_precision": "750",
+              "coord_lat": "47.000512113492",
+              "coord_lon": "7.3400260418024",
+              "municipality": "Wohlen bei Bern",
+              "county": "BE",
+              "country": ""
+            },
+            "observers": [
+              {
+                "anonymous": "0",
+                "anonymous_in_export": "0",
+                "second_hand": "0",
+                "id_sighting": "38238191",
+                "id_universal": "1_38238191",
+                "timing": {
+                  "@timestamp": "1790892000",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-02T00:00:00+02:00",
+                  "#text": "vendredi, 2. octobre 2026"
+                },
+                "coord_lat": "47.000512113492",
+                "coord_lon": "7.3400260418024",
+                "altitude": "680",
+                "atlas_grid_name": "59 20 (Wohlensee)",
+                "id_form": "503235",
+                "id_form_universal": "1_503235",
+                "precision": "square",
+                "estimation_code": "EXACT_VALUE",
+                "count": "2",
+                "flight_number": "1",
+                "source": "WEB",
+                "insert_date": {
+                  "@timestamp": "1791115928",
+                  "@notime": "0",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-04T14:12:08+02:00",
+                  "#text": "dimanche, 4. octobre 2026, 14:12:08"
+                },
+                "auditory_contact": "0"
+              }
+            ]
+          },
+          {
+            "date": {
+              "@timestamp": "1790892000",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-02T00:00:00+02:00",
+              "#text": "vendredi, 2. octobre 2026"
+            },
+            "species": {
+              "@id": "54",
+              "sys_order": "40",
+              "taxonomy": "1",
+              "rarity": "verycommon",
+              "name": "Cygne tuberculé",
+              "latin_name": "Cygnus olor",
+              "category": "C",
+              "atlas_13_16": {
+                "@id": "V",
+                "#text": "V"
+              }
+            },
+            "place": {
+              "@id": "21617",
+              "name": "Wohlen bei Bern [592/205]",
+              "altitude": "680",
+              "place_type": "square",
+              "loc_precision": "750",
+              "coord_lat": "47.000512113492",
+              "coord_lon": "7.3400260418024",
+              "municipality": "Wohlen bei Bern",
+              "county": "BE",
+              "country": ""
+            },
+            "observers": [
+              {
+                "anonymous": "0",
+                "anonymous_in_export": "0",
+                "second_hand": "0",
+                "id_sighting": "38238192",
+                "id_universal": "1_38238192",
+                "timing": {
+                  "@timestamp": "1790892000",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-02T00:00:00+02:00",
+                  "#text": "vendredi, 2. octobre 2026"
+                },
+                "coord_lat": "47.000512113492",
+                "coord_lon": "7.3400260418024",
+                "altitude": "680",
+                "atlas_grid_name": "59 20 (Wohlensee)",
+                "id_form": "503235",
+                "id_form_universal": "1_503235",
+                "precision": "square",
+                "estimation_code": "EXACT_VALUE",
+                "count": "2",
+                "flight_number": "1",
+                "source": "WEB",
+                "insert_date": {
+                  "@timestamp": "1791115928",
+                  "@notime": "0",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-04T14:12:08+02:00",
+                  "#text": "dimanche, 4. octobre 2026, 14:12:08"
+                },
+                "auditory_contact": "0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

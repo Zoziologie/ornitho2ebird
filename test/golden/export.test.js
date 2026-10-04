@@ -17,6 +17,8 @@ const FIXTURES = [
   ["birdlasser_ruai_dandora.csv", "birdlasser"],
   ["birdlasser_trip_kenya_2022.csv", "birdlasser"],
   ["observation_org.csv", "observation.org"],
+  ["rules/biolovision_french.txt", "data.biolovision.net"],
+  ["rules/ornitho_mortality_overnight.json", "ornitho.ch"],
 ];
 
 describe("eBird CSV export", () => {

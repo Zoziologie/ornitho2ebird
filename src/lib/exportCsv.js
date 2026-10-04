@@ -7,6 +7,7 @@ import {
   mathRound,
   normalizeLocationName,
   protocol,
+  isExportableSighting,
 } from "./utils";
 
 export const EBIRD_COMMENT_MAX_LENGTH = 8000;
@@ -130,7 +131,7 @@ export function buildExportRows({
   const errors = [];
 
   const rows = exportableForms.flatMap(({ form, protocolState }) => {
-    const formSightings = sightingsByFormId.get(form.id) || [];
+    const formSightings = (sightingsByFormId.get(form.id) || []).filter(isExportableSighting);
     const interactiveMapUrl =
       globalStaticMap?.interactive && form.include_static_map !== false && form.interactive_map_url
         ? buildInteractiveMapViewerUrl(form.interactive_map_url)
@@ -175,9 +176,11 @@ export function buildExportRows({
           protocol: protocolState.name,
           number_observer: form.number_observer,
           Duration: Number(form.duration) > 0 ? form.duration : "",
-          full_form: form.full_form ? "Y" : "N",
+          full_form: form.primary_purpose && form.full_form ? "Y" : "N",
           distance:
-            Number(form.distance) > 0 ? mathRound(Number(form.distance) * KM_TO_MILES, 3) : "",
+            protocolState.name !== "Stationary" && Number(form.distance) > 0
+              ? mathRound(Number(form.distance) * KM_TO_MILES, 3)
+              : "",
           area_covered: "",
           checklist_comment: mergedComment,
         };

@@ -1,5 +1,11 @@
 import { markRaw, reactive, readonly, toRaw } from "vue";
-import { applyDefaultAutomaticAssignment, buildForm, distanceFromPath, mathRound } from "./utils";
+import {
+  applyDefaultAutomaticAssignment,
+  buildForm,
+  checklistReview,
+  uniqueDistanceFromPath,
+  mathRound,
+} from "./utils";
 
 // The imported data: checklists (`forms`), casual sightings (`sightings`, assigned to a checklist
 // through `form_id`, 0 when unassigned) and the sightings of imported checklists
@@ -107,12 +113,56 @@ export function createStore() {
     const form = findForm(formId);
     if (form) {
       Object.assign(form, changes);
+      if (changes.full_form === true) form.primary_purpose = true;
+      if (changes.primary_purpose === false) form.full_form = false;
+      if ("time" in changes || "duration" in changes) form.crosses_midnight = false;
     }
   }
 
   // Traces can be large and are only ever replaced as a whole, so they are not made reactive.
   function setFormPath(formId, path) {
-    updateForm(formId, { path: markRaw(path), distance: distanceFromPath(path) });
+    updateForm(formId, { path: markRaw(path), distance: uniqueDistanceFromPath(path) });
+  }
+
+  // Split only timestamped observations. Effort and untimed tracks cannot be allocated reliably.
+  function splitFormByDate(formId) {
+    const form = findForm(formId);
+    const sightings = [...data.sightings, ...data.formsSightings.flat()].filter(
+      (sighting) => sighting.form_id === formId,
+    );
+    const review = checklistReview(form, sightings);
+    if (!review.canSplit) return [];
+    const firstNewId = Math.max(...data.forms.map((item) => item.id)) + 1;
+    const ids = [];
+    review.dates.forEach((date, index) => {
+      const id = index === 0 ? formId : firstNewId + index - 1;
+      const group = sightings.filter((sighting) => sighting.date === date);
+      const split = buildForm(
+        {
+          ...form,
+          date,
+          time: group.map((sighting) => sighting.time).sort()[0],
+          duration: "",
+          distance: "",
+          path: null,
+          crosses_midnight: false,
+          interactive_map_url: "",
+        },
+        id,
+      );
+      if (index === 0) Object.assign(form, split);
+      else data.forms.push(split);
+      group.forEach((sighting) => {
+        sighting.form_id = id;
+      });
+      ids.push(id);
+    });
+    // Preserve the imported-list indexing contract, including sparse ids after manual forms.
+    const importedSightings = data.formsSightings.flat();
+    ids.forEach((id) => {
+      data.formsSightings[id - 1] = importedSightings.filter((sighting) => sighting.form_id === id);
+    });
+    return ids;
   }
 
   // Checklists without a number of observers take the new default.
@@ -137,6 +187,7 @@ export function createStore() {
     moveForm,
     updateForm,
     setFormPath,
+    splitFormByDate,
     fillNumberObserver,
   };
 }
