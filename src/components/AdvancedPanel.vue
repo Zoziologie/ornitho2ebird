@@ -4,6 +4,7 @@ import { trackEvent } from "../lib/analytics";
 import { useI18n } from "vue-i18n";
 import AssignmentMap from "./AssignmentMap.vue";
 import ReviewMap from "./ReviewMap.vue";
+import { loadHotspots, hotspotEvidence } from "../lib/hotspotMatching";
 import {
   CHECKLIST_COLORS,
   UNASSIGNED_COLOR,
@@ -25,8 +26,7 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
-import { EBIRD_API_KEY, LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
-import { fetchJson } from "../lib/http";
+import { LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
 import { store } from "../lib/store";
 
 const props = defineProps({
@@ -57,6 +57,7 @@ const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
 const observationsModalOpen = ref(false);
+let hotspotRequest = 0;
 
 const unassignedColor = UNASSIGNED_COLOR;
 const checklistColors = CHECKLIST_COLORS;
@@ -75,6 +76,10 @@ const selectedSightings = computed(() => {
     ...props.sightings.filter((sighting) => sighting.form_id === selectedForm.value.id),
   ];
 });
+
+const selectedHotspotEvidence = computed(() =>
+  selectedForm.value ? hotspotEvidence(selectedForm.value, selectedSightings.value) : null,
+);
 
 const unassignedSightings = computed(() => {
   return props.sightings.filter((sighting) => sighting.form_id === 0);
@@ -265,29 +270,17 @@ function computeDurationFromSightings() {
 }
 
 async function loadHotspotsForSelectedForm() {
-  // Keep a reference: the selection may change while the request is in flight.
+  const request = ++hotspotRequest;
   const form = selectedForm.value;
-  // Not `!form.lat`: latitude or longitude 0 is a valid position.
-  const isCoordinate = (value) => value !== "" && value != null && Number.isFinite(Number(value));
-  if (!form || !isCoordinate(form.lat) || !isCoordinate(form.lon)) {
-    return;
-  }
-
-  const hotspotKey = `${Number(form.lat).toFixed(3)},${Number(form.lon).toFixed(3)}`;
-  if (form.hotspot_key === hotspotKey && Array.isArray(form.hotspots)) {
-    return;
-  }
-
+  const evidence = selectedHotspotEvidence.value;
+  if (!form) return;
+  const key = JSON.stringify(evidence.anchors);
+  if (form.hotspot_key === key) return;
   try {
-    const json = await fetchJson(
-      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=${EBIRD_API_KEY}`,
-    );
-    store.updateForm(form.id, {
-      hotspots: markRaw(Array.isArray(json) ? json : []),
-      hotspot_key: hotspotKey,
-    });
+    const hotspots = await loadHotspots(evidence);
+    if (request !== hotspotRequest) return;
+    store.updateForm(form.id, { hotspots: markRaw(hotspots), hotspot_key: key });
   } catch (error) {
-    // Not cached, so selecting the checklist again retries.
     console.warn("Could not load eBird hotspots", error);
   }
 }
@@ -529,13 +522,7 @@ function useHotspot(hotspot) {
     return;
   }
 
-  store.updateForm(selectedForm.value.id, {
-    hotspot_id: hotspot.locId,
-    location_name: normalizeLocationName(hotspot.locName),
-    lat: hotspot.lat,
-    lon: hotspot.lng,
-    hotspot_key: "",
-  });
+  store.selectHotspot(selectedForm.value.id, hotspot);
   trackEvent("checklist_action", { action: "hotspot" });
   loadHotspotsForSelectedForm();
 }
@@ -546,13 +533,8 @@ function selectChecklistOnMap(formId) {
 }
 
 watch(
-  () => [selectedForm.value?.id, selectedForm.value?.lat, selectedForm.value?.lon],
-  async () => {
-    if (!selectedForm.value) {
-      return;
-    }
-    await loadHotspotsForSelectedForm();
-  },
+  () => [selectedForm.value?.id, JSON.stringify(selectedHotspotEvidence.value?.anchors)],
+  loadHotspotsForSelectedForm,
   { immediate: true },
 );
 

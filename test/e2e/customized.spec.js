@@ -25,7 +25,10 @@ test("choosing a hotspot exports its ID and exact coordinates", async ({ page })
   await importFixture(page, "ornitho.ch", FIXTURE);
 
   await page.locator(".hotspot-marker-icon").click();
-  await page.getByRole("button", { name: "Use as checklist location" }).click();
+  await page
+    .locator(".maplibregl-popup")
+    .getByRole("button", { name: "Use as checklist location" })
+    .click();
   const details = page.locator("section", {
     has: page.getByRole("heading", { level: 2, name: "Checklist details" }),
   });
@@ -116,4 +119,69 @@ test("checklist edits in Customized mode reach the CSV", async ({ page }) => {
   await page.getByRole("button", { name: "No thanks" }).click();
   await page.getByRole("button", { name: "Close", exact: true }).click();
   expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+});
+
+for (const [customized, fixture] of [
+  [false, FIXTURE],
+  [true, FIXTURE],
+  [false, "export_normal_with_trace.json"],
+]) {
+  test(`hotspots are selected automatically in ${customized ? "Customized" : "Basic"} mode (${fixture})`, async ({
+    page,
+  }) => {
+    const golden = parseCsv(readGolden(fixture));
+    const hotspot = {
+      locId: "L123456",
+      locName: "Matched site",
+      lat: Number(golden[0][6]) + 0.00000001,
+      lng: Number(golden[0][7]) + 0.00000002,
+    };
+    await stubNetwork(page);
+    await page.route("https://api.ebird.org/v2/ref/hotspot/**", (route) =>
+      route.fulfill({ json: [hotspot] }),
+    );
+    await openApp(page);
+    if (customized) {
+      await page.getByRole("button", { name: "Settings" }).click();
+      await page.getByRole("button", { name: /^Customized mode/ }).click();
+      await page.getByRole("button", { name: "Close" }).click();
+    }
+    await importFixture(page, "ornitho.ch", fixture);
+    const expected = golden.map((row) =>
+      row[LOCATION] === golden[0][LOCATION]
+        ? row
+            .with(LOCATION, hotspot.locId)
+            .with(6, String(hotspot.lat))
+            .with(7, String(hotspot.lng))
+        : row,
+    );
+    expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+    await expect(page.getByRole("heading", { name: /Hotspot suggestions/ })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Download comparison for all checklists" }),
+    ).toHaveCount(0);
+  });
+}
+
+test("uncertain hotspot matches and failed lookups preserve the CSV", async ({ page }) => {
+  const golden = parseCsv(readGolden(FIXTURE));
+  const hotspot = {
+    locId: "L1",
+    locName: "Overlapping site",
+    lat: Number(golden[0][6]),
+    lng: Number(golden[0][7]),
+  };
+  await stubNetwork(page);
+  await page.route("https://api.ebird.org/v2/ref/hotspot/**", (route) =>
+    route.fulfill({ json: [hotspot, { ...hotspot, locId: "L2" }] }),
+  );
+  await openApp(page);
+  await importFixture(page, "ornitho.ch", FIXTURE);
+  expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
+  await page.route("https://api.ebird.org/v2/ref/hotspot/**", (route) =>
+    route.fulfill({ status: 503, body: "" }),
+  );
+  await page.reload();
+  await importFixture(page, "ornitho.ch", FIXTURE);
+  expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
 });
