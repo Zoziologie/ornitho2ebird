@@ -19,9 +19,9 @@ async function openPreferences() {
 async function choose(choice, preferences) {
   analytics.choose(choice);
   reopened.value = false;
-  if (!preferences) {
+  if (!preferences && analytics.state.choice !== "accepted") {
     await nextTick();
-    launcher.value.focus();
+    launcher.value?.focus();
   }
 }
 
@@ -82,7 +82,7 @@ async function closePreferences() {
       </div>
     </section>
     <button
-      v-else
+      v-else-if="analytics.state.choice !== 'accepted'"
       ref="launcher"
       type="button"
       class="analytics-launcher btn btn-light btn-sm"

@@ -570,9 +570,6 @@ async function downloadFile() {
         <p v-if="!exportState.rows.length" class="alert alert-secondary">
           {{ t("noEligibleRecords") }}
         </p>
-        <p v-if="exportableForms.some(({ form }) => form.path)" class="small text-muted">
-          {{ t("uniqueDistanceHelp") }}
-        </p>
         <div v-for="review in dateReviews" :key="review.form.id" class="alert alert-warning">
           <p>
             {{
