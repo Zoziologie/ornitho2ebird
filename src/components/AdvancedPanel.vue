@@ -978,7 +978,17 @@ onMounted(() => {
               </div>
             </div>
             <div class="col-lg-3 col-sm-6">
-              <label class="form-label">{{ t("checklistDistance") }}</label>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <label class="form-label mb-0">{{ t("checklistDistance") }}</label>
+                <button
+                  v-tooltip:top="t('uniqueDistanceHelp')"
+                  class="btn btn-link p-0 lh-1 text-secondary"
+                  type="button"
+                  :aria-label="t('uniqueDistanceHelp')"
+                >
+                  <i class="bi bi-question-circle" aria-hidden="true"></i>
+                </button>
+              </div>
               <div class="input-group">
                 <input
                   v-model.number="selectedFormModel.distance"
@@ -1000,9 +1010,6 @@ onMounted(() => {
                   <i class="bi bi-bezier" aria-hidden="true"></i>
                 </button>
               </div>
-              <p v-if="selectedForm.path" class="small text-muted mt-1 mb-0">
-                {{ t("uniqueDistanceHelp") }}
-              </p>
             </div>
             <div class="col-lg-3 col-sm-12">
               <div class="d-flex align-items-center gap-2">
