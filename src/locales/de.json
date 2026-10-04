@@ -104,7 +104,7 @@
   "faqSpeciesMatchingQuestion": "eBird fordert mich auf, einige Arten zuzuordnen. Ist das normal?",
   "faqSpeciesMatchingAnswer": "Ja, bei Felsentaube und Bekassine, deren wissenschaftliche Namen der eBird-Import nicht erkennt, und bei Arten, die die App nicht mit eBird verknüpfen konnte (sie stehen auf der Exportseite). Wähle die richtige Art einmal auf der eBird-Seite „Fix species“: eBird merkt sich deine Wahl für spätere Importe, wähle also sorgfältig. Direkt nach dem jährlichen eBird-Taxonomie-Update (meist im Oktober) müssen eventuell einige weitere Arten zugeordnet werden, bis die App aktualisiert ist.",
   "faqHotspotsQuestion": "Meine Checkliste ist nicht mit dem gewählten Hotspot verknüpft.",
-  "faqHotspotsAnswer": "eBird legt manchmal einen persönlichen Ort an, auch wenn Name und Koordinaten zum Hotspot passen. [Führe den Ort nach dem Import mit dem Hotspot zusammen]: Alle seine Checklisten wandern dann zum Hotspot.",
+  "faqHotspotsAnswer": "Wähle den Hotspot auf der Karte im Benutzerdefinierten Modus aus und verwende ihn als Checklistenort. Die CSV enthält seine eBird-Orts-ID, damit eBird ihn direkt zuordnen kann. Name und Koordinaten allein können zu einem persönlichen Ort führen. Für bereits importierte Checklisten kannst du [den Ort mit dem Hotspot zusammenführen]: Alle seine Checklisten wandern dann zum Hotspot.",
   "faqProcessingQuestion": "Mein Import wird seit Tagen verarbeitet.",
   "faqProcessingAnswer": "eBird kann mehrere Tage, manchmal bis zu einer Woche, für die Verarbeitung eines Imports brauchen. Das ist normal und lässt sich nicht beschleunigen. Den Fortschritt siehst du unter [Meine Importe].",
   "faqMistakesQuestion": "Ich habe in einem Import einen Fehler gemacht. Wie korrigiere ich ihn?",

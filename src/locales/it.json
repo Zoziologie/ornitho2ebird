@@ -104,7 +104,7 @@
   "faqSpeciesMatchingQuestion": "eBird mi chiede di abbinare alcune specie. È normale?",
   "faqSpeciesMatchingAnswer": "Sì, per il Piccione selvatico e il Beccaccino, i cui nomi scientifici non vengono riconosciuti dall'importazione di eBird, e per le specie che l'app non ha potuto collegare a eBird (elencate nella pagina di esportazione). Scegli una volta la specie corretta nella pagina «Fix species» di eBird: eBird ricorda la tua scelta per le importazioni successive, quindi scegli con attenzione. Subito dopo l'aggiornamento annuale della tassonomia eBird (di solito a ottobre), alcune altre specie potrebbero dover essere abbinate finché l'app non viene aggiornata.",
   "faqHotspotsQuestion": "La mia checklist non è collegata all'hotspot scelto.",
-  "faqHotspotsAnswer": "eBird a volte crea una località personale anche se nome e coordinate corrispondono all'hotspot. Dopo l'importazione, [unisci la località all'hotspot]: tutte le sue checklist passano all'hotspot.",
+  "faqHotspotsAnswer": "Seleziona l'hotspot sulla mappa in Modalità personalizzata e usalo come località della checklist. Il CSV contiene il suo identificativo di località eBird, così eBird può riconoscerlo direttamente. Il nome e le coordinate da soli possono creare una località personale. Per le checklist già importate, [unisci la località all'hotspot]: tutte le sue checklist passano all'hotspot.",
   "faqProcessingQuestion": "La mia importazione è in elaborazione da giorni.",
   "faqProcessingAnswer": "eBird può impiegare diversi giorni, a volte fino a una settimana, per elaborare un'importazione. È normale e non si può accelerare. Puoi seguirne l'avanzamento in [Le mie importazioni].",
   "faqMistakesQuestion": "Ho fatto un errore in un'importazione. Come lo correggo?",

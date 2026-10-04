@@ -112,6 +112,13 @@ export function createStore() {
   function updateForm(formId, changes) {
     const form = findForm(formId);
     if (form) {
+      // Editing the location makes it personal again unless a hotspot is selected explicitly.
+      if (
+        !("hotspot_id" in changes) &&
+        ["location_name", "lat", "lon"].some((key) => key in changes && changes[key] !== form[key])
+      ) {
+        form.hotspot_id = "";
+      }
       Object.assign(form, changes);
       if (changes.full_form === true) form.primary_purpose = true;
       if (changes.primary_purpose === false) form.full_form = false;

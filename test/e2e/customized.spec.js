@@ -7,6 +7,46 @@ const FIXTURE = "export_small_incidental.json";
 const LOCATION = 5;
 const NUMBER_OBSERVER = 13;
 
+test("choosing a hotspot exports its ID and exact coordinates", async ({ page }) => {
+  const hotspot = {
+    locId: "L5860421",
+    locName: "Rochers de Clé",
+    lat: 46.4159672,
+    lng: 7.2082329,
+  };
+  await stubNetwork(page);
+  await page.route("https://api.ebird.org/v2/ref/hotspot/**", (route) =>
+    route.fulfill({ json: [hotspot] }),
+  );
+  await openApp(page);
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: /^Customized mode/ }).click();
+  await page.getByRole("button", { name: "Close" }).click();
+  await importFixture(page, "ornitho.ch", FIXTURE);
+
+  await page.locator(".hotspot-marker-icon").click();
+  await page.getByRole("button", { name: "Use as checklist location" }).click();
+  const details = page.locator("section", {
+    has: page.getByRole("heading", { level: 2, name: "Checklist details" }),
+  });
+  await expect(field(details, "Location name")).toHaveValue(hotspot.locName);
+  const golden = parseCsv(readGolden(FIXTURE));
+  const expected = golden.map((row) =>
+    row[LOCATION] === golden[0][LOCATION]
+      ? row.with(LOCATION, hotspot.locId).with(6, String(hotspot.lat)).with(7, String(hotspot.lng))
+      : row,
+  );
+  expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+
+  // Renaming the location must not silently export the previously selected hotspot.
+  await field(details, "Location name").fill("My personal location");
+  expect(parseCsv(await downloadCsv(page))).toEqual(
+    expected.map((row) =>
+      row[LOCATION] === hotspot.locId ? row.with(LOCATION, "My personal location") : row,
+    ),
+  );
+});
+
 const parseCsv = (text) => Papa.parse(text).data;
 
 // The checklist editor's labels are not tied to their inputs: take the input of the innermost

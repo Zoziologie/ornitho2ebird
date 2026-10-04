@@ -530,7 +530,8 @@ function useHotspot(hotspot) {
   }
 
   store.updateForm(selectedForm.value.id, {
-    location_name: hotspot.locName,
+    hotspot_id: hotspot.locId,
+    location_name: normalizeLocationName(hotspot.locName),
     lat: hotspot.lat,
     lon: hotspot.lng,
     hotspot_key: "",

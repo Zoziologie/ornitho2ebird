@@ -104,7 +104,7 @@
   "faqSpeciesMatchingQuestion": "eBird asks me to match some species. Is that normal?",
   "faqSpeciesMatchingAnswer": "Yes, for Rock Pigeon and Common Snipe, whose scientific names eBird's import does not recognise, and for species the app could not link to eBird (the export page lists them). Choose the right species once on eBird's Fix species page: eBird remembers your choice for later imports, so choose carefully. Right after eBird's yearly taxonomy update (usually in October), a few more species may need matching until the app is updated.",
   "faqHotspotsQuestion": "My checklist is not linked to the hotspot I chose.",
-  "faqHotspotsAnswer": "eBird sometimes creates a personal location even when its name and coordinates match the hotspot. After the import, [merge the location with the hotspot]: all its checklists then move to the hotspot.",
+  "faqHotspotsAnswer": "Select the hotspot on the map in Customized mode and use it as the checklist location. The CSV exports its eBird location ID so eBird can match it directly. A name and coordinates alone may create a personal location. For checklists already imported, [merge the location with the hotspot]: all its checklists then move to the hotspot.",
   "faqProcessingQuestion": "My import has been processing for days.",
   "faqProcessingAnswer": "eBird can take several days, sometimes up to a week, to process an import. This is normal and cannot be sped up. You can follow it on [My Imports].",
   "faqMistakesQuestion": "I made a mistake in an import. How do I fix it?",
