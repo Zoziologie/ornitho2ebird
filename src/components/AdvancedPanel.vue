@@ -4,6 +4,8 @@ import { trackEvent } from "../lib/analytics";
 import { useI18n } from "vue-i18n";
 import AssignmentMap from "./AssignmentMap.vue";
 import ReviewMap from "./ReviewMap.vue";
+import HotspotSuggestions from "./HotspotSuggestions.vue";
+import { createHotspotLoader, hotspotEvidence, rankHotspots } from "../lib/hotspotMatching";
 import {
   CHECKLIST_COLORS,
   UNASSIGNED_COLOR,
@@ -25,8 +27,7 @@ import {
   protocol,
 } from "../lib/utils";
 import { buildStaticMapUrl } from "../lib/staticMap";
-import { EBIRD_API_KEY, LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
-import { fetchJson } from "../lib/http";
+import { LOCATION_NAME_MAX_LENGTH } from "../lib/constants";
 import { store } from "../lib/store";
 
 const props = defineProps({
@@ -57,6 +58,11 @@ const reviewSelectorOpen = ref(false);
 const assignSelectorRef = ref(null);
 const reviewSelectorRef = ref(null);
 const observationsModalOpen = ref(false);
+const hotspotsLoading = ref(false);
+const hotspotsFailed = ref(false);
+const hotspotReporting = ref(false);
+const loadHotspots = createHotspotLoader();
+let hotspotRequest = 0;
 
 const unassignedColor = UNASSIGNED_COLOR;
 const checklistColors = CHECKLIST_COLORS;
@@ -75,6 +81,10 @@ const selectedSightings = computed(() => {
     ...props.sightings.filter((sighting) => sighting.form_id === selectedForm.value.id),
   ];
 });
+
+const selectedHotspotEvidence = computed(() =>
+  selectedForm.value ? hotspotEvidence(selectedForm.value, selectedSightings.value) : null,
+);
 
 const unassignedSightings = computed(() => {
   return props.sightings.filter((sighting) => sighting.form_id === 0);
@@ -265,30 +275,74 @@ function computeDurationFromSightings() {
 }
 
 async function loadHotspotsForSelectedForm() {
-  // Keep a reference: the selection may change while the request is in flight.
+  const request = ++hotspotRequest;
   const form = selectedForm.value;
-  // Not `!form.lat`: latitude or longitude 0 is a valid position.
-  const isCoordinate = (value) => value !== "" && value != null && Number.isFinite(Number(value));
-  if (!form || !isCoordinate(form.lat) || !isCoordinate(form.lon)) {
-    return;
-  }
-
-  const hotspotKey = `${Number(form.lat).toFixed(3)},${Number(form.lon).toFixed(3)}`;
-  if (form.hotspot_key === hotspotKey && Array.isArray(form.hotspots)) {
-    return;
-  }
-
+  const evidence = selectedHotspotEvidence.value;
+  hotspotsFailed.value = false;
+  hotspotsLoading.value = false;
+  if (!form) return;
+  const key = JSON.stringify(evidence.anchors);
+  if (form.hotspot_key === key) return;
+  hotspotsLoading.value = true;
   try {
-    const json = await fetchJson(
-      `https://api.ebird.org/v2/ref/hotspot/geo?lat=${form.lat}&lng=${form.lon}&dist=10&fmt=json&key=${EBIRD_API_KEY}`,
-    );
-    store.updateForm(form.id, {
-      hotspots: markRaw(Array.isArray(json) ? json : []),
-      hotspot_key: hotspotKey,
-    });
+    const hotspots = await loadHotspots(evidence);
+    if (request !== hotspotRequest) return;
+    store.updateForm(form.id, { hotspots: markRaw(hotspots), hotspot_key: key });
   } catch (error) {
-    // Not cached, so selecting the checklist again retries.
+    if (request === hotspotRequest) hotspotsFailed.value = true;
     console.warn("Could not load eBird hotspots", error);
+  } finally {
+    if (request === hotspotRequest) hotspotsLoading.value = false;
+  }
+}
+
+async function downloadHotspotReport() {
+  hotspotReporting.value = true;
+  // Snapshot the import so a selection or edit during network requests cannot change the report.
+  const checklists = props.forms.map((form) => ({
+    id: form.id,
+    location: {
+      name: form.location_name,
+      lat: form.lat,
+      lon: form.lon,
+      hotspotId: form.hotspot_id,
+    },
+    protocol: protocol(form).name,
+    evidence: hotspotEvidence(form, [
+      ...(props.formsSightings[form.id - 1] || []),
+      ...props.sightings.filter((sighting) => sighting.form_id === form.id),
+    ]),
+  }));
+  try {
+    for (const checklist of checklists) {
+      checklist.ranking = rankHotspots(checklist.evidence, await loadHotspots(checklist.evidence));
+    }
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            model: "hotspot-scoring-v1-experimental",
+            notice:
+              "Scores are experimental, not probabilities. No checklist locations were changed.",
+            checklists,
+          },
+          null,
+          2,
+        ),
+      ],
+      { type: "application/json" },
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "hotspot-comparison.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.warn("Could not prepare hotspot report", error);
+    alertDialog(t("hotspotSuggestionsFailed"));
+  } finally {
+    hotspotReporting.value = false;
   }
 }
 
@@ -529,13 +583,7 @@ function useHotspot(hotspot) {
     return;
   }
 
-  store.updateForm(selectedForm.value.id, {
-    hotspot_id: hotspot.locId,
-    location_name: normalizeLocationName(hotspot.locName),
-    lat: hotspot.lat,
-    lon: hotspot.lng,
-    hotspot_key: "",
-  });
+  store.selectHotspot(selectedForm.value.id, hotspot);
   trackEvent("checklist_action", { action: "hotspot" });
   loadHotspotsForSelectedForm();
 }
@@ -546,13 +594,8 @@ function selectChecklistOnMap(formId) {
 }
 
 watch(
-  () => [selectedForm.value?.id, selectedForm.value?.lat, selectedForm.value?.lon],
-  async () => {
-    if (!selectedForm.value) {
-      return;
-    }
-    await loadHotspotsForSelectedForm();
-  },
+  () => [selectedForm.value?.id, JSON.stringify(selectedHotspotEvidence.value?.anchors)],
+  loadHotspotsForSelectedForm,
   { immediate: true },
 );
 
@@ -1074,6 +1117,17 @@ onMounted(() => {
                 @move-form="moveChecklist"
                 @path="updatePath"
                 @use-hotspot="useHotspot"
+              />
+              <HotspotSuggestions
+                :form="selectedForm"
+                :evidence="selectedHotspotEvidence"
+                :loading="hotspotsLoading"
+                :failed="hotspotsFailed"
+                :reporting="hotspotReporting"
+                @use-hotspot="useHotspot"
+                @restore="store.restoreLocation(selectedForm.id)"
+                @retry="loadHotspotsForSelectedForm"
+                @report="downloadHotspotReport"
               />
             </div>
             <div v-if="showStaticMapPanel" class="col-xl-4 col-lg-5">

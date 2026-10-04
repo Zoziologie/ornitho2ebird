@@ -5,6 +5,7 @@ import {
   checklistReview,
   uniqueDistanceFromPath,
   mathRound,
+  normalizeLocationName,
 } from "./utils";
 
 // The imported data: checklists (`forms`), casual sightings (`sightings`, assigned to a checklist
@@ -118,12 +119,36 @@ export function createStore() {
         ["location_name", "lat", "lon"].some((key) => key in changes && changes[key] !== form[key])
       ) {
         form.hotspot_id = "";
+        form.location_before_hotspot = null;
       }
       Object.assign(form, changes);
       if (changes.full_form === true) form.primary_purpose = true;
       if (changes.primary_purpose === false) form.full_form = false;
       if ("time" in changes || "duration" in changes) form.crosses_midnight = false;
     }
+  }
+
+  function selectHotspot(formId, hotspot) {
+    const form = findForm(formId);
+    updateForm(formId, {
+      location_before_hotspot: form.location_before_hotspot || {
+        location_name: form.location_name,
+        lat: form.lat,
+        lon: form.lon,
+        hotspot_id: form.hotspot_id,
+      },
+      hotspot_id: hotspot.locId,
+      location_name: normalizeLocationName(hotspot.locName),
+      lat: hotspot.lat,
+      lon: hotspot.lng,
+    });
+  }
+
+  function restoreLocation(formId) {
+    updateForm(formId, {
+      ...findForm(formId).location_before_hotspot,
+      location_before_hotspot: null,
+    });
   }
 
   // Traces can be large and are only ever replaced as a whole, so they are not made reactive.
@@ -193,6 +218,8 @@ export function createStore() {
     autoAssign,
     moveForm,
     updateForm,
+    selectHotspot,
+    restoreLocation,
     setFormPath,
     splitFormByDate,
     fillNumberObserver,

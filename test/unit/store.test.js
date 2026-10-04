@@ -166,6 +166,26 @@ describe("store", () => {
     expect(store.state.forms[1]).toMatchObject({ hotspot_id: "", lat: 46.4, lon: 7.2 });
   });
 
+  it("can undo hotspot choices without changing sightings or effort", () => {
+    const store = loadedStore();
+    const previous = { ...store.state.forms[1] };
+    const assignments = formIdsOfSightings(store);
+    store.selectHotspot(2, { locId: "L1", locName: "First", lat: 46.1234567, lng: 7.1234567 });
+    store.selectHotspot(2, { locId: "L2", locName: "Second", lat: 46.2, lng: 7.2 });
+    expect(store.state.forms[1].location_before_hotspot.location_name).toBe(previous.location_name);
+    store.updateForm(2, { duration: 30 });
+    store.restoreLocation(2);
+    expect(store.state.forms[1]).toMatchObject({
+      location_name: previous.location_name,
+      lat: previous.lat,
+      lon: previous.lon,
+      hotspot_id: previous.hotspot_id,
+      location_before_hotspot: null,
+      duration: 30,
+    });
+    expect(formIdsOfSightings(store)).toEqual(assignments);
+  });
+
   it("updateForm changes the given fields of one checklist", () => {
     const store = loadedStore();
     store.updateForm(2, { location_name: "Renamed", exportable: false });

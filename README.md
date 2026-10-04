@@ -144,6 +144,12 @@ Choosing a hotspot exports its eBird location ID in the CSV's location-name colu
 so eBird can match the hotspot directly. The app still displays its readable name.
 Renaming or moving the location clears that hotspot association.
 
+An experimental hotspot comparison below the review map ranks nearby candidates using
+the route when available, otherwise the observation positions. It explains the fit and
+competing scores; choosing a suggestion remains manual and can be undone. Download a
+comparison report for all checklists to review and tune the model. See
+[`docs/hotspot-scoring.md`](docs/hotspot-scoring.md) for the scoring assumptions and limitations.
+
 ### Species comment templates
 
 Species comments are customizable. The app can generate concise or expanded comments and switch between templates when many duplicate sightings of the same species are merged into one eBird row.

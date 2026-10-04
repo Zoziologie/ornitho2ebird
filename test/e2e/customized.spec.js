@@ -25,7 +25,10 @@ test("choosing a hotspot exports its ID and exact coordinates", async ({ page })
   await importFixture(page, "ornitho.ch", FIXTURE);
 
   await page.locator(".hotspot-marker-icon").click();
-  await page.getByRole("button", { name: "Use as checklist location" }).click();
+  await page
+    .locator(".maplibregl-popup")
+    .getByRole("button", { name: "Use as checklist location" })
+    .click();
   const details = page.locator("section", {
     has: page.getByRole("heading", { level: 2, name: "Checklist details" }),
   });
@@ -36,6 +39,25 @@ test("choosing a hotspot exports its ID and exact coordinates", async ({ page })
       ? row.with(LOCATION, hotspot.locId).with(6, String(hotspot.lat)).with(7, String(hotspot.lng))
       : row,
   );
+  expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+
+  await page.getByRole("button", { name: "Restore previous location" }).click();
+  expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
+  const suggestions = page.locator("article", {
+    has: page.getByRole("heading", { name: "Hotspot suggestions (experimental)", exact: true }),
+  });
+  await suggestions.getByRole("button", { name: "Use as checklist location" }).click();
+  expect(parseCsv(await downloadCsv(page))).toEqual(expected);
+
+  const reportDownload = page.waitForEvent("download");
+  await suggestions.getByRole("button", { name: "Download comparison for all checklists" }).click();
+  const report = await reportDownload;
+  const stream = await report.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  const comparison = JSON.parse(Buffer.concat(chunks).toString());
+  expect(comparison.checklists).toHaveLength(new Set(golden.map((row) => row[LOCATION])).size);
+  expect(comparison.checklists[0].ranking.candidates[0].hotspot.locId).toBe(hotspot.locId);
   expect(parseCsv(await downloadCsv(page))).toEqual(expected);
 
   // Renaming the location must not silently export the previously selected hotspot.
