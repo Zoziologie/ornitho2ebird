@@ -1,0 +1,4555 @@
+{
+  "fixture": "export_mixed_large.json",
+  "reviewedModel": "hotspot-scoring-v1-experimental",
+  "reviewDate": "2026-10-04",
+  "reviewer": "Maintainer",
+  "noMatchMeaning": "Keep existing checklist location; do not select a hotspot.",
+  "unresolved": [
+    22,
+    31
+  ],
+  "labels": [
+    {
+      "id": 1,
+      "location": "Le Pont – Lac Brenet",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L5287486",
+      "split": "validation"
+    },
+    {
+      "id": 2,
+      "location": "Sursee Triechter",
+      "accepted": [
+        "L10483319"
+      ],
+      "reviewedTop": "L10483319",
+      "split": "calibration"
+    },
+    {
+      "id": 3,
+      "location": "Promenade Robert Hainard",
+      "accepted": [
+        "L1166823"
+      ],
+      "reviewedTop": "L1166823",
+      "split": "calibration"
+    },
+    {
+      "id": 4,
+      "location": "Bonvillars [542/186]",
+      "accepted": [
+        "L4188461"
+      ],
+      "reviewedTop": "L4188461",
+      "split": "validation"
+    },
+    {
+      "id": 5,
+      "location": "Creux de Terre",
+      "accepted": [
+        "L3012485"
+      ],
+      "reviewedTop": "L3012485",
+      "split": "calibration"
+    },
+    {
+      "id": 6,
+      "location": "Creux de Terre",
+      "accepted": [
+        "L3012485"
+      ],
+      "reviewedTop": "L3012485",
+      "split": "calibration"
+    },
+    {
+      "id": 7,
+      "location": "Les Saars",
+      "accepted": [
+        "L4446431"
+      ],
+      "reviewedTop": "L4446431",
+      "split": "calibration"
+    },
+    {
+      "id": 8,
+      "location": "Lac Coffy",
+      "accepted": [
+        "L4379692"
+      ],
+      "reviewedTop": "L4379692",
+      "split": "validation"
+    },
+    {
+      "id": 9,
+      "location": "Etang de Bioley-Orjulaz",
+      "accepted": [
+        "L3642659"
+      ],
+      "reviewedTop": "L3642659",
+      "split": "calibration"
+    },
+    {
+      "id": 10,
+      "location": "Parcelle du projet \"Escale limicoles\"",
+      "accepted": [
+        "L6296888"
+      ],
+      "reviewedTop": "L6296888",
+      "split": "calibration"
+    },
+    {
+      "id": 11,
+      "location": "Etang des Douves",
+      "accepted": [
+        "L4834608"
+      ],
+      "reviewedTop": "L4834608",
+      "split": "calibration"
+    },
+    {
+      "id": 12,
+      "location": "Préverenges [530/152]",
+      "accepted": [
+        "L3872486"
+      ],
+      "reviewedTop": "L3872486",
+      "split": "calibration"
+    },
+    {
+      "id": 13,
+      "location": "Chablais de Cudrefin",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L975146",
+      "split": "validation"
+    },
+    {
+      "id": 14,
+      "location": "Vieille Thielle",
+      "accepted": [
+        "L3884517"
+      ],
+      "reviewedTop": "L3884517",
+      "split": "validation"
+    },
+    {
+      "id": 15,
+      "location": "Champ-Pittet",
+      "accepted": [
+        "L1763098"
+      ],
+      "reviewedTop": "L1763098",
+      "split": "calibration"
+    },
+    {
+      "id": 16,
+      "location": "Observatoire îles de Cheseaux",
+      "accepted": [
+        "L5385575"
+      ],
+      "reviewedTop": "L5385575",
+      "split": "calibration"
+    },
+    {
+      "id": 17,
+      "location": "Les Rochettes",
+      "accepted": [
+        "L12688816"
+      ],
+      "reviewedTop": "L12688816",
+      "split": "validation"
+    },
+    {
+      "id": 18,
+      "location": "Epalinges [541/155]",
+      "accepted": [
+        "L3092254"
+      ],
+      "reviewedTop": "L3092254",
+      "split": "calibration"
+    },
+    {
+      "id": 19,
+      "location": "Lausanne [540/158]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3092254",
+      "split": "calibration"
+    },
+    {
+      "id": 20,
+      "location": "Etang du Milieu",
+      "accepted": [
+        "L5298617"
+      ],
+      "reviewedTop": "L5298617",
+      "split": "calibration"
+    },
+    {
+      "id": 21,
+      "location": "Sulgen [731/267]",
+      "accepted": [
+        "L10884455"
+      ],
+      "reviewedTop": "L10884455",
+      "split": "calibration"
+    },
+    {
+      "id": 22,
+      "location": "Arbon / Hafen-Quai",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L10884455",
+      "split": "calibration",
+      "note": "Reject current suggestions; a closer hotspot may exist, identity unresolved."
+    },
+    {
+      "id": 23,
+      "location": "Arbon / Seepark",
+      "accepted": [
+        "L5165267"
+      ],
+      "reviewedTop": "L5165267",
+      "split": "validation"
+    },
+    {
+      "id": 24,
+      "location": "Egnach / Luxburg",
+      "accepted": [
+        "L5165262"
+      ],
+      "reviewedTop": "L5165267",
+      "split": "validation"
+    },
+    {
+      "id": 25,
+      "location": "Ermatinger Becken TG / S-E",
+      "accepted": [
+        "L4067650"
+      ],
+      "reviewedTop": "L4067650",
+      "split": "validation"
+    },
+    {
+      "id": 26,
+      "location": "Stein am Rhein / Werd",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L12847727",
+      "split": "calibration"
+    },
+    {
+      "id": 27,
+      "location": "Embouchure de la Venoge",
+      "accepted": [
+        "L2815445"
+      ],
+      "reviewedTop": "L2815445",
+      "split": "calibration"
+    },
+    {
+      "id": 28,
+      "location": "Weissenau / Alte Aare",
+      "accepted": [
+        "L2342192"
+      ],
+      "reviewedTop": "L2342192",
+      "split": "calibration"
+    },
+    {
+      "id": 29,
+      "location": "Tenniken [629/254]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L5578810",
+      "split": "calibration"
+    },
+    {
+      "id": 30,
+      "location": "Ollon [568/127]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L64731784",
+      "split": "validation"
+    },
+    {
+      "id": 31,
+      "location": "La Dullive",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L64731784",
+      "split": "validation",
+      "note": "Ignore incorrect GPS track; nearby hotspot identity unresolved."
+    },
+    {
+      "id": 32,
+      "location": "Pizy [517/149]",
+      "accepted": [
+        "L10430857"
+      ],
+      "reviewedTop": "L10430857",
+      "split": "validation"
+    },
+    {
+      "id": 33,
+      "location": "Larrit",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L10110439",
+      "split": "calibration"
+    },
+    {
+      "id": 34,
+      "location": "Tête du Lac",
+      "accepted": [
+        "L4188336"
+      ],
+      "reviewedTop": "L4188336",
+      "split": "calibration"
+    },
+    {
+      "id": 35,
+      "location": "Sempach / Festhalle",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L21595508",
+      "split": "calibration",
+      "note": "No match with current sightings only; Festhalle would be acceptable with a supporting track."
+    },
+    {
+      "id": 36,
+      "location": "Sursee Triechter",
+      "accepted": [
+        "L10483319"
+      ],
+      "reviewedTop": "L10483319",
+      "split": "calibration"
+    },
+    {
+      "id": 37,
+      "location": "Geuensee / Moos",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L4456045",
+      "split": "validation"
+    },
+    {
+      "id": 38,
+      "location": "Leysin",
+      "accepted": [
+        "L7477068"
+      ],
+      "reviewedTop": "L7477068",
+      "split": "calibration"
+    },
+    {
+      "id": 39,
+      "location": "Ormont-Dessous [574/138]",
+      "accepted": [
+        "L5565145"
+      ],
+      "reviewedTop": "L5565145",
+      "split": "calibration"
+    },
+    {
+      "id": 40,
+      "location": "Jouxtens-Mézery [535/155]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L27998191",
+      "split": "calibration"
+    },
+    {
+      "id": 41,
+      "location": "Etang de Tioleire",
+      "accepted": [
+        "L4547632"
+      ],
+      "reviewedTop": "L4547632",
+      "split": "calibration"
+    },
+    {
+      "id": 42,
+      "location": "Saint-Sulpice [532/151]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3289598",
+      "split": "validation"
+    },
+    {
+      "id": 43,
+      "location": "Chavannes-près-Renens",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3292272",
+      "split": "calibration"
+    },
+    {
+      "id": 44,
+      "location": "Parc de Valency",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L10017527",
+      "split": "calibration"
+    },
+    {
+      "id": 45,
+      "location": "Les Tannes",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L975146",
+      "split": "validation"
+    },
+    {
+      "id": 46,
+      "location": "Le Moulin",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L20050939",
+      "split": "validation"
+    },
+    {
+      "id": 47,
+      "location": "Camp de Vaumarcus",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L20050939",
+      "split": "validation"
+    },
+    {
+      "id": 48,
+      "location": "Yvonand [544/180]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L5385575",
+      "split": "calibration"
+    },
+    {
+      "id": 49,
+      "location": "Embouchure du Mujon",
+      "accepted": [
+        "L1166823"
+      ],
+      "reviewedTop": "L1166823",
+      "split": "calibration"
+    },
+    {
+      "id": 50,
+      "location": "Creux de Terre",
+      "accepted": [
+        "L3012485"
+      ],
+      "reviewedTop": "L3012485",
+      "split": "calibration"
+    },
+    {
+      "id": 51,
+      "location": "Riond-Bosson",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3642659",
+      "split": "calibration"
+    },
+    {
+      "id": 52,
+      "location": "Parc de Valency",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L10017527",
+      "split": "calibration"
+    },
+    {
+      "id": 53,
+      "location": "Epalinges [541/155]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3092254",
+      "split": "calibration"
+    },
+    {
+      "id": 54,
+      "location": "La Gouille",
+      "accepted": [
+        null,
+        "L5844168"
+      ],
+      "reviewedTop": "L5844168",
+      "split": "validation",
+      "note": "No match or Val d’Arolla are both acceptable."
+    },
+    {
+      "id": 55,
+      "location": "Martigny-Combe [566/100]",
+      "accepted": [
+        null,
+        "L5844150"
+      ],
+      "reviewedTop": "L5844150",
+      "split": "calibration"
+    },
+    {
+      "id": 56,
+      "location": "Epalinges [541/155]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3092254",
+      "split": "calibration"
+    },
+    {
+      "id": 57,
+      "location": "Mézery",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L27998191",
+      "split": "calibration"
+    },
+    {
+      "id": 58,
+      "location": "Le Chenit [507/155]",
+      "accepted": [
+        null,
+        "L37194693"
+      ],
+      "reviewedTop": "L37194693",
+      "split": "calibration"
+    },
+    {
+      "id": 59,
+      "location": "Paquoille",
+      "accepted": [
+        "L12807117"
+      ],
+      "reviewedTop": "L12807117",
+      "split": "calibration"
+    },
+    {
+      "id": 60,
+      "location": "Alle [577/252]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L69166488",
+      "split": "validation"
+    },
+    {
+      "id": 61,
+      "location": "Sulgen [731/267]",
+      "accepted": [
+        "L10884455"
+      ],
+      "reviewedTop": "L10884455",
+      "split": "calibration"
+    },
+    {
+      "id": 62,
+      "location": "Graströchni",
+      "accepted": [
+        null,
+        "L7976906"
+      ],
+      "reviewedTop": "L7976906",
+      "split": "validation"
+    },
+    {
+      "id": 63,
+      "location": "Vaulion [518/171]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L10110439",
+      "split": "calibration"
+    },
+    {
+      "id": 64,
+      "location": "Grand Rosey",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L3587432",
+      "split": "validation"
+    },
+    {
+      "id": 65,
+      "location": "La Rueyre",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L27998191",
+      "split": "calibration"
+    },
+    {
+      "id": 66,
+      "location": "Les Moillets",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L6206930",
+      "split": "calibration"
+    },
+    {
+      "id": 67,
+      "location": "Genève [499/120]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L12009409",
+      "split": "calibration"
+    },
+    {
+      "id": 68,
+      "location": "Perly-Certoux [495/113]",
+      "accepted": [
+        null,
+        "L5168447"
+      ],
+      "reviewedTop": "L5168447",
+      "split": "calibration"
+    },
+    {
+      "id": 69,
+      "location": "Noyers Léonard",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L5168514",
+      "split": "calibration",
+      "note": "Nearby overlapping hotspots cannot be distinguished."
+    },
+    {
+      "id": 70,
+      "location": "Ollon [568/127]",
+      "accepted": [
+        null
+      ],
+      "reviewedTop": "L64731784",
+      "split": "validation"
+    }
+  ],
+  "hotspots": [
+    {
+      "locId": "L5287486",
+      "locName": "Lac de Joux--Le Pont",
+      "lat": 46.6664023,
+      "lng": 6.3285756
+    },
+    {
+      "locId": "L5168412",
+      "locName": "Lac Brenet",
+      "lat": 46.6726454,
+      "lng": 6.3229752
+    },
+    {
+      "locId": "L5287487",
+      "locName": "Lac de Joux--Embouchure de la Lionne",
+      "lat": 46.6500843,
+      "lng": 6.316216
+    },
+    {
+      "locId": "L10110439",
+      "locName": "Dent de Vaulion",
+      "lat": 46.6847431,
+      "lng": 6.3509721
+    },
+    {
+      "locId": "L10110445",
+      "locName": "Juraparc",
+      "lat": 46.6919445,
+      "lng": 6.3405061
+    },
+    {
+      "locId": "L23266402",
+      "locName": "Refuge du poteau",
+      "lat": 46.680095,
+      "lng": 6.2706614
+    },
+    {
+      "locId": "L5243896",
+      "locName": "Lac de Joux (general area) (please use more specific location)",
+      "lat": 46.6386528,
+      "lng": 6.2872696
+    },
+    {
+      "locId": "L5640941",
+      "locName": "Mont-d'Or",
+      "lat": 46.7340772,
+      "lng": 6.3536811
+    },
+    {
+      "locId": "L4834619",
+      "locName": "Lac de Joux--Bas de Bioux",
+      "lat": 46.6163189,
+      "lng": 6.2570009
+    },
+    {
+      "locId": "L5168425",
+      "locName": "Mont Tendre",
+      "lat": 46.5947705,
+      "lng": 6.3100409
+    },
+    {
+      "locId": "L5004606",
+      "locName": "Forêt Domaniale du Risol (ouest)",
+      "lat": 46.6488097,
+      "lng": 6.2123823
+    },
+    {
+      "locId": "L4188336",
+      "locName": "Lac de Joux--Tête du Lac",
+      "lat": 46.6110366,
+      "lng": 6.2419939
+    },
+    {
+      "locId": "L24856000",
+      "locName": "Mouthe--source du Doubs",
+      "lat": 46.7050495,
+      "lng": 6.2091208
+    },
+    {
+      "locId": "L10483319",
+      "locName": "Triechter",
+      "lat": 47.1726241,
+      "lng": 8.1245386
+    },
+    {
+      "locId": "L16236362",
+      "locName": "Juchmoos",
+      "lat": 47.1553984,
+      "lng": 8.121339
+    },
+    {
+      "locId": "L4456045",
+      "locName": "Mauensee",
+      "lat": 47.1715693,
+      "lng": 8.0760884
+    },
+    {
+      "locId": "L10135807",
+      "locName": "Nottwil--Strandbad",
+      "lat": 47.1392086,
+      "lng": 8.1389137
+    },
+    {
+      "locId": "L5806486",
+      "locName": "Hagimoos",
+      "lat": 47.169301,
+      "lng": 8.0525976
+    },
+    {
+      "locId": "L5126271",
+      "locName": "Sempach--Festhalle",
+      "lat": 47.1346513,
+      "lng": 8.1890523
+    },
+    {
+      "locId": "L42705355",
+      "locName": "Sempach* general (use more precise loc.)",
+      "lat": 47.1267631,
+      "lng": 8.1854528
+    },
+    {
+      "locId": "L5126270",
+      "locName": "Sempach--Vogelwarte Visitor Center",
+      "lat": 47.1279215,
+      "lng": 8.1919438
+    },
+    {
+      "locId": "L42705334",
+      "locName": "Sempach--Seeland Camping",
+      "lat": 47.1253593,
+      "lng": 8.1899321
+    },
+    {
+      "locId": "L21595508",
+      "locName": "Sempach--Schweizerische Vogelwarte (office)",
+      "lat": 47.1263705,
+      "lng": 8.1937141
+    },
+    {
+      "locId": "L5126269",
+      "locName": "Sempach--Schlichti",
+      "lat": 47.1200448,
+      "lng": 8.1849539
+    },
+    {
+      "locId": "L3161143",
+      "locName": "Wauwilermoos",
+      "lat": 47.1715839,
+      "lng": 8.0180347
+    },
+    {
+      "locId": "L6778800",
+      "locName": "Buchser Moos",
+      "lat": 47.2051089,
+      "lng": 8.0217791
+    },
+    {
+      "locId": "L36208401",
+      "locName": "Reinacher Berg",
+      "lat": 47.255694,
+      "lng": 8.166033
+    },
+    {
+      "locId": "L1166823",
+      "locName": "Promenade Robert Hainard",
+      "lat": 46.7921857,
+      "lng": 6.6425443
+    },
+    {
+      "locId": "L3699971",
+      "locName": "Etang de la STEP des Tuileries",
+      "lat": 46.79819,
+      "lng": 6.63319
+    },
+    {
+      "locId": "L3883758",
+      "locName": "Plage d'Yverdon",
+      "lat": 46.7845018,
+      "lng": 6.6545498
+    },
+    {
+      "locId": "L6286106",
+      "locName": "Port de Grandson",
+      "lat": 46.8048184,
+      "lng": 6.6406989
+    },
+    {
+      "locId": "L9758866",
+      "locName": "Ville d'Yverdon-les-Bains",
+      "lat": 46.7786426,
+      "lng": 6.6412407
+    },
+    {
+      "locId": "L1763098",
+      "locName": "Champ Pittet",
+      "lat": 46.7850307,
+      "lng": 6.6650748
+    },
+    {
+      "locId": "L44296053",
+      "locName": "Station de pompage de Grandson",
+      "lat": 46.8122193,
+      "lng": 6.6539083
+    },
+    {
+      "locId": "L6296888",
+      "locName": "Basse Plaine de l'Orbe--Parcelle du projet \"Escale limicoles\"",
+      "lat": 46.7692468,
+      "lng": 6.6208898
+    },
+    {
+      "locId": "L5216944",
+      "locName": "Plage de Repuis",
+      "lat": 46.8161201,
+      "lng": 6.6610166
+    },
+    {
+      "locId": "L5385575",
+      "locName": "Observatoire îles de Cheseaux",
+      "lat": 46.7962035,
+      "lng": 6.6945
+    },
+    {
+      "locId": "L16063381",
+      "locName": "Basse Plaine de l'Orbe--Pré Vuacoz",
+      "lat": 46.7536772,
+      "lng": 6.6136326
+    },
+    {
+      "locId": "L4188461",
+      "locName": "Embouchure de l'Arnon",
+      "lat": 46.824775,
+      "lng": 6.6825199
+    },
+    {
+      "locId": "L8858920",
+      "locName": "La Prise",
+      "lat": 46.8392963,
+      "lng": 6.6550316
+    },
+    {
+      "locId": "L4468685",
+      "locName": "Basse Plaine de l'Orbe* general area",
+      "lat": 46.7531525,
+      "lng": 6.5840292
+    },
+    {
+      "locId": "L11543100",
+      "locName": "La Chassagne",
+      "lat": 46.843967,
+      "lng": 6.6820212
+    },
+    {
+      "locId": "L8012910",
+      "locName": "Plage du camping d'Yvonand",
+      "lat": 46.8055665,
+      "lng": 6.7360778
+    },
+    {
+      "locId": "L3285614",
+      "locName": "Embouchure de la Menthue",
+      "lat": 46.8076934,
+      "lng": 6.7416868
+    },
+    {
+      "locId": "L5126217",
+      "locName": "Port de Concise",
+      "lat": 46.8487894,
+      "lng": 6.7201138
+    },
+    {
+      "locId": "L9777525",
+      "locName": "Gorges de Covatannaz",
+      "lat": 46.8133089,
+      "lng": 6.5370698
+    },
+    {
+      "locId": "L12688816",
+      "locName": "Carrières de Balmes et Les Rapilles",
+      "lat": 46.7952675,
+      "lng": 6.5205632
+    },
+    {
+      "locId": "L3012485",
+      "locName": "Le Creux de Terre",
+      "lat": 46.7207772,
+      "lng": 6.5653932
+    },
+    {
+      "locId": "L22054404",
+      "locName": "Sentier Port de Cheyres à Crevel",
+      "lat": 46.8150021,
+      "lng": 6.7775467
+    },
+    {
+      "locId": "L6811409",
+      "locName": "Port de Cheyres",
+      "lat": 46.8195332,
+      "lng": 6.7811286
+    },
+    {
+      "locId": "L20050939",
+      "locName": "Iles de Vaumarcus",
+      "lat": 46.8732415,
+      "lng": 6.7569978
+    },
+    {
+      "locId": "L26017487",
+      "locName": "Rives de Cheyres et Port de la Lagune",
+      "lat": 46.8213821,
+      "lng": 6.7859313
+    },
+    {
+      "locId": "L3995817",
+      "locName": "Port de St-Aubin",
+      "lat": 46.89044,
+      "lng": 6.77449
+    },
+    {
+      "locId": "L4547632",
+      "locName": "Haute Plaine de l'Orbe* general area",
+      "lat": 46.6797711,
+      "lng": 6.5499544
+    },
+    {
+      "locId": "L10995951",
+      "locName": "Étangs d'Arnex",
+      "lat": 46.682741,
+      "lng": 6.5067121
+    },
+    {
+      "locId": "L5884457",
+      "locName": "Les Gorges de l'Orbe",
+      "lat": 46.7261536,
+      "lng": 6.4804316
+    },
+    {
+      "locId": "L18269814",
+      "locName": "Parc Naturel des Jonquilles",
+      "lat": 46.6599081,
+      "lng": 6.5591168
+    },
+    {
+      "locId": "L5126213",
+      "locName": "Le Suchet",
+      "lat": 46.7723897,
+      "lng": 6.46625
+    },
+    {
+      "locId": "L4446431",
+      "locName": "Rives de Neuchâtel--Les Saars",
+      "lat": 46.996368,
+      "lng": 6.9555849
+    },
+    {
+      "locId": "L44295902",
+      "locName": "Plage de Monruz",
+      "lat": 47.003429,
+      "lng": 6.9626498
+    },
+    {
+      "locId": "L4440909",
+      "locName": "Bois de l'Hôpital",
+      "lat": 47.0043728,
+      "lng": 6.9454408
+    },
+    {
+      "locId": "L4197584",
+      "locName": "Rives de Neuchâtel--Jeunes rives",
+      "lat": 46.9904177,
+      "lng": 6.9376934
+    },
+    {
+      "locId": "L2632629",
+      "locName": "Champréveyres",
+      "lat": 47.0061434,
+      "lng": 6.971662
+    },
+    {
+      "locId": "L29679145",
+      "locName": "Rives de Neuchâtel* general area (use more precise loc.)",
+      "lat": 46.9895784,
+      "lng": 6.9304526
+    },
+    {
+      "locId": "L20050852",
+      "locName": "Rives de Neuchâtel--l'Evole",
+      "lat": 46.9892006,
+      "lng": 6.9256919
+    },
+    {
+      "locId": "L13335511",
+      "locName": "Plages et ports d'Hauterive et de Saint-Blaise",
+      "lat": 47.0102842,
+      "lng": 6.9795912
+    },
+    {
+      "locId": "L46920902",
+      "locName": "Crêt du parc",
+      "lat": 46.9959998,
+      "lng": 6.914001
+    },
+    {
+      "locId": "L27463220",
+      "locName": "Chaumont",
+      "lat": 47.0275317,
+      "lng": 6.9576716
+    },
+    {
+      "locId": "L64527942",
+      "locName": "La Marnière",
+      "lat": 47.0216282,
+      "lng": 6.9816371
+    },
+    {
+      "locId": "L20050857",
+      "locName": "Rives de Neuchâtel--Plage de Serrière",
+      "lat": 46.9848197,
+      "lng": 6.913383
+    },
+    {
+      "locId": "L1871845",
+      "locName": "La Ramée/Les Tertres",
+      "lat": 47.0058405,
+      "lng": 6.9988353
+    },
+    {
+      "locId": "L42261066",
+      "locName": "Gorges du Seyon",
+      "lat": 46.9941495,
+      "lng": 6.9081327
+    },
+    {
+      "locId": "L20050860",
+      "locName": "Rives de Neuchâtel--Port de Serrières",
+      "lat": 46.980515,
+      "lng": 6.9037846
+    },
+    {
+      "locId": "L18750173",
+      "locName": "Golf Neuchâtel",
+      "lat": 47.0326361,
+      "lng": 6.992712
+    },
+    {
+      "locId": "L5192619",
+      "locName": "La Tène (est)",
+      "lat": 47.0011134,
+      "lng": 7.0201378
+    },
+    {
+      "locId": "L1871832",
+      "locName": "La Tène (ouest) (incl. Plage et Port)",
+      "lat": 47.0037677,
+      "lng": 7.0203068
+    },
+    {
+      "locId": "L22800448",
+      "locName": "Bois du Camping de Marin",
+      "lat": 47.0069802,
+      "lng": 7.0235046
+    },
+    {
+      "locId": "L5385611",
+      "locName": "Débarcadère de Cudrefin",
+      "lat": 46.9592845,
+      "lng": 7.0140141
+    },
+    {
+      "locId": "L16325321",
+      "locName": "Réserve Naturelle des Grèves de la Motte",
+      "lat": 46.9421714,
+      "lng": 6.9866977
+    },
+    {
+      "locId": "L9055739",
+      "locName": "Port d'Auvernier",
+      "lat": 46.9717398,
+      "lng": 6.8772566
+    },
+    {
+      "locId": "L3037243",
+      "locName": "Fanel--Chablais de Cudrefin",
+      "lat": 46.9777197,
+      "lng": 7.0369899
+    },
+    {
+      "locId": "L44295426",
+      "locName": "La Pôlière",
+      "lat": 47.0149984,
+      "lng": 6.8724897
+    },
+    {
+      "locId": "L4493118",
+      "locName": "Fanel* general (use more precise loc.) (not including Grosses Moos)",
+      "lat": 46.9797363,
+      "lng": 7.0402113
+    },
+    {
+      "locId": "L2632360",
+      "locName": "Fanel--Inseln und Lagunen",
+      "lat": 46.98168,
+      "lng": 7.0416
+    },
+    {
+      "locId": "L23833915",
+      "locName": "Fanel--Inseln und Lagunen--Lagunen",
+      "lat": 46.9840532,
+      "lng": 7.0460163
+    },
+    {
+      "locId": "L20050867",
+      "locName": "Plage de Colombier",
+      "lat": 46.9667677,
+      "lng": 6.8732142
+    },
+    {
+      "locId": "L20050869",
+      "locName": "Robinson",
+      "lat": 46.9632605,
+      "lng": 6.8736227
+    },
+    {
+      "locId": "L26017721",
+      "locName": "Fanel--Inseln und Lagunen--Reiherwäldli (forest only)",
+      "lat": 46.9828008,
+      "lng": 7.0533368
+    },
+    {
+      "locId": "L975146",
+      "locName": "Fanel--Centre Nature Birdlife de La Sauge (paid reserve only)",
+      "lat": 46.9745902,
+      "lng": 7.0519057
+    },
+    {
+      "locId": "L18104018",
+      "locName": "Grosses Moos West--Lindenhof/Strafanswalt",
+      "lat": 46.9906906,
+      "lng": 7.058439
+    },
+    {
+      "locId": "L2442265",
+      "locName": "Port de Portalban",
+      "lat": 46.924328,
+      "lng": 6.9550401
+    },
+    {
+      "locId": "L7715770",
+      "locName": "Grosses Moos--Southwest--Les Peupliers",
+      "lat": 46.965728,
+      "lng": 7.0503259
+    },
+    {
+      "locId": "L7715764",
+      "locName": "Grosses Moos West--Witzwilmoos",
+      "lat": 46.9978169,
+      "lng": 7.062428
+    },
+    {
+      "locId": "L20050894",
+      "locName": "Prés d'Areuse/Grand Verger",
+      "lat": 46.9527656,
+      "lng": 6.8680089
+    },
+    {
+      "locId": "L11916299",
+      "locName": "Grosses Moos/Fanel/Krümmi* general area (use more precise loc.)",
+      "lat": 46.9802785,
+      "lng": 7.0615687
+    },
+    {
+      "locId": "L20050758",
+      "locName": "Grissemoos",
+      "lat": 47.0367565,
+      "lng": 7.0492599
+    },
+    {
+      "locId": "L44295996",
+      "locName": "L'embouchure de l'Areuse",
+      "lat": 46.9458888,
+      "lng": 6.8709109
+    },
+    {
+      "locId": "L14510825",
+      "locName": "Jolimont",
+      "lat": 47.024809,
+      "lng": 7.0602221
+    },
+    {
+      "locId": "L63101530",
+      "locName": "Haut de Bôle",
+      "lat": 46.9765384,
+      "lng": 6.8410678
+    },
+    {
+      "locId": "L4611485",
+      "locName": "Grosses Moos West--Le Rondet",
+      "lat": 46.97302,
+      "lng": 7.0694447
+    },
+    {
+      "locId": "L3884517",
+      "locName": "Vieille Thielle",
+      "lat": 47.0492,
+      "lng": 7.04794
+    },
+    {
+      "locId": "L7715767",
+      "locName": "Grosses Moos West--Giritzimoos",
+      "lat": 47.0010949,
+      "lng": 7.0752168
+    },
+    {
+      "locId": "L20393394",
+      "locName": "Les Grèves de Portalban",
+      "lat": 46.9138546,
+      "lng": 6.9430361
+    },
+    {
+      "locId": "L20050762",
+      "locName": "Grand Marais",
+      "lat": 47.0472057,
+      "lng": 7.056247
+    },
+    {
+      "locId": "L34678959",
+      "locName": "Les grandes pradières",
+      "lat": 47.0309736,
+      "lng": 6.8362924
+    },
+    {
+      "locId": "L4611484",
+      "locName": "Grosses Moos West--Felder Witzwil",
+      "lat": 46.9952118,
+      "lng": 7.0841217
+    },
+    {
+      "locId": "L1112118",
+      "locName": "Grosses Moos West* general",
+      "lat": 46.9839999,
+      "lng": 7.0848942
+    },
+    {
+      "locId": "L29931170",
+      "locName": "Grosses Moos West--Vinelzmoos",
+      "lat": 47.0041021,
+      "lng": 7.0911006
+    },
+    {
+      "locId": "L4379692",
+      "locName": "Lac Coffy",
+      "lat": 46.6157901,
+      "lng": 6.5872318
+    },
+    {
+      "locId": "L3642659",
+      "locName": "Gravière de Bioley-Orjulaz",
+      "lat": 46.62059,
+      "lng": 6.58789
+    },
+    {
+      "locId": "L4379705",
+      "locName": "Bois de Vernand Dessous",
+      "lat": 46.5739668,
+      "lng": 6.5961099
+    },
+    {
+      "locId": "L69733080",
+      "locName": "Bois de la Commune",
+      "lat": 46.631966,
+      "lng": 6.646836
+    },
+    {
+      "locId": "L3587432",
+      "locName": "Gravière de Colliare",
+      "lat": 46.5920035,
+      "lng": 6.5357561
+    },
+    {
+      "locId": "L27998191",
+      "locName": "La cascade de la Mèbre",
+      "lat": 46.5628881,
+      "lng": 6.5861696
+    },
+    {
+      "locId": "L4547595",
+      "locName": "Etang du Sépey",
+      "lat": 46.6152904,
+      "lng": 6.4895403
+    },
+    {
+      "locId": "L7188871",
+      "locName": "Bois du Jorat",
+      "lat": 46.5882649,
+      "lng": 6.7015314
+    },
+    {
+      "locId": "L1043942",
+      "locName": "Bois de Sauvabelin",
+      "lat": 46.5374095,
+      "lng": 6.6388093
+    },
+    {
+      "locId": "L10434178",
+      "locName": "Parc de l'Hermitage",
+      "lat": 46.5295352,
+      "lng": 6.6370726
+    },
+    {
+      "locId": "L3092254",
+      "locName": "Bois de la Chapelle",
+      "lat": 46.5485164,
+      "lng": 6.6814631
+    },
+    {
+      "locId": "L4834608",
+      "locName": "Les Douves",
+      "lat": 46.2916805,
+      "lng": 6.1350811
+    },
+    {
+      "locId": "L5042536",
+      "locName": "Forêt de Veytay",
+      "lat": 46.3024251,
+      "lng": 6.1555195
+    },
+    {
+      "locId": "L4661466",
+      "locName": "Bois du Faisan",
+      "lat": 46.2779787,
+      "lng": 6.1518073
+    },
+    {
+      "locId": "L7695223",
+      "locName": "Observatoire de Genève",
+      "lat": 46.3082483,
+      "lng": 6.1342695
+    },
+    {
+      "locId": "L44280724",
+      "locName": "Combes Chapuis",
+      "lat": 46.305542,
+      "lng": 6.1256289
+    },
+    {
+      "locId": "L926714",
+      "locName": "Port Choiseul",
+      "lat": 46.2879333,
+      "lng": 6.1719167
+    },
+    {
+      "locId": "L5168435",
+      "locName": "Les Crénées (private)",
+      "lat": 46.2982444,
+      "lng": 6.174708
+    },
+    {
+      "locId": "L2416357",
+      "locName": "Port de Versoix et Embouchure de la Versoix",
+      "lat": 46.2761693,
+      "lng": 6.171205
+    },
+    {
+      "locId": "L42046928",
+      "locName": "Plage de la Bécassine",
+      "lat": 46.2740484,
+      "lng": 6.1712587
+    },
+    {
+      "locId": "L5197687",
+      "locName": "Sauverny (ville)",
+      "lat": 46.3158189,
+      "lng": 6.1144415
+    },
+    {
+      "locId": "L17397338",
+      "locName": "Port de Mies",
+      "lat": 46.3048275,
+      "lng": 6.1816501
+    },
+    {
+      "locId": "L2467048",
+      "locName": "Creux-de-Genthod",
+      "lat": 46.2634926,
+      "lng": 6.1631906
+    },
+    {
+      "locId": "L3807203",
+      "locName": "Rue du Marcy (Ornex)",
+      "lat": 46.2687915,
+      "lng": 6.0999287
+    },
+    {
+      "locId": "L8426189",
+      "locName": "Etang de Cessy",
+      "lat": 46.3137945,
+      "lng": 6.095916
+    },
+    {
+      "locId": "L22387239",
+      "locName": "Ferney-Voltaire--parc du Château de Voltaire",
+      "lat": 46.2579278,
+      "lng": 6.1052553
+    },
+    {
+      "locId": "L14738427",
+      "locName": "La Plaine (Versonnex)",
+      "lat": 46.3037467,
+      "lng": 6.0809702
+    },
+    {
+      "locId": "L9286136",
+      "locName": "Pays de Gex - Pleine d'Ornex",
+      "lat": 46.2745671,
+      "lng": 6.0826523
+    },
+    {
+      "locId": "L4446340",
+      "locName": "Port de Coppet",
+      "lat": 46.314865,
+      "lng": 6.1931026
+    },
+    {
+      "locId": "L5168431",
+      "locName": "Marais de la Versoix",
+      "lat": 46.3375508,
+      "lng": 6.1407137
+    },
+    {
+      "locId": "L7872119",
+      "locName": "Le Vengeron",
+      "lat": 46.2461132,
+      "lng": 6.1537083
+    },
+    {
+      "locId": "L14569596",
+      "locName": "Marais de la Versoix",
+      "lat": 46.3390056,
+      "lng": 6.1378695
+    },
+    {
+      "locId": "L13812873",
+      "locName": "Bois de la Bagasse",
+      "lat": 46.2457615,
+      "lng": 6.1090589
+    },
+    {
+      "locId": "L4834578",
+      "locName": "Plage de la Savonnière",
+      "lat": 46.2646146,
+      "lng": 6.2004948
+    },
+    {
+      "locId": "L14764935",
+      "locName": "Gouille de Ferney",
+      "lat": 46.2465274,
+      "lng": 6.0993782
+    },
+    {
+      "locId": "L5168437",
+      "locName": "Port de Bellerive",
+      "lat": 46.2529239,
+      "lng": 6.1928129
+    },
+    {
+      "locId": "L2021971",
+      "locName": "Founex",
+      "lat": 46.3310468,
+      "lng": 6.1920834
+    },
+    {
+      "locId": "L2545625",
+      "locName": "Mont Mourex",
+      "lat": 46.3411334,
+      "lng": 6.1053461
+    },
+    {
+      "locId": "L14556844",
+      "locName": "Aire d'accueil des gens du Voyage de Gex",
+      "lat": 46.3276239,
+      "lng": 6.0754886
+    },
+    {
+      "locId": "L12009409",
+      "locName": "Domaine de Penthes",
+      "lat": 46.233589,
+      "lng": 6.14088
+    },
+    {
+      "locId": "L14764912",
+      "locName": "Marais des Fontaines",
+      "lat": 46.2459212,
+      "lng": 6.0873898
+    },
+    {
+      "locId": "L3563938",
+      "locName": "Aéroport de Genève",
+      "lat": 46.2367338,
+      "lng": 6.1080122
+    },
+    {
+      "locId": "L1056225",
+      "locName": "Pointe à la Bise",
+      "lat": 46.2444733,
+      "lng": 6.1925125
+    },
+    {
+      "locId": "L9160537",
+      "locName": "Parc Sarasin",
+      "lat": 46.2329236,
+      "lng": 6.117548
+    },
+    {
+      "locId": "L4031922",
+      "locName": "Le Reposoir",
+      "lat": 46.2312681,
+      "lng": 6.1503589
+    },
+    {
+      "locId": "L31137192",
+      "locName": "Parc du Chateau-Pictet",
+      "lat": 46.2311727,
+      "lng": 6.1255877
+    },
+    {
+      "locId": "L4446346",
+      "locName": "Port de Founex",
+      "lat": 46.3340545,
+      "lng": 6.2030804
+    },
+    {
+      "locId": "L7678041",
+      "locName": "Lac de Divonne",
+      "lat": 46.3543924,
+      "lng": 6.1519575
+    },
+    {
+      "locId": "L58436260",
+      "locName": "Forêt route des Ceytines",
+      "lat": 46.2634162,
+      "lng": 6.0579163
+    },
+    {
+      "locId": "L5083272",
+      "locName": "Marais des Crêts",
+      "lat": 46.2432129,
+      "lng": 6.0774987
+    },
+    {
+      "locId": "L1115697",
+      "locName": "Jardin Botanique de Genève",
+      "lat": 46.2258685,
+      "lng": 6.1464429
+    },
+    {
+      "locId": "L10173616",
+      "locName": "Parc William Rappard",
+      "lat": 46.2250892,
+      "lng": 6.1494577
+    },
+    {
+      "locId": "L14556847",
+      "locName": "Chapelle Notre-Dame de Riantmont",
+      "lat": 46.3522893,
+      "lng": 6.0950303
+    },
+    {
+      "locId": "L5107975",
+      "locName": "Marais des Bidonnes",
+      "lat": 46.362086,
+      "lng": 6.1609643
+    },
+    {
+      "locId": "L7872288",
+      "locName": "Lac Léman--Petit Lac (open water)",
+      "lat": 46.3278946,
+      "lng": 6.2283202
+    },
+    {
+      "locId": "L15898289",
+      "locName": "Plage d'Hermance",
+      "lat": 46.3038076,
+      "lng": 6.2411571
+    },
+    {
+      "locId": "L7016881",
+      "locName": "Lac des Vernes",
+      "lat": 46.235502,
+      "lng": 6.074388
+    },
+    {
+      "locId": "L4446312",
+      "locName": "Parc Mon Repos et de la Perle du Lac",
+      "lat": 46.2198561,
+      "lng": 6.152097
+    },
+    {
+      "locId": "L2154983",
+      "locName": "Réserve naturelle Les Bondex",
+      "lat": 46.3580281,
+      "lng": 6.1831677
+    },
+    {
+      "locId": "L33275256",
+      "locName": "Parc De Trembley",
+      "lat": 46.218505,
+      "lng": 6.1292982
+    },
+    {
+      "locId": "L15414804",
+      "locName": "Les Chancelants",
+      "lat": 46.2912435,
+      "lng": 6.2453481
+    },
+    {
+      "locId": "L4446349",
+      "locName": "Port de Céligny",
+      "lat": 46.3479941,
+      "lng": 6.2086809
+    },
+    {
+      "locId": "L4834579",
+      "locName": "Quai de Cologny",
+      "lat": 46.2226323,
+      "lng": 6.1813116
+    },
+    {
+      "locId": "L4909612",
+      "locName": "Chens le Pont",
+      "lat": 46.3030961,
+      "lng": 6.2476158
+    },
+    {
+      "locId": "L14682873",
+      "locName": "Etangs de Crassy",
+      "lat": 46.3665032,
+      "lng": 6.1627998
+    },
+    {
+      "locId": "L22580057",
+      "locName": "Parc de l'Étang",
+      "lat": 46.2180545,
+      "lng": 6.105752
+    },
+    {
+      "locId": "L13331287",
+      "locName": "Parc Beaulieu",
+      "lat": 46.2140211,
+      "lng": 6.1377525
+    },
+    {
+      "locId": "L28223179",
+      "locName": "Quai Wilson",
+      "lat": 46.2145451,
+      "lng": 6.1523707
+    },
+    {
+      "locId": "L5594191",
+      "locName": "Marais de Rouelbeau",
+      "lat": 46.2398802,
+      "lng": 6.2228751
+    },
+    {
+      "locId": "L6787871",
+      "locName": "Les Varlioudes",
+      "lat": 46.2521672,
+      "lng": 6.2366617
+    },
+    {
+      "locId": "L22103242",
+      "locName": "Sous Cusy, Chens-sur-Léman (Lac Léman)",
+      "lat": 46.3078273,
+      "lng": 6.2496938
+    },
+    {
+      "locId": "L4834580",
+      "locName": "Port Noir",
+      "lat": 46.2140291,
+      "lng": 6.1711728
+    },
+    {
+      "locId": "L22463595",
+      "locName": "Gare de Cornavin",
+      "lat": 46.2099074,
+      "lng": 6.1416526
+    },
+    {
+      "locId": "L1433872",
+      "locName": "Rade de Genève (Geneva Bay)* general",
+      "lat": 46.2110811,
+      "lng": 6.1597252
+    },
+    {
+      "locId": "L36330876",
+      "locName": "Parc Des Franchises",
+      "lat": 46.2111257,
+      "lng": 6.1166811
+    },
+    {
+      "locId": "L33120259",
+      "locName": "Parc Geisendorf",
+      "lat": 46.2097447,
+      "lng": 6.1303926
+    },
+    {
+      "locId": "L926699",
+      "locName": "Jetée et Port des Pâquis",
+      "lat": 46.2102417,
+      "lng": 6.1546
+    },
+    {
+      "locId": "L12483990",
+      "locName": "Plage des Eaux-vives",
+      "lat": 46.2105169,
+      "lng": 6.1666131
+    },
+    {
+      "locId": "L4031955",
+      "locName": "Port des Eaux-Vives",
+      "lat": 46.2092102,
+      "lng": 6.1624289
+    },
+    {
+      "locId": "L9307354",
+      "locName": "CERN (restricted access)",
+      "lat": 46.2324564,
+      "lng": 6.0521808
+    },
+    {
+      "locId": "L5395470",
+      "locName": "Marais du Château",
+      "lat": 46.229639,
+      "lng": 6.223575
+    },
+    {
+      "locId": "L2768491",
+      "locName": "Île Rousseau",
+      "lat": 46.2059101,
+      "lng": 6.1476767
+    },
+    {
+      "locId": "L13351650",
+      "locName": "Zone de loisirs au Moulin",
+      "lat": 46.2112964,
+      "lng": 6.0934639
+    },
+    {
+      "locId": "L8356868",
+      "locName": "Jetée du Jet d'eau",
+      "lat": 46.206114,
+      "lng": 6.1573005
+    },
+    {
+      "locId": "L20471361",
+      "locName": "Bel Air",
+      "lat": 46.2047185,
+      "lng": 6.1398998
+    },
+    {
+      "locId": "L8034676",
+      "locName": "Nuticel",
+      "lat": 46.3781018,
+      "lng": 6.1268603
+    },
+    {
+      "locId": "L4493081",
+      "locName": "Ville de Genève (City of Geneva)* general",
+      "lat": 46.20428,
+      "lng": 6.1429453
+    },
+    {
+      "locId": "L5183485",
+      "locName": "Tougues, Chens-sur-Léman (Lac Léman)",
+      "lat": 46.3232825,
+      "lng": 6.2564993
+    },
+    {
+      "locId": "L3859517",
+      "locName": "Parc de la Grange et Parc des Eaux-Vives",
+      "lat": 46.2065224,
+      "lng": 6.1677611
+    },
+    {
+      "locId": "L1120147",
+      "locName": "Jardin Anglais",
+      "lat": 46.2042,
+      "lng": 6.152
+    },
+    {
+      "locId": "L9307399",
+      "locName": "CERN (France)",
+      "lat": 46.2349431,
+      "lng": 6.0429969
+    },
+    {
+      "locId": "L31250459",
+      "locName": "Site de migration de Crozet",
+      "lat": 46.275285,
+      "lng": 6.015569
+    },
+    {
+      "locId": "L4785220",
+      "locName": "Pont Sous-Terre",
+      "lat": 46.203372,
+      "lng": 6.131793
+    },
+    {
+      "locId": "L5080962",
+      "locName": "Roselière du Bois des Fonds",
+      "lat": 46.2100929,
+      "lng": 6.089462
+    },
+    {
+      "locId": "L14569738",
+      "locName": "Route d'Harée",
+      "lat": 46.2738991,
+      "lng": 6.0142461
+    },
+    {
+      "locId": "L7749036",
+      "locName": "Cimetière des Rois",
+      "lat": 46.2020401,
+      "lng": 6.1363056
+    },
+    {
+      "locId": "L2758150",
+      "locName": "Marais de Sionnet",
+      "lat": 46.23163,
+      "lng": 6.23641
+    },
+    {
+      "locId": "L3872486",
+      "locName": "Le Monteiron  (migration)",
+      "lat": 46.5217401,
+      "lng": 6.5324664
+    },
+    {
+      "locId": "L44089638",
+      "locName": "Sentier de la Venoge",
+      "lat": 46.5230041,
+      "lng": 6.5462797
+    },
+    {
+      "locId": "L2815445",
+      "locName": "Île de Préverenges",
+      "lat": 46.5073722,
+      "lng": 6.5354718
+    },
+    {
+      "locId": "L9872088",
+      "locName": "Embouchure du Bief",
+      "lat": 46.5151708,
+      "lng": 6.5132443
+    },
+    {
+      "locId": "L3289597",
+      "locName": "Débarcadère de Saint-Sulpice",
+      "lat": 46.5086718,
+      "lng": 6.5613377
+    },
+    {
+      "locId": "L4396369",
+      "locName": "Baie du Temple",
+      "lat": 46.5117288,
+      "lng": 6.5026832
+    },
+    {
+      "locId": "L3292272",
+      "locName": "Université de Lausanne/EPFL",
+      "lat": 46.5205146,
+      "lng": 6.5744805
+    },
+    {
+      "locId": "L6360710",
+      "locName": "Parc du Pélican",
+      "lat": 46.5134713,
+      "lng": 6.5725976
+    },
+    {
+      "locId": "L3289598",
+      "locName": "Port des Pierrettes",
+      "lat": 46.5171333,
+      "lng": 6.5777689
+    },
+    {
+      "locId": "L4396348",
+      "locName": "Embouchure de la Morges",
+      "lat": 46.5035249,
+      "lng": 6.4941001
+    },
+    {
+      "locId": "L3612717",
+      "locName": "Embouchure de la Chamberonne",
+      "lat": 46.5171333,
+      "lng": 6.5867543
+    },
+    {
+      "locId": "L6323539",
+      "locName": "Ruines romaines de Vidy",
+      "lat": 46.5165353,
+      "lng": 6.6011256
+    },
+    {
+      "locId": "L10017527",
+      "locName": "Vallée de la Jeunesse",
+      "lat": 46.5202414,
+      "lng": 6.6046178
+    },
+    {
+      "locId": "L4417475",
+      "locName": "Port de Vidy",
+      "lat": 46.5119962,
+      "lng": 6.6069125
+    },
+    {
+      "locId": "L6183849",
+      "locName": "stakeout European Roller, Colombier (2017-08)",
+      "lat": 46.5542346,
+      "lng": 6.4751047
+    },
+    {
+      "locId": "L5168547",
+      "locName": "Lac Léman (CH)* general area (open water)",
+      "lat": 46.4809007,
+      "lng": 6.5832138
+    },
+    {
+      "locId": "L8714676",
+      "locName": "stakeout Crested Lark, Colombier (March 2019)",
+      "lat": 46.5629019,
+      "lng": 6.4693567
+    },
+    {
+      "locId": "L6377997",
+      "locName": "Coline de Montriond",
+      "lat": 46.51413,
+      "lng": 6.62398
+    },
+    {
+      "locId": "L1043905",
+      "locName": "Ouchy",
+      "lat": 46.5057181,
+      "lng": 6.6273201
+    },
+    {
+      "locId": "L4507674",
+      "locName": "Ville de Lausanne (city of Lausanne)* general area (use more precise loc.)",
+      "lat": 46.51946,
+      "lng": 6.63104
+    },
+    {
+      "locId": "L5099388",
+      "locName": "Pointe du Suchet",
+      "lat": 46.4787027,
+      "lng": 6.462155
+    },
+    {
+      "locId": "L4405058",
+      "locName": "Place St-François",
+      "lat": 46.519658,
+      "lng": 6.633435
+    },
+    {
+      "locId": "L3850118",
+      "locName": "Cathédrale de Lausanne",
+      "lat": 46.5223508,
+      "lng": 6.6353238
+    },
+    {
+      "locId": "L5163401",
+      "locName": "Saint-Prex--Pierre de Coulet",
+      "lat": 46.4741847,
+      "lng": 6.4494306
+    },
+    {
+      "locId": "L3924212",
+      "locName": "Lac Léman (France)",
+      "lat": 46.4447967,
+      "lng": 6.530056
+    },
+    {
+      "locId": "L3605942",
+      "locName": "Champs Corbes",
+      "lat": 46.50156,
+      "lng": 6.41977
+    },
+    {
+      "locId": "L8710011",
+      "locName": "Mont Vully",
+      "lat": 46.9630307,
+      "lng": 7.0949048
+    },
+    {
+      "locId": "L27606254",
+      "locName": "Grosses Moos--Moosgärte",
+      "lat": 46.987888,
+      "lng": 7.1191287
+    },
+    {
+      "locId": "L4456061",
+      "locName": "Embouchure du canal de Sugiez",
+      "lat": 46.9555352,
+      "lng": 7.1184647
+    },
+    {
+      "locId": "L2692970",
+      "locName": "Embouchure de la Broye",
+      "lat": 46.9196691,
+      "lng": 7.0338249
+    },
+    {
+      "locId": "L23199539",
+      "locName": "Krümmi--Staatswald",
+      "lat": 46.9845191,
+      "lng": 7.1325055
+    },
+    {
+      "locId": "L4604907",
+      "locName": "Grosses Moos--Bir länge Stude",
+      "lat": 46.9981203,
+      "lng": 7.1280885
+    },
+    {
+      "locId": "L69343596",
+      "locName": "Staatswald Chablais",
+      "lat": 46.949442,
+      "lng": 7.130599
+    },
+    {
+      "locId": "L8348687",
+      "locName": "Port de Morat",
+      "lat": 46.931762,
+      "lng": 7.1171157
+    },
+    {
+      "locId": "L6147886",
+      "locName": "Krümmi--Obermoos",
+      "lat": 46.9858736,
+      "lng": 7.1437097
+    },
+    {
+      "locId": "L10318444",
+      "locName": "Camping Muntelier",
+      "lat": 46.9428939,
+      "lng": 7.134161
+    },
+    {
+      "locId": "L4611472",
+      "locName": "Krümmi--Bellechasse",
+      "lat": 46.9801938,
+      "lng": 7.1482909
+    },
+    {
+      "locId": "L8348726",
+      "locName": "Murten Stadt",
+      "lat": 46.9291176,
+      "lng": 7.120028
+    },
+    {
+      "locId": "L6147885",
+      "locName": "Galmizmoos (Erlehof, Tannenhof)",
+      "lat": 46.9641758,
+      "lng": 7.147615
+    },
+    {
+      "locId": "L2438141",
+      "locName": "Plage d'Avenches",
+      "lat": 46.9053152,
+      "lng": 7.0495641
+    },
+    {
+      "locId": "L10318447",
+      "locName": "Pré de la Blancherie",
+      "lat": 46.9099892,
+      "lng": 7.0897436
+    },
+    {
+      "locId": "L3223134",
+      "locName": "Krümmi* general area",
+      "lat": 46.9828288,
+      "lng": 7.1539879
+    },
+    {
+      "locId": "L18572935",
+      "locName": "Ziegelhof",
+      "lat": 47.0449239,
+      "lng": 7.0809722
+    },
+    {
+      "locId": "L4620851",
+      "locName": "Krümmi--Ausgleichsfläche",
+      "lat": 46.984322,
+      "lng": 7.1594059
+    },
+    {
+      "locId": "L20050505",
+      "locName": "Seestrandweg (Erlach-Vinelz)",
+      "lat": 47.0404674,
+      "lng": 7.1046945
+    },
+    {
+      "locId": "L4611493",
+      "locName": "Étangs de l'Eau Noire",
+      "lat": 46.8966355,
+      "lng": 7.046206
+    },
+    {
+      "locId": "L6062324",
+      "locName": "Krümmi--Agriswilmoos",
+      "lat": 46.9794472,
+      "lng": 7.1629894
+    },
+    {
+      "locId": "L20050693",
+      "locName": "Plage et Port du Landeron",
+      "lat": 47.0527017,
+      "lng": 7.0744891
+    },
+    {
+      "locId": "L4815142",
+      "locName": "Haras Federal d'Avenches",
+      "lat": 46.8886772,
+      "lng": 7.0167446
+    },
+    {
+      "locId": "L4832521",
+      "locName": "Grosses Moos North--Kerzermoos",
+      "lat": 46.991143,
+      "lng": 7.1784067
+    },
+    {
+      "locId": "L20050667",
+      "locName": "St. Peterinsel--Heidenweg (Süd)",
+      "lat": 47.0518793,
+      "lng": 7.1138191
+    },
+    {
+      "locId": "L20050697",
+      "locName": "Plage et Port de la Neuveville",
+      "lat": 47.0607091,
+      "lng": 7.0912775
+    },
+    {
+      "locId": "L18021449",
+      "locName": "Serroue",
+      "lat": 47.0815927,
+      "lng": 7.0399387
+    },
+    {
+      "locId": "L18172149",
+      "locName": "La Praye",
+      "lat": 47.083202,
+      "lng": 7.0802782
+    },
+    {
+      "locId": "L38531557",
+      "locName": "Vigne de La Neuveville",
+      "lat": 47.0704788,
+      "lng": 7.1015665
+    },
+    {
+      "locId": "L20050701",
+      "locName": "Levées de St. Joux",
+      "lat": 47.0668773,
+      "lng": 7.1096857
+    },
+    {
+      "locId": "L15098008",
+      "locName": "Chuffort",
+      "lat": 47.0965908,
+      "lng": 7.0133858
+    },
+    {
+      "locId": "L3127868",
+      "locName": "St. Peterinsel* general",
+      "lat": 47.059335,
+      "lng": 7.1289039
+    },
+    {
+      "locId": "L25462220",
+      "locName": "Montagne de Diesse",
+      "lat": 47.1030225,
+      "lng": 7.1007063
+    },
+    {
+      "locId": "L20050732",
+      "locName": "Ligerz/Gléresse (zone cotière)",
+      "lat": 47.0835213,
+      "lng": 7.1356366
+    },
+    {
+      "locId": "L20050486",
+      "locName": "Hafen Lüscherz",
+      "lat": 47.0479026,
+      "lng": 7.1506405
+    },
+    {
+      "locId": "L20050658",
+      "locName": "St. Peterinsel--Chloster (Nord)",
+      "lat": 47.072694,
+      "lng": 7.1448469
+    },
+    {
+      "locId": "L15305015",
+      "locName": "Vignoble de Ligerz",
+      "lat": 47.0883634,
+      "lng": 7.1395536
+    },
+    {
+      "locId": "L24054290",
+      "locName": "La Rochalle",
+      "lat": 47.118701,
+      "lng": 7.1044622
+    },
+    {
+      "locId": "L20050745",
+      "locName": "Twannbachschlucht",
+      "lat": 47.1014469,
+      "lng": 7.1412849
+    },
+    {
+      "locId": "L3887996",
+      "locName": "Le Chasseral",
+      "lat": 47.13265,
+      "lng": 7.05898
+    },
+    {
+      "locId": "L5126214",
+      "locName": "Aiguilles de Baulmes",
+      "lat": 46.7909516,
+      "lng": 6.4713013
+    },
+    {
+      "locId": "L40338684",
+      "locName": "Joux de la Limasse",
+      "lat": 46.7987359,
+      "lng": 6.4492541
+    },
+    {
+      "locId": "L7834471",
+      "locName": "Le Chasseron",
+      "lat": 46.8517089,
+      "lng": 6.5384439
+    },
+    {
+      "locId": "L3892144",
+      "locName": "Port de Pully",
+      "lat": 46.5048763,
+      "lng": 6.6642702
+    },
+    {
+      "locId": "L5083253",
+      "locName": "Port et bord du lac de Lutry",
+      "lat": 46.5018116,
+      "lng": 6.6827238
+    },
+    {
+      "locId": "L5083250",
+      "locName": "Débarcadère de Cully",
+      "lat": 46.4873905,
+      "lng": 6.7317384
+    },
+    {
+      "locId": "L3540290",
+      "locName": "Lavaux (general area)",
+      "lat": 46.4925131,
+      "lng": 6.7429018
+    },
+    {
+      "locId": "L4446369",
+      "locName": "Lac de Bret",
+      "lat": 46.51387,
+      "lng": 6.7732
+    },
+    {
+      "locId": "L14575242",
+      "locName": "Parcours Handicape & Nature du Jorat",
+      "lat": 46.6163133,
+      "lng": 6.7229247
+    },
+    {
+      "locId": "L4834359",
+      "locName": "Fondation Crêt-Bérard",
+      "lat": 46.493946,
+      "lng": 6.7796373
+    },
+    {
+      "locId": "L5298617",
+      "locName": "Etangs de Bonfol",
+      "lat": 47.4711834,
+      "lng": 7.1644807
+    },
+    {
+      "locId": "L37912476",
+      "locName": "Plan d'eau de Courtavon",
+      "lat": 47.4727875,
+      "lng": 7.2060138
+    },
+    {
+      "locId": "L5192624",
+      "locName": "Marais de Damphreux",
+      "lat": 47.473011,
+      "lng": 7.1112442
+    },
+    {
+      "locId": "L27078812",
+      "locName": "Etangs de Gerschwiller",
+      "lat": 47.5125124,
+      "lng": 7.1501701
+    },
+    {
+      "locId": "L69166488",
+      "locName": "Les Esserts",
+      "lat": 47.4233899,
+      "lng": 7.1724307
+    },
+    {
+      "locId": "L5148812",
+      "locName": "Etangs de La Colombière",
+      "lat": 47.4652689,
+      "lng": 7.0496821
+    },
+    {
+      "locId": "L26222734",
+      "locName": "Blaisyweiher",
+      "lat": 47.5438878,
+      "lng": 7.193093
+    },
+    {
+      "locId": "L42031748",
+      "locName": "Lac de Lucelle",
+      "lat": 47.418837,
+      "lng": 7.2451772
+    },
+    {
+      "locId": "L6717913",
+      "locName": "Forêt de Winkel",
+      "lat": 47.4549068,
+      "lng": 7.2731638
+    },
+    {
+      "locId": "L20490525",
+      "locName": "Grossbersigweiher",
+      "lat": 47.5454997,
+      "lng": 7.220276
+    },
+    {
+      "locId": "L48647393",
+      "locName": "Bois Nord (Bisel)",
+      "lat": 47.5503291,
+      "lng": 7.2144297
+    },
+    {
+      "locId": "L10884455",
+      "locName": "stakeout Oriental Turtle Dove, Sulgen (2020)",
+      "lat": 47.5405558,
+      "lng": 9.1849945
+    },
+    {
+      "locId": "L24961862",
+      "locName": "Lehmgrube Opfershofen",
+      "lat": 47.556992,
+      "lng": 9.166709
+    },
+    {
+      "locId": "L24961925",
+      "locName": "Sangen-Mühlifang",
+      "lat": 47.55371,
+      "lng": 9.134666
+    },
+    {
+      "locId": "L14189577",
+      "locName": "Hudelmoos",
+      "lat": 47.5236347,
+      "lng": 9.2840052
+    },
+    {
+      "locId": "L20394202",
+      "locName": "Hauptwiler Weiher",
+      "lat": 47.4800015,
+      "lng": 9.255209
+    },
+    {
+      "locId": "L11198352",
+      "locName": "Bommer Weiher",
+      "lat": 47.6181939,
+      "lng": 9.155004
+    },
+    {
+      "locId": "L5165267",
+      "locName": "Seepark Arbon",
+      "lat": 47.5203308,
+      "lng": 9.4329858
+    },
+    {
+      "locId": "L5165265",
+      "locName": "Steinacher Bucht--Schlosshafen",
+      "lat": 47.5128964,
+      "lng": 9.439863
+    },
+    {
+      "locId": "L5165257",
+      "locName": "Strandbad Buchhorn",
+      "lat": 47.5269963,
+      "lng": 9.41921
+    },
+    {
+      "locId": "L2772086",
+      "locName": "Steinacher Bucht* general (use more precise loc.)",
+      "lat": 47.5098963,
+      "lng": 9.4447231
+    },
+    {
+      "locId": "L27300656",
+      "locName": "Steinacher Bucht--Aachmündung",
+      "lat": 47.5069807,
+      "lng": 9.4361254
+    },
+    {
+      "locId": "L11021916",
+      "locName": "Frauenbad",
+      "lat": 47.531829,
+      "lng": 9.4096166
+    },
+    {
+      "locId": "L5165268",
+      "locName": "Steinacher Bucht--Steinachmündung",
+      "lat": 47.5032359,
+      "lng": 9.4482315
+    },
+    {
+      "locId": "L5165258",
+      "locName": "Luxburger Bucht--Strandbad Wiedehorn",
+      "lat": 47.537384,
+      "lng": 9.4004399
+    },
+    {
+      "locId": "L60283708",
+      "locName": "Horn Hafen",
+      "lat": 47.4966472,
+      "lng": 9.4629407
+    },
+    {
+      "locId": "L3094631",
+      "locName": "Luxburger Bucht* general (use more precise loc.)",
+      "lat": 47.55244,
+      "lng": 9.39261
+    },
+    {
+      "locId": "L5165262",
+      "locName": "Luxburger Bucht--Luxburg",
+      "lat": 47.5503403,
+      "lng": 9.3867445
+    },
+    {
+      "locId": "L28610074",
+      "locName": "Luxburger Bucht--Mündung Salmsacher Aach",
+      "lat": 47.5560293,
+      "lng": 9.380222
+    },
+    {
+      "locId": "L11193135",
+      "locName": "Obersee (open water) (CH)",
+      "lat": 47.572026,
+      "lng": 9.4319485
+    },
+    {
+      "locId": "L28610154",
+      "locName": "Romanshorn--Werft Süd",
+      "lat": 47.5619179,
+      "lng": 9.3846416
+    },
+    {
+      "locId": "L2470376",
+      "locName": "Romanshorn--Hafengelände",
+      "lat": 47.5678252,
+      "lng": 9.3845344
+    },
+    {
+      "locId": "L5165269",
+      "locName": "Rorschacher Burcht--Hafen",
+      "lat": 47.4794504,
+      "lng": 9.4924664
+    },
+    {
+      "locId": "L5165266",
+      "locName": "Rorschacher Burcht * general area (use more precise loc.)",
+      "lat": 47.489659,
+      "lng": 9.512701
+    },
+    {
+      "locId": "L40956064",
+      "locName": "Neuwald",
+      "lat": 47.5661998,
+      "lng": 9.3399693
+    },
+    {
+      "locId": "L2287650",
+      "locName": "Schloss Wartegg",
+      "lat": 47.4784316,
+      "lng": 9.5304278
+    },
+    {
+      "locId": "L5165270",
+      "locName": "Rorschacher Burcht--Staad Speck",
+      "lat": 47.4830178,
+      "lng": 9.5357037
+    },
+    {
+      "locId": "L2352345",
+      "locName": "Eggersriet",
+      "lat": 47.4451558,
+      "lng": 9.4694424
+    },
+    {
+      "locId": "L11222235",
+      "locName": "Fähre Friedrichshafen - Romanshorn (CH)",
+      "lat": 47.6002282,
+      "lng": 9.4384396
+    },
+    {
+      "locId": "L5165272",
+      "locName": "Alter Rhein Mündung (restricted access)",
+      "lat": 47.502301,
+      "lng": 9.5574617
+    },
+    {
+      "locId": "L5165271",
+      "locName": "Hüttenry",
+      "lat": 47.495009,
+      "lng": 9.5555735
+    },
+    {
+      "locId": "L1810061",
+      "locName": "Seetaucherstrecke--Uttwil",
+      "lat": 47.5862234,
+      "lng": 9.3451595
+    },
+    {
+      "locId": "L4067650",
+      "locName": "Ermatinger Becken--Triboltingen",
+      "lat": 47.6661063,
+      "lng": 9.1103294
+    },
+    {
+      "locId": "L2722677",
+      "locName": "Ermatinger Becken (CH)* general (use more precise loc.)",
+      "lat": 47.6745195,
+      "lng": 9.1038036
+    },
+    {
+      "locId": "L20921847",
+      "locName": "Ermatinger Becken--Hafenanlage",
+      "lat": 47.6660353,
+      "lng": 9.1275688
+    },
+    {
+      "locId": "L29194195",
+      "locName": "Ermatinger Becken (DE)",
+      "lat": 47.6779831,
+      "lng": 9.1056957
+    },
+    {
+      "locId": "L10633563",
+      "locName": "Wollmatinger Ried (restricted access)",
+      "lat": 47.6764536,
+      "lng": 9.123884
+    },
+    {
+      "locId": "L5239952",
+      "locName": "Ermatinger Becken--Gottlieben",
+      "lat": 47.6647009,
+      "lng": 9.1345203
+    },
+    {
+      "locId": "L4067648",
+      "locName": "Wollmatinger Ried--Gottlieberweg",
+      "lat": 47.6695779,
+      "lng": 9.1386294
+    },
+    {
+      "locId": "L5165673",
+      "locName": "Ermatinger Becken--Stad",
+      "lat": 47.675083,
+      "lng": 9.0853822
+    },
+    {
+      "locId": "L4314755",
+      "locName": "Ruine Schopflen",
+      "lat": 47.6864207,
+      "lng": 9.100746
+    },
+    {
+      "locId": "L4468341",
+      "locName": "Hegnebucht--Lagune",
+      "lat": 47.6886683,
+      "lng": 9.1050053
+    },
+    {
+      "locId": "L11179154",
+      "locName": "NABU Bodenseezentrum, Konstanz",
+      "lat": 47.6888159,
+      "lng": 9.1264791
+    },
+    {
+      "locId": "L17852545",
+      "locName": "Wollmatinger Ried--Seerhein",
+      "lat": 47.6682434,
+      "lng": 9.1500145
+    },
+    {
+      "locId": "L13193473",
+      "locName": "Insel Reichenau--Fährenhorn",
+      "lat": 47.6832192,
+      "lng": 9.0817688
+    },
+    {
+      "locId": "L13193464",
+      "locName": "Insel Reichenau--Mauershorn",
+      "lat": 47.6848749,
+      "lng": 9.072128
+    },
+    {
+      "locId": "L61628983",
+      "locName": "Europa-Park Konstanz",
+      "lat": 47.6679676,
+      "lng": 9.1635684
+    },
+    {
+      "locId": "L13193457",
+      "locName": "Hegnebucht (gesamt)",
+      "lat": 47.6980539,
+      "lng": 9.0903565
+    },
+    {
+      "locId": "L11179052",
+      "locName": "Hegnebucht--Camping Hegne",
+      "lat": 47.7034933,
+      "lng": 9.0979421
+    },
+    {
+      "locId": "L11176091",
+      "locName": "Untersee--Mannenbach-Salenstein",
+      "lat": 47.6745154,
+      "lng": 9.0484469
+    },
+    {
+      "locId": "L6463171",
+      "locName": "Herosé-Park, Konstanz",
+      "lat": 47.6691228,
+      "lng": 9.1740614
+    },
+    {
+      "locId": "L6869496",
+      "locName": "Stadtgarten Konstanz",
+      "lat": 47.6622803,
+      "lng": 9.1789055
+    },
+    {
+      "locId": "L17767270",
+      "locName": "Insel Reichenau--Schiffanlegestelle",
+      "lat": 47.69025,
+      "lng": 9.0541125
+    },
+    {
+      "locId": "L6121698",
+      "locName": "Konstanzer Trichter",
+      "lat": 47.6660407,
+      "lng": 9.1794878
+    },
+    {
+      "locId": "L13191167",
+      "locName": "Hauptfriedhof Konstanz",
+      "lat": 47.6806494,
+      "lng": 9.1753327
+    },
+    {
+      "locId": "L13193460",
+      "locName": "Insel Reichenau (gesamt)",
+      "lat": 47.6953839,
+      "lng": 9.0589854
+    },
+    {
+      "locId": "L13191181",
+      "locName": "Hafen Konstanz",
+      "lat": 47.6591203,
+      "lng": 9.1805963
+    },
+    {
+      "locId": "L13191166",
+      "locName": "Park Büdingen, Konstanz",
+      "lat": 47.6676985,
+      "lng": 9.1832043
+    },
+    {
+      "locId": "L3155193",
+      "locName": "Kreuzlingen--Seepark",
+      "lat": 47.6526835,
+      "lng": 9.1853964
+    },
+    {
+      "locId": "L13374761",
+      "locName": "Yachthafen Konstanz",
+      "lat": 47.6663955,
+      "lng": 9.1894427
+    },
+    {
+      "locId": "L11176506",
+      "locName": "Untersee--Eschlibüüge",
+      "lat": 47.6735462,
+      "lng": 9.0321784
+    },
+    {
+      "locId": "L13190899",
+      "locName": "Mooswiese (NSG)",
+      "lat": 47.7153985,
+      "lng": 9.1407448
+    },
+    {
+      "locId": "L13193566",
+      "locName": "Strandweg, Allensbach",
+      "lat": 47.7124392,
+      "lng": 9.0705135
+    },
+    {
+      "locId": "L11098871",
+      "locName": "Campus Universität Konstanz",
+      "lat": 47.6893407,
+      "lng": 9.1860786
+    },
+    {
+      "locId": "L39518192",
+      "locName": "Bussenried (NSG)",
+      "lat": 47.7210249,
+      "lng": 9.1019682
+    },
+    {
+      "locId": "L17894178",
+      "locName": "Kreuzlingen Yachthafen",
+      "lat": 47.6480017,
+      "lng": 9.1939653
+    },
+    {
+      "locId": "L39518224",
+      "locName": "Bussensee (NSG)",
+      "lat": 47.7162664,
+      "lng": 9.1517545
+    },
+    {
+      "locId": "L13389607",
+      "locName": "Insel Reichenau--Sandseele",
+      "lat": 47.7010347,
+      "lng": 9.0412159
+    },
+    {
+      "locId": "L13374765",
+      "locName": "Konstanzer Bucht",
+      "lat": 47.6645594,
+      "lng": 9.2007919
+    },
+    {
+      "locId": "L13193491",
+      "locName": "Gnadensee (gesamt)",
+      "lat": 47.7126791,
+      "lng": 9.055904
+    },
+    {
+      "locId": "L13190914",
+      "locName": "Obere Güll (NSG)",
+      "lat": 47.698188,
+      "lng": 9.1878943
+    },
+    {
+      "locId": "L13190928",
+      "locName": "Litzelstetten Purren",
+      "lat": 47.7167186,
+      "lng": 9.160898
+    },
+    {
+      "locId": "L13190897",
+      "locName": "Dingelsdorfer Ried (NSG)",
+      "lat": 47.7243609,
+      "lng": 9.136917
+    },
+    {
+      "locId": "L13190903",
+      "locName": "Bodenseeufer - Untere Güll (NSG)",
+      "lat": 47.7079703,
+      "lng": 9.1777017
+    },
+    {
+      "locId": "L11089828",
+      "locName": "Lorettowald, Konstanz",
+      "lat": 47.6700421,
+      "lng": 9.2043067
+    },
+    {
+      "locId": "L13193481",
+      "locName": "Insel Reichenau--Schloss Windegg",
+      "lat": 47.7074151,
+      "lng": 9.0416085
+    },
+    {
+      "locId": "L11223241",
+      "locName": "Untersee (Mannenbach to Steckborn)* general area (use more precise loc.)",
+      "lat": 47.679513,
+      "lng": 9.0156736
+    },
+    {
+      "locId": "L11179031",
+      "locName": "Untersee--Nööchsthorn-Wis",
+      "lat": 47.6723492,
+      "lng": 9.0112238
+    },
+    {
+      "locId": "L13190917",
+      "locName": "Fähranleger Staad",
+      "lat": 47.682136,
+      "lng": 9.2118328
+    },
+    {
+      "locId": "L2735941",
+      "locName": "Insel Mainau",
+      "lat": 47.7055964,
+      "lng": 9.1957626
+    },
+    {
+      "locId": "L5216669",
+      "locName": "Schlössli",
+      "lat": 47.644581,
+      "lng": 9.2120824
+    },
+    {
+      "locId": "L13191169",
+      "locName": "Strandbad Horn 'Hörnle', Konstanz",
+      "lat": 47.6661495,
+      "lng": 9.217137
+    },
+    {
+      "locId": "L11916449",
+      "locName": "Mühlhaldenweiher",
+      "lat": 47.7349394,
+      "lng": 9.0922741
+    },
+    {
+      "locId": "L13193517",
+      "locName": "Nägelried (NSG)",
+      "lat": 47.7273852,
+      "lng": 9.0537428
+    },
+    {
+      "locId": "L13190912",
+      "locName": "Insel Mainau--Anleger",
+      "lat": 47.7056016,
+      "lng": 9.201936
+    },
+    {
+      "locId": "L39518456",
+      "locName": "Hagstaffelweiher (NSG)",
+      "lat": 47.7380526,
+      "lng": 9.1256806
+    },
+    {
+      "locId": "L13375465",
+      "locName": "Anleger Horn",
+      "lat": 47.6894473,
+      "lng": 8.9998931
+    },
+    {
+      "locId": "L10517640",
+      "locName": "Hornspitze auf der Höri",
+      "lat": 47.6967091,
+      "lng": 9.0016726
+    },
+    {
+      "locId": "L13193525",
+      "locName": "Fischerweihermoor (NSG)",
+      "lat": 47.7362799,
+      "lng": 9.0591914
+    },
+    {
+      "locId": "L13448734",
+      "locName": "Bodensee--Untersee (gesamt)",
+      "lat": 47.707606,
+      "lng": 9.0093992
+    },
+    {
+      "locId": "L39518159",
+      "locName": "Bündtlisried (NSG)",
+      "lat": 47.7368666,
+      "lng": 9.047966
+    },
+    {
+      "locId": "L13375454",
+      "locName": "Stehlwiesen (NSG)",
+      "lat": 47.6838416,
+      "lng": 8.9885154
+    },
+    {
+      "locId": "L13193522",
+      "locName": "Büntlisried (NSG)",
+      "lat": 47.73714,
+      "lng": 9.046982
+    },
+    {
+      "locId": "L62597592",
+      "locName": "Halbinsel Mettnau--Mettnauspitze",
+      "lat": 47.7213916,
+      "lng": 9.0151498
+    },
+    {
+      "locId": "L13190924",
+      "locName": "Anleger und Strandbad Wallhausen",
+      "lat": 47.748511,
+      "lng": 9.1335488
+    },
+    {
+      "locId": "L5165252",
+      "locName": "Münsterlingen Klinik (restricted access)",
+      "lat": 47.6356101,
+      "lng": 9.2322922
+    },
+    {
+      "locId": "L13375447",
+      "locName": "Anleger Gaienhofen",
+      "lat": 47.6796068,
+      "lng": 8.9824774
+    },
+    {
+      "locId": "L13193536",
+      "locName": "Wild- und Freizeitpark Allensbach",
+      "lat": 47.7410626,
+      "lng": 9.0446968
+    },
+    {
+      "locId": "L4067663",
+      "locName": "Steckborn--Feldbach",
+      "lat": 47.6659148,
+      "lng": 8.9780241
+    },
+    {
+      "locId": "L13190919",
+      "locName": "Fähre Meersburg - Konstanz",
+      "lat": 47.6889412,
+      "lng": 9.238695
+    },
+    {
+      "locId": "L11192601",
+      "locName": "Bodenseeufer, Gundholzen",
+      "lat": 47.7068932,
+      "lng": 8.992865
+    },
+    {
+      "locId": "L13193530",
+      "locName": "Winterried (NSG)",
+      "lat": 47.739038,
+      "lng": 9.0344437
+    },
+    {
+      "locId": "L11192662",
+      "locName": "Wasserturm Horn",
+      "lat": 47.6993214,
+      "lng": 8.9853787
+    },
+    {
+      "locId": "L3285359",
+      "locName": "Halbinsel Mettnau (gesamt)",
+      "lat": 47.7248621,
+      "lng": 9.009304
+    },
+    {
+      "locId": "L11190193",
+      "locName": "Segete (NSG)",
+      "lat": 47.6949943,
+      "lng": 8.9817997
+    },
+    {
+      "locId": "L12847727",
+      "locName": "Eschenz--Pontonierweg",
+      "lat": 47.6561385,
+      "lng": 8.8710956
+    },
+    {
+      "locId": "L5210922",
+      "locName": "Eschenz--Werd Insel",
+      "lat": 47.6552708,
+      "lng": 8.8666534
+    },
+    {
+      "locId": "L4951881",
+      "locName": "Eschenz--Nilibucht",
+      "lat": 47.6536375,
+      "lng": 8.8693142
+    },
+    {
+      "locId": "L2760450",
+      "locName": "Eschenz * general (use more precise loc.)",
+      "lat": 47.6537426,
+      "lng": 8.8723262
+    },
+    {
+      "locId": "L4951884",
+      "locName": "Eschenz--Äschezerhorn",
+      "lat": 47.6539555,
+      "lng": 8.8762879
+    },
+    {
+      "locId": "L4951888",
+      "locName": "Stein am Rhein--Altstadt",
+      "lat": 47.6602243,
+      "lng": 8.8562733
+    },
+    {
+      "locId": "L4951885",
+      "locName": "Eschenz--Strandbad",
+      "lat": 47.6513609,
+      "lng": 8.8833931
+    },
+    {
+      "locId": "L29747797",
+      "locName": "Hohenklingen",
+      "lat": 47.6649299,
+      "lng": 8.8604788
+    },
+    {
+      "locId": "L13375417",
+      "locName": "Hafen Öhningen",
+      "lat": 47.652131,
+      "lng": 8.8946364
+    },
+    {
+      "locId": "L13375402",
+      "locName": "Hangried Schrännen (NSG)",
+      "lat": 47.6701076,
+      "lng": 8.8963097
+    },
+    {
+      "locId": "L13375382",
+      "locName": "Kattenhorner Bühl (NSG)",
+      "lat": 47.6593824,
+      "lng": 8.9097637
+    },
+    {
+      "locId": "L13375391",
+      "locName": "Bühler Moos (NSG)",
+      "lat": 47.6688825,
+      "lng": 8.9068884
+    },
+    {
+      "locId": "L13375433",
+      "locName": "Schloss Kattenhorn",
+      "lat": 47.6556829,
+      "lng": 8.9120633
+    },
+    {
+      "locId": "L13375398",
+      "locName": "Moor am Oberbühlhof (NSG)",
+      "lat": 47.6759103,
+      "lng": 8.905322
+    },
+    {
+      "locId": "L52553188",
+      "locName": "Ruine Wolkenstein",
+      "lat": 47.6800818,
+      "lng": 8.8383722
+    },
+    {
+      "locId": "L11179029",
+      "locName": "Mammern",
+      "lat": 47.6484076,
+      "lng": 8.9167428
+    },
+    {
+      "locId": "L13375438",
+      "locName": "Hafen Wangen",
+      "lat": 47.6589449,
+      "lng": 8.9302776
+    },
+    {
+      "locId": "L13375441",
+      "locName": "Strandbad Wangen",
+      "lat": 47.6593821,
+      "lng": 8.9379747
+    },
+    {
+      "locId": "L6211904",
+      "locName": "Bibermühle",
+      "lat": 47.6794028,
+      "lng": 8.8069797
+    },
+    {
+      "locId": "L2695174",
+      "locName": "Hüttwilersee",
+      "lat": 47.6101829,
+      "lng": 8.8441658
+    },
+    {
+      "locId": "L11198243",
+      "locName": "Nussbaumersee",
+      "lat": 47.6163002,
+      "lng": 8.8169238
+    },
+    {
+      "locId": "L11196987",
+      "locName": "Unter- und Oberstammheim",
+      "lat": 47.6370726,
+      "lng": 8.7945407
+    },
+    {
+      "locId": "L11620160",
+      "locName": "Heinz-Sielmann-Weiher, Worblingen",
+      "lat": 47.7148725,
+      "lng": 8.8675869
+    },
+    {
+      "locId": "L2599354",
+      "locName": "Gailingen Rheinwald",
+      "lat": 47.6826049,
+      "lng": 8.7902344
+    },
+    {
+      "locId": "L39518075",
+      "locName": "Bohlinger Aachried (NSG)",
+      "lat": 47.7232773,
+      "lng": 8.8841008
+    },
+    {
+      "locId": "L13375444",
+      "locName": "Anleger Hemmenhofen",
+      "lat": 47.6722063,
+      "lng": 8.9695294
+    },
+    {
+      "locId": "L11179126",
+      "locName": "Bankholzen-Weiler",
+      "lat": 47.7104341,
+      "lng": 8.9377175
+    },
+    {
+      "locId": "L11192491",
+      "locName": "Galgenberg Bohlingen",
+      "lat": 47.726003,
+      "lng": 8.8964597
+    },
+    {
+      "locId": "L39518423",
+      "locName": "Graues Ried (NSG)",
+      "lat": 47.6993093,
+      "lng": 8.9626348
+    },
+    {
+      "locId": "L3437945",
+      "locName": "Auli",
+      "lat": 47.5806655,
+      "lng": 8.9007711
+    },
+    {
+      "locId": "L16711354",
+      "locName": "Schüppelwise & Feuchtgebiet",
+      "lat": 47.7236306,
+      "lng": 8.8064958
+    },
+    {
+      "locId": "L13390359",
+      "locName": "Strandbad Moos",
+      "lat": 47.723001,
+      "lng": 8.943659
+    },
+    {
+      "locId": "L13390358",
+      "locName": "Hafen Moos",
+      "lat": 47.7270581,
+      "lng": 8.93967
+    },
+    {
+      "locId": "L3599367",
+      "locName": "Radolfzeller Aachried (NSG)",
+      "lat": 47.7345323,
+      "lng": 8.9209414
+    },
+    {
+      "locId": "L60284627",
+      "locName": "Hugiweiher",
+      "lat": 47.5714696,
+      "lng": 8.858799
+    },
+    {
+      "locId": "L13371530",
+      "locName": "Anleger Iznang",
+      "lat": 47.717054,
+      "lng": 8.9616427
+    },
+    {
+      "locId": "L39518966",
+      "locName": "Murbacher Ried (NSG)",
+      "lat": 47.7137468,
+      "lng": 8.7704599
+    },
+    {
+      "locId": "L39518382",
+      "locName": "Gailinger Berg-Bölderen (NSG)",
+      "lat": 47.7008089,
+      "lng": 8.7519729
+    },
+    {
+      "locId": "L3314048",
+      "locName": "Radolfzeller Aachmündung",
+      "lat": 47.731131,
+      "lng": 8.9497763
+    },
+    {
+      "locId": "L2342192",
+      "locName": "Naturschutzgebiet Weissenau",
+      "lat": 46.6735288,
+      "lng": 7.8258705
+    },
+    {
+      "locId": "L51616740",
+      "locName": "Harder Kulm",
+      "lat": 46.696696,
+      "lng": 7.8502357
+    },
+    {
+      "locId": "L5876463",
+      "locName": "Harder",
+      "lat": 46.7074406,
+      "lng": 7.8652883
+    },
+    {
+      "locId": "L43228120",
+      "locName": "Sendli",
+      "lat": 46.6936042,
+      "lng": 7.8847785
+    },
+    {
+      "locId": "L2688781",
+      "locName": "Niederhorn",
+      "lat": 46.7107364,
+      "lng": 7.7750909
+    },
+    {
+      "locId": "L4897033",
+      "locName": "Lütschinendelta",
+      "lat": 46.6909878,
+      "lng": 7.8984725
+    },
+    {
+      "locId": "L3819585",
+      "locName": "Schynige Platte",
+      "lat": 46.6563587,
+      "lng": 7.9074955
+    },
+    {
+      "locId": "L11981509",
+      "locName": "Valley Justistal",
+      "lat": 46.7306417,
+      "lng": 7.7900548
+    },
+    {
+      "locId": "L5165248",
+      "locName": "Merligen",
+      "lat": 46.6953002,
+      "lng": 7.7373362
+    },
+    {
+      "locId": "L5165247",
+      "locName": "Faulensee-Bucht",
+      "lat": 46.6747656,
+      "lng": 7.7056217
+    },
+    {
+      "locId": "L6316348",
+      "locName": "Habkern--Läger (migration)",
+      "lat": 46.7501533,
+      "lng": 7.8883284
+    },
+    {
+      "locId": "L8537225",
+      "locName": "Wengen (village)",
+      "lat": 46.6056933,
+      "lng": 7.9200443
+    },
+    {
+      "locId": "L5578810",
+      "locName": "Aussichtsturm Liestal",
+      "lat": 47.488006,
+      "lng": 7.7533436
+    },
+    {
+      "locId": "L64268783",
+      "locName": "Allerheiligenberg",
+      "lat": 47.3526858,
+      "lng": 7.8137456
+    },
+    {
+      "locId": "L64731784",
+      "locName": "Le Montet",
+      "lat": 46.261445,
+      "lng": 7.018139
+    },
+    {
+      "locId": "L7477068",
+      "locName": "Leysin (general area)",
+      "lat": 46.3432689,
+      "lng": 7.011863
+    },
+    {
+      "locId": "L15784468",
+      "locName": "Aérodrome de Bex",
+      "lat": 46.2591557,
+      "lng": 6.9845907
+    },
+    {
+      "locId": "L3924970",
+      "locName": "Étang Avale",
+      "lat": 46.2916064,
+      "lng": 6.9590181
+    },
+    {
+      "locId": "L10300228",
+      "locName": "STEP de Monthey",
+      "lat": 46.2620848,
+      "lng": 6.9698378
+    },
+    {
+      "locId": "L4629804",
+      "locName": "Étang des Mangettes",
+      "lat": 46.2648074,
+      "lng": 6.9658041
+    },
+    {
+      "locId": "L3773404",
+      "locName": "Les Caillettes",
+      "lat": 46.2259576,
+      "lng": 7.0085049
+    },
+    {
+      "locId": "L5527825",
+      "locName": "Col de la Croix",
+      "lat": 46.3242309,
+      "lng": 7.1262753
+    },
+    {
+      "locId": "L5527779",
+      "locName": "Miroir d'Argentine",
+      "lat": 46.273292,
+      "lng": 7.1319723
+    },
+    {
+      "locId": "L2363846",
+      "locName": "Tour d'Aï",
+      "lat": 46.3721948,
+      "lng": 7.0020863
+    },
+    {
+      "locId": "L6177187",
+      "locName": "Vallon de Nant",
+      "lat": 46.2281843,
+      "lng": 7.0990992
+    },
+    {
+      "locId": "L3861812",
+      "locName": "Etang des Communailles",
+      "lat": 46.3384545,
+      "lng": 6.9281352
+    },
+    {
+      "locId": "L3861814",
+      "locName": "Rigoles de Vionnaz",
+      "lat": 46.3022215,
+      "lng": 6.9129217
+    },
+    {
+      "locId": "L4603026",
+      "locName": "Domaine des Barges",
+      "lat": 46.3276686,
+      "lng": 6.9195843
+    },
+    {
+      "locId": "L5860415",
+      "locName": "Tour de Famelon",
+      "lat": 46.3838637,
+      "lng": 7.0239437
+    },
+    {
+      "locId": "L10430857",
+      "locName": "Signal de Bougy (migration)",
+      "lat": 46.4902412,
+      "lng": 6.3624657
+    },
+    {
+      "locId": "L5044242",
+      "locName": "Les Alliex, Savorex, Levette et la Praz",
+      "lat": 46.4822896,
+      "lng": 6.3870049
+    },
+    {
+      "locId": "L2185055",
+      "locName": "Arboretum du Vallon de l'Aubonne",
+      "lat": 46.5115682,
+      "lng": 6.3663103
+    },
+    {
+      "locId": "L13502635",
+      "locName": "Port des Vernes",
+      "lat": 46.4605407,
+      "lng": 6.3457046
+    },
+    {
+      "locId": "L4535223",
+      "locName": "Embouchure de l'Aubonne",
+      "lat": 46.459915,
+      "lng": 6.3912803
+    },
+    {
+      "locId": "L4190310",
+      "locName": "Port et bord du lac de Rolle",
+      "lat": 46.4548006,
+      "lng": 6.3376522
+    },
+    {
+      "locId": "L5168426",
+      "locName": "Place d'Armes de Bière (restricted access)",
+      "lat": 46.5275127,
+      "lng": 6.3264084
+    },
+    {
+      "locId": "L4190315",
+      "locName": "Plage de la Dullive",
+      "lat": 46.4246428,
+      "lng": 6.2971026
+    },
+    {
+      "locId": "L4535221",
+      "locName": "Plage de Gland",
+      "lat": 46.4188911,
+      "lng": 6.2899733
+    },
+    {
+      "locId": "L4552892",
+      "locName": "Marais des Monods",
+      "lat": 46.5784507,
+      "lng": 6.3899446
+    },
+    {
+      "locId": "L22487218",
+      "locName": "Le Sentier",
+      "lat": 46.6007706,
+      "lng": 6.2222544
+    },
+    {
+      "locId": "L5168422",
+      "locName": "Sagne du Campe",
+      "lat": 46.5961321,
+      "lng": 6.2266302
+    },
+    {
+      "locId": "L7931050",
+      "locName": "Grand Risoux",
+      "lat": 46.5886563,
+      "lng": 6.1708323
+    },
+    {
+      "locId": "L4872240",
+      "locName": "Col du Marchairuz",
+      "lat": 46.5525745,
+      "lng": 6.2508023
+    },
+    {
+      "locId": "L37194693",
+      "locName": "Sèche des Amburnex",
+      "lat": 46.5503097,
+      "lng": 6.2191147
+    },
+    {
+      "locId": "L12602311",
+      "locName": "Parc Polaire",
+      "lat": 46.6535604,
+      "lng": 6.1436749
+    },
+    {
+      "locId": "L29701901",
+      "locName": "Forêt du Risoux--La Roche du Creux",
+      "lat": 46.55239,
+      "lng": 6.145082
+    },
+    {
+      "locId": "L4711312",
+      "locName": "Ronfeld",
+      "lat": 47.1745158,
+      "lng": 8.2766747
+    },
+    {
+      "locId": "L7980206",
+      "locName": "Brunauerberg",
+      "lat": 47.0603779,
+      "lng": 8.2177367
+    },
+    {
+      "locId": "L13874562",
+      "locName": "stakeout Snow Bunting, Ruswill (2021-01)",
+      "lat": 47.0775668,
+      "lng": 8.0963749
+    },
+    {
+      "locId": "L5410285",
+      "locName": "Baldeggersee--Baldegg",
+      "lat": 47.1851335,
+      "lng": 8.2765889
+    },
+    {
+      "locId": "L20427185",
+      "locName": "Schönfelweiher",
+      "lat": 47.1510629,
+      "lng": 8.3122864
+    },
+    {
+      "locId": "L8839811",
+      "locName": "Egolzwilersee",
+      "lat": 47.1845502,
+      "lng": 7.998498
+    },
+    {
+      "locId": "L9842366",
+      "locName": "Pierre du Möellé",
+      "lat": 46.390814,
+      "lng": 7.0458886
+    },
+    {
+      "locId": "L5860418",
+      "locName": "Pointe d'Aveneyre",
+      "lat": 46.4173809,
+      "lng": 7.0046049
+    },
+    {
+      "locId": "L60727610",
+      "locName": "Arboretum de Rennaz",
+      "lat": 46.3729942,
+      "lng": 6.9104594
+    },
+    {
+      "locId": "L8010646",
+      "locName": "Parc Emilien-Pot",
+      "lat": 46.3403534,
+      "lng": 6.8925276
+    },
+    {
+      "locId": "L3861828",
+      "locName": "Les Grangettes--Lagune des Saviez",
+      "lat": 46.3946681,
+      "lng": 6.9170469
+    },
+    {
+      "locId": "L5565145",
+      "locName": "Col des Mosses",
+      "lat": 46.3989523,
+      "lng": 7.1025538
+    },
+    {
+      "locId": "L19083896",
+      "locName": "Lac de l'Hongrin",
+      "lat": 46.4248984,
+      "lng": 7.0498562
+    },
+    {
+      "locId": "L2385196",
+      "locName": "Les Grangettes* general",
+      "lat": 46.3917295,
+      "lng": 6.9064521
+    },
+    {
+      "locId": "L5860423",
+      "locName": "Col de la Chenau",
+      "lat": 46.3776539,
+      "lng": 7.1322942
+    },
+    {
+      "locId": "L5860422",
+      "locName": "Les Arpilles",
+      "lat": 46.4027108,
+      "lng": 7.1704674
+    },
+    {
+      "locId": "L5527831",
+      "locName": "Cape au Moine",
+      "lat": 46.3805998,
+      "lng": 7.1709448
+    },
+    {
+      "locId": "L5860421",
+      "locName": "Rochers de Clé",
+      "lat": 46.4159672,
+      "lng": 7.2082329
+    },
+    {
+      "locId": "L5860419",
+      "locName": "Pays d'Enhaut (general area)",
+      "lat": 46.4714434,
+      "lng": 7.1565628
+    },
+    {
+      "locId": "L11911292",
+      "locName": "Pointe de Cray",
+      "lat": 46.4870285,
+      "lng": 7.1004042
+    },
+    {
+      "locId": "L4951772",
+      "locName": "Col du Pillon",
+      "lat": 46.3536593,
+      "lng": 7.2056982
+    },
+    {
+      "locId": "L5860413",
+      "locName": "Tschärzis",
+      "lat": 46.3955486,
+      "lng": 7.2217512
+    },
+    {
+      "locId": "L3146524",
+      "locName": "Rochers de Naye",
+      "lat": 46.4318287,
+      "lng": 6.976372
+    },
+    {
+      "locId": "L3091923",
+      "locName": "Col de Jaman",
+      "lat": 46.4501788,
+      "lng": 6.9759536
+    },
+    {
+      "locId": "L4832522",
+      "locName": "Grosses Moos North--Walperswilmoos",
+      "lat": 47.0016218,
+      "lng": 7.1786642
+    },
+    {
+      "locId": "L5216952",
+      "locName": "Chez-le-Bart",
+      "lat": 46.9002939,
+      "lng": 6.7877215
+    },
+    {
+      "locId": "L5385583",
+      "locName": "Observatoire étangs de Font",
+      "lat": 46.8374734,
+      "lng": 6.8115087
+    },
+    {
+      "locId": "L2572565",
+      "locName": "Creux-du-Van",
+      "lat": 46.9347334,
+      "lng": 6.7259932
+    },
+    {
+      "locId": "L5126220",
+      "locName": "Estavayer-le-Lac--Port",
+      "lat": 46.8523114,
+      "lng": 6.8384206
+    },
+    {
+      "locId": "L5193637",
+      "locName": "Port de Bevaix",
+      "lat": 46.9222778,
+      "lng": 6.8217212
+    },
+    {
+      "locId": "L6206931",
+      "locName": "Estavayer-le-Lac* general",
+      "lat": 46.8521793,
+      "lng": 6.8460917
+    },
+    {
+      "locId": "L6206929",
+      "locName": "Estavayer-le-Lac--Grande Gouille et Camping",
+      "lat": 46.8559799,
+      "lng": 6.847862
+    },
+    {
+      "locId": "L6206930",
+      "locName": "Estavayer-le-Lac--La Grève",
+      "lat": 46.8574912,
+      "lng": 6.8546426
+    },
+    {
+      "locId": "L26562721",
+      "locName": "Gorges de l’Areuse",
+      "lat": 46.9505259,
+      "lng": 6.7470646
+    },
+    {
+      "locId": "L20050926",
+      "locName": "Pointe du Grain",
+      "lat": 46.925795,
+      "lng": 6.8369722
+    },
+    {
+      "locId": "L23712978",
+      "locName": "Dessous du Champ-du-Moulin",
+      "lat": 46.9569776,
+      "lng": 6.7679406
+    },
+    {
+      "locId": "L5844168",
+      "locName": "Val d'Arolla",
+      "lat": 46.0448804,
+      "lng": 7.489028
+    },
+    {
+      "locId": "L26316900",
+      "locName": "Arolla (stadt)",
+      "lat": 46.0237413,
+      "lng": 7.4819598
+    },
+    {
+      "locId": "L48377427",
+      "locName": "Barrage de Ferpècle",
+      "lat": 46.0584022,
+      "lng": 7.5496244
+    },
+    {
+      "locId": "L3841151",
+      "locName": "Barrage de la Grand Dixence",
+      "lat": 46.0809113,
+      "lng": 7.4033046
+    },
+    {
+      "locId": "L37137460",
+      "locName": "Chemeuille Evolène",
+      "lat": 46.1254491,
+      "lng": 7.4547798
+    },
+    {
+      "locId": "L5844150",
+      "locName": "Col de la Forclaz",
+      "lat": 46.0578512,
+      "lng": 7.0015821
+    },
+    {
+      "locId": "L2334927",
+      "locName": "Mont de l'Arpille",
+      "lat": 46.0771604,
+      "lng": 7.007432
+    },
+    {
+      "locId": "L7757422",
+      "locName": "Bisse du Trient",
+      "lat": 46.028036,
+      "lng": 7.014054
+    },
+    {
+      "locId": "L5185828",
+      "locName": "Col de Balme",
+      "lat": 46.0287743,
+      "lng": 6.9735396
+    },
+    {
+      "locId": "L12786463",
+      "locName": "Les Saix Blancs (Massif du Mont-Blanc), Vallorcine",
+      "lat": 46.0393306,
+      "lng": 6.9484425
+    },
+    {
+      "locId": "L8713758",
+      "locName": "Col des Posettes",
+      "lat": 46.0245384,
+      "lng": 6.9514545
+    },
+    {
+      "locId": "L5844155",
+      "locName": "Val d'Arpette",
+      "lat": 46.0260218,
+      "lng": 7.0798945
+    },
+    {
+      "locId": "L1344771",
+      "locName": "Bel Oiseau",
+      "lat": 46.0786124,
+      "lng": 6.9372239
+    },
+    {
+      "locId": "L5126275",
+      "locName": "Lac d'Emosson",
+      "lat": 46.0711763,
+      "lng": 6.9215155
+    },
+    {
+      "locId": "L6529936",
+      "locName": "Ville de Martigny",
+      "lat": 46.1049585,
+      "lng": 7.0754743
+    },
+    {
+      "locId": "L73934553",
+      "locName": "Le Buet, Vallorcine",
+      "lat": 46.0189,
+      "lng": 6.91983
+    },
+    {
+      "locId": "L5844146",
+      "locName": "Vallon d'Emaney",
+      "lat": 46.1113257,
+      "lng": 6.9608259
+    },
+    {
+      "locId": "L9969668",
+      "locName": "Forêt du Coutéraz",
+      "lat": 46.028975,
+      "lng": 6.911993
+    },
+    {
+      "locId": "L4233607",
+      "locName": "Montroc",
+      "lat": 45.9977964,
+      "lng": 6.9365573
+    },
+    {
+      "locId": "L10300227",
+      "locName": "Plaine de Fully/Martigny--Les Ciseaux",
+      "lat": 46.1147453,
+      "lng": 7.0661885
+    },
+    {
+      "locId": "L24662474",
+      "locName": "RN des Aiguilles Rouges--Col des Montets",
+      "lat": 46.0040137,
+      "lng": 6.9236435
+    },
+    {
+      "locId": "L3666057",
+      "locName": "Plaine de Fully/Martigny--Le Verney",
+      "lat": 46.117588,
+      "lng": 7.0765257
+    },
+    {
+      "locId": "L5844157",
+      "locName": "Combe d'Orny",
+      "lat": 46.008826,
+      "lng": 7.1018457
+    },
+    {
+      "locId": "L20639397",
+      "locName": "Lac de Champex",
+      "lat": 46.028224,
+      "lng": 7.1162175
+    },
+    {
+      "locId": "L31890406",
+      "locName": "Sentier des Follatères",
+      "lat": 46.122288,
+      "lng": 7.0723414
+    },
+    {
+      "locId": "L3990061",
+      "locName": "La Remuaz",
+      "lat": 45.9950834,
+      "lng": 6.9126105
+    },
+    {
+      "locId": "L3990045",
+      "locName": "Forêt d'Argentière",
+      "lat": 45.9820456,
+      "lng": 6.9333869
+    },
+    {
+      "locId": "L7746250",
+      "locName": "Argentière",
+      "lat": 45.9842017,
+      "lng": 6.9269004
+    },
+    {
+      "locId": "L12751885",
+      "locName": "Saleina",
+      "lat": 45.98664,
+      "lng": 7.0864247
+    },
+    {
+      "locId": "L7750964",
+      "locName": "Vallon de Bérard, Vallorcine",
+      "lat": 46.0134238,
+      "lng": 6.8916405
+    },
+    {
+      "locId": "L29701902",
+      "locName": "Le Moulin des Scies Neuves",
+      "lat": 46.5456857,
+      "lng": 6.1474672
+    },
+    {
+      "locId": "L29701898",
+      "locName": "Forêt du Risoux--Chalet Prodhon",
+      "lat": 46.5467932,
+      "lng": 6.1342712
+    },
+    {
+      "locId": "L14580815",
+      "locName": "Orbe (Bois-d'Amont)",
+      "lat": 46.5319517,
+      "lng": 6.1292488
+    },
+    {
+      "locId": "L3174419",
+      "locName": "La Chaux Sèche--Chalet Arbel / La Caserne",
+      "lat": 46.5570688,
+      "lng": 6.1293872
+    },
+    {
+      "locId": "L47294259",
+      "locName": "Chalet Gaillard",
+      "lat": 46.5632865,
+      "lng": 6.1216164
+    },
+    {
+      "locId": "L47289935",
+      "locName": "Forêt du Risoux--Fontaine au pitre",
+      "lat": 46.5480566,
+      "lng": 6.1061952
+    },
+    {
+      "locId": "L4670537",
+      "locName": "Route de la Planche Paget",
+      "lat": 46.5160958,
+      "lng": 6.1079478
+    },
+    {
+      "locId": "L69475224",
+      "locName": "Forêt du Risoux--Plan Pichon",
+      "lat": 46.5365052,
+      "lng": 6.1016607
+    },
+    {
+      "locId": "L4670468",
+      "locName": "Forêt du Risoux",
+      "lat": 46.5455423,
+      "lng": 6.0937643
+    },
+    {
+      "locId": "L37178127",
+      "locName": "Le Vivier des Rousses",
+      "lat": 46.5136632,
+      "lng": 6.0966396
+    },
+    {
+      "locId": "L12807117",
+      "locName": "Falaise et Viaduc de St Ursanne",
+      "lat": 47.3673392,
+      "lng": 7.1681446
+    },
+    {
+      "locId": "L39305780",
+      "locName": "Village de Saint-Ursanne",
+      "lat": 47.3651081,
+      "lng": 7.1575996
+    },
+    {
+      "locId": "L4507810",
+      "locName": "Clos-du-Doubs",
+      "lat": 47.3506868,
+      "lng": 7.1496105
+    },
+    {
+      "locId": "L5192627",
+      "locName": "Les Montoyes",
+      "lat": 47.3402477,
+      "lng": 7.2205925
+    },
+    {
+      "locId": "L44295769",
+      "locName": "La Metteneux et Les Forges",
+      "lat": 47.30417,
+      "lng": 7.2164041
+    },
+    {
+      "locId": "L5393146",
+      "locName": "Champs Graitoux",
+      "lat": 47.3977,
+      "lng": 7.0657
+    },
+    {
+      "locId": "L3307429",
+      "locName": "Etang de Bollement",
+      "lat": 47.2955008,
+      "lng": 7.124902
+    },
+    {
+      "locId": "L42441410",
+      "locName": "Etang des Beusses",
+      "lat": 47.2895444,
+      "lng": 7.14415
+    },
+    {
+      "locId": "L12040480",
+      "locName": "Lac Vert d'Undervelier",
+      "lat": 47.2897522,
+      "lng": 7.2229533
+    },
+    {
+      "locId": "L7976906",
+      "locName": "Graströchni",
+      "lat": 47.3296779,
+      "lng": 8.0414479
+    },
+    {
+      "locId": "L7980107",
+      "locName": "Bally Park",
+      "lat": 47.3668213,
+      "lng": 7.9966736
+    },
+    {
+      "locId": "L3960692",
+      "locName": "Aarau--Friedhof Rosengarten",
+      "lat": 47.3872144,
+      "lng": 8.0464125
+    },
+    {
+      "locId": "L61284371",
+      "locName": "Waldweiher Starrkirch-Wil",
+      "lat": 47.3451913,
+      "lng": 7.9289103
+    },
+    {
+      "locId": "L6375796",
+      "locName": "Zurlindeninsel",
+      "lat": 47.4059305,
+      "lng": 8.0635142
+    },
+    {
+      "locId": "L13916380",
+      "locName": "Erzberg Rebberg und Orchideenwald",
+      "lat": 47.41267,
+      "lng": 8.00526
+    },
+    {
+      "locId": "L8006176",
+      "locName": "Aarburg Stadt",
+      "lat": 47.3204164,
+      "lng": 7.9063656
+    },
+    {
+      "locId": "L45578407",
+      "locName": "Jougne (ville)",
+      "lat": 46.7605689,
+      "lng": 6.3894296
+    },
+    {
+      "locId": "L5401883",
+      "locName": "Port militaire de Forel",
+      "lat": 46.8813737,
+      "lng": 6.8835247
+    },
+    {
+      "locId": "L3330980",
+      "locName": "Aérodrome de Payerne",
+      "lat": 46.8469972,
+      "lng": 6.9209898
+    },
+    {
+      "locId": "L3110068",
+      "locName": "Etang de Pré Bovet",
+      "lat": 46.8596367,
+      "lng": 6.9320408
+    },
+    {
+      "locId": "L3982845",
+      "locName": "Etang du Vernez de Chaux",
+      "lat": 46.8140267,
+      "lng": 6.9215208
+    },
+    {
+      "locId": "L4695537",
+      "locName": "Port de Chevroux",
+      "lat": 46.8987361,
+      "lng": 6.8986309
+    },
+    {
+      "locId": "L3895787",
+      "locName": "Les Eterpis",
+      "lat": 46.8641817,
+      "lng": 6.9519854
+    },
+    {
+      "locId": "L2411026",
+      "locName": "Port et Canal de Gletterens",
+      "lat": 46.9082153,
+      "lng": 6.9284775
+    },
+    {
+      "locId": "L2078722",
+      "locName": "Plaine de Dompierre",
+      "lat": 46.8569337,
+      "lng": 6.9858885
+    },
+    {
+      "locId": "L3898224",
+      "locName": "Les Cornaches",
+      "lat": 46.8971819,
+      "lng": 6.9599032
+    },
+    {
+      "locId": "L15684408",
+      "locName": "Port du Petit Cortaillod",
+      "lat": 46.9391142,
+      "lng": 6.8527651
+    },
+    {
+      "locId": "L21230836",
+      "locName": "Parc des Bastions",
+      "lat": 46.199449,
+      "lng": 6.145305
+    },
+    {
+      "locId": "L22764551",
+      "locName": "Plaine de Plainpalais",
+      "lat": 46.1989675,
+      "lng": 6.1411392
+    },
+    {
+      "locId": "L33807660",
+      "locName": "Promenade de l'Observatoire",
+      "lat": 46.2000177,
+      "lng": 6.1522365
+    },
+    {
+      "locId": "L3759842",
+      "locName": "Bois de la Batie",
+      "lat": 46.1998045,
+      "lng": 6.1206132
+    },
+    {
+      "locId": "L13085551",
+      "locName": "Parc Alfred Bertrand",
+      "lat": 46.1930708,
+      "lng": 6.1584446
+    },
+    {
+      "locId": "L19679856",
+      "locName": "Parc Des Evaux",
+      "lat": 46.1896724,
+      "lng": 6.0916722
+    },
+    {
+      "locId": "L5168443",
+      "locName": "Bois des Mouilles",
+      "lat": 46.1930443,
+      "lng": 6.082145
+    },
+    {
+      "locId": "L4834587",
+      "locName": "Observatoire de Planfonds",
+      "lat": 46.1994028,
+      "lng": 6.0709186
+    },
+    {
+      "locId": "L18823466",
+      "locName": "Chemin du Pont-du-Centenaire",
+      "lat": 46.1768078,
+      "lng": 6.1004092
+    },
+    {
+      "locId": "L34630790",
+      "locName": "Parc des Crêts",
+      "lat": 46.1662994,
+      "lng": 6.1493652
+    },
+    {
+      "locId": "L58298198",
+      "locName": "Bois de Vernaz",
+      "lat": 46.1759674,
+      "lng": 6.1910534
+    },
+    {
+      "locId": "L20394221",
+      "locName": "Le Petit Veyrier",
+      "lat": 46.1720146,
+      "lng": 6.186277
+    },
+    {
+      "locId": "L19416040",
+      "locName": "Zone humide des Étangs d'Etrembières, Etrembières",
+      "lat": 46.172972,
+      "lng": 6.19159
+    },
+    {
+      "locId": "L13271659",
+      "locName": "Éco-crèche en forêt",
+      "lat": 46.1602773,
+      "lng": 6.1344009
+    },
+    {
+      "locId": "L4834597",
+      "locName": "Pont de Peney et Embouchure du Nant d'Avril",
+      "lat": 46.1957773,
+      "lng": 6.043725
+    },
+    {
+      "locId": "L53672711",
+      "locName": "Les champs d'Arrhes",
+      "lat": 46.2266814,
+      "lng": 6.24274
+    },
+    {
+      "locId": "L29696763",
+      "locName": "Gare SNCF de Annemasse",
+      "lat": 46.1994886,
+      "lng": 6.2369913
+    },
+    {
+      "locId": "L29699456",
+      "locName": "Annemasse (ville)",
+      "lat": 46.19323,
+      "lng": 6.2341833
+    },
+    {
+      "locId": "L19470117",
+      "locName": "Vallée de l'Arve--bois de la Châtelaine",
+      "lat": 46.1763839,
+      "lng": 6.2168613
+    },
+    {
+      "locId": "L9518823",
+      "locName": "Signal de Bernex",
+      "lat": 46.1684883,
+      "lng": 6.0685792
+    },
+    {
+      "locId": "L5168447",
+      "locName": "Plaine de l'Aire",
+      "lat": 46.1631504,
+      "lng": 6.0768567
+    },
+    {
+      "locId": "L29699455",
+      "locName": "Arve--Pont d'Etrembières",
+      "lat": 46.1831669,
+      "lng": 6.2306925
+    },
+    {
+      "locId": "L44279848",
+      "locName": "Réserve naturelle du Bois de Treulaz",
+      "lat": 46.18874,
+      "lng": 6.03439
+    },
+    {
+      "locId": "L3699976",
+      "locName": "Barrage de Verbois",
+      "lat": 46.19372,
+      "lng": 6.03049
+    },
+    {
+      "locId": "L38654858",
+      "locName": "Le Petit Salève",
+      "lat": 46.168567,
+      "lng": 6.2187257
+    },
+    {
+      "locId": "L29698964",
+      "locName": "Le Baugé (Bossey)",
+      "lat": 46.1467392,
+      "lng": 6.1505478
+    },
+    {
+      "locId": "L20427132",
+      "locName": "Retenue sur l'Aire",
+      "lat": 46.1521682,
+      "lng": 6.0760658
+    },
+    {
+      "locId": "L5168449",
+      "locName": "Les Ruttets",
+      "lat": 46.1554889,
+      "lng": 6.0678434
+    },
+    {
+      "locId": "L29698960",
+      "locName": "Saint-Julien-en-Genevois--Lathoy",
+      "lat": 46.1402331,
+      "lng": 6.1037463
+    },
+    {
+      "locId": "L4684141",
+      "locName": "Champagne Genevoise--La Feuillée",
+      "lat": 46.150192,
+      "lng": 6.051267
+    },
+    {
+      "locId": "L29698973",
+      "locName": "Neydens--Huffin",
+      "lat": 46.130521,
+      "lng": 6.1010554
+    },
+    {
+      "locId": "L29698961",
+      "locName": "Chosal (Archamps)",
+      "lat": 46.1359247,
+      "lng": 6.1220132
+    },
+    {
+      "locId": "L4031965",
+      "locName": "Champagne Genevoise--Réserve Naturelle de Laconnex",
+      "lat": 46.1562172,
+      "lng": 6.0299706
+    },
+    {
+      "locId": "L44279469",
+      "locName": "Champagne Genevoise--Champs Pointus",
+      "lat": 46.1475199,
+      "lng": 6.0342057
+    },
+    {
+      "locId": "L18575248",
+      "locName": "Archamps--ville",
+      "lat": 46.13581,
+      "lng": 6.13188
+    },
+    {
+      "locId": "L4446326",
+      "locName": "Réserve Naturelle du Moulin de Vert",
+      "lat": 46.1795778,
+      "lng": 6.0235387
+    },
+    {
+      "locId": "L4723633",
+      "locName": "Champagne Genevoise* general area (use more precise loc.)",
+      "lat": 46.1527539,
+      "lng": 6.0224175
+    },
+    {
+      "locId": "L5168510",
+      "locName": "Champagne Genevoise--Les Allues",
+      "lat": 46.1586516,
+      "lng": 6.0199192
+    },
+    {
+      "locId": "L44279531",
+      "locName": "Champagne Genevoise--Champs Grillet",
+      "lat": 46.1484343,
+      "lng": 6.0223933
+    },
+    {
+      "locId": "L5168513",
+      "locName": "Champagne Genevoise--Champ Courbe et Derrière-Forestal",
+      "lat": 46.1519512,
+      "lng": 6.0204864
+    },
+    {
+      "locId": "L29698970",
+      "locName": "Neydens--Le Biolay",
+      "lat": 46.117367,
+      "lng": 6.0906408
+    },
+    {
+      "locId": "L4031987",
+      "locName": "Teppes de Verbois",
+      "lat": 46.180395,
+      "lng": 6.0148001
+    },
+    {
+      "locId": "L37444286",
+      "locName": "Champagne Genevoise--Sur Moulin",
+      "lat": 46.1437695,
+      "lng": 6.0199455
+    },
+    {
+      "locId": "L5168514",
+      "locName": "Champagne Genevoise--Ferrage",
+      "lat": 46.164347,
+      "lng": 6.0060024
+    },
+    {
+      "locId": "L19080479",
+      "locName": "Champagne Genevoise--Ronzier",
+      "lat": 46.1587913,
+      "lng": 6.0043558
+    },
+    {
+      "locId": "L29698971",
+      "locName": "L'Agnellu",
+      "lat": 46.1026078,
+      "lng": 6.0853529
+    },
+    {
+      "locId": "L37444125",
+      "locName": "La Touvière",
+      "lat": 46.1714763,
+      "lng": 5.98949
+    },
+    {
+      "locId": "L17863047",
+      "locName": "Challex--Les Barraques (ancienne gravière et Rhône)",
+      "lat": 46.1732806,
+      "lng": 5.9871418
+    },
+    {
+      "locId": "L14015969",
+      "locName": "Mont Salève (Bossey)",
+      "lat": 46.1455099,
+      "lng": 6.1876462
+    },
+    {
+      "locId": "L11951400",
+      "locName": "Mont Salève (La Muraz)",
+      "lat": 46.1345074,
+      "lng": 6.1820894
+    },
+    {
+      "locId": "L16890377",
+      "locName": "Col de la Croisette (Salève)",
+      "lat": 46.1197073,
+      "lng": 6.1714113
+    },
+    {
+      "locId": "L10263422",
+      "locName": "Grand Bois",
+      "lat": 46.2205311,
+      "lng": 6.0067133
+    },
+    {
+      "locId": "L32546284",
+      "locName": "Mont Salève",
+      "lat": 46.105453,
+      "lng": 6.155403
+    },
+    {
+      "locId": "L50486260",
+      "locName": "Vallon de l'Allondon",
+      "lat": 46.215981,
+      "lng": 5.9955311
+    },
+    {
+      "locId": "L47962234",
+      "locName": "Col des Pitons",
+      "lat": 46.0928767,
+      "lng": 6.1425161
+    },
+    {
+      "locId": "L5159691",
+      "locName": "Pougny--Le Rhône",
+      "lat": 46.1443473,
+      "lng": 5.9635431
+    },
+    {
+      "locId": "L3098213",
+      "locName": "Bois de Chancy",
+      "lat": 46.1343336,
+      "lng": 5.9645784
+    },
+    {
+      "locId": "L4454527",
+      "locName": "Marais de l'Étournel",
+      "lat": 46.1308858,
+      "lng": 5.9405566
+    },
+    {
+      "locId": "L14682301",
+      "locName": "Ancienne gravière d'Asserans",
+      "lat": 46.1592861,
+      "lng": 5.9144229
+    },
+    {
+      "locId": "L14738354",
+      "locName": "Marais de L'Etournel--Ferme des Iles",
+      "lat": 46.131814,
+      "lng": 5.9196987
+    },
+    {
+      "locId": "L14556878",
+      "locName": "Station de lagunage de Collonges",
+      "lat": 46.1365544,
+      "lng": 5.9150314
+    },
+    {
+      "locId": "L14682353",
+      "locName": "Les Terrettes (Thoiry)",
+      "lat": 46.2407907,
+      "lng": 6.0061263
+    },
+    {
+      "locId": "L14295720",
+      "locName": "Site de suivi de la migration du Défilé de l'Ecluse, Chevrier",
+      "lat": 46.1172459,
+      "lng": 5.9147215
+    },
+    {
+      "locId": "L6451211",
+      "locName": "Champs Vautier, Chevrier",
+      "lat": 46.1184804,
+      "lng": 5.913021
+    },
+    {
+      "locId": "L77115789",
+      "locName": "Réserve naturelle de la haute chaîne du Jura",
+      "lat": 46.146351,
+      "lng": 5.8890581
+    },
+    {
+      "locId": "L49604394",
+      "locName": "Charly (Andilly)",
+      "lat": 46.0697888,
+      "lng": 6.0696217
+    }
+  ]
+}

@@ -321,7 +321,7 @@ async function downloadHotspotReport() {
       [
         JSON.stringify(
           {
-            model: "hotspot-scoring-v1-experimental",
+            model: "hotspot-scoring-v2-experimental",
             notice:
               "Scores are experimental, not probabilities. No checklist locations were changed.",
             checklists,

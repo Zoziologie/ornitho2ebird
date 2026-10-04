@@ -28,6 +28,9 @@ const ranking = computed(() => rankHotspots(props.evidence, props.form.hotspots 
       </button>
     </div>
     <p class="small text-muted mb-2">{{ t("hotspotSuggestionsHelp") }}</p>
+    <p v-if="evidence.trackRejected" class="small text-warning-emphasis mb-2" role="status">
+      {{ t("hotspotTrackRejected") }}
+    </p>
     <p v-if="loading" class="small mb-0" role="status">{{ t("hotspotSuggestionsLoading") }}</p>
     <div v-else-if="failed" class="small" role="alert">
       {{ t("hotspotSuggestionsFailed") }}

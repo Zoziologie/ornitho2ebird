@@ -14,6 +14,27 @@ const uniquePoints = (points) => [
   ...new Map(points.map((point) => [pointKey(point), point])).values(),
 ];
 
+// Distance to segments also supports sparse routes with observations between GPS fixes.
+function distanceToTrack(point, path) {
+  return Math.min(
+    ...path.slice(1).map((end, index) => {
+      const start = path[index];
+      const longitudeScale = Math.cos((point[0] * Math.PI) / 180);
+      const dx = (end[1] - start[1]) * longitudeScale;
+      const dy = end[0] - start[0];
+      const fraction = Math.max(
+        0,
+        Math.min(
+          1,
+          ((point[1] - start[1]) * longitudeScale * dx + (point[0] - start[0]) * dy) /
+            (dx * dx + dy * dy || 1),
+        ),
+      );
+      return distance(point, [start[0] + fraction * dy, start[1] + fraction * (end[1] - start[1])]);
+    }),
+  );
+}
+
 // Equal-distance samples prevent a dense GPS recording interval from dominating a route.
 function sampleTrack(path) {
   const lengths = [0];
@@ -54,7 +75,15 @@ export function hotspotEvidence(form, sightings) {
   const sightingPoints = uniquePoints(
     observations.map((sighting) => [Number(sighting.lat), Number(sighting.lon)]),
   );
-  const path = (form.path || []).filter((point) => coordinate(point[0]) && coordinate(point[1]));
+  let path = (form.path || []).filter((point) => coordinate(point[0]) && coordinate(point[1]));
+  // A route copied from another visit must not override the observation positions.
+  // Compare with the route, not its centre: sightings around a lake remain supported.
+  const trackSeparation =
+    path.length > 1 && sightingPoints.length
+      ? median(sightingPoints.map((point) => distanceToTrack(point, path)))
+      : null;
+  const trackRejected = trackSeparation != null && trackSeparation > 1;
+  if (trackRejected) path = [];
   const trackPoints = uniquePoints(path);
   const source = path.length > 1 ? "track" : sightingPoints.length ? "sightings" : "location";
   const raw =
@@ -123,6 +152,8 @@ export function hotspotEvidence(form, sightings) {
     count: raw.length,
     trimmed: raw.length - (source === "track" ? uniquePoints(route).length : retained.size),
     anchors,
+    trackRejected,
+    trackSeparation,
   };
 }
 
@@ -175,14 +206,17 @@ export function rankHotspots(evidence, hotspots) {
     })
     .sort((a, b) => b.score - a.score || a.hotspot.locId.localeCompare(b.hotspot.locId));
   const margin = candidates.length > 1 ? candidates[0].score - candidates[1].score : null;
-  // Experimental confidence categories, never automatic assignment or probabilities.
+  // Calibrated abstention: a candidate must fit and clearly beat the alternatives.
+  // Sightings locate birds; an early observation alone cannot establish a route start.
   const status = !candidates.length
     ? "none"
-    : evidence.count < 3
+    : evidence.source === "location" ||
+        (evidence.count < 3 && (candidates[0].score < 25 || evidence.radius > 1))
       ? "insufficient"
-      : candidates[0].score < 65
+      : candidates[0].score < 25
         ? "weak"
-        : margin != null && margin < 15
+        : (evidence.source === "sightings" && candidates[0].interpretation === "start") ||
+            (margin != null && margin / candidates[0].score < 0.4)
           ? "ambiguous"
           : "clear";
   return { status, margin, candidates };

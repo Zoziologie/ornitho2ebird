@@ -132,3 +132,60 @@ describe("hotspot discovery", () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("reviewed evidence conflicts", () => {
+  it("supports sightings between sparse GPS fixes", () => {
+    const evidence = hotspotEvidence(
+      { ...form, path: [point(0), point(10)] },
+      sightings([point(4), point(5), point(6)]),
+    );
+    expect(evidence.trackRejected).toBe(false);
+    expect(evidence.trackSeparation).toBeLessThan(0.01);
+  });
+  it("ignores a geographically unrelated track and searches around sightings", () => {
+    const path = Array.from({ length: 31 }, (_, i) => point(20 + i / 100));
+    const evidence = hotspotEvidence(
+      { ...form, path },
+      sightings([point(0), point(0.02), point(0.04)]),
+    );
+    expect(evidence.trackRejected).toBe(true);
+    expect(evidence.trackSeparation).toBeGreaterThan(19);
+    expect(evidence.source).toBe("sightings");
+    expect(
+      rankHotspots(evidence, [hotspot("actual-visit", 0), hotspot("wrong-track", 20)]).candidates[0]
+        .hotspot.locId,
+    ).toBe("actual-visit");
+  });
+
+  it("keeps a supported route despite a minority of distant bird positions", () => {
+    const path = Array.from({ length: 31 }, (_, i) => point(i / 100));
+    const evidence = hotspotEvidence(
+      { ...form, path },
+      sightings([point(0), point(0.1), point(0.2), point(3)]),
+    );
+    expect(evidence.trackRejected).toBe(false);
+    expect(evidence.source).toBe("track");
+  });
+
+  it("leaves a sighting-only start interpretation for manual review", () => {
+    const records = sightings([point(0), point(2), point(2.1), point(2.2)]).map((record, i) => ({
+      ...record,
+      date: "2026-01-01",
+      time: `08:0${i}`,
+    }));
+    const ranking = rankHotspots(hotspotEvidence(form, records), [
+      hotspot("early-bird", 0),
+      hotspot("far", 10),
+    ]);
+    expect(ranking.candidates[0].interpretation).toBe("start");
+    expect(ranking.status).toBe("ambiguous");
+  });
+
+  it("can distinguish a strong sparse match from overlapping candidates", () => {
+    const evidence = hotspotEvidence(form, sightings([point(0)]));
+    expect(rankHotspots(evidence, [hotspot("site", 0), hotspot("far", 3)]).status).toBe("clear");
+    expect(rankHotspots(evidence, [hotspot("site", 0), hotspot("overlap", 0.01)]).status).toBe(
+      "ambiguous",
+    );
+  });
+});

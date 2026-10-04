@@ -14,7 +14,7 @@ Automatic assignment is deliberately deferred until real examples have been revi
 
 - Without a track, use distinct sighting positions (six-decimal coordinate keys), with no
   weight for species repetitions or bird counts. Positions without coordinates are omitted.
-- With a track, use the observer's route as the main evidence and sightings as a small
+- With a geographically consistent track, use the observer's route as the main evidence and sightings as a small
   complementary signal. Imported tracks currently contain coordinates without timestamps,
   so resample into 65 positions at equal distances. Time sampling requires timestamped tracks.
 - Remove at most the outer 5% of distinct sighting positions around their median centre.
@@ -36,7 +36,7 @@ across nearby checklists; IDs are deduplicated. Failed requests are not cached a
 offers retry. Discovery is bounded, so very large or dispersed visits can still miss candidates.
 The search radius is not a matching criterion.
 
-## Score version 1
+## Score version 2
 
 All distances below are in kilometres. Let `R` be the largest distance of a retained/sampled
 position from the median centre, `D50` and `D95` the median and 95th-percentile distances
@@ -65,9 +65,13 @@ The panel shows the winning interpretation, `D50`, `D95`, and the lead over the 
 The report retains all candidates and component values so alternative weights can be
 compared. These scales and weights are starting hypotheses, not empirically calibrated defaults.
 
-Provisional descriptions distinguish no candidates, fewer than three distinct positions,
-a best score below 65, a lead below 15 points, and a clear leader. A single candidate
-still needs adequate evidence and overall fit. None of these categories selects a location.
+The updated confidence categories use the maintainer's labelled comparison: a best score
+of at least 25 and a lead of at least 40% of that score. This relative lead compares the
+winner with its competitors rather than accepting every candidate within a distance.
+An earliest sighting interpreted as a route start always remains for manual review: bird
+positions do not establish the observer's starting point. A single sighting can support a
+clear geographic match when competing sites fit much worse; marker-only evidence remains
+insufficient. None of these categories selects a location.
 Scores can remain high for an inappropriate site, especially when nearby general hotspots
 and subsites cannot be distinguished geographically. Human review remains necessary.
 
@@ -102,3 +106,44 @@ with live eBird candidates: 16 clear leaders, 28 weak fits, 25 with insufficient
 and 1 ambiguous comparison. These are model categories, not measured correctness.
 For Le Pont – Lac Brenet the two leading candidates scored approximately 51 and 49;
 the experiment therefore kept that close choice for human review. No locations were changed.
+
+## Maintainer calibration, 4 October 2026
+
+The 70 reference choices are saved in
+`test/fixtures/hotspots/maintainer-review.json`, including explicit hotspot IDs, no-match
+choices, and cases where either result is acceptable. Unmentioned checklists use the
+first suggestion from the reviewed version-1 report, frozen by ID rather than interpreted
+as the first result of a later algorithm. “No match” keeps the existing checklist location.
+
+Checklists 22 and 31 reject the old suggestions but mention an unidentified nearby hotspot;
+they remain unresolved and are excluded from fitting and accuracy totals. Checklist 24
+explicitly requires Luxburger Bucht--Luxburg (`L5165262`). Checklist 35 requires no match
+with its current sighting-only evidence; Festhalle is conditional on a supporting route,
+which this checklist does not contain.
+
+Before candidate discovery, measure each distinct sighting's nearest distance to the GPS
+route. If their median exceeds 1 km, ignore that route for hotspot matching and use sightings.
+This catches the copied/unrelated tracks in 22, 24 and 31, while a minority of distant birds
+cannot trigger rejection. It is an evidence-consistency heuristic, not a hotspot distance
+cutoff. A genuine route can still be rejected when most recorded birds are distant. The
+original track, checklist effort and observations are preserved, and the panel explains
+that sightings were used. Candidate discovery now finds Luxburger Bucht for 24 and Plage
+de la Dullive for 31.
+
+Run `npm run hotspots:calibrate` to replay the import offline against the frozen inventory
+of 650 eBird hotspots retrieved during review. Candidates are filtered using the same
+rounded search centres and 10 km discovery radius. The inventory is not a complete eBird
+catalogue. The script writes `docs/hotspot-calibration.json` with every decision and the
+parameter search outcome. The report does not alter checklist locations or CSVs.
+
+A deterministic split groups cases sharing the original top-candidate ID; the split was
+fixed before fitting. Parameter selection uses only the 47 calibration cases, penalizing
+wrong hotspot selections five times more than missed matches. The selected score floor 25
+and relative lead 40% match all 47 calibration labels. Of 21 held-out cases, 20 agree;
+there are zero wrong selections and one abstention (24). Its correct hotspot ranks first,
+but the lead over its competitor remains too small for a clear match.
+
+These figures describe one reviewed import, including user-acceptable abstentions. They
+are not a probability or an accuracy estimate for new users. The no-match in 26 lies close
+to the chosen relative-lead boundary, and geographically adjacent sites can occur across
+the split. More independent examples are needed before enabling automatic selection.

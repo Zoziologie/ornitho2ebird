@@ -145,7 +145,7 @@ so eBird can match the hotspot directly. The app still displays its readable nam
 Renaming or moving the location clears that hotspot association.
 
 An experimental hotspot comparison below the review map ranks nearby candidates using
-the route when available, otherwise the observation positions. It explains the fit and
+a consistent route when available, otherwise the observation positions. It explains the fit and
 competing scores; choosing a suggestion remains manual and can be undone. Download a
 comparison report for all checklists to review and tune the model. See
 [`docs/hotspot-scoring.md`](docs/hotspot-scoring.md) for the scoring assumptions and limitations.

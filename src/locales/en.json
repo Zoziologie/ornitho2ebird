@@ -358,5 +358,6 @@
   "hotspotStatusambiguous": "Several candidates fit similarly. Choose the site you visited.",
   "hotspotStatusweak": "The best candidate still fits poorly. Keep your location unless you recognize a suitable site.",
   "hotspotStatusinsufficient": "There is little location evidence. Review these suggestions carefully.",
-  "hotspotStatusnone": "No nearby hotspots found."
+  "hotspotStatusnone": "No nearby hotspots found.",
+  "hotspotTrackRejected": "The GPS track is far from most observations. These suggestions use the observation positions instead."
 }

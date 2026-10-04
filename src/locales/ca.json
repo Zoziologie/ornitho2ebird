@@ -358,5 +358,6 @@
   "hotspotStatusambiguous": "Diversos candidats encaixen de manera similar. Tria el lloc que has visitat.",
   "hotspotStatusweak": "Fins i tot el millor candidat encaixa malament. Conserva la teva localitat tret que reconeguis un lloc adequat.",
   "hotspotStatusinsufficient": "Hi ha poques dades de localització. Revisa aquests suggeriments amb cura.",
-  "hotspotStatusnone": "No s’han trobat hotspots propers."
+  "hotspotStatusnone": "No s’han trobat hotspots propers.",
+  "hotspotTrackRejected": "El recorregut GPS és lluny de la majoria d’observacions. Per això, aquests suggeriments utilitzen les posicions de les observacions."
 }

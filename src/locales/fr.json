@@ -358,5 +358,6 @@
   "hotspotStatusambiguous": "Plusieurs candidats conviennent autant. Choisissez le site que vous avez visité.",
   "hotspotStatusweak": "Même le meilleur candidat convient mal. Conservez votre lieu sauf si vous reconnaissez un site adapté.",
   "hotspotStatusinsufficient": "Les données de localisation sont limitées. Examinez attentivement ces suggestions.",
-  "hotspotStatusnone": "Aucun hotspot trouvé à proximité."
+  "hotspotStatusnone": "Aucun hotspot trouvé à proximité.",
+  "hotspotTrackRejected": "La trace GPS est éloignée de la plupart des observations. Ces suggestions utilisent donc les positions des observations."
 }
