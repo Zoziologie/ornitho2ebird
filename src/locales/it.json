@@ -143,7 +143,7 @@
   "importHelpOrnitho": "Esporta il file JSON dei dati che vuoi convertire. Usa il link qui sotto per ottenere direttamente i dati necessari.",
   "importHelpObservation": "Apri la pagina Observations, esporta i tuoi record come CSV, poi importa qui quel file CSV.",
   "importHelpBirdlasser": "Esporta i tuoi record da BirdLasser come CSV, poi importa qui quel file CSV.",
-  "importHelpOrnithoNet": "Apri “Tutte le mie osservazioni”, esporta i risultati come TXT in inglese o francese, poi importa il file qui.",
+  "importHelpOrnithoNet": "Apri “Tutte le mie osservazioni”, esporta i risultati come TXT e importa il file qui. Sono supportate le intestazioni in italiano, inglese, francese, tedesco, spagnolo, catalano e polacco.",
   "importSuccess": "Dati caricati: {lists} e {sightings}",
   "importSuccessLists": "{n} lista | {n} liste",
   "importSuccessSightings": "{n} osservazione occasionale | {n} osservazioni occasionali",
@@ -151,7 +151,7 @@
   "importSkippedNoCoordinates": "{n} osservazione senza coordinate è stata ignorata. | {n} osservazioni senza coordinate sono state ignorate.",
   "importErrorInvalidJson": "Questo file non è un export JSON di ornitho valido.",
   "importErrorMissingColumns": "In questo file mancano le colonne previste ({columns}). Verifica di aver scelto il sito sorgente corretto e di aver esportato il file in inglese.",
-  "importErrorTxtHeader": "L’intestazione TXT non è riconosciuta. Esporta un file TXT Biolovision in inglese o francese.",
+  "importErrorTxtHeader": "Le colonne TXT non sono riconosciute. Esporta le osservazioni Biolovision come TXT in italiano, inglese, francese, tedesco, spagnolo, catalano o polacco.",
   "importErrorUnsupported": "Questo sito sorgente non è supportato.",
   "importErrorUnexpected": "Impossibile leggere il file. Verifica che corrisponda al sito sorgente scelto. Dettagli: {detail}",
   "recentDays": "Giorni recenti",
@@ -333,6 +333,6 @@
   "splitByDate": "Dividi per data",
   "splitDatesConfirm": "Creare una lista per ogni data di osservazione? Tutte le osservazioni e i commenti vengono conservati. L’ora iniziale è quella della prima osservazione del giorno. Durata, distanza e tracce saranno cancellate perché lo sforzo non può essere ripartito in modo affidabile; controllali dopo la divisione.",
   "splitDatesUnavailable": "La divisione automatica richiede una data e un’ora precise per ogni osservazione e osservazioni su più date. La lista resterà unita finché non la modifichi.",
-  "uniqueDistanceHelp": "Distanza unica stimata: i segmenti sovrapposti sono esclusi quando seguono quasi la stessa linea. Errori GPS e percorsi vicini possono influire sulla stima. Verificala e modifica la distanza se necessario.",
+  "uniqueDistanceHelp": "Stime GPS: il protocollo stazionario usa la massima distanza tra il 95% dei punti centrali del tracciato, ignorando gli errori isolati. Anche un breve spostamento reale può essere ignorato. La distanza unica esclude i segmenti strettamente sovrapposti; la deriva GPS e i sentieri vicini possono influenzarla. Controlla il tracciato e correggi la distanza se necessario.",
   "noEligibleRecords": "Nessuna osservazione rimane idonea per l’esportazione CSV. Verifica i record esclusi qui sotto."
 }

@@ -82,3 +82,29 @@ test("completeness edits update primary purpose and the exported protocol", asyn
   rows = Papa.parse(await downloadCsv(page)).data;
   expect(rows.every((row) => row[12] === "Incidental" && row[15] === "N")).toBe(true);
 });
+
+test("isolated GPS errors do not change a stationary checklist's exported protocol", async ({
+  page,
+}) => {
+  await stubNetwork(page);
+  await openApp(page);
+  const source = JSON.parse(readFileSync(fixturePath("export_normal_with_trace.json"), "utf8"));
+  source.data.sightings = [];
+  source.data.forms = [source.data.forms[0]];
+  const form = source.data.forms[0];
+  const lat = Number(form.lat);
+  const lon = Number(form.lon);
+  const path = Array.from({ length: 40 }, (_, index) => [lat + (index % 3) * 0.00004, lon]);
+  path[0] = [lat + 0.01, lon];
+  form.trace = `LINESTRING(${path.map(([pointLat, pointLon]) => `${pointLon} ${pointLat}`).join(", ")})`;
+  await page.locator("#import-source-website").selectOption("ornitho.ch");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "stationary_with_bad_fix.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(source)),
+  });
+  await expect(page.locator(".alert-success")).toContainText("Data loaded successfully");
+  const rows = Papa.parse(await downloadCsv(page)).data;
+  expect(rows.length).toBeGreaterThan(0);
+  expect(rows.every((row) => row[12] === "Stationary" && row[16] === "")).toBe(true);
+});

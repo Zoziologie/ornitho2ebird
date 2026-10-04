@@ -143,7 +143,7 @@
   "importHelpOrnitho": "Exportez le fichier JSON des données que vous souhaitez convertir. Utilisez le lien ci-dessous pour obtenir directement les données nécessaires.",
   "importHelpObservation": "Ouvrez la page Observations, exportez vos données en CSV puis importez ce fichier CSV ici.",
   "importHelpBirdlasser": "Exportez vos données depuis BirdLasser au format CSV puis importez ce fichier CSV ici.",
-  "importHelpOrnithoNet": "Ouvrez « Toutes mes observations », exportez les résultats au format TXT en anglais ou en français, puis importez ce fichier ici.",
+  "importHelpOrnithoNet": "Ouvrez « Toutes mes observations », exportez les résultats au format TXT, puis importez ce fichier ici. Les en-têtes français, anglais, allemands, italiens, espagnols, catalans et polonais sont pris en charge.",
   "importSuccess": "Données chargées : {lists} et {sightings}",
   "importSuccessLists": "{n} liste | {n} listes",
   "importSuccessSightings": "{n} observation occasionnelle | {n} observations occasionnelles",
@@ -151,7 +151,7 @@
   "importSkippedNoCoordinates": "{n} observation sans coordonnées a été ignorée. | {n} observations sans coordonnées ont été ignorées.",
   "importErrorInvalidJson": "Ce fichier n'est pas un export JSON ornitho valide.",
   "importErrorMissingColumns": "Il manque à ce fichier les colonnes attendues ({columns}). Vérifiez que vous avez choisi le bon site source et exporté le fichier en anglais.",
-  "importErrorTxtHeader": "L’en-tête TXT n’est pas reconnu. Exportez un fichier TXT Biolovision en anglais ou en français.",
+  "importErrorTxtHeader": "Les colonnes TXT ne sont pas reconnues. Exportez les observations Biolovision au format TXT en français, anglais, allemand, italien, espagnol, catalan ou polonais.",
   "importErrorUnsupported": "Ce site source n'est pas pris en charge.",
   "importErrorUnexpected": "Le fichier n'a pas pu être lu. Vérifiez qu'il correspond au site source choisi. Détails : {detail}",
   "recentDays": "Derniers jours",
@@ -333,6 +333,6 @@
   "splitByDate": "Séparer par date",
   "splitDatesConfirm": "Créer une liste par date d’observation ? Toutes les observations et tous les commentaires sont conservés. L’heure de début est celle de la première observation du jour. La durée, la distance et les tracés seront effacés, car l’effort ne peut pas être réparti de manière fiable ; vérifiez-les après la séparation.",
   "splitDatesUnavailable": "La séparation automatique nécessite une date et une heure précises pour chaque observation, avec des observations sur plusieurs dates. Cette liste restera regroupée sauf si vous la modifiez.",
-  "uniqueDistanceHelp": "Distance unique estimée : les segments superposés sont exclus lorsqu’ils suivent presque la même ligne. Les erreurs GPS et les chemins proches peuvent affecter l’estimation. Vérifiez-la et ajustez la distance si nécessaire.",
+  "uniqueDistanceHelp": "Estimations GPS : le protocole stationnaire utilise le plus grand écart entre les 95 % de points centraux du tracé, en ignorant les erreurs isolées. Un bref déplacement réel peut aussi être ignoré. La distance unique exclut les segments qui se superposent étroitement ; la dérive GPS et les chemins proches peuvent l’affecter. Vérifiez le tracé et ajustez la distance si nécessaire.",
   "noEligibleRecords": "Aucune observation ne reste admissible pour l’export CSV. Vérifiez les observations exclues ci-dessous."
 }

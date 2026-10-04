@@ -143,7 +143,7 @@
   "importHelpOrnitho": "Exportiere die JSON-Datei mit den Daten, die du umwandeln möchtest. Nutze den Link unten, um direkt die benötigten Daten zu erhalten.",
   "importHelpObservation": "Öffne die Observations-Seite, exportiere deine Daten als CSV und importiere diese CSV-Datei hier.",
   "importHelpBirdlasser": "Exportiere deine Daten aus BirdLasser als CSV und importiere diese CSV-Datei hier.",
-  "importHelpOrnithoNet": "Öffne „Alle meine Beobachtungen“, exportiere die Ergebnisse als TXT auf Englisch oder Französisch und importiere die Datei hier.",
+  "importHelpOrnithoNet": "Öffne „Alle meine Beobachtungen“, exportiere die Ergebnisse als TXT und importiere die Datei hier. Spaltenüberschriften auf Deutsch, Englisch, Französisch, Italienisch, Spanisch, Katalanisch und Polnisch werden unterstützt.",
   "importSuccess": "Daten erfolgreich geladen: {lists} und {sightings}",
   "importSuccessLists": "{n} Liste | {n} Listen",
   "importSuccessSightings": "{n} Gelegenheitsbeobachtung | {n} Gelegenheitsbeobachtungen",
@@ -151,7 +151,7 @@
   "importSkippedNoCoordinates": "{n} Beobachtung ohne Koordinaten wurde übersprungen. | {n} Beobachtungen ohne Koordinaten wurden übersprungen.",
   "importErrorInvalidJson": "Diese Datei ist kein gültiger ornitho-JSON-Export.",
   "importErrorMissingColumns": "In dieser Datei fehlen die erwarteten Spalten ({columns}). Prüfe, ob du die richtige Quellwebsite gewählt und die Datei auf Englisch exportiert hast.",
-  "importErrorTxtHeader": "Der TXT-Dateikopf wird nicht erkannt. Exportiere eine Biolovision-TXT-Datei auf Englisch oder Französisch.",
+  "importErrorTxtHeader": "Die TXT-Spalten werden nicht erkannt. Exportiere Biolovision-Beobachtungen als TXT auf Deutsch, Englisch, Französisch, Italienisch, Spanisch, Katalanisch oder Polnisch.",
   "importErrorUnsupported": "Diese Quellwebsite wird nicht unterstützt.",
   "importErrorUnexpected": "Die Datei konnte nicht gelesen werden. Prüfe, ob sie zur gewählten Quellwebsite passt. Details: {detail}",
   "recentDays": "Letzte Tage",
@@ -333,6 +333,6 @@
   "splitByDate": "Nach Datum aufteilen",
   "splitDatesConfirm": "Eine Liste pro Beobachtungsdatum erstellen? Alle Meldungen und Kommentare bleiben erhalten. Die Startzeit entspricht der ersten Meldung des Tages. Dauer, Strecke und Tracks werden geleert, da sich der Beobachtungsaufwand nicht zuverlässig aufteilen lässt. Prüfe diese Angaben danach.",
   "splitDatesUnavailable": "Die automatische Aufteilung benötigt für jede Meldung ein genaues Datum und eine Uhrzeit sowie Meldungen an mehreren Tagen. Diese Liste bleibt zusammen, solange du sie nicht bearbeitest.",
-  "uniqueDistanceHelp": "Geschätzte einmalig zurückgelegte Strecke: Überlappende Trackabschnitte werden ausgeschlossen, wenn sie nahezu derselben Linie folgen. GPS-Abweichungen und nahe Wege können die Schätzung beeinflussen. Prüfe und korrigiere die Strecke bei Bedarf.",
+  "uniqueDistanceHelp": "GPS-Schätzungen: Für das stationäre Protokoll wird der größte Abstand zwischen den zentralen 95 % der Trackpunkte verwendet; einzelne Fehler werden ignoriert. Auch ein kurzer tatsächlicher Ortswechsel kann dabei entfallen. Die einmalig zurückgelegte Strecke schließt eng überlappende Abschnitte aus; GPS-Abweichungen und nahe Wege können sie beeinflussen. Prüfe den Track und passe die Strecke bei Bedarf an.",
   "noEligibleRecords": "Keine Meldungen bleiben für den CSV-Export geeignet. Prüfe die unten ausgeschlossenen Meldungen."
 }

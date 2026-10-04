@@ -106,6 +106,7 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 - Same-day casual observations can be grouped into one checklist if they remain within configurable time and distance limits
 - Generated sighting-based checklists default to non-primary-purpose birding and incomplete (Incidental)
 - If a checklist has no track or distance, it may end up as a historical checklist in eBird
+- Stationary GPS classification uses the central 95% of track points; isolated errors and brief real excursions can be ignored, so review the track
 - Track distance estimates exclude near-exact backtracking; review GPS drift and adjust the unique-distance estimate if needed
 - Dead and zero-count records stay available for review but are excluded from the CSV; unclear mortality information requires confirmation
 - Date mismatches and overnight effort require confirmation; timestamped lists can be split by date, with effort reviewed afterward

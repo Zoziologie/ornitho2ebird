@@ -1,3 +1,4 @@
+import Papa from "papaparse";
 import { beforeAll, describe, expect, it } from "vitest";
 import { buildExportRows, exportableFormsOf, groupSightingsByForm } from "../../src/lib/exportCsv";
 import { parseImportFile } from "../../src/lib/importers";
@@ -10,6 +11,7 @@ import {
   distanceFromPath,
   checklistReview,
   uniqueDistanceFromPath,
+  trackExtentKm,
   protocol,
 } from "../../src/lib/utils";
 import { defaultSpeciesCommentTemplate, readFixture, website } from "../helpers";
@@ -361,6 +363,48 @@ describe("distance rules", () => {
     expect(rows[0].distance).toBeCloseTo(0.111195 * 0.621371, 3);
   });
 
+  it.each([0, 10, 39])("ignores an isolated bad fix at track position %s", (badIndex) => {
+    const path = Array.from({ length: 40 }, (_, index) => [46 + (index % 3) * 0.00004, 7]);
+    path[badIndex] = [46.01, 7];
+    expect(trackExtentKm(path)).toBeLessThan(0.03);
+    expect(protocol({ ...effort, path }).name).toBe("Stationary");
+  });
+  it("does not discard more than 5% of the positions", () => {
+    const path = Array.from({ length: 40 }, () => [46, 7]);
+    path[10] = [46.001, 7];
+    path[11] = [46.002, 7];
+    path[12] = [46.003, 7];
+    expect(trackExtentKm(path)).toBeGreaterThan(0.1);
+    expect(trackExtentKm([...path].reverse())).toBeCloseTo(trackExtentKm(path), 8);
+  });
+  it("retains sustained movement even after trimming", () => {
+    const path = Array.from({ length: 40 }, (_, index) => [46 + index * 0.00002, 7]);
+    expect(trackExtentKm(path)).toBeGreaterThan(0.03);
+    expect(protocol({ ...effort, path }).name).toBe("Traveling");
+  });
+  it("retains every point on sparse tracks", () => {
+    const path = [
+      [46, 7],
+      [46.001, 7],
+      [46, 7],
+    ];
+    expect(trackExtentKm(path)).toBeGreaterThan(0.1);
+    expect(protocol({ ...effort, path }).name).toBe("Traveling");
+  });
+  it("documents that a genuine brief excursion can also be trimmed", () => {
+    const path = Array.from({ length: 40 }, () => [46, 7]);
+    path[20] = [46.001, 7];
+    expect(trackExtentKm(path)).toBe(0);
+  });
+  it("measures extent between retained positions rather than radius around the median", () => {
+    const path = Array.from({ length: 40 }, (_, index) => [
+      46 + (index % 2 ? 0.00018 : -0.00018),
+      7,
+    ]);
+    expect(trackExtentKm(path)).toBeGreaterThan(0.03);
+    expect(protocol({ ...effort, path }).name).toBe("Traveling");
+  });
+
   it("movement entirely within 30 m of the start stays Stationary", () => {
     const path = [
       [46, 7],
@@ -532,6 +576,62 @@ describe("real Biolovision regression examples", () => {
       scientific_name: "Alcedo atthis",
       lat: 46.722253,
       lon: 6.564841,
+      count: "1",
+    });
+  });
+
+  it.each(["italian", "spanish", "polish", "catalan"])(
+    "imports real %s headers and untimed records",
+    (language) => {
+      const parsed = parseImportFile(
+        readFixture(`rules/biolovision_${language}.txt`),
+        website("data.biolovision.net"),
+      );
+      expect(parsed.sightings).toHaveLength(2);
+      expect(parsed.sightings.find((record) => record.id === "65_176783758")).toMatchObject({
+        date: "2026-09-02",
+        time: "19:19",
+        scientific_name: "Calidris temminckii",
+        lat: 47.766212,
+        lon: 7.170107,
+        count: "1",
+      });
+      expect(parsed.sightings.find((record) => record.id === "65_176702563")).toMatchObject({
+        date: "2026-08-30",
+        time: "",
+        scientific_name: "Tringa erythropus",
+      });
+    },
+  );
+
+  it("imports real German headers", () => {
+    const parsed = parseImportFile(
+      readFixture("rules/biolovision_german.txt"),
+      website("data.biolovision.net"),
+    );
+    expect(parsed.sightings).toHaveLength(2);
+    expect(parsed.sightings.find((record) => record.id === "65_136859234")).toMatchObject({
+      date: "2023-09-29",
+      time: "11:10",
+      scientific_name: "Circus aeruginosus",
+      lat: 47.61804,
+      lon: 7.230884,
+      count: "2",
+    });
+  });
+
+  it("accepts reordered columns and ignores added columns, including duplicate Polish day headers", () => {
+    const rows = Papa.parse(readFixture("rules/biolovision_polish.txt"), {
+      skipEmptyLines: true,
+    }).data;
+    const reordered = Papa.unparse(
+      rows.map((row) => ["unused", ...[...row].reverse()]),
+      { delimiter: "\t" },
+    );
+    const parsed = parseImportFile(reordered, website("data.biolovision.net"));
+    expect(parsed.sightings.find((record) => record.id === "65_176783758")).toMatchObject({
+      date: "2026-09-02",
+      scientific_name: "Calidris temminckii",
       count: "1",
     });
   });

@@ -32,17 +32,17 @@ Completeness is trusted rather than inferred from effort. It means every identif
 
 ## Biolovision TXT
 
-English and French observation headers are supported. Dates prefer the separate year/month/day columns; when absent, the documented fallback is day-month-year. Dates are padded consistently. Header validation checks for the time column rather than requiring the first observation to have a known time.
+English, French, German, Italian, Spanish, Polish and Catalan observation headers are supported. Columns are resolved by recognized names, so reordering and added columns are tolerated; newly renamed fields still require aliases. Polish repeats “Dzień” for day and day-of-year, so its day comes from the unambiguous dotted date. Dates prefer the separate year/month/day columns; when absent, the documented fallback is day-month-year. Dates are padded consistently. Header validation checks the required observation columns rather than requiring the first observation to have a known time.
 
-The supplied French export and an English-header derivative exercise identical actual observation values. The derivative is not an actual English-language export. A real English sample remains useful to verify format variations. The observation export does not provide the separately exported source-list effort information, so these records still follow the casual conversion path.
+Small fixtures from six real export languages exercise dates, coordinates, counts and species. An English-header derivative exercises the original French observation values. The derivative is not an actual English-language export. A real English sample remains useful to verify format variations. The observation export does not provide the separately exported source-list effort information, so these records still follow the casual conversion path.
 
 ## GPS estimates
 
-For a track, Stationary classification checks the maximum distance of positions from its starting point against approximately 30 m. Cumulative movement inside that radius no longer makes the checklist Traveling. A manual distance of zero allows the user to confirm Stationary. Without a track, the existing numeric-distance interpretation is retained.
+For a track, Stationary classification uses the widest separation among the central 95% of positions, selected by their distance from the component-wise median coordinate. Discard at most floor(5% × point count) positions; retain ties at the cutoff. Tracks shorter than 20 points retain every position. This avoids depending on the first GPS fix and tolerates isolated spikes. The 30 m extent threshold is a conversion heuristic, not an exact implementation of eBird’s starting-point rule. It can ignore a genuine brief excursion, and can classify a spread around a fixed point more conservatively than the starting-point rule. It assumes point density represents the track adequately. The original track remains visible for review. A manual distance of zero allows the user to confirm Stationary. Without a track, the existing numeric-distance interpretation is retained.
 
 Unique route distance removes overlapping, nearly collinear segments, including partially retraced routes with different segmentation. Matching requires endpoints within 1 m of the current line and directions within 1 degree. Covered intervals are merged so repeated overlap is subtracted only once. Length uses haversine distances and is rounded to 0.001 km before miles conversion.
 
-This is a conservative estimate, not a reconstruction of exact trail geometry. Larger GPS drift may retain duplicated portions; paths less than 1 m apart may be merged. There is no GPS outlier filtering. The original track remains available, the estimate can be edited, and both Basic and Customized modes explain that it needs review. Stationary export rows omit traveling distance.
+This is a conservative estimate, not a reconstruction of exact trail geometry. Larger GPS drift may retain duplicated portions; paths less than 1 m apart may be merged. The 95% trimming applies only to protocol classification; it does not alter the original track or the unique-distance estimate. Distance filtering would need a separate approach that preserves genuine route geometry. The original track remains available, the estimate can be edited, and both Basic and Customized modes explain that it needs review. Stationary export rows omit traveling distance.
 
 ## Aggregation assumptions retained
 
@@ -52,11 +52,11 @@ Missing times are treated as midnight for grouping. Default observer count remai
 
 ## Validation
 
-`test/unit/ebirdRules.test.js` covers protocol/completeness combinations, missing effort, counts and source links, real mortality metadata, French TXT dates, date warnings, user splitting, imported-list indexing, primary-purpose edits, synthetic stationary drift, loops, partial backtracking and nearby parallel paths. All former expected failures were replaced with ordinary assertions matching the accepted decisions.
+`test/unit/ebirdRules.test.js` covers protocol/completeness combinations, missing effort, counts and source links, real mortality metadata, multilingual TXT dates and reordered headers, date warnings, user splitting, imported-list indexing, primary-purpose edits, synthetic stationary drift and outliers, sustained movement, sparse tracks, brief excursions, loops, partial backtracking and nearby parallel paths. All former expected failures were replaced with ordinary assertions matching the accepted decisions.
 
 Browser tests exercise cancellation and acknowledgment, dead-bird exclusion with injured-bird retention, splitting a timestamped derivative of the real overnight list, and French TXT import through CSV download. Fixtures and their real/synthetic provenance are documented in `test/fixtures/rules/README.md`.
 
-Golden CSV changes are intentional: unique-distance estimates and Stationary classification change track-based rows; dead and zero-count observations are removed. Two golden fixtures cover the new real source examples. No live eBird upload was performed.
+Golden CSV changes are intentional: unique-distance estimates and Stationary classification change track-based rows; dead and zero-count observations are removed. Seven golden fixtures cover the new real source examples, including six TXT languages. No live eBird upload was performed.
 
 ## References
 

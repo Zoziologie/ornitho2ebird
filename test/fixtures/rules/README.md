@@ -13,3 +13,15 @@ These small examples support rule tests in `test/unit/ebirdRules.test.js`. Golde
 - The GPS-noise test uses the first point of `export_normal_with_trace.json` as its anchor and replaces the trace with deterministic small offsets. All points remain less than 30 m from that anchor while cumulative length exceeds 30 m. This is **synthetic stationary GPS drift**, not measured noise or evidence for a particular GPS-error model.
 
 The original files in Downloads were not modified. The converter now supports the French TXT and preserves mortality metadata. Dead and zero-count records are excluded from golden CSVs.
+
+## Additional real language exports
+
+Two rows per language were selected from the exports supplied later on 4 October 2026. Public/private comments and observer identity fields were cleared; headers, observation ids, dates, coordinates, counts and species were retained.
+
+- `biolovision_german.txt`: `EXPORT_UNIVERSAL_OBS_92023.txt` (365 records).
+- `biolovision_italian.txt`: `EXPORT_UNIVERSAL_OBS_2026.txt` (749 records); `EXPORT_UNIVERSAL_OBS_2026 (1).txt` has the same headers and observation values.
+- `biolovision_spanish.txt`: `EXPORT_UNIVERSAL_OBS_2026 (2).txt` (749 records).
+- `biolovision_polish.txt`: `EXPORT_UNIVERSAL_OBS_2026 (3).txt` (749 records); the header repeats `Dzień` for day and day-of-year.
+- `biolovision_catalan.txt`: `EXPORT_UNIVERSAL_OBS_2026 (4).txt` (749 records).
+
+The last four languages share the same two observations, one timed and one untimed. A test reverses the Polish columns and adds an unused column to verify name-based matching. All five real additions have golden CSVs. GPS-outlier tests are deterministic synthetic cases; they demonstrate the chosen central-95% policy and its brief-excursion limitation, not measured device errors.

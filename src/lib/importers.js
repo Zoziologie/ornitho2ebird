@@ -7,6 +7,53 @@ import {
 } from "./utils";
 import { ebirdCodeForScientificName, getOrnithoEbirdSpeciesCode } from "./taxonomy";
 
+// Match columns by name so reordered columns and extra fields do not change their meaning.
+const biolovisionHeaders = {
+  id: [
+    "Universal observation ID",
+    "ID universel observation",
+    "ID Beobachtung universell",
+    "ID osservazione universale",
+    "SEARCH_EXPORT_TEXT_UNIVERSAL_ID_OBSERVATION",
+    "Uniwersalne ID obserwacji",
+    "ID Universal Observació",
+  ],
+  date: ["Date", "Datum", "Data", "Fecha"],
+  day: ["Day", "Jour", "Tag", "Giorno", "día", "dia"],
+  month: ["Month", "Mois", "Monat", "Mese", "Mes", "Miesiąc"],
+  year: ["Year", "Annee", "Jahr", "Anno", "Año", "Rok", "Any"],
+  time: ["Timing", "Horaire", "Zeitraum", "Orario", "Horario", "Okres czasu", "Horari"],
+  lat: [
+    "Latitude (N)",
+    "Lat (WGS84)",
+    "Geogr. Breite (N)",
+    "Latitudine (N)",
+    "Latitud (N)",
+    "Szerokość geograficzna (N)",
+  ],
+  lon: [
+    "Longitude (E)",
+    "Lon (WGS84)",
+    "Geogr. Länge (E)",
+    "Longitudine (E)",
+    "Longitud (E)",
+    "Długość geograficzna (E)",
+  ],
+  location_name: ["Site", "Lieudit", "Ort", "Località", "Localidad", "Lokalizacja", "Localitat"],
+  common_name: ["Species", "Nom espèce", "Vogelarten", "Specie", "Especie", "Gatunek", "Espècie"],
+  scientific_name: [
+    "Latin name",
+    "Nom latin",
+    "Latin",
+    "Nombre científico",
+    "Nazwa łacińska",
+    "Nom científic",
+  ],
+  count: ["Number", "Nombre", "Anzahl", "Numero", "Número", "Liczebność"],
+  count_precision: ["Estimation", "Schätzung", "Stima", "Estimación", "Szacunek", "Estimació"],
+  comment: ["Comment", "Observation", "Bemerkung", "Nota", "Comentario", "Komentarz", "Comentari"],
+};
+
 const precisionMatchOrnitho = {
   MINIMUM: ">",
   EXACT_VALUE: "=",
@@ -287,34 +334,37 @@ export function parseImportFile(rawText, selectedWebsite) {
       });
     });
   } else if (selectedWebsite.system === "ornitho.net") {
-    const parsed = Papa.parse(rawText, {
-      skipEmptyLines: true,
-      header: true,
-    }).data;
-
-    const headers = Object.keys(parsed[0] || {});
-    if (!headers.includes("Timing") && !headers.includes("Horaire")) {
+    const [headers, ...rows] = Papa.parse(rawText, { skipEmptyLines: true }).data;
+    const columns = Object.fromEntries(
+      Object.entries(biolovisionHeaders).map(([key, aliases]) => [
+        key,
+        headers.findIndex((header) => aliases.includes(header.trim())),
+      ]),
+    );
+    if (
+      ["id", "date", "time", "lat", "lon", "common_name", "scientific_name", "count"].some(
+        (key) => columns[key] < 0,
+      )
+    ) {
       throw new ImportError("importErrorTxtHeader");
     }
 
-    exportData.sightings = parsed.map((sighting) => {
-      const [day, month, year] = sighting.Date.split(".");
+    exportData.sightings = rows.map((row) => {
+      const sighting = Object.fromEntries(
+        Object.entries(columns).map(([key, index]) => [key, row[index] || ""]),
+      );
+      const [day, month, year] = sighting.date.split(".");
       return createSighting({
-        id: sighting["Universal observation ID"] || sighting["ID universel observation"],
+        ...sighting,
         form_id: 0,
         website: selectedWebsite.name,
         source_website_name: selectedWebsite.name,
         system: selectedWebsite.system,
-        date: `${sighting.Year || sighting.Annee || year}-${String(sighting.Month || sighting.Mois || month).padStart(2, "0")}-${String(sighting.Day || sighting.Jour || day).padStart(2, "0")}`,
-        time: sighting.Timing || sighting.Horaire,
-        lat: Number.parseFloat(sighting["Latitude (N)"] || sighting["Lat (WGS84)"]),
-        lon: Number.parseFloat(sighting["Longitude (E)"] || sighting["Lon (WGS84)"]),
-        location_name: sighting.Site || sighting.Lieudit,
-        common_name: sighting.Species || sighting["Nom espèce"],
-        scientific_name: sighting["Latin name"] || sighting["Nom latin"],
-        count: sighting.Estimation === "×" ? "x" : (sighting.Number ?? sighting.Nombre),
-        count_precision: sighting.Estimation,
-        comment: sighting.Comment || sighting.Observation,
+        // Polish repeats “Dzień” for day and day-of-year; use the unambiguous date instead.
+        date: `${sighting.year || year}-${String(sighting.month || month).padStart(2, "0")}-${String(sighting.day || day).padStart(2, "0")}`,
+        lat: Number.parseFloat(sighting.lat),
+        lon: Number.parseFloat(sighting.lon),
+        count: sighting.count_precision === "×" ? "x" : sighting.count,
       });
     });
   } else {

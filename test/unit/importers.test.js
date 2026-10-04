@@ -174,7 +174,7 @@ describe("Observation CSV", () => {
 });
 
 describe("other sources", () => {
-  it("rejects an ornitho.net TXT without the English header", () => {
+  it("rejects an ornitho.net TXT without recognized observation headers", () => {
     expect(
       importError(() => parseImportFile("Datum\tArt\n1\t2", website("data.biolovision.net"))).key,
     ).toBe("importErrorTxtHeader");

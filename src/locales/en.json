@@ -143,7 +143,7 @@
   "importHelpOrnitho": "Export the JSON file of the data you want to convert. Use the link below to get directly the data you need.",
   "importHelpObservation": "Open the Observations page, export your records as CSV, then import that CSV file here.",
   "importHelpBirdlasser": "Export your records from BirdLasser as CSV, then import that CSV file here.",
-  "importHelpOrnithoNet": "Open 'All my sightings', export the results as TXT in English or French, then import that file here.",
+  "importHelpOrnithoNet": "Open 'All my sightings', export the results as TXT, then import that file here. English, French, German, Italian, Spanish, Catalan and Polish headers are supported.",
   "importSuccess": "Data loaded successfully: {lists} and {sightings}",
   "importSuccessLists": "{n} list | {n} lists",
   "importSuccessSightings": "{n} casual observation | {n} casual observations",
@@ -151,7 +151,7 @@
   "importSkippedNoCoordinates": "{n} observation without coordinates was skipped. | {n} observations without coordinates were skipped.",
   "importErrorInvalidJson": "This file is not a valid ornitho JSON export.",
   "importErrorMissingColumns": "This file is missing the expected columns ({columns}). Check that you selected the right source website and exported the file in English.",
-  "importErrorTxtHeader": "The TXT header is not recognized. Export a Biolovision TXT file in English or French.",
+  "importErrorTxtHeader": "The TXT columns are not recognized. Export a Biolovision observation TXT in English, French, German, Italian, Spanish, Catalan or Polish.",
   "importErrorUnsupported": "This source website is not supported.",
   "importErrorUnexpected": "The file could not be read. Check that it matches the selected source website. Details: {detail}",
   "recentDays": "Recent days",
@@ -333,6 +333,6 @@
   "splitByDate": "Split by date",
   "splitDatesConfirm": "Create one checklist per observation date? All records and comments are kept. Start time uses the first sighting on each day. Duration, distance and paths will be cleared because effort cannot be divided reliably; review them after splitting.",
   "splitDatesUnavailable": "Automatic splitting needs an exact date and time for every sighting, with sightings on more than one date. This checklist will remain together unless you edit it.",
-  "uniqueDistanceHelp": "Estimated unique distance: overlapping track segments are excluded when they closely follow the same line. GPS drift and nearby paths can affect the estimate. Review it and adjust the distance if needed.",
+  "uniqueDistanceHelp": "GPS estimates: stationary classification uses the widest separation among the central 95% of track points, ignoring isolated errors. A brief real excursion can also be ignored. Unique distance excludes closely overlapping segments; GPS drift and nearby paths can affect it. Review the track and adjust the distance if needed.",
   "noEligibleRecords": "No observations remain eligible for CSV export. Review the excluded records below."
 }

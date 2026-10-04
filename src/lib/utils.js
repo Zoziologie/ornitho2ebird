@@ -157,6 +157,29 @@ export function checklistReview(form, sightings) {
   };
 }
 
+// Robust spatial extent, independent of the first fix. Retain at least 95% of positions.
+// This estimates movement, not GPS certainty: a brief genuine excursion can be trimmed too.
+export function trackExtentKm(path) {
+  const center = [0, 1].map((axis) => {
+    const values = path.map((point) => point[axis]).sort((a, b) => a - b);
+    return (
+      (values[Math.floor((values.length - 1) / 2)] + values[Math.floor(values.length / 2)]) / 2
+    );
+  });
+  const distances = path.map((point) => haversineDistanceKm(...center, ...point));
+  const cutoff = [...distances].sort((a, b) => a - b)[
+    path.length - Math.floor(path.length * 0.05) - 1
+  ];
+  const retained = path.filter((point, index) => distances[index] <= cutoff);
+  let extent = 0;
+  for (let index = 0; index < retained.length; index += 1) {
+    for (let other = 0; other < index; other += 1) {
+      extent = Math.max(extent, haversineDistanceKm(...retained[index], ...retained[other]));
+    }
+  }
+  return extent;
+}
+
 export function protocol(form) {
   const stationaryDistanceThresholdKm = 0.03;
 
@@ -187,10 +210,7 @@ export function protocol(form) {
     const stationary =
       Number(form.distance) === 0 ||
       (form.path?.length > 1
-        ? form.path.every(
-            (point) =>
-              haversineDistanceKm(...form.path[0], ...point) <= stationaryDistanceThresholdKm,
-          )
+        ? trackExtentKm(form.path) <= stationaryDistanceThresholdKm
         : Number(form.distance) <= stationaryDistanceThresholdKm);
     return !stationary
       ? { name: "Traveling", letter: "T", variant: "success" }

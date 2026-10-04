@@ -18,6 +18,11 @@ const FIXTURES = [
   ["birdlasser_trip_kenya_2022.csv", "birdlasser"],
   ["observation_org.csv", "observation.org"],
   ["rules/biolovision_french.txt", "data.biolovision.net"],
+  ["rules/biolovision_german.txt", "data.biolovision.net"],
+  ["rules/biolovision_italian.txt", "data.biolovision.net"],
+  ["rules/biolovision_spanish.txt", "data.biolovision.net"],
+  ["rules/biolovision_polish.txt", "data.biolovision.net"],
+  ["rules/biolovision_catalan.txt", "data.biolovision.net"],
   ["rules/ornitho_mortality_overnight.json", "ornitho.ch"],
 ];
 

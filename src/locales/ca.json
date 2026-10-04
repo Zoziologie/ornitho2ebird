@@ -143,7 +143,7 @@
   "importHelpOrnitho": "Exporta el fitxer JSON de les dades que vols convertir. Fes servir l'enllaç de sota per obtenir directament les dades que necessites.",
   "importHelpObservation": "Obre la pàgina Observations, exporta les dades en CSV i després importa aquest fitxer CSV aquí.",
   "importHelpBirdlasser": "Exporta les dades des de BirdLasser en CSV i després importa aquest fitxer CSV aquí.",
-  "importHelpOrnithoNet": "Obre “Totes les meves observacions”, exporta els resultats com a TXT en anglès o francès i importa el fitxer aquí.",
+  "importHelpOrnithoNet": "Obre “Totes les meves observacions”, exporta els resultats com a TXT i importa el fitxer aquí. S’admeten capçaleres en català, anglès, francès, alemany, italià, castellà i polonès.",
   "importSuccess": "Dades carregades: {lists} i {sightings}",
   "importSuccessLists": "{n} llista | {n} llistes",
   "importSuccessSightings": "{n} observació ocasional | {n} observacions ocasionals",
@@ -151,7 +151,7 @@
   "importSkippedNoCoordinates": "S'ha omès {n} observació sense coordenades. | S'han omès {n} observacions sense coordenades.",
   "importErrorInvalidJson": "Aquest fitxer no és una exportació JSON d'ornitho vàlida.",
   "importErrorMissingColumns": "En aquest fitxer falten les columnes esperades ({columns}). Comproveu que heu triat el lloc web d'origen correcte i que heu exportat el fitxer en anglès.",
-  "importErrorTxtHeader": "No es reconeix la capçalera TXT. Exporta un fitxer TXT Biolovision en anglès o francès.",
+  "importErrorTxtHeader": "No es reconeixen les columnes TXT. Exporta les observacions Biolovision com a TXT en català, anglès, francès, alemany, italià, castellà o polonès.",
   "importErrorUnsupported": "Aquest lloc web d'origen no és compatible.",
   "importErrorUnexpected": "No s'ha pogut llegir el fitxer. Comproveu que correspon al lloc web d'origen triat. Detalls: {detail}",
   "recentDays": "Dies recents",
@@ -333,6 +333,6 @@
   "splitByDate": "Separa per data",
   "splitDatesConfirm": "Vols crear una llista per cada data d’observació? Es conserven totes les observacions i els comentaris. L’hora d’inici és la de la primera observació del dia. S’esborraran la durada, la distància i els traçats perquè l’esforç no es pot repartir de manera fiable; revisa’ls després de separar les llistes.",
   "splitDatesUnavailable": "La separació automàtica requereix una data i una hora precises per a cada observació i observacions en més d’una data. La llista es mantindrà unida si no la modifiques.",
-  "uniqueDistanceHelp": "Distància única estimada: els segments superposats s’exclouen quan segueixen gairebé la mateixa línia. Els errors GPS i els camins propers poden afectar l’estimació. Revisa-la i ajusta la distància si cal.",
+  "uniqueDistanceHelp": "Estimacions GPS: el protocol estacionari utilitza la separació màxima entre el 95% dels punts centrals del traçat i ignora els errors aïllats. També pot ignorar un desplaçament real breu. La distància única exclou els segments que se superposen estretament; la deriva GPS i els camins propers poden afectar-la. Revisa el traçat i ajusta la distància si cal.",
   "noEligibleRecords": "No queda cap observació apta per a l’exportació CSV. Revisa els registres exclosos a continuació."
 }
