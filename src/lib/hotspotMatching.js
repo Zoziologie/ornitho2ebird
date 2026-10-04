@@ -247,3 +247,5 @@ export function createHotspotLoader(request = fetchJson) {
     return [...hotspots.values()];
   };
 }
+
+export const loadHotspots = createHotspotLoader();

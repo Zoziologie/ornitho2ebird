@@ -1,4 +1,5 @@
 import { markRaw, reactive, readonly, toRaw } from "vue";
+import { hotspotEvidence, rankHotspots } from "./hotspotMatching";
 import {
   applyDefaultAutomaticAssignment,
   buildForm,
@@ -119,7 +120,6 @@ export function createStore() {
         ["location_name", "lat", "lon"].some((key) => key in changes && changes[key] !== form[key])
       ) {
         form.hotspot_id = "";
-        form.location_before_hotspot = null;
       }
       Object.assign(form, changes);
       if (changes.full_form === true) form.primary_purpose = true;
@@ -129,14 +129,7 @@ export function createStore() {
   }
 
   function selectHotspot(formId, hotspot) {
-    const form = findForm(formId);
     updateForm(formId, {
-      location_before_hotspot: form.location_before_hotspot || {
-        location_name: form.location_name,
-        lat: form.lat,
-        lon: form.lon,
-        hotspot_id: form.hotspot_id,
-      },
       hotspot_id: hotspot.locId,
       location_name: normalizeLocationName(hotspot.locName),
       lat: hotspot.lat,
@@ -144,11 +137,23 @@ export function createStore() {
     });
   }
 
-  function restoreLocation(formId) {
-    updateForm(formId, {
-      ...findForm(formId).location_before_hotspot,
-      location_before_hotspot: null,
-    });
+  async function matchHotspot(form, loadHotspots) {
+    form = toRaw(form);
+    if (form.hotspot_id) return;
+    const evidence = () =>
+      hotspotEvidence(form, [
+        ...(data.formsSightings[form.id - 1] || []),
+        ...data.sightings.filter((sighting) => sighting.form_id === form.id),
+      ]);
+    const signature = () =>
+      JSON.stringify([form.location_name, form.lat, form.lon, form.hotspot_id, evidence()]);
+    const before = signature();
+    const hotspots = await loadHotspots(evidence());
+    // Import replacement and manual edits take precedence over an in-flight lookup.
+    if (toRaw(findForm(form.id)) !== form || signature() !== before) return;
+    updateForm(form.id, { hotspots: markRaw(hotspots) });
+    const ranking = rankHotspots(evidence(), hotspots);
+    if (ranking.status === "clear") selectHotspot(form.id, ranking.candidates[0].hotspot);
   }
 
   // Traces can be large and are only ever replaced as a whole, so they are not made reactive.
@@ -219,7 +224,7 @@ export function createStore() {
     moveForm,
     updateForm,
     selectHotspot,
-    restoreLocation,
+    matchHotspot,
     setFormPath,
     splitFormByDate,
     fillNumberObserver,

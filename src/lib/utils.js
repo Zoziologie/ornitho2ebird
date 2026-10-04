@@ -517,7 +517,6 @@ export function buildForm(form, id, options = {}) {
     exportable: form.exportable !== false,
     location_name: normalizeLocationName(form.location_name, `Checklist ${id}`),
     hotspot_id: form.hotspot_id || "",
-    location_before_hotspot: form.location_before_hotspot || null,
     lat: form.hotspot_id ? form.lat : mathRound(form.lat, 6),
     lon: form.hotspot_id ? form.lon : mathRound(form.lon, 6),
     date: form.date || "",

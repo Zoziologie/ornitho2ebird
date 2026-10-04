@@ -32,6 +32,7 @@ import { setI18nLanguage } from "./i18n";
 import { assembleImport } from "./lib/utils";
 import { resolveBasemap } from "./lib/basemaps";
 import { store } from "./lib/store";
+import { loadHotspots } from "./lib/hotspotMatching";
 import { confirmDialog } from "./lib/dialog";
 import { WORKFLOW_STEPS } from "./lib/workflow";
 import LinkedText from "./components/LinkedText.vue";
@@ -125,6 +126,18 @@ watch(
 
 const website = ref(null);
 const { forms, sightings, formsSightings } = toRefs(store.state);
+const hotspotLookups = ref(0);
+// Match newly imported or created checklists once, in both workflow modes.
+watch(
+  () => forms.value.map((form) => form),
+  async (current, previous = []) => {
+    const added = current.filter((form) => !previous.includes(form));
+    if (!added.length) return;
+    hotspotLookups.value += added.length;
+    await Promise.allSettled(added.map((form) => store.matchHotspot(form, loadHotspots)));
+    hotspotLookups.value -= added.length;
+  },
+);
 const selectedFormId = ref(null);
 const settingsOpen = ref(false);
 const settingsFocusSection = ref("");
@@ -475,6 +488,7 @@ function openSettingsForSection(section) {
       <ExportPanel
         v-if="hasImportedData"
         :forms="forms"
+        :matching-hotspots="hotspotLookups > 0"
         :sightings="sightings"
         :forms-sightings="formsSightings"
         :mapbox-token="settings.mapboxToken"

@@ -28,6 +28,7 @@ import {
 } from "../lib/taxonomy";
 
 const props = defineProps({
+  matchingHotspots: { type: Boolean, default: false },
   forms: {
     type: Array,
     required: true,
@@ -497,7 +498,7 @@ watch(
 );
 
 async function downloadFile() {
-  if (!exportState.value.csv) {
+  if (!exportState.value.csv || props.matchingHotspots) {
     return;
   }
 
@@ -821,6 +822,7 @@ async function downloadFile() {
               type="button"
               :disabled="
                 interactiveMapPublishing ||
+                matchingHotspots ||
                 exportState.errors.length > 0 ||
                 (taxonomyNeededForExport && taxonomyStatus === 'loading')
               "

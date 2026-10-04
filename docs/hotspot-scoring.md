@@ -1,14 +1,15 @@
-# Experimental hotspot scoring (#60)
+# Automatic hotspot matching (#60)
 
-Customized mode shows up to five ranked hotspot suggestions below the checklist map.
-The selected location changes only when the user chooses **Use as checklist location**.
-**Restore previous location** undoes hotspot choices, preserving checklist membership,
-effort and species. Editing the name or moving the location discards this undo snapshot,
-so undo cannot overwrite a later manual location edit.
+Newly imported and created checklists are matched once in both modes. Clear winners use
+the hotspot’s exact coordinates and eBird ID; other results keep the original location.
+Manual location edits and replacement imports take precedence over pending lookups.
+The export waits for lookups to finish; failed requests preserve the original location.
+Customized mode retains manual hotspot selection on the map. No scores, comparison
+panels or report downloads are exposed in the interface.
 
 The same hotspot may rank first for several checklists. There is no allocation constraint.
-A high score is an experimental geographic fit, not a probability or a verified site boundary.
-Automatic assignment is deliberately deferred until real examples have been reviewed.
+A high score describes geographic fit, not a probability or a verified site boundary.
+Automatic selection now uses the confidence rule calibrated below.
 
 ## Evidence and candidate discovery
 
@@ -61,9 +62,8 @@ checklist-marker-only fallback. The final score is:
 100 * evidence_quality * (0.65 * alignment + 0.35 * spatial_support)
 ```
 
-The panel shows the winning interpretation, `D50`, `D95`, and the lead over the runner-up.
-The report retains all candidates and component values so alternative weights can be
-compared. These scales and weights are starting hypotheses, not empirically calibrated defaults.
+The scoring result retains the winning interpretation, `D50`, `D95`, and the lead over
+the runner-up for offline analysis. These scales and weights are starting hypotheses, not empirically calibrated defaults.
 
 The updated confidence categories use the maintainer's labelled comparison: a best score
 of at least 25 and a lead of at least 40% of that score. This relative lead compares the
@@ -71,24 +71,11 @@ winner with its competitors rather than accepting every candidate within a dista
 An earliest sighting interpreted as a route start always remains for manual review: bird
 positions do not establish the observer's starting point. A single sighting can support a
 clear geographic match when competing sites fit much worse; marker-only evidence remains
-insufficient. None of these categories selects a location.
+insufficient. Only the clear category selects a location.
 Scores can remain high for an inappropriate site, especially when nearby general hotspots
 and subsites cannot be distinguished geographically. Human review remains necessary.
 
-## Local comparison report
-
-**Download comparison for all checklists** produces `hotspot-comparison.json`. It snapshots
-all checklists before querying, includes their current locations and protocols, evidence,
-rankings and scoring version, and changes neither locations nor CSVs. A failed lookup
-aborts the report with a visible retry message; partial data are not represented as complete.
-The file contains observation positions and stays local. No report is published or sent away;
-only candidate search centres are sent to eBird, as for hotspot discovery in the map.
-
-Use the report to label whether a top candidate is correct, incorrect, or ambiguous before
-choosing score scales or enabling automatic assignment. Review parking/trailhead and lake
-cases, sighting-only checklists, distant birds, small samples, repeated positions, adjacent
-hotspots, unsuitable lone candidates, and several checklists sharing a hotspot. Test chosen
-parameters on other examples rather than only those used to tune them.
+## Offline calibration report
 
 ## Verification
 
@@ -97,9 +84,9 @@ substantial distant group, duplicate positions/bird counts, small samples, close
 a distant lone candidate, uneven GPS sampling, spikes, timestamp ambiguity, discovery cache
 reuse and retries. These are controlled geographic examples, not a labelled real-world benchmark.
 
-The browser regression verifies selecting a suggestion reaches the CSV as the hotspot ID,
-undo restores the original CSV, and downloading the comparison preserves the export.
-Existing golden CSVs remain unchanged until a user explicitly accepts a hotspot.
+Browser regressions verify automatic matching in Basic and Customized modes reaches
+the CSV as the hotspot ID with exact coordinates, ambiguous choices preserve original
+locations, and manual edits clear the association. Offline golden files do not query eBird.
 
 A local run on 4 October 2026 compared all 70 checklists from `export_mixed_large.json`
 with live eBird candidates: 16 clear leaders, 28 weak fits, 25 with insufficient evidence,
@@ -126,8 +113,7 @@ route. If their median exceeds 1 km, ignore that route for hotspot matching and 
 This catches the copied/unrelated tracks in 22, 24 and 31, while a minority of distant birds
 cannot trigger rejection. It is an evidence-consistency heuristic, not a hotspot distance
 cutoff. A genuine route can still be rejected when most recorded birds are distant. The
-original track, checklist effort and observations are preserved, and the panel explains
-that sightings were used. Candidate discovery now finds Luxburger Bucht for 24 and Plage
+original track, checklist effort and observations are preserved. Candidate discovery now finds Luxburger Bucht for 24 and Plage
 de la Dullive for 31.
 
 Run `npm run hotspots:calibrate` to replay the import offline against the frozen inventory
@@ -146,4 +132,5 @@ but the lead over its competitor remains too small for a clear match.
 These figures describe one reviewed import, including user-acceptable abstentions. They
 are not a probability or an accuracy estimate for new users. The no-match in 26 lies close
 to the chosen relative-lead boundary, and geographically adjacent sites can occur across
-the split. More independent examples are needed before enabling automatic selection.
+the split. Further independent reviews can refine this rule; current automatic selection uses the
+calibrated clear category.

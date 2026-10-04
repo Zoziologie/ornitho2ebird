@@ -166,26 +166,6 @@ describe("store", () => {
     expect(store.state.forms[1]).toMatchObject({ hotspot_id: "", lat: 46.4, lon: 7.2 });
   });
 
-  it("can undo hotspot choices without changing sightings or effort", () => {
-    const store = loadedStore();
-    const previous = { ...store.state.forms[1] };
-    const assignments = formIdsOfSightings(store);
-    store.selectHotspot(2, { locId: "L1", locName: "First", lat: 46.1234567, lng: 7.1234567 });
-    store.selectHotspot(2, { locId: "L2", locName: "Second", lat: 46.2, lng: 7.2 });
-    expect(store.state.forms[1].location_before_hotspot.location_name).toBe(previous.location_name);
-    store.updateForm(2, { duration: 30 });
-    store.restoreLocation(2);
-    expect(store.state.forms[1]).toMatchObject({
-      location_name: previous.location_name,
-      lat: previous.lat,
-      lon: previous.lon,
-      hotspot_id: previous.hotspot_id,
-      location_before_hotspot: null,
-      duration: 30,
-    });
-    expect(formIdsOfSightings(store)).toEqual(assignments);
-  });
-
   it("updateForm changes the given fields of one checklist", () => {
     const store = loadedStore();
     store.updateForm(2, { location_name: "Renamed", exportable: false });
@@ -214,5 +194,68 @@ describe("store", () => {
     store.updateForm(2, { number_observer: 3 });
     store.fillNumberObserver(5);
     expect(store.state.forms.map((form) => form.number_observer)).toEqual([5, 3]);
+  });
+});
+
+describe("automatic hotspot selection", () => {
+  const hotspot = { locId: "L1", locName: "Local site", lat: 46.50000001, lng: 7.50000002 };
+
+  it("selects a clear winner without changing membership or effort", async () => {
+    const store = loadedStore();
+    const previous = { ...store.state.forms[1] };
+    const assignments = formIdsOfSightings(store);
+    await store.matchHotspot(store.state.forms[1], async () => [hotspot]);
+    expect(store.state.forms[1]).toMatchObject({
+      hotspot_id: "L1",
+      location_name: "Local site",
+      lat: hotspot.lat,
+      lon: hotspot.lng,
+      duration: previous.duration,
+      path: previous.path,
+    });
+    expect(formIdsOfSightings(store)).toEqual(assignments);
+  });
+
+  it("keeps the location when candidates overlap or discovery fails", async () => {
+    const store = loadedStore();
+    const previous = { ...store.state.forms[1] };
+    await store.matchHotspot(store.state.forms[1], async () => [
+      hotspot,
+      { ...hotspot, locId: "L2" },
+    ]);
+    expect(store.state.forms[1]).toMatchObject({
+      location_name: previous.location_name,
+      lat: previous.lat,
+      lon: previous.lon,
+      hotspot_id: "",
+    });
+    await expect(
+      store.matchHotspot(store.state.forms[1], async () => {
+        throw new Error("offline");
+      }),
+    ).rejects.toThrow("offline");
+    expect(store.state.forms[1].hotspot_id).toBe("");
+  });
+
+  it("does not overwrite edits or a replacement import after a delayed lookup", async () => {
+    for (const change of ["location", "sightings", "import"]) {
+      const store = loadedStore();
+      let finish;
+      const pending = store.matchHotspot(
+        store.state.forms[1],
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      );
+      if (change === "location") store.updateForm(2, { location_name: "Manual choice" });
+      if (change === "sightings")
+        store.assignSightings([store.state.sightings[0], store.state.sightings[1]], 0);
+      if (change === "import")
+        store.loadImport({ forms: [buildForm({ location_name: "New import" }, 2)] });
+      finish([hotspot]);
+      await pending;
+      expect(store.state.forms.find((form) => form.id === 2).hotspot_id).toBe("");
+    }
   });
 });
