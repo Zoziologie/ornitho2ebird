@@ -1,6 +1,58 @@
 import Papa from "papaparse";
-import { buildSpeciesCommentTemplate, createSighting, distanceFromPath, mathMode } from "./utils";
+import {
+  buildSpeciesCommentTemplate,
+  createSighting,
+  uniqueDistanceFromPath,
+  mathMode,
+} from "./utils";
 import { ebirdCodeForScientificName, getOrnithoEbirdSpeciesCode } from "./taxonomy";
+
+// Match columns by name so reordered columns and extra fields do not change their meaning.
+const biolovisionHeaders = {
+  id: [
+    "Universal observation ID",
+    "ID universel observation",
+    "ID Beobachtung universell",
+    "ID osservazione universale",
+    "SEARCH_EXPORT_TEXT_UNIVERSAL_ID_OBSERVATION",
+    "Uniwersalne ID obserwacji",
+    "ID Universal Observació",
+  ],
+  date: ["Date", "Datum", "Data", "Fecha"],
+  day: ["Day", "Jour", "Tag", "Giorno", "día", "dia"],
+  month: ["Month", "Mois", "Monat", "Mese", "Mes", "Miesiąc"],
+  year: ["Year", "Annee", "Jahr", "Anno", "Año", "Rok", "Any"],
+  time: ["Timing", "Horaire", "Zeitraum", "Orario", "Horario", "Okres czasu", "Horari"],
+  lat: [
+    "Latitude (N)",
+    "Lat (WGS84)",
+    "Geogr. Breite (N)",
+    "Latitudine (N)",
+    "Latitud (N)",
+    "Szerokość geograficzna (N)",
+  ],
+  lon: [
+    "Longitude (E)",
+    "Lon (WGS84)",
+    "Geogr. Länge (E)",
+    "Longitudine (E)",
+    "Longitud (E)",
+    "Długość geograficzna (E)",
+  ],
+  location_name: ["Site", "Lieudit", "Ort", "Località", "Localidad", "Lokalizacja", "Localitat"],
+  common_name: ["Species", "Nom espèce", "Vogelarten", "Specie", "Especie", "Gatunek", "Espècie"],
+  scientific_name: [
+    "Latin name",
+    "Nom latin",
+    "Latin",
+    "Nombre científico",
+    "Nazwa łacińska",
+    "Nom científic",
+  ],
+  count: ["Number", "Nombre", "Anzahl", "Numero", "Número", "Liczebność"],
+  count_precision: ["Estimation", "Schätzung", "Stima", "Estimación", "Szacunek", "Estimació"],
+  comment: ["Comment", "Observation", "Bemerkung", "Nota", "Comentario", "Komentarz", "Comentari"],
+};
 
 const precisionMatchOrnitho = {
   MINIMUM: ">",
@@ -145,6 +197,8 @@ function ornithoSightingsTransformation(sightings, formId, selectedWebsite) {
       count_precision: precisionMatchOrnitho[observer.estimation_code],
       atlas_code: observer.atlas_code?.["#text"] || "",
       auditory_contact: observer.auditory_contact,
+      has_death: observer.has_death || "",
+      extended_info: observer.extended_info || {},
       comment,
     });
   });
@@ -182,14 +236,15 @@ export function parseImportFile(rawText, selectedWebsite) {
       const date = form.sightings[0].observers[0].timing["@ISO8601"].split("T")[0];
       const timeStart = `${date}T${form.time_start}`;
       const timeStop = `${date}T${form.time_stop}`;
-      let duration = (new Date(timeStop) - new Date(timeStart)) / 1000 / 60;
+      let duration = (new Date(`${timeStop}Z`) - new Date(`${timeStart}Z`)) / 1000 / 60;
+      const crossesMidnight = duration < 0;
       if (duration < 0) {
         // The checklist ended after midnight.
         duration += 24 * 60;
       }
 
       const path = parseWktLineString(form.protocol?.wkt || form.trace);
-      const distance = path ? distanceFromPath(path) : null;
+      const distance = path ? uniqueDistanceFromPath(path) : null;
 
       return {
         id: index + 1,
@@ -200,6 +255,7 @@ export function parseImportFile(rawText, selectedWebsite) {
         date,
         time: form.time_start,
         duration,
+        crosses_midnight: crossesMidnight,
         distance,
         number_observer: null,
         full_form: form.full_form === "1",
@@ -278,33 +334,37 @@ export function parseImportFile(rawText, selectedWebsite) {
       });
     });
   } else if (selectedWebsite.system === "ornitho.net") {
-    const parsed = Papa.parse(rawText, {
-      skipEmptyLines: true,
-      header: true,
-    }).data;
-
-    if (!parsed[0]?.Timing) {
+    const [headers, ...rows] = Papa.parse(rawText, { skipEmptyLines: true }).data;
+    const columns = Object.fromEntries(
+      Object.entries(biolovisionHeaders).map(([key, aliases]) => [
+        key,
+        headers.findIndex((header) => aliases.includes(header.trim())),
+      ]),
+    );
+    if (
+      ["id", "date", "time", "lat", "lon", "common_name", "scientific_name", "count"].some(
+        (key) => columns[key] < 0,
+      )
+    ) {
       throw new ImportError("importErrorTxtHeader");
     }
 
-    exportData.sightings = parsed.map((sighting) => {
-      const dateSplit = sighting.Date.split(".");
+    exportData.sightings = rows.map((row) => {
+      const sighting = Object.fromEntries(
+        Object.entries(columns).map(([key, index]) => [key, row[index] || ""]),
+      );
+      const [day, month, year] = sighting.date.split(".");
       return createSighting({
-        id: sighting["Universal observation ID"],
+        ...sighting,
         form_id: 0,
         website: selectedWebsite.name,
         source_website_name: selectedWebsite.name,
         system: selectedWebsite.system,
-        date: `${dateSplit[2]}-${dateSplit[0]}-${dateSplit[1]}`,
-        time: sighting.Timing,
-        lat: Number.parseFloat(sighting["Latitude (N)"]),
-        lon: Number.parseFloat(sighting["Longitude (E)"]),
-        location_name: sighting.Site,
-        common_name: sighting.Species,
-        scientific_name: sighting["Latin name"],
-        count: sighting.Estimation === "×" ? "x" : sighting.Number,
-        count_precision: sighting.Estimation,
-        comment: sighting.Comment,
+        // Polish repeats “Dzień” for day and day-of-year; use the unambiguous date instead.
+        date: `${sighting.year || year}-${String(sighting.month || month).padStart(2, "0")}-${String(sighting.day || day).padStart(2, "0")}`,
+        lat: Number.parseFloat(sighting.lat),
+        lon: Number.parseFloat(sighting.lon),
+        count: sighting.count_precision === "×" ? "x" : sighting.count,
       });
     });
   } else {

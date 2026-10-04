@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isReactive, isReadonly } from "vue";
 import { createStore } from "../../src/lib/store";
-import { buildForm, createSighting, distanceFromPath } from "../../src/lib/utils";
+import { buildForm, createSighting, uniqueDistanceFromPath } from "../../src/lib/utils";
 
 const template = { short: "s", long: "l", limit: 4 };
 
@@ -167,7 +167,7 @@ describe("store", () => {
     store.setFormPath(2, path);
     expect(store.state.forms[1].path).toBe(path);
     expect(isReactive(store.state.forms[1].path)).toBe(false);
-    expect(store.state.forms[1].distance).toBe(distanceFromPath(path));
+    expect(store.state.forms[1].distance).toBe(uniqueDistanceFromPath(path));
   });
 
   it("fillNumberObserver sets only the missing numbers of observers", () => {

@@ -23,7 +23,7 @@ import {
   pointFeature,
 } from "../lib/maps";
 import { basemapGroups } from "../lib/basemaps";
-import { distanceFromPath, groupByLocation, mathRound } from "../lib/utils";
+import { uniqueDistanceFromPath, groupByLocation, mathRound } from "../lib/utils";
 
 const props = defineProps({
   // The selected checklist and its observations.
@@ -53,7 +53,7 @@ let hoverLabel = null;
 
 const drawing = ref(false);
 const drawPoints = ref([]);
-const drawDistance = computed(() => distanceFromPath(drawPoints.value));
+const drawDistance = computed(() => uniqueDistanceFromPath(drawPoints.value));
 
 const color = (formId) => checklistColor(formId, CHECKLIST_COLORS, UNASSIGNED_COLOR);
 // The count is written in the group's colour on white; yellow is too light for that.

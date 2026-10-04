@@ -1,7 +1,13 @@
 <script setup>
 import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatNumber, mathRound } from "../lib/utils";
+import {
+  checklistReview,
+  formatNumber,
+  isExportableSighting,
+  mortalityStatus,
+  mathRound,
+} from "../lib/utils";
 import {
   buildExportRows,
   exportableFormsOf,
@@ -9,7 +15,7 @@ import {
   rowsToCsv,
 } from "../lib/exportCsv";
 import { getAnalytics, trackEvent } from "../lib/analytics";
-import { alertDialog } from "../lib/dialog";
+import { alertDialog, confirmDialog } from "../lib/dialog";
 import LinkedText from "./LinkedText.vue";
 import { store } from "../lib/store";
 import { createInteractiveMapGist } from "../lib/interactiveMap";
@@ -97,10 +103,35 @@ const exportableSightingsByFormId = computed(() =>
   groupSightingsByForm(exportableForms.value, props.sightings, props.formsSightings),
 );
 
+const dateReviews = computed(() =>
+  exportableForms.value
+    .map(({ form }) => ({
+      form,
+      ...checklistReview(form, exportableSightingsByFormId.value.get(form.id) || []),
+    }))
+    .filter((review) => review.dateWarning),
+);
+const excludedSightings = computed(() =>
+  [...exportableSightingsByFormId.value.values()]
+    .flat()
+    .filter((sighting) => !isExportableSighting(sighting)),
+);
+const uncertainMortality = computed(() =>
+  [...exportableSightingsByFormId.value.values()]
+    .flat()
+    .filter(
+      (sighting) => isExportableSighting(sighting) && mortalityStatus(sighting) === "unknown",
+    ),
+);
+
+async function splitChecklist(formId) {
+  if (await confirmDialog(t("splitDatesConfirm"))) store.splitFormByDate(formId);
+}
+
 const exportSpeciesCodes = computed(() => {
   const codes = new Set();
   exportableSightingsByFormId.value.forEach((group) => {
-    group.forEach((sighting) => {
+    group.filter(isExportableSighting).forEach((sighting) => {
       if (sighting.ebird_species_code) {
         codes.add(sighting.ebird_species_code);
       }
@@ -254,7 +285,7 @@ const speciesToMatchOnce = computed(() => {
 
   const byName = new Map();
   exportableSightingsByFormId.value.forEach((group) => {
-    group.forEach((sighting) => {
+    group.filter(isExportableSighting).forEach((sighting) => {
       const code = sighting.ebird_species_code;
       if (code in MANUAL_MATCH_TAXA && taxonByCode.value.has(code)) {
         const { sciName, comName } = MANUAL_MATCH_TAXA[code];
@@ -283,9 +314,12 @@ watch(
 );
 
 const exportSummaryStats = computed(() => {
+  const includedForms = exportableForms.value.filter(({ form }) =>
+    (exportableSightingsByFormId.value.get(form.id) || []).some(isExportableSighting),
+  );
   const protocolCounts = new Map();
 
-  exportableForms.value.forEach(({ protocolState }) => {
+  includedForms.forEach(({ protocolState }) => {
     protocolCounts.set(protocolState.name, (protocolCounts.get(protocolState.name) || 0) + 1);
   });
 
@@ -302,12 +336,14 @@ const exportSummaryStats = computed(() => {
       .map((row) => row.common_name || `${row.Genus} ${row.Species}`.trim())
       .filter(Boolean),
   ).size;
-  const completeChecklists = exportableForms.value.filter(({ form }) => form.full_form).length;
-  const completePercent = exportableForms.value.length
-    ? Math.round((completeChecklists / exportableForms.value.length) * 100)
+  const completeChecklists = includedForms.filter(
+    ({ form }) => form.primary_purpose && form.full_form,
+  ).length;
+  const completePercent = includedForms.length
+    ? Math.round((completeChecklists / includedForms.length) * 100)
     : 0;
   const totalLocations = new Set(
-    exportableForms.value.map(({ form }) => {
+    includedForms.map(({ form }) => {
       const latitude = Number.isFinite(Number(form.lat)) ? Number(form.lat).toFixed(5) : "";
       const longitude = Number.isFinite(Number(form.lon)) ? Number(form.lon).toFixed(5) : "";
       return `${String(form.location_name || "").trim()}|${latitude}|${longitude}`;
@@ -316,7 +352,7 @@ const exportSummaryStats = computed(() => {
 
   return {
     protocolItems,
-    totalChecklists: exportableForms.value.length,
+    totalChecklists: includedForms.length,
     totalSpecies,
     totalSightings: exportState.value.rows.length,
     completeChecklists,
@@ -446,7 +482,7 @@ async function publishInteractiveMapsForExport() {
 }
 
 const exportReadiness = computed(() =>
-  !exportableForms.value.length
+  !exportState.value.rows.length
     ? "no_checklists"
     : taxonomyNeededForExport.value && taxonomyStatus.value === "loading"
       ? "loading_taxonomy"
@@ -469,6 +505,23 @@ async function downloadFile() {
     alertDialog(t("exportTaxonomyLoading"));
     return;
   }
+
+  const warnings = [
+    ...dateReviews.value.map(({ form }) =>
+      t("exportDateWarning", { name: `${form.id}. ${form.location_name}`, date: form.date }),
+    ),
+    excludedSightings.value.length
+      ? t("exportExcludedWarning", { count: excludedSightings.value.length })
+      : "",
+    uncertainMortality.value.length
+      ? t("exportMortalityWarning", { count: uncertainMortality.value.length })
+      : "",
+  ].filter(Boolean);
+  if (
+    warnings.length &&
+    !(await confirmDialog(`${warnings.join("\n\n")}\n\n${t("exportWarningsConfirm")}`))
+  )
+    return;
 
   const interactiveMapsReady = await publishInteractiveMapsForExport();
   if (!interactiveMapsReady || !exportState.value.csv) {
@@ -513,6 +566,61 @@ async function downloadFile() {
       </div>
 
       <div v-else>
+        <p v-if="!exportState.rows.length" class="alert alert-secondary">
+          {{ t("noEligibleRecords") }}
+        </p>
+        <p v-if="exportableForms.some(({ form }) => form.path)" class="small text-muted">
+          {{ t("uniqueDistanceHelp") }}
+        </p>
+        <div v-for="review in dateReviews" :key="review.form.id" class="alert alert-warning">
+          <p>
+            {{
+              t("exportDateWarning", {
+                name: `${review.form.id}. ${review.form.location_name}`,
+                date: review.form.date,
+              })
+            }}
+          </p>
+          <button
+            v-if="review.canSplit"
+            type="button"
+            class="btn btn-sm btn-outline-dark"
+            @click="splitChecklist(review.form.id)"
+          >
+            {{ t("splitByDate") }}
+          </button>
+          <p v-else class="small mb-0">{{ t("splitDatesUnavailable") }}</p>
+        </div>
+        <div
+          v-if="excludedSightings.length || uncertainMortality.length"
+          class="alert alert-warning"
+        >
+          <p v-if="excludedSightings.length">
+            {{ t("exportExcludedWarning", { count: excludedSightings.length }) }}
+          </p>
+          <p v-if="uncertainMortality.length">
+            {{ t("exportMortalityWarning", { count: uncertainMortality.length }) }}
+          </p>
+          <ul class="mb-0">
+            <li
+              v-for="sighting in [...excludedSightings, ...uncertainMortality]"
+              :key="`${sighting.form_id}-${sighting.id}`"
+            >
+              <a
+                v-if="sighting.source_record_url"
+                :href="sighting.source_record_url"
+                target="_blank"
+                rel="noopener"
+                >{{ sighting.common_name }}</a
+              >
+              <span v-else>{{ sighting.common_name }}</span>
+              — {{ sighting.date }}, {{ sighting.count }}
+              <span v-if="sighting.extended_info?.mortality?.comment">
+                — {{ sighting.extended_info.mortality.comment }}</span
+              >
+            </li>
+          </ul>
+        </div>
         <div
           v-if="taxonomyNeededForExport && taxonomyStatus === 'loading'"
           class="alert alert-secondary mb-3"

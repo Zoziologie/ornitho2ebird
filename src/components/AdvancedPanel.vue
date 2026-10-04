@@ -19,7 +19,8 @@ import { alertDialog, confirmDialog } from "../lib/dialog";
 import {
   buildChecklistPayloadFromSightings,
   buildSpeciesRows,
-  distanceFromPath,
+  uniqueDistanceFromPath,
+  checklistReview,
   normalizeLocationName,
   protocol,
 } from "../lib/utils";
@@ -69,9 +70,10 @@ const selectedSightings = computed(() => {
     return [];
   }
 
-  return selectedForm.value.imported
-    ? props.formsSightings[selectedForm.value.id - 1] || []
-    : props.sightings.filter((sighting) => sighting.form_id === selectedForm.value.id);
+  return [
+    ...(props.formsSightings[selectedForm.value.id - 1] || []),
+    ...props.sightings.filter((sighting) => sighting.form_id === selectedForm.value.id),
+  ];
 });
 
 const unassignedSightings = computed(() => {
@@ -140,9 +142,7 @@ const computedDuration = computed(() => {
 
 const spansMultipleDays = computed(() => {
   return (
-    new Set(
-      selectedSightings.value.filter((sighting) => sighting.date).map((sighting) => sighting.date),
-    ).size > 1
+    selectedForm.value && checklistReview(selectedForm.value, selectedSightings.value).dateWarning
   );
 });
 
@@ -308,8 +308,8 @@ async function updatePath(path) {
     return;
   }
 
-  const newDistance = distanceFromPath(path);
-  const currentDistance = Array.isArray(form.path) ? distanceFromPath(form.path) : null;
+  const newDistance = uniqueDistanceFromPath(path);
+  const currentDistance = form.distance === "" ? null : form.distance;
 
   const confirmed = await confirmDialog(
     currentDistance !== null
@@ -1017,6 +1017,9 @@ onMounted(() => {
                   <i class="bi bi-bezier" aria-hidden="true"></i>
                 </button>
               </div>
+              <p v-if="selectedForm.path" class="small text-muted mt-1 mb-0">
+                {{ t("uniqueDistanceHelp") }}
+              </p>
             </div>
             <div class="col-lg-3 col-sm-12">
               <div class="d-flex align-items-center gap-2">

@@ -92,6 +92,15 @@ export async function importFixture(page, websiteName, fixture) {
 export async function downloadCsv(page) {
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download CSV" }).click();
+  const warning = page.getByRole("alertdialog");
+  const first = await Promise.race([
+    downloadPromise.then(() => "download"),
+    warning
+      .waitFor({ state: "visible" })
+      .then(() => "warning")
+      .catch(() => "closed"),
+  ]);
+  if (first === "warning") await warning.getByRole("button", { name: "OK", exact: true }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^ornitho2ebird_\d{8}_\d{6}\.csv$/);
   const text = readFileSync(await download.path(), "utf8");
