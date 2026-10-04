@@ -1,9 +1,10 @@
 {
   "appTitle": "Ornitho2eBird",
   "appSubtitle": "Ornitho-Exporte in eBird-Checklisten umwandeln",
-  "newsTitle": "Artzuordnung:",
-  "newsBody": "Arten werden jetzt mit ihrem wissenschaftlichen Namen exportiert, sodass eBird sie unabhängig von der Sprache deines eBird-Kontos erkennt. Die eBird-Spracheinstellung wird nicht mehr benötigt.",
-  "newsLink": "Mehr erfahren",
+  "newsTitle": "Einfacher in eBird importieren:",
+  "newsBody": "Die Artzuordnung funktioniert jetzt unabhängig von der Sprache deines eBird-Kontos. Eindeutig passende Hotspots werden automatisch ausgewählt. Im Benutzerdefinierten Modus kannst du den Hotspot prüfen oder ändern.",
+  "newsSpeciesLink": "Artzuordnung",
+  "newsHotspotsLink": "Hotspots",
   "settings": "Einstellungen",
   "globalSettings": "Einstellungen",
   "close": "Schließen",
