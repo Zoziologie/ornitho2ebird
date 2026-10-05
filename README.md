@@ -127,6 +127,7 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 - If a checklist has no track or distance, it may end up as a historical checklist in eBird
 - Stationary GPS classification uses the central 95% of track points; isolated errors and brief real excursions can be ignored, so review the track
 - Track distance estimates exclude near-exact backtracking; review GPS drift and adjust the unique-distance estimate if needed
+- Isolated GPS jumps and distances over 20 km trigger non-blocking review warnings in Export and Customized mode. Routes and distances are never corrected automatically. You can optionally share an anonymized track in [#58](https://github.com/Zoziologie/ornitho2ebird/issues/58) to help improve detection.
 - Dead and zero-count records stay available for review but are excluded from the CSV; unclear mortality information requires confirmation
 - Date mismatches and overnight effort require confirmation; timestamped lists can be split by date, with effort reviewed afterward
 

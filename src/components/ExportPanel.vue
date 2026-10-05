@@ -3,6 +3,7 @@ import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   checklistReview,
+  distanceReview,
   formatNumber,
   isExportableSighting,
   mortalityStatus,
@@ -81,7 +82,6 @@ const props = defineProps({
 });
 const emit = defineEmits(["open-settings-section"]);
 const { t } = useI18n();
-const DISTANCE_WARNING_THRESHOLD_KM = 20;
 const DISTANCE_WARNING_LIST_LIMIT = 10;
 const TAXONOMY_WARNING_LIST_LIMIT = 12;
 // eBird species code → taxon, for the codes in the export. Always replaced as a whole.
@@ -369,10 +369,9 @@ const distanceWarningForms = computed(() => {
       form,
       protocolState,
       distanceKm: Number(form.distance),
+      ...distanceReview(form),
     }))
-    .filter(
-      ({ distanceKm }) => Number.isFinite(distanceKm) && distanceKm > DISTANCE_WARNING_THRESHOLD_KM,
-    )
+    .filter(({ gpsSpikeWarning, highDistanceWarning }) => gpsSpikeWarning || highDistanceWarning)
     .sort((left, right) => right.distanceKm - left.distanceKm);
 });
 
@@ -677,7 +676,12 @@ async function downloadFile() {
           </p>
           <ul class="list-unstyled mb-2 export-warning-list">
             <li
-              v-for="{ form, distanceKm } in displayedDistanceWarningForms"
+              v-for="{
+                form,
+                distanceKm,
+                gpsSpikeWarning,
+                highDistanceWarning,
+              } in displayedDistanceWarningForms"
               :key="`distance-${form.id}`"
               class="export-warning-item"
             >
@@ -688,8 +692,13 @@ async function downloadFile() {
                 <div class="small text-muted">
                   {{ form.date || "-" }} · {{ form.location_name || "-" }}
                 </div>
+                <p v-if="gpsSpikeWarning" class="small mb-0">{{ t("gpsSpikeWarning") }}</p>
+                <p v-if="highDistanceWarning" class="small mb-0">{{ t("highDistanceWarning") }}</p>
               </div>
-              <span class="badge rounded-pill text-bg-danger export-warning-distance">
+              <span
+                v-if="Number.isFinite(distanceKm)"
+                class="badge rounded-pill text-bg-danger export-warning-distance"
+              >
                 {{ mathRound(distanceKm, 2) }} km
               </span>
             </li>
@@ -697,6 +706,15 @@ async function downloadFile() {
               {{ t("exportDistanceWarningMore", { count: hiddenDistanceWarningCount }) }}
             </li>
           </ul>
+          <p
+            v-if="distanceWarningForms.some((review) => review.gpsSpikeWarning)"
+            class="small mb-0"
+          >
+            <LinkedText
+              :text="t('gpsShareExample')"
+              :links="['https://github.com/Zoziologie/ornitho2ebird/issues/58']"
+            />
+          </p>
         </div>
 
         <div class="export-overview mb-3">
