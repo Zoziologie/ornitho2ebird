@@ -336,5 +336,9 @@
   "splitDatesConfirm": "Creare una lista per ogni data di osservazione? Tutte le osservazioni e i commenti vengono conservati. L’ora iniziale è quella della prima osservazione del giorno. Durata, distanza e tracce saranno cancellate perché lo sforzo non può essere ripartito in modo affidabile; controllali dopo la divisione.",
   "splitDatesUnavailable": "La divisione automatica richiede una data e un’ora precise per ogni osservazione e osservazioni su più date. La lista resterà unita finché non la modifichi.",
   "uniqueDistanceHelp": "Stime GPS: il protocollo stazionario usa la massima distanza tra il 95% dei punti centrali del tracciato, ignorando gli errori isolati. Anche un breve spostamento reale può essere ignorato. La distanza unica esclude i segmenti strettamente sovrapposti; la deriva GPS e i sentieri vicini possono influenzarla. Controlla il tracciato e correggi la distanza se necessario.",
-  "noEligibleRecords": "Nessuna osservazione rimane idonea per l’esportazione CSV. Verifica i record esclusi qui sotto."
+  "noEligibleRecords": "Nessuna osservazione rimane idonea per l’esportazione CSV. Verifica i record esclusi qui sotto.",
+  "aggregationAppliesOnImport": "Questi limiti si applicano quando importi un file.",
+  "aggregationAppliesImmediately": "Modificare questi limiti raggruppa immediatamente le osservazioni casuali attuali. Non occorre importare nuovamente il file.",
+  "aggregationKeepsAssignments": "La Modalità personalizzata è stata usata per questa importazione, quindi modificare questi limiti mantiene le assegnazioni attuali, anche in Modalità base. Per raggruppare di nuovo le osservazioni, apri la Modalità personalizzata, fai clic su «Reimposta assegnazione», poi su «Raggruppa le osservazioni casuali». Non occorre importare nuovamente il file.",
+  "exportIncidentalAssignedNote": "da {sightings} osservazione casuale · assegnazioni attuali | da {sightings} osservazioni casuali · assegnazioni attuali"
 }

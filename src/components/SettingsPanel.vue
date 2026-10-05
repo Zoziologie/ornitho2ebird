@@ -8,6 +8,8 @@ import AnalyticsConsent from "./AnalyticsConsent.vue";
 import { speciesComment } from "../lib/utils";
 
 const props = defineProps({
+  hasImportedData: { type: Boolean, default: false },
+  assignmentCustomized: { type: Boolean, default: false },
   open: {
     type: Boolean,
     required: true,
@@ -256,6 +258,17 @@ watch(
           <div ref="aggregationRef" class="settings-section">
             <h3 class="modal-section-title">{{ t("advancedSettingsTitle") }}</h3>
             <p class="small text-muted mb-2">{{ t("aggregationSettingsHelp") }}</p>
+            <p class="small mb-2" role="status">
+              {{
+                t(
+                  !hasImportedData
+                    ? "aggregationAppliesOnImport"
+                    : assignmentCustomized
+                      ? "aggregationKeepsAssignments"
+                      : "aggregationAppliesImmediately",
+                )
+              }}
+            </p>
             <button
               class="btn btn-link btn-sm p-0 mb-3"
               type="button"

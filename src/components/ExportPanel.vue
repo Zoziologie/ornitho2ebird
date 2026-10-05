@@ -28,6 +28,7 @@ import {
 } from "../lib/taxonomy";
 
 const props = defineProps({
+  assignmentCustomized: { type: Boolean, default: false },
   matchingHotspots: { type: Boolean, default: false },
   forms: {
     type: Array,
@@ -728,7 +729,9 @@ async function downloadFile() {
                 >
                   {{
                     t(
-                      "exportIncidentalNote",
+                      assignmentCustomized
+                        ? "exportIncidentalAssignedNote"
+                        : "exportIncidentalNote",
                       {
                         sightings: formatNumber(basicModeSummary.createdSightings),
                         hours: autoAssignDuration,
@@ -745,6 +748,15 @@ async function downloadFile() {
                   >
                     {{ t("exportBasicChangeGrouping") }}
                   </button>
+                  <span class="d-block mt-1" role="status">
+                    {{
+                      t(
+                        assignmentCustomized
+                          ? "aggregationKeepsAssignments"
+                          : "aggregationAppliesImmediately",
+                      )
+                    }}
+                  </span>
                 </span>
                 <span v-else-if="item.name === 'Historical'" class="export-protocol-note">
                   <LinkedText :text="t('exportHistoricalNote')" :links="['#help/conversion']" />

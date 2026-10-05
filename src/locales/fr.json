@@ -336,5 +336,9 @@
   "splitDatesConfirm": "Créer une liste par date d’observation ? Toutes les observations et tous les commentaires sont conservés. L’heure de début est celle de la première observation du jour. La durée, la distance et les tracés seront effacés, car l’effort ne peut pas être réparti de manière fiable ; vérifiez-les après la séparation.",
   "splitDatesUnavailable": "La séparation automatique nécessite une date et une heure précises pour chaque observation, avec des observations sur plusieurs dates. Cette liste restera regroupée sauf si vous la modifiez.",
   "uniqueDistanceHelp": "Estimations GPS : le protocole stationnaire utilise le plus grand écart entre les 95 % de points centraux du tracé, en ignorant les erreurs isolées. Un bref déplacement réel peut aussi être ignoré. La distance unique exclut les segments qui se superposent étroitement ; la dérive GPS et les chemins proches peuvent l’affecter. Vérifiez le tracé et ajustez la distance si nécessaire.",
-  "noEligibleRecords": "Aucune observation ne reste admissible pour l’export CSV. Vérifiez les observations exclues ci-dessous."
+  "noEligibleRecords": "Aucune observation ne reste admissible pour l’export CSV. Vérifiez les observations exclues ci-dessous.",
+  "aggregationAppliesOnImport": "Ces limites s’appliquent lors de l’importation d’un fichier.",
+  "aggregationAppliesImmediately": "Modifier ces limites regroupe immédiatement les observations occasionnelles actuelles. Il n’est pas nécessaire de réimporter le fichier.",
+  "aggregationKeepsAssignments": "Le Mode personnalisé a été utilisé pour cet import. Modifier ces limites conserve donc les attributions actuelles, même en Mode basique. Pour regrouper les observations, ouvrez le Mode personnalisé, cliquez sur « Réinitialiser l’attribution », puis sur « Regrouper les observations occasionnelles ». Il n’est pas nécessaire de réimporter le fichier.",
+  "exportIncidentalAssignedNote": "à partir de {sightings} observation occasionnelle · attributions actuelles | à partir de {sightings} observations occasionnelles · attributions actuelles"
 }
