@@ -4,6 +4,7 @@ import { trackEvent } from "../lib/analytics";
 import { useI18n } from "vue-i18n";
 import AssignmentMap from "./AssignmentMap.vue";
 import ReviewMap from "./ReviewMap.vue";
+import LinkedText from "./LinkedText.vue";
 import { loadHotspots, hotspotEvidence } from "../lib/hotspotMatching";
 import {
   CHECKLIST_COLORS,
@@ -22,6 +23,7 @@ import {
   buildSpeciesRows,
   uniqueDistanceFromPath,
   checklistReview,
+  distanceReview,
   normalizeLocationName,
   protocol,
 } from "../lib/utils";
@@ -150,6 +152,10 @@ const spansMultipleDays = computed(() => {
     selectedForm.value && checklistReview(selectedForm.value, selectedSightings.value).dateWarning
   );
 });
+
+const selectedDistanceReview = computed(() =>
+  selectedForm.value ? distanceReview(selectedForm.value) : null,
+);
 
 const selectedProtocol = computed(() => {
   return selectedForm.value ? protocol(selectedForm.value) : null;
@@ -856,6 +862,27 @@ onMounted(() => {
               </div>
               <p v-if="isInvalid" class="mb-0">{{ t("warningInvalid") }}</p>
             </div>
+          </div>
+
+          <div
+            v-if="
+              selectedDistanceReview.gpsSpikeWarning || selectedDistanceReview.highDistanceWarning
+            "
+            class="alert alert-warning mb-3"
+          >
+            <h4 class="alert-heading h6">{{ t("exportDistanceWarningTitle") }}</h4>
+            <p v-if="selectedDistanceReview.gpsSpikeWarning" class="mb-2">
+              {{ t("gpsSpikeWarning") }}
+            </p>
+            <p v-if="selectedDistanceReview.highDistanceWarning" class="mb-0">
+              {{ t("highDistanceWarning") }}
+            </p>
+            <p v-if="selectedDistanceReview.gpsSpikeWarning" class="small mb-0">
+              <LinkedText
+                :text="t('gpsShareExample')"
+                :links="['https://github.com/Zoziologie/ornitho2ebird/issues/58']"
+              />
+            </p>
           </div>
 
           <div class="row g-3">

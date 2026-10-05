@@ -4,6 +4,7 @@ import {
   checklistComment,
   createSighting,
   distanceFromPath,
+  distanceReview,
   formatDate,
   groupByLocation,
   mathMode,
@@ -244,5 +245,94 @@ describe("checklistComment", () => {
     expect(html).toMatch(
       /<small><a href="https:\/\/ornitho2ebird.com\/"[^>]*>Imported with ornitho2eBird.<\/a><\/small>$/,
     );
+  });
+});
+
+describe("distanceReview", () => {
+  const walk = [
+    [46, 7],
+    [46.0001, 7],
+    [46.0002, 7],
+    [46.0003, 7],
+    [46.0004, 7],
+  ];
+
+  it("flags an isolated spike below the high-distance threshold without changing the input", () => {
+    const form = { path: walk.map((point) => [...point]), distance: 2 };
+    form.path[2] = [46.01, 7];
+    const original = structuredClone(form);
+    expect(distanceReview(form)).toEqual({ gpsSpikeWarning: true, highDistanceWarning: false });
+    expect(form).toEqual(original);
+  });
+
+  it("keeps high distance separate from suspected GPS errors", () => {
+    expect(distanceReview({ path: walk, distance: 21 })).toEqual({
+      gpsSpikeWarning: false,
+      highDistanceWarning: true,
+    });
+    expect(distanceReview({ distance: 20 })).toEqual({
+      gpsSpikeWarning: false,
+      highDistanceWarning: false,
+    });
+  });
+
+  it("does not flag ordinary walking, small drift or closely spaced parallel paths", () => {
+    for (const path of [
+      walk,
+      [
+        [46, 7],
+        [46, 7],
+        [46.001, 7],
+        [46, 7],
+        [46, 7],
+      ],
+      [
+        [46, 7],
+        [46.0001, 7],
+        [46.0002, 7],
+        [46.0002, 7.0001],
+        [46.0001, 7.0001],
+        [46, 7.0001],
+      ],
+    ]) {
+      expect(distanceReview({ path }).gpsSpikeWarning).toBe(false);
+    }
+  });
+
+  it("does not flag a multi-point excursion or a sparsely sampled route", () => {
+    const excursion = [
+      [46, 7],
+      [46.0001, 7],
+      [46.01, 7],
+      [46.0101, 7],
+      [46.0002, 7],
+      [46.0003, 7],
+    ];
+    const sparse = [
+      [46, 7],
+      [46.005, 7],
+      [46.01, 7],
+      [46.005, 7],
+      [46, 7],
+    ];
+    expect(distanceReview({ path: excursion }).gpsSpikeWarning).toBe(false);
+    expect(distanceReview({ path: sparse }).gpsSpikeWarning).toBe(false);
+  });
+
+  it("does not infer isolated errors at endpoints or from tracks without surrounding steps", () => {
+    expect(distanceReview({ path: [[46.01, 7], ...walk.slice(1)] }).gpsSpikeWarning).toBe(false);
+    expect(distanceReview({ path: [...walk.slice(0, -1), [46.01, 7]] }).gpsSpikeWarning).toBe(
+      false,
+    );
+    expect(
+      distanceReview({
+        path: [
+          [46, 7],
+          [46.01, 7],
+          [46, 7],
+        ],
+      }).gpsSpikeWarning,
+    ).toBe(false);
+    expect(distanceReview({}).gpsSpikeWarning).toBe(false);
   });
 });

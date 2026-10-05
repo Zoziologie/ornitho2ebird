@@ -131,6 +131,27 @@ export function uniqueDistanceFromPath(path) {
   return mathRound(distance, 3);
 }
 
+// Flag isolated jumps only: both legs exceed 250 m and are more than 10 times
+// the surrounding steps. Untimed tracks cannot establish whether a detour is an error.
+export function distanceReview(form) {
+  const path = form.path || [];
+  let gpsSpikeWarning = false;
+  for (let index = 2; index < path.length - 2; index += 1) {
+    const incoming = haversineDistanceKm(...path[index - 1], ...path[index]);
+    const outgoing = haversineDistanceKm(...path[index], ...path[index + 1]);
+    const surrounding = Math.max(
+      haversineDistanceKm(...path[index - 2], ...path[index - 1]),
+      haversineDistanceKm(...path[index - 1], ...path[index + 1]),
+      haversineDistanceKm(...path[index + 1], ...path[index + 2]),
+    );
+    if (Math.min(incoming, outgoing) > Math.max(0.25, 10 * surrounding)) {
+      gpsSpikeWarning = true;
+      break;
+    }
+  }
+  return { gpsSpikeWarning, highDistanceWarning: Number(form.distance) > 20 };
+}
+
 export function mortalityStatus(sighting) {
   const wounded = sighting.extended_info?.mortality?.wounded;
   if (wounded === "0") return "dead";
