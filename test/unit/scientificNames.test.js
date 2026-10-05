@@ -6,12 +6,19 @@ import {
   loadScientificNameIndex,
 } from "../../src/lib/taxonomy";
 import { exportFixture, parseFixture } from "../helpers";
+import observationTaxa from "../fixtures/observation_taxa.json";
 
 beforeAll(async () => {
   await loadScientificNameIndex();
 });
 
 describe("ebirdCodeForScientificName", () => {
+  it("maps all 311 bird taxa from the supplied Observation bulk export using the shared index", () => {
+    expect(Object.keys(observationTaxa)).toHaveLength(311);
+    for (const [name, code] of Object.entries(observationTaxa)) {
+      expect(ebirdCodeForScientificName(name), name).toBe(code);
+    }
+  });
   it.each([
     ["Gavia stellata", "retloo"],
     ["  Gavia   stellata ", "retloo"],

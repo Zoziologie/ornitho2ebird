@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { ImportError, parseImportFile, parseWktLineString } from "../../src/lib/importers";
 import { loadOrnithoSpeciesList } from "../../src/lib/taxonomy";
-import { parseFixture, readFixture, website } from "../helpers";
+import { exportFixture, parseFixture, readFixture, website } from "../helpers";
 
 beforeAll(() => loadOrnithoSpeciesList());
 
@@ -159,10 +159,45 @@ describe("BirdLasser CSV", () => {
 });
 
 describe("Observation CSV", () => {
+  it("combines French count breakdowns without losing counts or details", async () => {
+    const parsed = await parseFixture("observation_bulk_fr.csv", "observation.org");
+    expect(parsed.sightings).toHaveLength(5);
+    expect(parsed.skipped.nonBirds).toBe(1);
+    expect(new Set(parsed.sightings.map((sighting) => sighting.id)).size).toBe(5);
+    expect(parsed.sightings[0]).toMatchObject({
+      count: 5,
+      count_precision: ">",
+      comment: "First detail - Second detail - 2x parade nuptiale ou accouplement, 3x",
+    });
+    expect(parsed.sightings[1]).toMatchObject({ count: 4, comment: "2x M adulte, 2x" });
+    expect(parsed.sightings[2]).toMatchObject({ count: 3 });
+    expect(parsed.sightings[2].comment).toContain("1x poussin");
+    expect(parsed.sightings[3]).toMatchObject({ count: "x", count_precision: "" });
+    const { rows, errors } = await exportFixture("observation_bulk_fr.csv", "observation.org");
+    expect(errors).toEqual([]);
+    expect(rows).toHaveLength(5);
+    expect(rows.find((row) => row.Genus === "Circus").count).toBe(5);
+    expect(rows.find((row) => row.Genus === "Oxyura").count).toBe("X");
+    expect(rows.every((row) => row.common_name === "" && row.Genus)).toBe(true);
+  });
+
+  it("excludes an export containing only non-birds without attempting species matching", () => {
+    const raw = readFixture("observation_bulk_fr.csv").replaceAll("Oiseaux", "Mammifères");
+    const parsed = parseImportFile(raw, website("observation.org"));
+    expect(parsed.sightings).toEqual([]);
+    expect(parsed.skipped.nonBirds).toBe(6);
+  });
+
   it("parses observation.org exports with permalinks", async () => {
     const parsed = await parseFixture("observation_org.csv", "observation.org");
     expect(parsed.sightings.length).toBeGreaterThan(0);
     expect(parsed.sightings[0].permalink).toMatch(/^https:\/\/observation\.org\/observation\/\d+$/);
+    for (const precision of [">", "=", "~"]) {
+      expect(parsed.sightings.some((sighting) => sighting.count_precision === precision)).toBe(
+        true,
+      );
+    }
+    expect(parsed.sightings.some((sighting) => sighting.count === "x")).toBe(true);
   });
 
   it("names the missing columns for a BirdLasser file", () => {

@@ -176,6 +176,7 @@ watch(file, async (nextFile) => {
       parsed.skipped.noCoordinates > 0
         ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates)
         : "",
+      parsed.skipped.nonBirds > 0 ? t("importSkippedNonBirds", parsed.skipped.nonBirds) : "",
     ].filter(Boolean);
     numberImportedForms.value = parsed.forms.length;
     numberImportedSightings.value = parsed.sightings.length;

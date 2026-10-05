@@ -1,0 +1,11 @@
+id,date,time,species name,scientific name,species group,number,sex,life stage,activity,counting method,location,lat,lng,notes
+900000000,2024-05-01,07:30:00,Busard des roseaux,Circus aeruginosus,Oiseaux,2,U,indéterminé,parade nuptiale ou accouplement,indéterminé,Example location,46.1,7.1,First detail
+900000000,2024-05-01,07:30:00,Busard des roseaux,Circus aeruginosus,Oiseaux,3,U,indéterminé,présent,indéterminé,Example location,46.1,7.1,Second detail
+900000001,2024-05-01,07:30:00,Canard chipeau,Mareca strepera,Oiseaux,2,M,adulte,présent,indéterminé,Example location,46.1,7.1,
+900000001,2024-05-01,07:30:00,Canard chipeau,Mareca strepera,Oiseaux,2,U,indéterminé,présent,indéterminé,Example location,46.1,7.1,
+900000002,2024-05-01,07:30:00,Gravelot de Leschenault,Anarhynchus leschenaultii,Oiseaux,1,M,adulte,nid occupé avec poussins,indéterminé,Example location,46.1,7.1,
+900000002,2024-05-01,07:30:00,Gravelot de Leschenault,Anarhynchus leschenaultii,Oiseaux,1,F,adulte,nid occupé avec poussins,indéterminé,Example location,46.1,7.1,
+900000002,2024-05-01,07:30:00,Gravelot de Leschenault,Anarhynchus leschenaultii,Oiseaux,1,U,poussin,nid occupé avec poussins,indéterminé,Example location,46.1,7.1,
+900000003,2024-05-01,07:30:00,Érismature à tête blanche,Oxyura leucocephala,Oiseaux,50,U,indéterminé,présent,non compté,Example location,46.1,7.1,
+900000004,2024-05-01,07:30:00,Grue demoiselle,Grus virgo,Oiseaux,40,U,indéterminé,présent,indéterminé,Example location,46.1,7.1,
+900000005,2024-05-01,07:30:00,Renard roux,Vulpes vulpes,Mammifères,1,U,indéterminé,présent,indéterminé,Example location,46.1,7.1,

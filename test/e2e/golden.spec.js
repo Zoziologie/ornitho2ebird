@@ -8,6 +8,7 @@ import { downloadCsv, importFixture, openApp, readGolden, stubNetwork } from "./
 const FIXTURES = [
   ["export_mixed_large.json", "ornitho.ch"],
   ["observation_org.csv", "observation.org"],
+  ["observation_bulk_fr.csv", "observation.org"],
   ["birdlasser_trip_kenya_2022.csv", "birdlasser"],
 ];
 

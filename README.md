@@ -93,6 +93,13 @@ The app currently supports:
 
 The full source list lives in [`data/websites_list.json`](data/websites_list.json).
 
+For Observation websites, import the bulk CSV directly; no KML is needed. English exports are
+recommended; the French counting values `indéterminé` and `non compté` are also supported.
+Non-bird observations are skipped with a summary. Rows sharing an observation ID are count
+breakdowns: their counts are combined and their details retained in the species comment.
+Bulk exports do not contain session effort or completeness, so they follow the same automatic
+grouping as other casual observations.
+
 ## Conversion model
 
 The app uses two different paths depending on what you import:
