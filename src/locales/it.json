@@ -142,7 +142,7 @@
   "error": "Errore",
   "importHelperTitle": "Trova i tuoi dati",
   "importHelpOrnitho": "Esporta il file JSON dei dati che vuoi convertire. Usa il link qui sotto per ottenere direttamente i dati necessari.",
-  "importHelpObservation": "Apri la pagina Observations, esporta i tuoi record come CSV, poi importa qui quel file CSV.",
+  "importHelpObservation": "Accedi al sito di origine e apri le tue osservazioni dal menu «My Observation». Esporta i tuoi dati come CSV, poi importa qui quel file CSV.",
   "importHelpBirdlasser": "Esporta i tuoi record da BirdLasser come CSV, poi importa qui quel file CSV.",
   "importHelpOrnithoNet": "Apri “Tutte le mie osservazioni”, esporta i risultati come TXT e importa il file qui. Sono supportate le intestazioni in italiano, inglese, francese, tedesco, spagnolo, catalano e polacco.",
   "importSuccess": "Dati caricati: {lists} e {sightings}",
