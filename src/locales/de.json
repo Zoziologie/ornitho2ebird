@@ -336,5 +336,9 @@
   "splitDatesConfirm": "Eine Liste pro Beobachtungsdatum erstellen? Alle Meldungen und Kommentare bleiben erhalten. Die Startzeit entspricht der ersten Meldung des Tages. Dauer, Strecke und Tracks werden geleert, da sich der Beobachtungsaufwand nicht zuverlässig aufteilen lässt. Prüfe diese Angaben danach.",
   "splitDatesUnavailable": "Die automatische Aufteilung benötigt für jede Meldung ein genaues Datum und eine Uhrzeit sowie Meldungen an mehreren Tagen. Diese Liste bleibt zusammen, solange du sie nicht bearbeitest.",
   "uniqueDistanceHelp": "GPS-Schätzungen: Für das stationäre Protokoll wird der größte Abstand zwischen den zentralen 95 % der Trackpunkte verwendet; einzelne Fehler werden ignoriert. Auch ein kurzer tatsächlicher Ortswechsel kann dabei entfallen. Die einmalig zurückgelegte Strecke schließt eng überlappende Abschnitte aus; GPS-Abweichungen und nahe Wege können sie beeinflussen. Prüfe den Track und passe die Strecke bei Bedarf an.",
-  "noEligibleRecords": "Keine Meldungen bleiben für den CSV-Export geeignet. Prüfe die unten ausgeschlossenen Meldungen."
+  "noEligibleRecords": "Keine Meldungen bleiben für den CSV-Export geeignet. Prüfe die unten ausgeschlossenen Meldungen.",
+  "aggregationAppliesOnImport": "Diese Grenzen gelten beim Import einer Datei.",
+  "aggregationAppliesImmediately": "Wenn du diese Grenzen änderst, werden die aktuellen Gelegenheitsbeobachtungen sofort neu gruppiert. Du musst die Datei nicht erneut importieren.",
+  "aggregationKeepsAssignments": "Für diesen Import wurde der Benutzerdefinierte Modus verwendet. Änderungen dieser Grenzen behalten daher die aktuellen Zuordnungen bei, auch im Basis-Modus. Zum erneuten Gruppieren öffne den Benutzerdefinierten Modus, klicke auf „Zuordnung zurücksetzen“ und dann auf „Gelegenheitsbeobachtungen gruppieren“. Du musst die Datei nicht erneut importieren.",
+  "exportIncidentalAssignedNote": "aus {sightings} Gelegenheitsbeobachtung · aktuelle Zuordnungen | aus {sightings} Gelegenheitsbeobachtungen · aktuelle Zuordnungen"
 }

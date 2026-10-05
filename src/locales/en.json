@@ -336,5 +336,9 @@
   "splitDatesConfirm": "Create one checklist per observation date? All records and comments are kept. Start time uses the first sighting on each day. Duration, distance and paths will be cleared because effort cannot be divided reliably; review them after splitting.",
   "splitDatesUnavailable": "Automatic splitting needs an exact date and time for every sighting, with sightings on more than one date. This checklist will remain together unless you edit it.",
   "uniqueDistanceHelp": "GPS estimates: stationary classification uses the widest separation among the central 95% of track points, ignoring isolated errors. A brief real excursion can also be ignored. Unique distance excludes closely overlapping segments; GPS drift and nearby paths can affect it. Review the track and adjust the distance if needed.",
-  "noEligibleRecords": "No observations remain eligible for CSV export. Review the excluded records below."
+  "noEligibleRecords": "No observations remain eligible for CSV export. Review the excluded records below.",
+  "aggregationAppliesOnImport": "These limits apply when you import a file.",
+  "aggregationAppliesImmediately": "Changing these limits immediately regroups the current casual observations. No re-upload is needed.",
+  "aggregationKeepsAssignments": "Customized mode has been used for this import, so changing these limits keeps the current assignments, even in Basic mode. To regroup, open Customized mode, click “Reset assignment”, then “Aggregate casual observations”. No re-upload is needed.",
+  "exportIncidentalAssignedNote": "from {sightings} casual observation · current assignments | from {sightings} casual observations · current assignments"
 }

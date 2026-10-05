@@ -398,6 +398,8 @@ function openSettingsForSection(section) {
     <SettingsPanel
       :open="settingsOpen"
       :focus-section="settingsFocusSection"
+      :has-imported-data="hasImportedData"
+      :assignment-customized="assignmentCustomized"
       @close="closeSettings"
       @open-info="openInfo($event)"
     />
@@ -500,6 +502,7 @@ function openSettingsForSection(section) {
         :customized-species-comments="settings.customizedSpeciesComments"
         :personalized-species-comments="settings.speciesCommentTemplateOptions.personalized"
         :advanced-enabled="settings.advancedEnabled"
+        :assignment-customized="assignmentCustomized"
         :auto-assign-duration="settings.autoAssignDuration"
         :auto-assign-distance="settings.autoAssignDistance"
         @open-settings-section="openSettingsForSection"

@@ -336,5 +336,9 @@
   "splitDatesConfirm": "Vols crear una llista per cada data d’observació? Es conserven totes les observacions i els comentaris. L’hora d’inici és la de la primera observació del dia. S’esborraran la durada, la distància i els traçats perquè l’esforç no es pot repartir de manera fiable; revisa’ls després de separar les llistes.",
   "splitDatesUnavailable": "La separació automàtica requereix una data i una hora precises per a cada observació i observacions en més d’una data. La llista es mantindrà unida si no la modifiques.",
   "uniqueDistanceHelp": "Estimacions GPS: el protocol estacionari utilitza la separació màxima entre el 95% dels punts centrals del traçat i ignora els errors aïllats. També pot ignorar un desplaçament real breu. La distància única exclou els segments que se superposen estretament; la deriva GPS i els camins propers poden afectar-la. Revisa el traçat i ajusta la distància si cal.",
-  "noEligibleRecords": "No queda cap observació apta per a l’exportació CSV. Revisa els registres exclosos a continuació."
+  "noEligibleRecords": "No queda cap observació apta per a l’exportació CSV. Revisa els registres exclosos a continuació.",
+  "aggregationAppliesOnImport": "Aquests límits s’apliquen quan importes un fitxer.",
+  "aggregationAppliesImmediately": "Canviar aquests límits reagrupa immediatament les observacions casuals actuals. No cal tornar a importar el fitxer.",
+  "aggregationKeepsAssignments": "S’ha utilitzat el Mode personalitzat per a aquesta importació, de manera que canviar aquests límits manté les assignacions actuals, fins i tot en Mode bàsic. Per reagrupar les observacions, obre el Mode personalitzat, fes clic a «Reinicia l’assignació» i després a «Agrupa observacions casuals». No cal tornar a importar el fitxer.",
+  "exportIncidentalAssignedNote": "a partir de {sightings} observació casual · assignacions actuals | a partir de {sightings} observacions casuals · assignacions actuals"
 }
