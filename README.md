@@ -100,6 +100,18 @@ breakdowns: their counts are combined and their details retained in the species 
 Bulk exports do not contain session effort or completeness, so they follow the same automatic
 grouping as other casual observations.
 
+For Observation sessions, export each session as both CSV and KML in English or French.
+Select or drop all the matching pairs together; filenames and selection order do not matter.
+The CSV supplies species, count precision and comments; the KML supplies session membership,
+start/end times and the recorded route or stationary location. Each session stays a separate
+imported checklist in the same pipeline as ornitho lists. Distance uses the existing route
+estimate; review it for GPS drift and backtracking.
+
+Completeness and observer count are not exported. Session checklists default to incomplete
+and use the observer count from Settings; confirm these in Customized mode. Bulk CSVs and
+session pairs must be imported separately. Missing, mismatched or overlapping pairs leave
+the previous import intact. KML-only import and bulk KML files are not supported.
+
 ## Conversion model
 
 The app uses two different paths depending on what you import:

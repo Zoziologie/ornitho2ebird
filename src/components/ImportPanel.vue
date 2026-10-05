@@ -10,8 +10,8 @@ import {
   ImportError,
   assignEbirdCodesFromScientificNames,
   needsScientificNameLookup,
-  parseImportFile,
 } from "../lib/importers";
+import { parseImportFiles } from "../lib/observationSessions";
 
 const props = defineProps({
   selectedWebsiteName: {
@@ -29,7 +29,7 @@ const numberImportedSightings = ref(0);
 const errorMessage = ref("");
 const verificationWarning = ref("");
 const skippedWarnings = ref([]);
-const file = ref(null);
+const files = ref(null);
 const fileInput = ref(null);
 const dragCounter = ref(0);
 const isDragActive = ref(false);
@@ -45,7 +45,7 @@ function resetImportState() {
   errorMessage.value = "";
   verificationWarning.value = "";
   skippedWarnings.value = [];
-  file.value = null;
+  files.value = null;
   dragCounter.value = 0;
   isDragActive.value = false;
   if (fileInput.value) {
@@ -129,14 +129,15 @@ const exportLink = computed(() => {
 // Dropping a second file while the first is still loading must not let the first one win.
 let importRunId = 0;
 
-watch(file, async (nextFile) => {
-  if (!nextFile || !website.value) {
+watch(files, async (nextFiles) => {
+  const runId = ++importRunId;
+  if (!nextFiles?.length || !website.value) {
     return;
   }
 
-  const sourceWebsite = website.value.name;
+  const selectedWebsite = website.value;
+  const sourceWebsite = selectedWebsite.name;
   trackEvent("import_start", { source_website: sourceWebsite });
-  const runId = ++importRunId;
   const isStale = () => runId !== importRunId;
   numberImportedForms.value = 0;
   numberImportedSightings.value = 0;
@@ -146,14 +147,14 @@ watch(file, async (nextFile) => {
   loadingStatus.value = 0;
 
   try {
-    const rawText = await nextFile.text();
-    if (website.value.system === "ornitho") {
+    if (selectedWebsite.system === "ornitho") {
       await loadOrnithoSpeciesList();
     }
     if (isStale()) {
       return;
     }
-    const parsed = parseImportFile(rawText, website.value);
+    const parsed = await parseImportFiles(nextFiles, selectedWebsite);
+    if (isStale()) return;
     if (needsScientificNameLookup(parsed)) {
       try {
         await loadScientificNameIndex();
@@ -167,8 +168,8 @@ watch(file, async (nextFile) => {
       }
     }
     parsed.website = {
-      ...website.value,
-      species_comment_template: buildSpeciesCommentTemplate(website.value),
+      ...selectedWebsite,
+      species_comment_template: buildSpeciesCommentTemplate(selectedWebsite),
     };
 
     skippedWarnings.value = [
@@ -177,6 +178,9 @@ watch(file, async (nextFile) => {
         ? t("importSkippedNoCoordinates", parsed.skipped.noCoordinates)
         : "",
       parsed.skipped.nonBirds > 0 ? t("importSkippedNonBirds", parsed.skipped.nonBirds) : "",
+      selectedWebsite.system === "observation" && parsed.forms.length
+        ? t("importSessionReview")
+        : "",
     ].filter(Boolean);
     numberImportedForms.value = parsed.forms.length;
     numberImportedSightings.value = parsed.sightings.length;
@@ -195,7 +199,7 @@ watch(file, async (nextFile) => {
     });
 
     // Only a hint, so it does not hold up the import.
-    const warning = await checkWebsite(parsed, website.value);
+    const warning = await checkWebsite(parsed, selectedWebsite);
     if (!isStale()) {
       verificationWarning.value = warning;
     }
@@ -224,8 +228,13 @@ watch(file, async (nextFile) => {
   }
 });
 
-function updateSelectedFile(nextFile) {
-  file.value = nextFile || null;
+function updateSelectedFiles(nextFiles) {
+  const selection = Array.from(nextFiles || []);
+  files.value = selection.length
+    ? website.value.system === "observation"
+      ? selection
+      : selection.slice(0, 1)
+    : null;
 }
 
 function openFilePicker() {
@@ -233,7 +242,7 @@ function openFilePicker() {
 }
 
 function onFileInputChange(event) {
-  updateSelectedFile(event.target.files?.[0]);
+  updateSelectedFiles(event.target.files);
 }
 
 function hasFilesPayload(event) {
@@ -275,7 +284,7 @@ function onFileDrop(event) {
 
   dragCounter.value = 0;
   isDragActive.value = false;
-  updateSelectedFile(event.dataTransfer?.files?.[0]);
+  updateSelectedFiles(event.dataTransfer?.files);
 }
 
 async function checkWebsite(exportData, selectedWebsite) {
@@ -478,7 +487,7 @@ async function checkWebsite(exportData, selectedWebsite) {
             <label class="form-label fw-semibold">{{ t(importFileLabelKey) }}</label>
             <div
               class="import-dropzone"
-              :class="{ 'is-drag-active': isDragActive, 'is-compact': file }"
+              :class="{ 'is-drag-active': isDragActive, 'is-compact': files }"
               role="button"
               tabindex="0"
               @click="openFilePicker"
@@ -493,7 +502,8 @@ async function checkWebsite(exportData, selectedWebsite) {
                 ref="fileInput"
                 class="visually-hidden"
                 type="file"
-                :accept="website.extension"
+                :accept="website.system === 'observation' ? '.csv,.kml' : website.extension"
+                :multiple="website.system === 'observation'"
                 @change="onFileInputChange"
               />
               <div class="import-dropzone-body">
@@ -504,13 +514,35 @@ async function checkWebsite(exportData, selectedWebsite) {
                       aria-hidden="true"
                     ></i>
                     <div class="import-dropzone-text">
-                      <div class="fw-semibold">{{ t("importDropzoneTitle") }}</div>
-                      <div class="small text-muted">{{ t("importDropzoneHint") }}</div>
+                      <div class="fw-semibold">
+                        {{
+                          t(
+                            website.system === "observation"
+                              ? "importDropzoneTitleMultiple"
+                              : "importDropzoneTitle",
+                          )
+                        }}
+                      </div>
+                      <div class="small text-muted">
+                        {{
+                          t(
+                            website.system === "observation"
+                              ? "importDropzoneHintMultiple"
+                              : "importDropzoneHint",
+                          )
+                        }}
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div v-if="file" class="small text-break import-dropzone-selected">
-                  {{ t("importDropzoneSelected", { name: file.name }) }}
+                <div v-if="files" class="small text-break import-dropzone-selected">
+                  {{
+                    t(
+                      "importDropzoneSelected",
+                      { name: files.map((item) => item.name).join(", ") },
+                      files.length,
+                    )
+                  }}
                 </div>
               </div>
             </div>

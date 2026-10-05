@@ -19,8 +19,8 @@ import {
 import {
   assignEbirdCodesFromScientificNames,
   needsScientificNameLookup,
-  parseImportFile,
 } from "../src/lib/importers";
+import { parseImportFiles } from "../src/lib/observationSessions";
 import { loadOrnithoSpeciesList, loadScientificNameIndex } from "../src/lib/taxonomy";
 import { assembleImport } from "../src/lib/utils";
 
@@ -52,7 +52,10 @@ export const ebirdScientificNameByCode = new Map(
 // As ImportPanel.vue does it.
 export async function parseFixture(fixture, websiteName) {
   await loadOrnithoSpeciesList();
-  const parsed = parseImportFile(readFixture(fixture), website(websiteName));
+  const parsed = await parseImportFiles(
+    [fixture].flat().map((name) => ({ name, text: async () => readFixture(name) })),
+    website(websiteName),
+  );
   if (needsScientificNameLookup(parsed)) {
     await loadScientificNameIndex();
     assignEbirdCodesFromScientificNames(parsed);

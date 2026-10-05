@@ -28,6 +28,23 @@ const FIXTURES = [
 ];
 
 describe("eBird CSV export", () => {
+  it.each([
+    ["transect", ["sessions/transect.csv", "sessions/transect.kml"]],
+    ["stationary", ["sessions/stationary.csv", "sessions/stationary.kml"]],
+    [
+      "multiple",
+      [
+        "sessions/transect.csv",
+        "sessions/stationary.kml",
+        "sessions/stationary.csv",
+        "sessions/transect.kml",
+      ],
+    ],
+  ])("session %s matches its golden CSV", async (name, files) => {
+    const { csv, errors } = await exportFixture(files, "observation.org");
+    expect(errors).toEqual([]);
+    await expect(csv).toMatchFileSnapshot(`./__snapshots__/sessions/${name}.csv`);
+  });
   it.each(FIXTURES)("%s matches its golden CSV", async (fixture, websiteName) => {
     const { csv, errors } = await exportFixture(fixture, websiteName);
     expect(errors).toEqual([]);
