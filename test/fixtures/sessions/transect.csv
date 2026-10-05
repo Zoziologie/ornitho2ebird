@@ -1,0 +1,4 @@
+id,date,time,species name,scientific name,species group,number,sex,life stage,activity,counting method,location,lat,lng,notes
+900001000,2024-05-01,07:04:00,Common Buzzard,Buteo buteo,Birds,1,U,unknown,present,real count,Example transect,46.1,7.1,
+900001001,2024-05-01,07:20:00,European Golden Plover,Pluvialis apricaria,Birds,1000,U,unknown,present,estimated,Example transect,46.1002,7.1002,
+900001002,2024-05-01,07:43:00,Eurasian Coot,Fulica atra,Birds,1,U,unknown,present,seen not counted,Example transect,46.1004,7.1004,

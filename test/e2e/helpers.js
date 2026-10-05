@@ -84,7 +84,7 @@ export async function openApp(page, { chooseConsent = true } = {}) {
 
 export async function importFixture(page, websiteName, fixture) {
   await page.locator("#import-source-website").selectOption(websiteName);
-  await page.locator('input[type="file"]').setInputFiles(fixturePath(fixture));
+  await page.locator('input[type="file"]').setInputFiles([fixture].flat().map(fixturePath));
   await expect(page.locator(".alert-success")).toContainText("Data loaded successfully");
 }
 
