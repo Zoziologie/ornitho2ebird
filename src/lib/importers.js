@@ -63,7 +63,9 @@ const precisionMatchOrnitho = {
 
 const precisionMatchObservation = {
   unknown: ">",
+  indéterminé: ">",
   "seen not counted": "",
+  "non compté": "",
   "real count": "=",
   estimated: "~",
   extrapolated: "~",
@@ -312,7 +314,45 @@ export function parseImportFile(rawText, selectedWebsite) {
     }).data;
     requireColumns(rows, ["id", "date", "time", "lat", "lng", "species name", "number"]);
 
-    exportData.sightings = rows.map((sighting) => {
+    const birdRows = rows.filter(
+      (row) => !row["species group"] || ["Birds", "Oiseaux"].includes(row["species group"]),
+    );
+    exportData.skipped.nonBirds = new Set(
+      rows
+        .filter(
+          (row) => row["species group"] && !["Birds", "Oiseaux"].includes(row["species group"]),
+        )
+        .map((row) => row.id),
+    ).size;
+    // A repeated ID is a count breakdown, not another observation. Combine it before assignment.
+    const observations = new Map();
+    for (const row of birdRows) {
+      const details = observations.get(row.id) || [];
+      details.push(row);
+      observations.set(row.id, details);
+    }
+    exportData.sightings = [...observations.values()].map((details) => {
+      const sighting = details[0];
+      const uncounted = details.some((row) =>
+        ["seen not counted", "non compté"].includes(row["counting method"]),
+      );
+      const detailComment =
+        details.length > 1
+          ? details
+              .map((row) =>
+                [
+                  `${row.number}x`,
+                  row.sex !== "U" ? row.sex : "",
+                  !["unknown", "indéterminé"].includes(row["life stage"]) ? row["life stage"] : "",
+                  !["present", "présent", "unknown", "indéterminé"].includes(row.activity)
+                    ? row.activity
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" "),
+              )
+              .join(", ")
+          : "";
       return createSighting({
         id: sighting.id,
         form_id: 0,
@@ -328,9 +368,11 @@ export function parseImportFile(rawText, selectedWebsite) {
         location_name: sighting.location,
         common_name: sighting["species name"],
         scientific_name: sighting["scientific name"] || "",
-        count: sighting["counting method"] === "seen not counted" ? "x" : sighting.number,
+        count: uncounted ? "x" : details.reduce((sum, row) => sum + Number(row.number), 0),
         count_precision: precisionMatchObservation[sighting["counting method"]],
-        comment: sighting.notes,
+        comment: [...new Set(details.map((row) => row.notes).filter(Boolean)), detailComment]
+          .filter(Boolean)
+          .join(" - "),
       });
     });
   } else if (selectedWebsite.system === "ornitho.net") {

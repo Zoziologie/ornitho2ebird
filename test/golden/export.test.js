@@ -17,6 +17,7 @@ const FIXTURES = [
   ["birdlasser_ruai_dandora.csv", "birdlasser"],
   ["birdlasser_trip_kenya_2022.csv", "birdlasser"],
   ["observation_org.csv", "observation.org"],
+  ["observation_bulk_fr.csv", "observation.org"],
   ["rules/biolovision_french.txt", "data.biolovision.net"],
   ["rules/biolovision_german.txt", "data.biolovision.net"],
   ["rules/biolovision_italian.txt", "data.biolovision.net"],

@@ -150,6 +150,7 @@
   "importSuccessSightings": "{n} Gelegenheitsbeobachtung | {n} Gelegenheitsbeobachtungen",
   "importSkippedEmptyForms": "{n} leere Checkliste wurde übersprungen. | {n} leere Checklisten wurden übersprungen.",
   "importSkippedNoCoordinates": "{n} Beobachtung ohne Koordinaten wurde übersprungen. | {n} Beobachtungen ohne Koordinaten wurden übersprungen.",
+  "importSkippedNonBirds": "{n} Beobachtung einer anderen Tiergruppe wurde übersprungen. | {n} Beobachtungen anderer Tiergruppen wurden übersprungen.",
   "importErrorInvalidJson": "Diese Datei ist kein gültiger ornitho-JSON-Export.",
   "importErrorMissingColumns": "In dieser Datei fehlen die erwarteten Spalten ({columns}). Prüfe, ob du die richtige Quellwebsite gewählt und die Datei auf Englisch exportiert hast.",
   "importErrorTxtHeader": "Die TXT-Spalten werden nicht erkannt. Exportiere Biolovision-Beobachtungen als TXT auf Deutsch, Englisch, Französisch, Italienisch, Spanisch, Katalanisch oder Polnisch.",

@@ -150,6 +150,7 @@
   "importSuccessSightings": "{n} casual observation | {n} casual observations",
   "importSkippedEmptyForms": "{n} empty checklist was skipped. | {n} empty checklists were skipped.",
   "importSkippedNoCoordinates": "{n} observation without coordinates was skipped. | {n} observations without coordinates were skipped.",
+  "importSkippedNonBirds": "{n} non-bird observation was skipped. | {n} non-bird observations were skipped.",
   "importErrorInvalidJson": "This file is not a valid ornitho JSON export.",
   "importErrorMissingColumns": "This file is missing the expected columns ({columns}). Check that you selected the right source website and exported the file in English.",
   "importErrorTxtHeader": "The TXT columns are not recognized. Export a Biolovision observation TXT in English, French, German, Italian, Spanish, Catalan or Polish.",

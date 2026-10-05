@@ -150,6 +150,7 @@
   "importSuccessSightings": "{n} observation occasionnelle | {n} observations occasionnelles",
   "importSkippedEmptyForms": "{n} liste vide a été ignorée. | {n} listes vides ont été ignorées.",
   "importSkippedNoCoordinates": "{n} observation sans coordonnées a été ignorée. | {n} observations sans coordonnées ont été ignorées.",
+  "importSkippedNonBirds": "{n} observation d’un autre groupe que les oiseaux a été ignorée. | {n} observations d’autres groupes que les oiseaux ont été ignorées.",
   "importErrorInvalidJson": "Ce fichier n'est pas un export JSON ornitho valide.",
   "importErrorMissingColumns": "Il manque à ce fichier les colonnes attendues ({columns}). Vérifiez que vous avez choisi le bon site source et exporté le fichier en anglais.",
   "importErrorTxtHeader": "Les colonnes TXT ne sont pas reconnues. Exportez les observations Biolovision au format TXT en français, anglais, allemand, italien, espagnol, catalan ou polonais.",
