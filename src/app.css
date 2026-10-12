@@ -1434,6 +1434,8 @@ h6 {
 /* While selecting a rectangle or drawing a path, clicks go to the map, not to the markers. */
 .map-picking .maplibregl-canvas-container.maplibregl-interactive {
   cursor: crosshair;
+  /* Keeps the browser from scrolling or zooming the page while a finger draws. */
+  touch-action: none;
 }
 
 .map-picking .maplibregl-marker {
