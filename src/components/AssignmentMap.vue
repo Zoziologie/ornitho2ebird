@@ -218,6 +218,8 @@ function startSelection() {
   selecting.value = true;
   map.dragPan.disable();
   map.doubleClickZoom.disable();
+  // Otherwise a one-finger drag only shows the "use two fingers" hint on touch screens.
+  map.cooperativeGestures.disable();
   container.value.classList.add("map-picking");
   document.addEventListener("keydown", onSelectionKeydown);
 }
@@ -233,6 +235,7 @@ function stopSelection() {
   selectionBox = null;
   map?.dragPan.enable();
   map?.doubleClickZoom.enable();
+  map?.cooperativeGestures.enable();
   container.value?.classList.remove("map-picking");
   document.removeEventListener("keydown", onSelectionKeydown);
 }
@@ -243,41 +246,50 @@ function onSelectionKeydown(event) {
   }
 }
 
-function onMouseDown(event) {
-  if (!selecting.value || event.originalEvent.button !== 0) {
+// Pointer events cover the mouse, touch screens and pens alike.
+function pointerPosition(event) {
+  const rect = map.getCanvasContainer().getBoundingClientRect();
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+}
+
+function onPointerDown(event) {
+  if (!selecting.value || (event.pointerType === "mouse" && event.button !== 0)) {
     return;
   }
 
-  selectionStart = event.point;
+  event.preventDefault();
+  event.currentTarget.setPointerCapture(event.pointerId);
+  selectionStart = pointerPosition(event);
   selectionBox = document.createElement("div");
   selectionBox.className = "map-selection-box";
   map.getCanvasContainer().appendChild(selectionBox);
-  onMouseMove(event);
+  onPointerMove(event);
 }
 
-function onMouseMove(event) {
+function onPointerMove(event) {
   if (!selecting.value || !selectionStart) {
     return;
   }
 
+  const point = pointerPosition(event);
   Object.assign(selectionBox.style, {
-    left: `${Math.min(selectionStart.x, event.point.x)}px`,
-    top: `${Math.min(selectionStart.y, event.point.y)}px`,
-    width: `${Math.abs(event.point.x - selectionStart.x)}px`,
-    height: `${Math.abs(event.point.y - selectionStart.y)}px`,
+    left: `${Math.min(selectionStart.x, point.x)}px`,
+    top: `${Math.min(selectionStart.y, point.y)}px`,
+    width: `${Math.abs(point.x - selectionStart.x)}px`,
+    height: `${Math.abs(point.y - selectionStart.y)}px`,
   });
 }
 
-function onMouseUp(event) {
+function onPointerUp(event) {
   if (!selecting.value || !selectionStart) {
     return;
   }
 
   const start = selectionStart;
-  const end = event.point;
+  const end = pointerPosition(event);
   stopSelection();
   // A click rather than a drag.
-  if (start.dist(end) < 4) {
+  if (Math.hypot(end.x - start.x, end.y - start.y) < 4) {
     return;
   }
 
@@ -347,9 +359,11 @@ function initialize() {
     map.getCanvas().style.cursor = "";
     hoverLabel.hide();
   });
-  map.on("mousedown", onMouseDown);
-  map.on("mousemove", onMouseMove);
-  map.on("mouseup", onMouseUp);
+  const canvasContainer = map.getCanvasContainer();
+  canvasContainer.addEventListener("pointerdown", onPointerDown);
+  canvasContainer.addEventListener("pointermove", onPointerMove);
+  canvasContainer.addEventListener("pointerup", onPointerUp);
+  canvasContainer.addEventListener("pointercancel", stopSelection);
 }
 
 // Only what the map draws, so typing in checklist fields does not rebuild every marker.
