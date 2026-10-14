@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import Papa from "papaparse";
-import { downloadCsv, fixturePath, importFixture, openApp, stubNetwork } from "./helpers";
+import {
+  downloadCsv,
+  fixturePath,
+  importFixture,
+  openApp,
+  readGolden,
+  stubNetwork,
+} from "./helpers";
 
 test("French question flags and committee notes survive conversion of casual and list records", async ({
   page,
@@ -92,6 +99,36 @@ test("source flags retain protected records, exclude refused records, and always
   expect(csv).toContain("CAvS: accepted by the Swiss rarities committee");
   expect(csv).toContain("CAvS: rejected by the Swiss rarities committee");
   expect(csv).toContain("CAvS: documentation required by the Swiss rarities committee");
+  await importFixture(page, "ornitho.ch", "rules/ornitho_flags_updated.json");
+  await expect(page.locator("#confirm-source-review")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
+  await expect(refusedWarning.locator("a")).toHaveCount(1);
+  await expect(refusedWarning.locator("a[href*='38325489']")).toHaveText("Cinciallegra");
+  const incomplete = page
+    .locator(".alert-warning")
+    .filter({ hasText: "marked as incomplete on ornitho.ch" });
+  await expect(incomplete.locator("a")).toHaveCount(3);
+  await expect(incomplete.locator("a[href*='38325488']")).toHaveCount(1);
+  const verification = page
+    .locator(".alert-warning")
+    .filter({ hasText: "under verification on ornitho.ch" });
+  await expect(verification.locator("a")).toHaveCount(2);
+  await expect(verification.locator("a[href*='38325490']")).toHaveCount(1);
+  await expect(verification.locator("a[href*='38325502']")).toHaveCount(1);
+  const hidden = page.locator(".alert-warning").filter({ hasText: "hidden on ornitho.ch" });
+  await expect(hidden.locator("a[href*='38325489']")).toHaveCount(0);
+  for (const id of ["38325491", "38325494", "38325603"]) {
+    await expect(hidden.locator(`a[href*='${id}']`)).toHaveCount(1);
+  }
+  await page.locator("#confirm-source-review").check();
+  const updatedRows = Papa.parse(await downloadCsv(page)).data;
+  expect(updatedRows).toHaveLength(8);
+  expect(updatedRows.some((r) => r[1] === "Parus" && r[2] === "major")).toBe(false);
+  // Golden CSV uses default comments; the earlier download in this test disabled them.
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#customized-species-comments").check();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  expect(await downloadCsv(page)).toBe(readGolden("rules/ornitho_flags_updated.json"));
   const source = JSON.parse(readFileSync(fixturePath("rules/ornitho_flags.json"), "utf8"));
   [...source.data.sightings, ...source.data.forms[0].sightings].forEach(
     (s) => (s.observers[0].admin_hidden_type = "refused"),

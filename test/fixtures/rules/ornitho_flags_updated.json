@@ -1,0 +1,348 @@
+{
+  "data": {
+    "sightings": [
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "371",
+          "rarity": "verycommon",
+          "name": "Cinciarella",
+          "latin_name": "Cyanistes caeruleus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325488",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "370",
+          "rarity": "verycommon",
+          "name": "Cinciallegra",
+          "latin_name": "Parus major",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325489",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "refused",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "377",
+          "rarity": "verycommon",
+          "name": "Codibugnolo",
+          "latin_name": "Aegithalos caudatus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325490",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "question",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "375",
+          "rarity": "verycommon",
+          "name": "Cincia bigia",
+          "latin_name": "Poecile palustris",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325491",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "181",
+          "rarity": "unusual",
+          "name": "Gallo cedrone",
+          "latin_name": "Tetrao urogallus",
+          "category": "A"
+        },
+        "place": {
+          "name": "Col du Marchairuz"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325494",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "46.552622094713",
+            "coord_lon": "6.2504959945679",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "comment": "This is a test data for ornitho2ebird. I will delete this entry in the day",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "373",
+          "rarity": "verycommon",
+          "name": "Cincia mora",
+          "latin_name": "Periparus ater",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325498",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "11323",
+          "rarity": "rare",
+          "name": "Cincia alpestre (ssp. montanus)",
+          "latin_name": "Poecile montanus montanus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325502",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "question",
+            "comment": "This is a test data for ornitho2ebird. I will delete this entry in the day",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "374",
+          "rarity": "verycommon",
+          "name": "Cincia dal ciuffo",
+          "latin_name": "Lophophanes cristatus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325503",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1791928800",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2026-10-14T00:00:00+02:00",
+          "#text": "mercoledì, 14. ottobre 2026"
+        },
+        "species": {
+          "@id": "11322",
+          "rarity": "unusual",
+          "name": "Cincia dei salici",
+          "latin_name": "Poecile montanus rhenanus / salicarius",
+          "category": "A"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325603",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercoledì, 14. ottobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      }
+    ]
+  }
+}

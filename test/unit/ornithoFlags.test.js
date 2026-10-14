@@ -9,6 +9,40 @@ import { exportFixture, parseFixture, readFixture, website } from "../helpers";
 beforeAll(() => loadOrnithoSpeciesList());
 
 describe("Ornitho protection and validation", () => {
+  it("reads changed statuses for the same Swiss observations from the later Italian-language export", async () => {
+    const before = await parseFixture("rules/ornitho_flags.json", "ornitho.ch");
+    const after = await parseFixture("rules/ornitho_flags_updated.json", "ornitho.ch");
+    expect(after.sightings).toHaveLength(9);
+    for (const [id, previousStatus, status, hidden] of [
+      ["38325488", "", "incomplete", false],
+      ["38325489", "", "refused", true],
+      ["38325490", "", "question", false],
+      ["38325491", "", "", true],
+      ["38325494", "", "", true],
+      ["38325498", "incomplete", "incomplete", false],
+      ["38325502", "incomplete", "question", false],
+      ["38325503", "incomplete", "incomplete", false],
+    ]) {
+      const earlier = before.sightings.find((s) => s.id === id);
+      const later = after.sightings.find((s) => s.id === id);
+      expect(earlier.admin_hidden_type, id).toBe(previousStatus);
+      expect(later, id).toMatchObject({ admin_hidden_type: status, hidden });
+      expect(later.ebird_species_code, id).toBe(earlier.ebird_species_code);
+      expect(later.scientific_name, id).toBe(earlier.scientific_name);
+    }
+    expect(after.sightings.find((s) => s.id === "38325603")).toMatchObject({
+      hidden: true,
+      admin_hidden_type: "",
+      common_name: "Cincia dei salici",
+    });
+    const { rows, errors } = await exportFixture("rules/ornitho_flags_updated.json", "ornitho.ch");
+    expect(errors).toEqual([]);
+    expect(rows).toHaveLength(8);
+    expect(rows.reduce((total, row) => total + row.count, 0)).toBe(8);
+    expect(rows.some((row) => row.Genus === "Parus" && row.Species === "major")).toBe(false);
+    expect(rows.some((row) => row.Genus === "Cyanistes" && row.Species === "caeruleus")).toBe(true);
+    expect(rows.some((row) => row.Genus === "Aegithalos" && row.Species === "caudatus")).toBe(true);
+  });
   it("preserves the new French review examples without treating legal protection as hidden data", async () => {
     const parsed = await parseFixture("rules/ornitho_flags_fr.json", "faune-france.org");
     const sightings = [...parsed.sightings, ...parsed.formsSightings.flat()];
