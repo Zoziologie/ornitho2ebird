@@ -93,6 +93,7 @@ const exportFilenameEditing = ref(false);
 const interactiveMapPublishing = ref(false);
 const interactiveMapError = ref("");
 const interactiveMapStatusByFormId = ref({});
+const sourceReviewConfirmed = ref(false);
 let taxonomyRequestId = 0;
 
 const exportableForms = computed(() => exportableFormsOf(props.forms));
@@ -125,8 +126,13 @@ const sourceFlagReviews = computed(() => {
   return [
     {
       key: "exportProtectedWarning",
-      sightings: sightings.filter((sighting) => sighting.hidden),
-      links: ["https://support.ebird.org/en/support/solutions/articles/48000803210"],
+      sightings: [...exportableSightingsByFormId.value.values()]
+        .flat()
+        .filter((sighting) => sighting.hidden && isExportableSighting(sighting)),
+      links: [
+        "https://support.ebird.org/en/support/solutions/articles/48000803210",
+        "https://support.ebird.org/en/support/solutions/articles/48000948757-ebird-faqs#anchorHiddenChecklist",
+      ],
     },
     {
       key: "exportRefusedWarning",
@@ -140,8 +146,28 @@ const sourceFlagReviews = computed(() => {
       key: "exportQuestionWarning",
       sightings: sightings.filter((sighting) => sighting.admin_hidden_type === "question"),
     },
-  ].filter((review) => review.sightings.length);
+  ]
+    .filter((review) => review.sightings.length)
+    .map((review) => ({
+      ...review,
+      source: [...new Set(review.sightings.map((sighting) => sighting.source_website_name))].join(
+        ", ",
+      ),
+    }));
 });
+const needsSourceReview = computed(() =>
+  [...exportableSightingsByFormId.value.values()]
+    .flat()
+    .some(
+      (sighting) =>
+        isExportableSighting(sighting) &&
+        ["incomplete", "question"].includes(sighting.admin_hidden_type),
+    ),
+);
+watch(
+  [() => props.sightings, () => props.formsSightings, exportableSightingsByFormId],
+  () => (sourceReviewConfirmed.value = false),
+);
 const uncertainMortality = computed(() =>
   [...exportableSightingsByFormId.value.values()]
     .flat()
@@ -522,7 +548,11 @@ watch(
 );
 
 async function downloadFile() {
-  if (!exportState.value.csv || props.matchingHotspots) {
+  if (
+    !exportState.value.csv ||
+    props.matchingHotspots ||
+    (needsSourceReview.value && !sourceReviewConfirmed.value)
+  ) {
     return;
   }
 
@@ -588,10 +618,7 @@ async function downloadFile() {
       <h2 v-analytics-view="'export'" class="border-bottom pb-2 mb-3">{{ t("exportTitle") }}</h2>
       <div v-for="review in sourceFlagReviews" :key="review.key" class="alert alert-warning">
         <p>
-          <LinkedText
-            :text="t(review.key, { count: review.sightings.length })"
-            :links="review.links"
-          />
+          <LinkedText :text="t(review.key, { source: review.source })" :links="review.links" />
         </p>
         <ul class="mb-0">
           <li v-for="sighting in review.sightings" :key="`${sighting.form_id}-${sighting.id}`">
@@ -601,6 +628,17 @@ async function downloadFile() {
             — {{ sighting.date }}, {{ sighting.location_name }}
           </li>
         </ul>
+      </div>
+      <div v-if="needsSourceReview" class="form-check mb-3">
+        <input
+          id="confirm-source-review"
+          v-model="sourceReviewConfirmed"
+          type="checkbox"
+          class="form-check-input"
+        />
+        <label for="confirm-source-review" class="form-check-label">{{
+          t("exportSourceReviewConfirm")
+        }}</label>
       </div>
       <div v-if="exportableForms.length === 0" class="alert alert-secondary mb-0">
         {{ t("notReady") }}
@@ -889,6 +927,7 @@ async function downloadFile() {
               type="button"
               :disabled="
                 !exportState.csv ||
+                (needsSourceReview && !sourceReviewConfirmed) ||
                 interactiveMapPublishing ||
                 matchingHotspots ||
                 exportState.errors.length > 0 ||
@@ -898,6 +937,9 @@ async function downloadFile() {
             >
               {{ interactiveMapPublishing ? t("interactiveMapPublishing") : t("downloadCsv") }}
             </button>
+            <p v-if="needsSourceReview && !sourceReviewConfirmed" class="small mt-2 mb-0">
+              <a href="#confirm-source-review">{{ t("exportSourceReviewRequired") }}</a>
+            </p>
             <p class="export-snapshot small mb-0">
               {{ formatNumber(exportSummaryStats.totalSpecies) }}
               {{ t("exportSummarySpecies", exportSummaryStats.totalSpecies) }} ·

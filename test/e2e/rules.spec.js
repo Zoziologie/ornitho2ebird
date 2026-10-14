@@ -11,8 +11,7 @@ test("French question flags and committee notes survive conversion of casual and
   await importFixture(page, "faune-france.org", "rules/ornitho_flags_fr.json");
   const discussion = page
     .locator(".alert-warning")
-    .filter({ hasText: "under discussion with the observer" });
-  await expect(discussion).toContainText("4 records");
+    .filter({ hasText: "under verification on faune-france.org" });
   for (const id of ["51584243", "62836635", "70938324", "59112386"]) {
     await expect(
       discussion.locator(`a[href='https://www.faune-france.org/index.php?m_id=54&id=${id}']`),
@@ -21,6 +20,8 @@ test("French question flags and committee notes survive conversion of casual and
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator("#customized-species-comments").uncheck();
   await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
+  await page.locator("#confirm-source-review").check();
   const csv = await downloadCsv(page);
   const rows = Papa.parse(csv).data;
   expect(rows).toHaveLength(5);
@@ -33,6 +34,16 @@ test("French question flags and committee notes survive conversion of casual and
   expect(
     rows.filter((r) => r[4].includes("CHN: documentation required by the rarities committee")),
   ).toHaveLength(2);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: /^Customized mode/ }).click();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.locator("#confirm-source-review").check();
+  await page.locator("#export-ready").uncheck();
+  await expect(page.locator("#confirm-source-review")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
+  await importFixture(page, "faune-france.org", "rules/ornitho_flags_fr.json");
+  await expect(page.locator("#confirm-source-review")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
 });
 
 test("source flags retain protected records, exclude refused records, and always export committee notes", async ({
@@ -43,24 +54,32 @@ test("source flags retain protected records, exclude refused records, and always
   await importFixture(page, "ornitho.ch", "rules/ornitho_flags.json");
   const refusedWarning = page
     .locator(".alert-warning")
-    .filter({ hasText: "records marked invalid" });
+    .filter({ hasText: "marked as rejected on ornitho.ch" });
   await expect(refusedWarning.locator("a[href*='15800381']")).toHaveCount(1);
   await expect(refusedWarning.locator("a[href*='3916932']")).toHaveCount(1);
   await expect(
     page
       .locator(".alert-warning")
-      .filter({ hasText: "needing additional information" })
+      .filter({ hasText: "marked as incomplete on ornitho.ch" })
       .locator("a[href*='38325498']"),
   ).toHaveCount(1);
   await expect(
     page
       .locator(".alert-warning")
-      .filter({ hasText: "source records are protected" })
-      .getByRole("link", { name: "eBird’s guidance" }),
+      .filter({ hasText: "hidden on ornitho.ch" })
+      .getByRole("link", { name: "Sensitive Species in eBird" }),
   ).toHaveAttribute("href", "https://support.ebird.org/en/support/solutions/articles/48000803210");
+  await expect(
+    page.getByRole("link", { name: "Hide from eBird output", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    "https://support.ebird.org/en/support/solutions/articles/48000948757-ebird-faqs#anchorHiddenChecklist",
+  );
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator("#customized-species-comments").uncheck();
   await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
+  await page.locator("#confirm-source-review").check();
   const csv = await downloadCsv(page);
   const rows = Papa.parse(csv).data;
   expect(rows.some((r) => r[1] === "Tetrao" && r[2] === "urogallus")).toBe(true);
@@ -82,7 +101,8 @@ test("source flags retain protected records, exclude refused records, and always
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(source)),
   });
-  await expect(refusedWarning).toContainText("14 records marked invalid");
+  await expect(refusedWarning.locator("a")).toHaveCount(14);
+  await expect(page.locator("#confirm-source-review")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
 });
 
