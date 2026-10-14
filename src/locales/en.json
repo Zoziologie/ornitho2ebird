@@ -351,7 +351,7 @@
   "aggregationAppliesImmediately": "Changing these limits immediately regroups the current casual observations. No re-upload is needed.",
   "aggregationKeepsAssignments": "Customized mode has been used for this import, so changing these limits keeps the current assignments, even in Basic mode. To regroup, open Customized mode, click “Reset assignment”, then “Aggregate casual observations”. No re-upload is needed.",
   "exportIncidentalAssignedNote": "from {sightings} casual observation · current assignments | from {sightings} casual observations · current assignments",
-  "exportProtectedWarning": "Some of your imported observations are **hidden** on {source}. These observations are included in the export CSV. eBird automatically hides species it considers sensitive; see [Sensitive Species in eBird] for the complete list. If your observations are not covered by that list, you can hide the entire checklist using Checklist Tools → [Hide from eBird output].",
+  "exportProtectedWarning": "Some observations are **hidden** on {source} but included in the CSV. eBird automatically protects species on its [Sensitive Species list]. If that protection does not apply, we recommend [hiding the entire checklist] to maintain their protection.",
   "exportRefusedWarning": "Some of your observations are marked as **rejected** on {source} and are therefore excluded from the export CSV.",
   "exportIncompleteWarning": "Some of your observations are marked as **incomplete** on {source}. Please check the original observations below and make sure they are in order before proceeding.",
   "faqProtectedQuestion": "What happens to protected Ornitho observations?",

@@ -74,10 +74,10 @@ test("source flags retain protected records, exclude refused records, and always
     page
       .locator(".alert-warning")
       .filter({ hasText: "hidden on ornitho.ch" })
-      .getByRole("link", { name: "Sensitive Species in eBird" }),
+      .getByRole("link", { name: "Sensitive Species list" }),
   ).toHaveAttribute("href", "https://support.ebird.org/en/support/solutions/articles/48000803210");
   await expect(
-    page.getByRole("link", { name: "Hide from eBird output", exact: true }),
+    page.getByRole("link", { name: "hiding the entire checklist", exact: true }),
   ).toHaveAttribute(
     "href",
     "https://support.ebird.org/en/support/solutions/articles/48000948757-ebird-faqs#anchorHiddenChecklist",
