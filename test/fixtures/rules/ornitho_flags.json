@@ -1,0 +1,459 @@
+{
+  "data": {
+    "sightings": [
+      {
+        "species": {
+          "@id": "371",
+          "rarity": "verycommon",
+          "name": "Mésange bleue",
+          "latin_name": "Cyanistes caeruleus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325488",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "370",
+          "rarity": "verycommon",
+          "name": "Mésange charbonnière",
+          "latin_name": "Parus major",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325489",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "377",
+          "rarity": "verycommon",
+          "name": "Mésange à longue queue",
+          "latin_name": "Aegithalos caudatus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325490",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "375",
+          "rarity": "verycommon",
+          "name": "Mésange nonnette",
+          "latin_name": "Poecile palustris",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325491",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "181",
+          "rarity": "unusual",
+          "name": "Grand Tétras",
+          "latin_name": "Tetrao urogallus",
+          "category": "A"
+        },
+        "place": {
+          "name": "Col du Marchairuz"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325494",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "46.552622094713",
+            "coord_lon": "6.2504959945679",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "comment": "This is a test data for ornitho2ebird. I will delete this entry in the day",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "373",
+          "rarity": "verycommon",
+          "name": "Mésange noire",
+          "latin_name": "Periparus ater",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325498",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "11323",
+          "rarity": "rare",
+          "name": "Mésange alpestre",
+          "latin_name": "Poecile montanus montanus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325502",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "comment": "This is a test data for ornitho2ebird. I will delete this entry in the day",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "374",
+          "rarity": "verycommon",
+          "name": "Mésange huppée",
+          "latin_name": "Lophophanes cristatus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Nussbaumersee"
+        },
+        "observers": [
+          {
+            "id_sighting": "38325503",
+            "timing": {
+              "@timestamp": "1791928800",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2026-10-14T00:00:00+02:00",
+              "#text": "mercredi, 14. octobre 2026"
+            },
+            "coord_lat": "47.615345768195",
+            "coord_lon": "8.816677103886",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "incomplete",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "53855",
+          "rarity": "rare",
+          "name": "Fauvette passerinette (indéterminée)",
+          "latin_name": "Curruca cantillans / iberiae / subalpina",
+          "category": "A"
+        },
+        "place": {
+          "name": "Kiefernwald Feschelbach"
+        },
+        "observers": [
+          {
+            "id_sighting": "15800381",
+            "timing": {
+              "@timestamp": "1526706000",
+              "@notime": "0",
+              "@offset": "7200",
+              "@ISO8601": "2018-05-19T07:00:00+02:00",
+              "#text": "samedi, 19. mai 2018, 07:00:00"
+            },
+            "coord_lat": "46.307377",
+            "coord_lon": "7.672789",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "refused",
+            "committees_validation": {
+              "cavs": "REQUESTED"
+            },
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "species": {
+          "@id": "1477",
+          "rarity": "rare",
+          "name": "Long-tailed Tit (ssp. caudatus); White-headed",
+          "latin_name": "Aegithalos caudatus caudatus",
+          "category": "C"
+        },
+        "place": {
+          "name": "Uitikon / Waldegg"
+        },
+        "observers": [
+          {
+            "id_sighting": "3916932",
+            "timing": {
+              "@timestamp": "1291158000",
+              "@notime": "1",
+              "@offset": "3600",
+              "@ISO8601": "2010-12-01T00:00:00+01:00",
+              "#text": "Wednesday, December 1st, 2010"
+            },
+            "coord_lat": "47.364783134177",
+            "coord_lon": "8.4646094598878",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "refused",
+            "comment": "Im Trupp zusammen mit ca. 5 europaeus",
+            "committees_validation": {
+              "cavs": "REQUESTED"
+            },
+            "auditory_contact": "0"
+          }
+        ]
+      }
+    ],
+    "forms": [
+      {
+        "time_start": "08:00:00",
+        "time_stop": "08:30:00",
+        "lat": "47.615345768195",
+        "lon": "8.816677103886",
+        "full_form": "1",
+        "sightings": [
+          {
+            "species": {
+              "@id": "371",
+              "rarity": "verycommon",
+              "name": "Mésange bleue",
+              "latin_name": "Cyanistes caeruleus",
+              "category": "C"
+            },
+            "place": {
+              "name": "Nussbaumersee"
+            },
+            "observers": [
+              {
+                "id_sighting": "900000001",
+                "timing": {
+                  "@timestamp": "1791928800",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-14T00:00:00+02:00",
+                  "#text": "mercredi, 14. octobre 2026"
+                },
+                "coord_lat": "47.615345768195",
+                "coord_lon": "8.816677103886",
+                "estimation_code": "EXACT_VALUE",
+                "count": "3",
+                "auditory_contact": "0",
+                "committees_validation": {
+                  "cavs": "ACCEPTED"
+                }
+              }
+            ]
+          },
+          {
+            "species": {
+              "@id": "371",
+              "rarity": "verycommon",
+              "name": "Mésange bleue",
+              "latin_name": "Cyanistes caeruleus",
+              "category": "C"
+            },
+            "place": {
+              "name": "Nussbaumersee"
+            },
+            "observers": [
+              {
+                "id_sighting": "900000002",
+                "timing": {
+                  "@timestamp": "1791928800",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-14T00:00:00+02:00",
+                  "#text": "mercredi, 14. octobre 2026"
+                },
+                "coord_lat": "47.615345768195",
+                "coord_lon": "8.816677103886",
+                "estimation_code": "EXACT_VALUE",
+                "count": "100",
+                "auditory_contact": "0",
+                "committees_validation": {
+                  "cavs": "ACCEPTED"
+                },
+                "admin_hidden_type": "refused",
+                "admin_hidden": "1"
+              }
+            ]
+          },
+          {
+            "species": {
+              "@id": "370",
+              "rarity": "verycommon",
+              "name": "Mésange charbonnière",
+              "latin_name": "Parus major",
+              "category": "C"
+            },
+            "place": {
+              "name": "Nussbaumersee"
+            },
+            "observers": [
+              {
+                "id_sighting": "900000003",
+                "timing": {
+                  "@timestamp": "1791928800",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-14T00:00:00+02:00",
+                  "#text": "mercredi, 14. octobre 2026"
+                },
+                "coord_lat": "47.615345768195",
+                "coord_lon": "8.816677103886",
+                "estimation_code": "EXACT_VALUE",
+                "count": "7",
+                "auditory_contact": "0",
+                "committees_validation": {
+                  "cavs": "REJECTED"
+                }
+              }
+            ]
+          },
+          {
+            "species": {
+              "@id": "377",
+              "rarity": "verycommon",
+              "name": "Mésange à longue queue",
+              "latin_name": "Aegithalos caudatus",
+              "category": "C"
+            },
+            "place": {
+              "name": "Nussbaumersee"
+            },
+            "observers": [
+              {
+                "id_sighting": "900000004",
+                "timing": {
+                  "@timestamp": "1791928800",
+                  "@notime": "1",
+                  "@offset": "7200",
+                  "@ISO8601": "2026-10-14T00:00:00+02:00",
+                  "#text": "mercredi, 14. octobre 2026"
+                },
+                "coord_lat": "47.615345768195",
+                "coord_lon": "8.816677103886",
+                "estimation_code": "EXACT_VALUE",
+                "count": "2",
+                "auditory_contact": "0",
+                "committees_validation": {
+                  "cavs": "REQUESTED"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

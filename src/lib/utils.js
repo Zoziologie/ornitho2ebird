@@ -161,6 +161,7 @@ export function mortalityStatus(sighting) {
 
 export function isExportableSighting(sighting) {
   return (
+    sighting.admin_hidden_type !== "refused" &&
     mortalityStatus(sighting) !== "dead" &&
     !(sighting.count !== null && sighting.count !== "" && Number(sighting.count) === 0)
   );
@@ -355,10 +356,28 @@ export function buildSpeciesRows(
       numericCount += parsedCount;
     });
 
+    const committeeComments = duplicates.flatMap((sighting) => {
+      const source = templateSighting(sighting);
+      return Object.entries(sighting.committees_validation || {}).map(([committee, value]) => {
+        const status = {
+          ACCEPTED: "accepted",
+          REJECTED: "rejected",
+          REQUESTED: "documentation required",
+        }[value];
+        const label = committee === "cavs" ? "CAvS" : escapeTemplateText(committee.toUpperCase());
+        const description = status
+          ? `${status} by the ${committee === "cavs" ? "Swiss " : ""}rarities committee`
+          : escapeTemplateText(value);
+        return `${label}: ${description} (${source.source_website_name}, ${source.date}; <a href="${source.source_record_url}">original observation</a>)`;
+      });
+    });
+
     return {
       common_name: commonNameForSighting(duplicates[0]),
       count: hasNonNumericCount ? "X" : numericCount,
-      species_comment: speciesComment(speciesCommentTemplate, duplicates),
+      species_comment: [...committeeComments, speciesComment(speciesCommentTemplate, duplicates)]
+        .filter(Boolean)
+        .join("<br/>"),
       sightings: duplicates,
     };
   });
@@ -620,6 +639,9 @@ export function createSighting(raw) {
     count_precision: raw.count_precision || "",
     atlas_code: raw.atlas_code ?? "",
     auditory_contact: raw.auditory_contact ?? "",
+    hidden: raw.hidden === "1",
+    admin_hidden_type: raw.admin_hidden_type || "",
+    committees_validation: raw.committees_validation || {},
     has_death: raw.has_death || "",
     extended_info: raw.extended_info || {},
     // Stored as HTML: escape the imported text, keep line breaks.

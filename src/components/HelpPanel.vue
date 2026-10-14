@@ -111,6 +111,12 @@ const faqGroups = [
       { id: "processing", key: "Processing", links: [EBIRD_IMPORTS_URL] },
       { id: "mistakes", key: "Mistakes", links: [EBIRD_IMPORTS_URL] },
       { id: "rarities", key: "Rarities", links: [] },
+      {
+        id: "protected-observations",
+        key: "Protected",
+        links: ["https://support.ebird.org/en/support/solutions/articles/48000803210"],
+      },
+      { id: "source-validation", key: "SourceValidation", links: [] },
       { id: "distance", key: "Distance", links: [] },
     ],
   },

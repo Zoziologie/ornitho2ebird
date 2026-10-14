@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 // Renders a translated text in which each "[bracketed words]" links to the next URL in
 // `links`, so translators can place the link anywhere in the sentence. Links to "#..." (the
-// help) stay in the app; the others open in a new tab.
+// help) stay in the app; the others open in a new tab. **Marked text** is rendered bold.
 const props = defineProps({
   text: {
     type: String,
@@ -27,6 +27,11 @@ const parts = computed(() =>
   <template v-for="(part, index) in parts" :key="index">
     <a v-if="part.href?.startsWith('#')" :href="part.href">{{ part.value }}</a>
     <a v-else-if="part.href" :href="part.href" target="_blank" rel="noopener">{{ part.value }}</a>
-    <template v-else>{{ part.value }}</template>
+    <template v-else>
+      <template v-for="(value, textIndex) in part.value.split(/\*\*([^*]+)\*\*/)" :key="textIndex">
+        <strong v-if="textIndex % 2 === 1">{{ value }}</strong>
+        <template v-else>{{ value }}</template>
+      </template>
+    </template>
   </template>
 </template>
