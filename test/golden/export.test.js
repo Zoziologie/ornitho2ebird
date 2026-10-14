@@ -26,6 +26,7 @@ const FIXTURES = [
   ["rules/biolovision_catalan.txt", "data.biolovision.net"],
   ["rules/ornitho_mortality_overnight.json", "ornitho.ch"],
   ["rules/ornitho_flags.json", "ornitho.ch"],
+  ["rules/ornitho_flags_fr.json", "faune-france.org"],
 ];
 
 describe("eBird CSV export", () => {

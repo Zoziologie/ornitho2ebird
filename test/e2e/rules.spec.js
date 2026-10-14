@@ -3,6 +3,38 @@ import { expect, test } from "@playwright/test";
 import Papa from "papaparse";
 import { downloadCsv, fixturePath, importFixture, openApp, stubNetwork } from "./helpers";
 
+test("French question flags and committee notes survive conversion of casual and list records", async ({
+  page,
+}) => {
+  await stubNetwork(page);
+  await openApp(page);
+  await importFixture(page, "faune-france.org", "rules/ornitho_flags_fr.json");
+  const discussion = page
+    .locator(".alert-warning")
+    .filter({ hasText: "under discussion with the observer" });
+  await expect(discussion).toContainText("4 records");
+  for (const id of ["51584243", "62836635", "70938324", "59112386"]) {
+    await expect(
+      discussion.locator(`a[href='https://www.faune-france.org/index.php?m_id=54&id=${id}']`),
+    ).toHaveCount(1);
+  }
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#customized-species-comments").uncheck();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  const csv = await downloadCsv(page);
+  const rows = Papa.parse(csv).data;
+  expect(rows).toHaveLength(5);
+  expect(rows.some((r) => r[1] === "Falco" && r[2] === "subbuteo")).toBe(true);
+  expect(rows.some((r) => r[1] === "Glaucidium" && r[2] === "passerinum")).toBe(true);
+  expect(csv).not.toContain("44105705");
+  expect(rows.find((r) => r[4].includes("59112386"))[4]).toContain(
+    "CHR: documentation required by the rarities committee",
+  );
+  expect(
+    rows.filter((r) => r[4].includes("CHN: documentation required by the rarities committee")),
+  ).toHaveLength(2);
+});
+
 test("source flags retain protected records, exclude refused records, and always export committee notes", async ({
   page,
 }) => {

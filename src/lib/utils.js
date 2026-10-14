@@ -356,17 +356,21 @@ export function buildSpeciesRows(
       numericCount += parsedCount;
     });
 
-    const committeeComments = duplicates
-      .filter((sighting) => sighting.committees_validation?.cavs)
-      .map((sighting) => {
+    const committeeComments = duplicates.flatMap((sighting) => {
+      const source = templateSighting(sighting);
+      return Object.entries(sighting.committees_validation || {}).map(([committee, value]) => {
         const status = {
-          ACCEPTED: "accepted by the Swiss rarities committee",
-          REJECTED: "rejected by the Swiss rarities committee",
-          REQUESTED: "documentation required by the Swiss rarities committee",
-        }[sighting.committees_validation.cavs];
-        const source = templateSighting(sighting);
-        return `CAvS: ${status || escapeTemplateText(sighting.committees_validation.cavs)} (${source.source_website_name}, ${source.date}; <a href="${source.source_record_url}">original observation</a>)`;
+          ACCEPTED: "accepted",
+          REJECTED: "rejected",
+          REQUESTED: "documentation required",
+        }[value];
+        const label = committee === "cavs" ? "CAvS" : escapeTemplateText(committee.toUpperCase());
+        const description = status
+          ? `${status} by the ${committee === "cavs" ? "Swiss " : ""}rarities committee`
+          : escapeTemplateText(value);
+        return `${label}: ${description} (${source.source_website_name}, ${source.date}; <a href="${source.source_record_url}">original observation</a>)`;
       });
+    });
 
     return {
       common_name: commonNameForSighting(duplicates[0]),

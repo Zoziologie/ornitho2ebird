@@ -1,0 +1,294 @@
+{
+  "data": {
+    "sightings": [
+      {
+        "date": {
+          "@timestamp": "1429999200",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2015-04-26T00:00:00+02:00",
+          "#text": "dimanche, 26. avril 2015"
+        },
+        "species": {
+          "@id": "1198",
+          "rarity": "common",
+          "name": "Buse indéterminée",
+          "latin_name": "Buteo sp.",
+          "category": "C",
+          "protection_nat": {
+            "#text": "-1"
+          }
+        },
+        "place": {
+          "name": "La Serva"
+        },
+        "observers": [
+          {
+            "anonymous_in_export": "anonymize",
+            "id_sighting": "44105705",
+            "timing": {
+              "@timestamp": "1430055000",
+              "@notime": "0",
+              "@offset": "7200",
+              "@ISO8601": "2015-04-26T15:30:00+02:00",
+              "#text": "dimanche, 26. avril 2015, 15:30:00"
+            },
+            "coord_lat": "48.407785642547",
+            "coord_lon": "7.2533978952347",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "refused",
+            "gradation": "2",
+            "comment": "Voici les critères qui me font penser que c’était une buse pattue:\r\n- taille: plus grand qu'une buse variable mais pas excessivement. Il m'a semblé que le ratio taille des ailes, tailles de la queue etait un peu plus grand\r\n- Il avait une bande/bande blanche sur le dessus de la queue (très similaire à http://www.oiseaux.net/photos/marc.fasol/buse.pattue.3.html#monde)\r\n- Couleur générale: brun-blanc mais généralement plus de blanc qu'une buse variable\r\n- Il a fait un vol du St Esprit, courtement mais distinctement battement d'aile sur place\r\n- J'ai eu l'impression de voire des taches blanche sur la \"tranche\" des ailes a l'avant. (un peu comme cela: http://www.oiseaux.net/photos/rein.hofman/buse.pattue.3.html#monde)\r\n- vol vers le nord, direction de Shirmeck, vu au dessus de Rothau. (migration)\r\n\r\nAutre commentaires:\r\n- La durée total de l'observation devait être de 30 secondes à l’œil nu et 10 secondes au jumelles. (de loin je pensais d'abord a une buse variable)\r\n- pas de photo prise\r\n- 4 personnes présente mais sans connaissance ornithologique\r\n\r\nMon expérience n'est pas suffisante pour être sur à 100% qu'il s'agissait de cette espèce rare. Je suis pret a supprimer l'observation si besoin, mais il est peut être intéressant pour vous de savoir qu'il y a une bonne probabilité qu'un tel individu soit passé dans la région.",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1463263200",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2016-05-15T00:00:00+02:00",
+          "#text": "dimanche, 15. mai 2016"
+        },
+        "species": {
+          "@id": "319",
+          "rarity": "unusual",
+          "name": "Chevêchette d'Europe",
+          "latin_name": "Glaucidium passerinum",
+          "category": "C",
+          "protection_nat": {
+            "#text": "1"
+          }
+        },
+        "place": {
+          "name": "Grand'Villette (colonie de Vacances)"
+        },
+        "observers": [
+          {
+            "anonymous_in_export": "anonymize",
+            "id_sighting": "51584243",
+            "timing": {
+              "@timestamp": "1463263200",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2016-05-15T00:00:00+02:00",
+              "#text": "dimanche, 15. mai 2016"
+            },
+            "coord_lat": "45.406912914281",
+            "coord_lon": "5.7271989611417",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "question",
+            "comment": "Cris entendu depuis le centre de Grand Villette provenant du sud. \r\n\r\nNous étions nous-même surpris d'entendre cet oiseau à cette altitude.  cris répété a interval régulier. son \"rond\" légèrement descendant. Nous n'avons pas bien entendu les petites notes répétées classique de son cris, peut-être a cause de la distance?\r\nNous avions hésité avec un petit duc assez longuement, mais \"l'entrée\" du cris n’était pas aussi agressif, le son légèrement plus long.\r\n\r\nJe n'ai moi-même que peut d'experience avec ces espèces mais j’étais en compagnie de Gérald Berney, qui sans avoir beaucoup d'expérience avec le petit duc a tout de meme une très bonne connaissance ornithologique en générale.\r\n\r\nL'ID n'est pas assuré à 100% mais de notre expérience et comparaison effectué la chevêchette semble être une bonne candidate.",
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1511046000",
+          "@notime": "1",
+          "@offset": "3600",
+          "@ISO8601": "2017-11-19T00:00:00+01:00",
+          "#text": "dimanche, 19. novembre 2017"
+        },
+        "species": {
+          "@id": "38791",
+          "rarity": "veryrare",
+          "name": "Aigle criard ou hybride pomarin x criard",
+          "latin_name": "Clanga clanga / pomarina x clanga",
+          "category": "C"
+        },
+        "place": {
+          "name": "les cargattes"
+        },
+        "observers": [
+          {
+            "anonymous_in_export": "anonymize",
+            "id_sighting": "62836635",
+            "timing": {
+              "@timestamp": "1511096880",
+              "@notime": "0",
+              "@offset": "3600",
+              "@ISO8601": "2017-11-19T14:08:00+01:00",
+              "#text": "dimanche, 19. novembre 2017, 14:08:00"
+            },
+            "coord_lat": "43.593298012837",
+            "coord_lon": "4.3513528064274",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "question",
+            "comment": "Avec Léo et Thomas. Possibilité d'un hybrid impossible exclure.",
+            "committees_validation": {
+              "chn": "REQUESTED"
+            },
+            "auditory_contact": "0"
+          }
+        ]
+      },
+      {
+        "date": {
+          "@timestamp": "1533852000",
+          "@notime": "1",
+          "@offset": "7200",
+          "@ISO8601": "2018-08-10T00:00:00+02:00",
+          "#text": "vendredi, 10. août 2018"
+        },
+        "species": {
+          "@id": "157",
+          "rarity": "veryrare",
+          "name": "Aigle pomarin",
+          "latin_name": "Clanga pomarina",
+          "category": "B",
+          "protection_nat": {
+            "#text": "1"
+          }
+        },
+        "place": {
+          "name": "Le Varot"
+        },
+        "observers": [
+          {
+            "anonymous_in_export": "anonymize",
+            "id_sighting": "70938324",
+            "timing": {
+              "@timestamp": "1533912660",
+              "@notime": "0",
+              "@offset": "7200",
+              "@ISO8601": "2018-08-10T16:51:00+02:00",
+              "#text": "vendredi, 10. août 2018, 16:51:00"
+            },
+            "coord_lat": "46.824559",
+            "coord_lon": "6.194151",
+            "estimation_code": "EXACT_VALUE",
+            "count": "1",
+            "hidden": "1",
+            "admin_hidden": "1",
+            "admin_hidden_type": "question",
+            "comment": "pas sur que ce soit le meme.",
+            "committees_validation": {
+              "chn": "REQUESTED"
+            },
+            "auditory_contact": "0"
+          }
+        ]
+      }
+    ],
+    "forms": [
+      {
+        "time_start": "07:18:00",
+        "time_stop": "14:23:00",
+        "full_form": "1",
+        "lat": "43.581276",
+        "lon": "-1.408209",
+        "sightings": [
+          {
+            "date": {
+              "@timestamp": "1598738400",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2020-08-30T00:00:00+02:00",
+              "#text": "dimanche, 30. août 2020"
+            },
+            "species": {
+              "@id": "174",
+              "rarity": "unusual",
+              "name": "Faucon hobereau",
+              "latin_name": "Falco subbuteo",
+              "category": "C",
+              "protection_nat": {
+                "#text": "1"
+              }
+            },
+            "place": {
+              "name": "Marais d'Orx (Casier Sud)"
+            },
+            "observers": [
+              {
+                "anonymous_in_export": "anonymize",
+                "id_sighting": "94411430",
+                "timing": {
+                  "@timestamp": "1598782566",
+                  "@notime": "0",
+                  "@offset": "7200",
+                  "@ISO8601": "2020-08-30T12:16:06+02:00",
+                  "#text": "dimanche, 30. août 2020, 12:16:06"
+                },
+                "coord_lat": "43.581276",
+                "coord_lon": "-1.408209",
+                "estimation_code": "EXACT_VALUE",
+                "count": "1",
+                "admin_hidden": "1",
+                "admin_hidden_type": "incomplete",
+                "comment": "pas 100% sur",
+                "auditory_contact": "0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "time_start": "13:27:00",
+        "time_stop": "14:55:00",
+        "full_form": "1",
+        "lat": "46.821435",
+        "lon": "6.195875",
+        "sightings": [
+          {
+            "date": {
+              "@timestamp": "1495231200",
+              "@notime": "1",
+              "@offset": "7200",
+              "@ISO8601": "2017-05-20T00:00:00+02:00",
+              "#text": "samedi, 20. mai 2017"
+            },
+            "species": {
+              "@id": "168",
+              "rarity": "unusual",
+              "name": "Circaète Jean-le-Blanc",
+              "latin_name": "Circaetus gallicus",
+              "category": "C",
+              "protection_nat": {
+                "#text": "1"
+              }
+            },
+            "place": {
+              "name": "Le Varot"
+            },
+            "observers": [
+              {
+                "anonymous_in_export": "anonymize",
+                "id_sighting": "59112386",
+                "timing": {
+                  "@timestamp": "1495280940",
+                  "@notime": "0",
+                  "@offset": "7200",
+                  "@ISO8601": "2017-05-20T13:49:00+02:00",
+                  "#text": "samedi, 20. mai 2017, 13:49:00"
+                },
+                "coord_lat": "46.821435",
+                "coord_lon": "6.195875",
+                "estimation_code": "EXACT_VALUE",
+                "count": "1",
+                "admin_hidden": "1",
+                "admin_hidden_type": "question",
+                "comment": "Passe 2x au-dessus de la plateforme, vers le nord à 13h45 puis vers le sud 10min plus tard. Son vol stationnaire pendant quelques instants nous a permis de bien l'admirer: Tête brune, corps blanc barré horizontalement sur le dessous des ailes, queue carre. Sur le retour, il s'est fait embêter par une buse bien plus petite que lui.",
+                "committees_validation": {
+                  "chr": "REQUESTED"
+                },
+                "auditory_contact": "0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

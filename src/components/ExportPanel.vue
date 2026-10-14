@@ -136,6 +136,10 @@ const sourceFlagReviews = computed(() => {
       key: "exportIncompleteWarning",
       sightings: sightings.filter((sighting) => sighting.admin_hidden_type === "incomplete"),
     },
+    {
+      key: "exportQuestionWarning",
+      sightings: sightings.filter((sighting) => sighting.admin_hidden_type === "question"),
+    },
   ].filter((review) => review.sightings.length);
 });
 const uncertainMortality = computed(() =>
