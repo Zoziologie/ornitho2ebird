@@ -262,7 +262,10 @@ function computeTimeFromSightings() {
     return;
   }
 
-  store.updateForm(selectedForm.value.id, { time: earliestTimedSighting()?.time || "" });
+  store.updateForm(selectedForm.value.id, {
+    time: earliestTimedSighting()?.time || "",
+    time_inferred: true,
+  });
   trackEvent("checklist_action", { action: "compute_time", panel: "checklist" });
 }
 

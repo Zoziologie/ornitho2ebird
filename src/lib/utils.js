@@ -202,6 +202,14 @@ export function trackExtentKm(path) {
   return extent;
 }
 
+// Inferred times describe grouped observations, not a recorded birding session.
+export function incidentalTimeOmission(form, sightings) {
+  if (form.primary_purpose || !form.time_inferred || !sightings.length) return false;
+  if (sightings.some((sighting) => !sighting.time)) return true;
+  const times = sightings.map((sighting) => Date.parse(`${sighting.date}T${sighting.time}Z`));
+  return Math.max(...times) - Math.min(...times) > 3 * 60 * 60 * 1000;
+}
+
 export function protocol(form) {
   const stationaryDistanceThresholdKm = 0.03;
 
@@ -442,7 +450,8 @@ export function buildChecklistPayloadFromSightings(sightings, options = {}) {
   return {
     location_name: mathMode(sightings.map((sighting) => sighting.location_name)),
     date: sightings[0].date,
-    time: sightings[0].time,
+    time: sightings.map((sighting) => sighting.time).sort()[0],
+    time_inferred: true,
     lat: sightings.reduce((sum, sighting) => sum + sighting.lat, 0) / sightings.length,
     lon: sightings.reduce((sum, sighting) => sum + sighting.lon, 0) / sightings.length,
     species_comment_template: options.speciesCommentTemplate,
@@ -561,6 +570,7 @@ export function buildForm(form, id, options = {}) {
     lon: form.hotspot_id ? form.lon : mathRound(form.lon, 6),
     date: form.date || "",
     time: form.time ? form.time.substring(0, 5) : "",
+    time_inferred: Boolean(form.time_inferred),
     duration: form.duration || "",
     crosses_midnight: Boolean(form.crosses_midnight),
     distance: form.distance === 0 ? 0 : (form.distance ?? ""),

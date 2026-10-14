@@ -185,3 +185,24 @@ test("uncertain hotspot matches and failed lookups preserve the CSV", async ({ p
   await importFixture(page, "ornitho.ch", FIXTURE);
   expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
 });
+
+test("incidental time omission follows effort toggles and manual time edits", async ({ page }) => {
+  await stubNetwork(page);
+  await openApp(page);
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: /^Customized mode/ }).click();
+  await page.getByRole("button", { name: "Close" }).click();
+  await importFixture(page, "data.biolovision.net", "rules/biolovision_german.txt");
+  const details = page.locator("section", {
+    has: page.getByRole("heading", { level: 2, name: "Checklist details" }),
+  });
+  await expect(field(details, "Time")).toHaveValue("07:33");
+  expect(parseCsv(await downloadCsv(page)).every((row) => row[9] === "")).toBe(true);
+  await page.locator("#complete-checklist").check();
+  expect(parseCsv(await downloadCsv(page)).every((row) => row[9] === "07:33")).toBe(true);
+  await page.locator("#complete-checklist").uncheck();
+  await page.locator("#primary-purpose").uncheck();
+  expect(parseCsv(await downloadCsv(page)).every((row) => row[9] === "")).toBe(true);
+  await field(details, "Time").fill("07:34");
+  expect(parseCsv(await downloadCsv(page)).every((row) => row[9] === "07:34")).toBe(true);
+});

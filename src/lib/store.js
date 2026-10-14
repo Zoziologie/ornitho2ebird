@@ -122,6 +122,7 @@ export function createStore() {
         form.hotspot_id = "";
       }
       Object.assign(form, changes);
+      if ("time" in changes) form.time_inferred = changes.time_inferred === true;
       if (changes.full_form === true) form.primary_purpose = true;
       if (changes.primary_purpose === false) form.full_form = false;
       if ("time" in changes || "duration" in changes) form.crosses_midnight = false;
@@ -179,6 +180,7 @@ export function createStore() {
           ...form,
           date,
           time: group.map((sighting) => sighting.time).sort()[0],
+          time_inferred: true,
           duration: "",
           distance: "",
           path: null,
