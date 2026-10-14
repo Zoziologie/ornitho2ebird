@@ -8,6 +8,7 @@ import {
   normalizeLocationName,
   protocol,
   isExportableSighting,
+  incidentalTimeOmission,
 } from "./utils";
 
 export const EBIRD_COMMENT_MAX_LENGTH = 8000;
@@ -171,7 +172,10 @@ export function buildExportRows({
           latitude: form.lat ?? "",
           longitude: form.lon ?? "",
           date: formatDate(form.date, "/"),
-          time: form.time ? form.time.substring(0, 5) : "",
+          time:
+            !form.time || incidentalTimeOmission(form, formSightings)
+              ? ""
+              : form.time.substring(0, 5),
           state: "",
           country: "",
           protocol: protocolState.name,

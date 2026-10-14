@@ -124,6 +124,7 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 - A default party size is used because some source systems do not store observer count
 - Same-day casual observations can be grouped into one checklist if they remain within configurable time and distance limits
 - Generated sighting-based checklists default to non-primary-purpose birding and incomplete (Incidental)
+- Inferred start times are omitted from Incidental exports when observations span more than 3 hours or any exported observation lacks a time. The time stays editable in Customized mode; manually entered and recorded source checklist start times are preserved. Changing completeness alone does not make a checklist Incidental: birding must not be its primary purpose.
 - If a checklist has no track or distance, it may end up as a historical checklist in eBird
 - Stationary GPS classification uses the central 95% of track points; isolated errors and brief real excursions can be ignored, so review the track
 - Track distance estimates exclude near-exact backtracking; review GPS drift and adjust the unique-distance estimate if needed
