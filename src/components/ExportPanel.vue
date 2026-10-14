@@ -116,8 +116,28 @@ const dateReviews = computed(() =>
 const excludedSightings = computed(() =>
   [...exportableSightingsByFormId.value.values()]
     .flat()
-    .filter((sighting) => !isExportableSighting(sighting)),
+    .filter(
+      (sighting) => sighting.admin_hidden_type !== "refused" && !isExportableSighting(sighting),
+    ),
 );
+const sourceFlagReviews = computed(() => {
+  const sightings = [...props.sightings, ...props.formsSightings.flat()];
+  return [
+    {
+      key: "exportProtectedWarning",
+      sightings: sightings.filter((sighting) => sighting.hidden),
+      links: ["https://support.ebird.org/en/support/solutions/articles/48000803210"],
+    },
+    {
+      key: "exportRefusedWarning",
+      sightings: sightings.filter((sighting) => sighting.admin_hidden_type === "refused"),
+    },
+    {
+      key: "exportIncompleteWarning",
+      sightings: sightings.filter((sighting) => sighting.admin_hidden_type === "incomplete"),
+    },
+  ].filter((review) => review.sightings.length);
+});
 const uncertainMortality = computed(() =>
   [...exportableSightingsByFormId.value.values()]
     .flat()
@@ -562,6 +582,22 @@ async function downloadFile() {
   <section class="card border-0 shadow-sm rounded-3 mb-3">
     <div class="card-body p-3 p-md-4">
       <h2 v-analytics-view="'export'" class="border-bottom pb-2 mb-3">{{ t("exportTitle") }}</h2>
+      <div v-for="review in sourceFlagReviews" :key="review.key" class="alert alert-warning">
+        <p>
+          <LinkedText
+            :text="t(review.key, { count: review.sightings.length })"
+            :links="review.links"
+          />
+        </p>
+        <ul class="mb-0">
+          <li v-for="sighting in review.sightings" :key="`${sighting.form_id}-${sighting.id}`">
+            <a :href="sighting.source_record_url" target="_blank" rel="noopener">{{
+              sighting.common_name
+            }}</a>
+            — {{ sighting.date }}, {{ sighting.location_name }}
+          </li>
+        </ul>
+      </div>
       <div v-if="exportableForms.length === 0" class="alert alert-secondary mb-0">
         {{ t("notReady") }}
       </div>
@@ -848,6 +884,7 @@ async function downloadFile() {
               class="btn btn-primary btn-lg export-download-btn"
               type="button"
               :disabled="
+                !exportState.csv ||
                 interactiveMapPublishing ||
                 matchingHotspots ||
                 exportState.errors.length > 0 ||

@@ -129,6 +129,9 @@ By default, the app makes a few pragmatic assumptions so imports can work with m
 - Track distance estimates exclude near-exact backtracking; review GPS drift and adjust the unique-distance estimate if needed
 - Isolated GPS jumps and distances over 20 km trigger non-blocking review warnings in Export and Customized mode. Routes and distances are never corrected automatically. You can optionally share an anonymized track in [#58](https://github.com/Zoziologie/ornitho2ebird/issues/58) to help improve detection.
 - Dead and zero-count records stay available for review but are excluded from the CSV; unclear mortality information requires confirmation
+- Ornitho records marked invalid (`admin_hidden_type: refused`) stay available for review but are excluded from the CSV; records needing additional information (`incomplete`) remain eligible, with source links in Export
+- Protected Ornitho observations remain eligible for export. Protection is not transferred to eBird; Export links to eBird's sensitive species and checklist hiding guidance. Keep the species in the checklist to avoid biasing occurrence data
+- CAvS committee statuses are always included in exported species comments, even when optional comments are disabled; source acceptance does not replace eBird review
 - Date mismatches and overnight effort require confirmation; timestamped lists can be split by date, with effort reviewed afterward
 
 ## Workflow

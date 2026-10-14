@@ -3,6 +3,57 @@ import { expect, test } from "@playwright/test";
 import Papa from "papaparse";
 import { downloadCsv, fixturePath, importFixture, openApp, stubNetwork } from "./helpers";
 
+test("source flags retain protected records, exclude refused records, and always export committee notes", async ({
+  page,
+}) => {
+  await stubNetwork(page);
+  await openApp(page);
+  await importFixture(page, "ornitho.ch", "rules/ornitho_flags.json");
+  const refusedWarning = page
+    .locator(".alert-warning")
+    .filter({ hasText: "records marked invalid" });
+  await expect(refusedWarning.locator("a[href*='15800381']")).toHaveCount(1);
+  await expect(refusedWarning.locator("a[href*='3916932']")).toHaveCount(1);
+  await expect(
+    page
+      .locator(".alert-warning")
+      .filter({ hasText: "needing additional information" })
+      .locator("a[href*='38325498']"),
+  ).toHaveCount(1);
+  await expect(
+    page
+      .locator(".alert-warning")
+      .filter({ hasText: "source records are protected" })
+      .getByRole("link", { name: "eBird’s guidance" }),
+  ).toHaveAttribute("href", "https://support.ebird.org/en/support/solutions/articles/48000803210");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#customized-species-comments").uncheck();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  const csv = await downloadCsv(page);
+  const rows = Papa.parse(csv).data;
+  expect(rows.some((r) => r[1] === "Tetrao" && r[2] === "urogallus")).toBe(true);
+  expect(rows.some((r) => r[1] === "Poecile" && r[2] === "palustris")).toBe(true);
+  expect(rows.some((r) => r[1] === "Periparus" && r[2] === "ater")).toBe(true);
+  expect(rows.find((r) => r[4].includes("900000001"))[3]).toBe("3");
+  expect(csv).not.toContain("15800381");
+  expect(csv).not.toContain("3916932");
+  expect(csv).not.toContain("900000002");
+  expect(csv).toContain("CAvS: accepted by the Swiss rarities committee");
+  expect(csv).toContain("CAvS: rejected by the Swiss rarities committee");
+  expect(csv).toContain("CAvS: documentation required by the Swiss rarities committee");
+  const source = JSON.parse(readFileSync(fixturePath("rules/ornitho_flags.json"), "utf8"));
+  [...source.data.sightings, ...source.data.forms[0].sightings].forEach(
+    (s) => (s.observers[0].admin_hidden_type = "refused"),
+  );
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "all_refused.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(source)),
+  });
+  await expect(refusedWarning).toContainText("14 records marked invalid");
+  await expect(page.getByRole("button", { name: "Download CSV" })).toBeDisabled();
+});
+
 test("dead-bird exclusion and untimed overnight effort require confirmation", async ({ page }) => {
   await stubNetwork(page);
   await openApp(page);

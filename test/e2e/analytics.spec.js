@@ -19,6 +19,14 @@ test("acceptance tracks conversion; withdrawal preserves the import and CSV", as
   await page.getByRole("button", { name: "Allow usage statistics" }).click();
   await expect.poll(() => googleRequests(requests).length).toBe(1);
   await importFixture(page, "ornitho.ch", FIXTURE);
+  await page.getByRole("heading", { level: 2, name: "Export" }).scrollIntoViewIfNeeded();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.dataLayer.some((entry) => entry[1] === "panel_view" && entry[2].panel === "export"),
+      ),
+    )
+    .toBe(true);
   expect(await downloadCsv(page)).toBe(readGolden(FIXTURE));
   const events = await page.evaluate(() =>
     window.dataLayer.filter((entry) => entry[0] === "event").map((entry) => [entry[1], entry[2]]),
@@ -113,7 +121,13 @@ test("exports report personalized and disabled species comments without their co
   await page.getByRole("button", { name: "Close", exact: true }).click();
   expect(
     Papa.parse(await downloadCsv(page)).data.every((row) =>
-      row[4].split(/<br\/>|, /).every((comment) => comment === "Private template text"),
+      row[4]
+        .split("<br/>")
+        .every(
+          (comment) =>
+            comment.startsWith("CAvS: ") ||
+            comment.split(", ").every((part) => part === "Private template text"),
+        ),
     ),
   ).toBe(true);
   let payload = await page.evaluate(
@@ -125,9 +139,13 @@ test("exports report personalized and disabled species comments without their co
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator("#customized-species-comments").uncheck();
   await page.getByRole("button", { name: "Close", exact: true }).click();
-  expect(Papa.parse(await downloadCsv(page)).data.every((row) => row[4] === "")).toBe(true);
+  expect(
+    Papa.parse(await downloadCsv(page)).data.every(
+      (row) => row[4] === "" || row[4].startsWith("CAvS: "),
+    ),
+  ).toBe(true);
   payload = await page.evaluate(
     () => window.dataLayer.filter((entry) => entry[1] === "export_csv").at(-1)[2],
   );
-  expect(payload).toMatchObject({ comment_mode: "disabled", has_species_comments: "no" });
+  expect(payload).toMatchObject({ comment_mode: "disabled", has_species_comments: "yes" });
 });
