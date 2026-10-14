@@ -844,15 +844,6 @@ async function downloadFile() {
                   >
                     {{ t("exportBasicChangeGrouping") }}
                   </button>
-                  <span class="d-block mt-1" role="status">
-                    {{
-                      t(
-                        assignmentCustomized
-                          ? "aggregationKeepsAssignments"
-                          : "aggregationAppliesImmediately",
-                      )
-                    }}
-                  </span>
                 </span>
                 <span v-else-if="item.name === 'Historical'" class="export-protocol-note">
                   <LinkedText :text="t('exportHistoricalNote')" :links="['#help/conversion']" />
