@@ -40,6 +40,7 @@ jobs:
             echo "The taxonomy data is up to date."
             exit 0
           fi
+          npm version patch --no-git-tag-version
           # Pull requests opened with the workflow token do not start CI, so check here.
           npm run check
           git config user.name "github-actions[bot]"
