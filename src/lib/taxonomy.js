@@ -24,6 +24,22 @@ let scientificNameIndex = null;
 let bundledScientificNameByCode = null;
 let scientificNameIndexPromise = null;
 
+// Source exports do not say which taxonomy version they used. These names previously covered
+// both sides of a split, so retain the broader eBird taxon rather than guessing a species.
+const splitTaxa = {
+  "Cistothorus palustris": "marwre",
+  "Cymbirhynchus macrorhynchos": "barbro1",
+  "Muscicapa striata": "spofly1",
+  "Myophonus caeruleus": "blwthr1",
+  "Myophonus caeruleus temminckii": "yebwht1",
+  "Oenanthe lugens": "mouwhe2",
+  "Patagona gigas": "giahum1",
+  "Psalidoprocne nitens": "sqtsaw1",
+  "Pycnonotus plumosus": "olwbul1",
+  "Tringa semipalmata": "willet1",
+  "Turdus albicollis": "whnrob1",
+};
+
 export function loadScientificNameIndex() {
   scientificNameIndexPromise ??= import("/data/ebird_scientific_names.json")
     .then((module) => {
@@ -68,6 +84,9 @@ export function ebirdCodeForScientificName(scientificName) {
   if (!name) {
     return "";
   }
+  if (name in splitTaxa) {
+    return splitTaxa[name];
+  }
   if (scientificNameIndex.has(name)) {
     return scientificNameIndex.get(name);
   }
@@ -86,7 +105,7 @@ export function ebirdCodeForScientificName(scientificName) {
   }
   // Subspecies only: no hybrid ("x") and no second genus ("Pernis apivorus / Buteo buteo").
   if (/^[a-z][a-z /-]*$/.test(rest) && !/(^| )x( |$)/.test(rest)) {
-    return scientificNameIndex.get(species) || "";
+    return splitTaxa[species] || scientificNameIndex.get(species) || "";
   }
   return "";
 }

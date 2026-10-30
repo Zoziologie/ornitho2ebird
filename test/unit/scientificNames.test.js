@@ -3,13 +3,42 @@ import { splitScientificName } from "../../src/lib/exportCsv";
 import {
   bundledEbirdTaxa,
   ebirdCodeForScientificName,
+  getOrnithoEbirdSpeciesCode,
   loadScientificNameIndex,
+  loadOrnithoSpeciesList,
 } from "../../src/lib/taxonomy";
 import { exportFixture, parseFixture } from "../helpers";
 import observationTaxa from "../fixtures/observation_taxa.json";
 
 beforeAll(async () => {
   await loadScientificNameIndex();
+  await loadOrnithoSpeciesList();
+});
+
+it("distinguishes the Faune-France flycatcher species and their unidentified group", () => {
+  expect(getOrnithoEbirdSpeciesCode("457")).toBe("spofly2");
+  expect(getOrnithoEbirdSpeciesCode("38659")).toBe("spofly3");
+  expect(getOrnithoEbirdSpeciesCode("62615")).toBe("spofly1");
+});
+
+it.each([
+  ["1037", "y00648"],
+  ["1502", "swan1"],
+  ["13065", "skua"],
+  ["19482", "shrike"],
+  ["1522", "leswhi2"],
+  ["447", "comchi3"],
+  ["1448", "blkred1"],
+  ["1431", "whbwoo9"],
+  ["1424", "barowl2"],
+  ["1425", "barowl2"],
+  ["54602", "chlido1"],
+  ["1224", "snipe2"],
+  ["1539", "y00950"],
+  ["54330", "y00814"],
+  ["50606", "gnwtea1"],
+])("keeps the reviewed eBird mapping for ornitho %s", (id, code) => {
+  expect(getOrnithoEbirdSpeciesCode(id)).toBe(code);
 });
 
 describe("ebirdCodeForScientificName", () => {
@@ -30,6 +59,22 @@ describe("ebirdCodeForScientificName", () => {
     // Older names, from the ornitho list.
     ["Anas querquedula", "gargan"],
     ["Bubulcus ibis", "categr1"],
+    ["Pernis apivorus / Buteo buteo", "hawk"],
+    // Legacy names that span a 2026 split remain at the broader taxon.
+    ["Muscicapa striata", "spofly1"],
+    ["Muscicapa tyrrhenica", "spofly3"],
+    ["Muscicapa striata tyrrhenica", "spofly10"],
+    ["Muscicapa striata balearica", "spofly9"],
+    ["Tringa semipalmata", "willet1"],
+    ["Turdus albicollis", "whnrob1"],
+    ["Cistothorus palustris", "marwre"],
+    ["Cymbirhynchus macrorhynchos", "barbro1"],
+    ["Myophonus caeruleus", "blwthr1"],
+    ["Myophonus caeruleus temminckii", "yebwht1"],
+    ["Oenanthe lugens", "mouwhe2"],
+    ["Patagona gigas", "giahum1"],
+    ["Psalidoprocne nitens", "sqtsaw1"],
+    ["Pycnonotus plumosus", "olwbul1"],
     // Source conventions.
     ["Apus spec.", "apus2"],
     ["Columba livia forma domestica", "rocpig1"],
@@ -45,7 +90,6 @@ describe("ebirdCodeForScientificName", () => {
     "Gavia nonexistens",
     // Not a subspecies: a hybrid, or two genera.
     "Gavia stellata x unknownus",
-    "Pernis apivorus / Buteo buteo",
     "Plain Martin",
   ])("%j has no eBird code", (name) => {
     expect(ebirdCodeForScientificName(name)).toBe("");

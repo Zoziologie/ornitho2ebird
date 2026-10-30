@@ -18,6 +18,7 @@ import {
 } from "./speciesList.js";
 
 const NAMES_FILE = new URL("../data/ebird_scientific_names.json", import.meta.url);
+const LEGACY_NAMES_FILE = new URL("../data/ornitho_legacy_names.json", import.meta.url);
 
 const normalize = (name) =>
   String(name || "")
@@ -55,9 +56,18 @@ if (errors.length > 0) {
 }
 const fixed = [];
 const unresolved = [];
+const renamed = new Map();
 rows.forEach((row) => {
   const code = row.ebird_species_code;
-  if (!code || taxonByCode.has(code)) {
+  if (!code) {
+    return;
+  }
+  const taxon = taxonByCode.get(code);
+  if (taxon) {
+    const previousName = previousNameByCode.get(code);
+    if (previousName && previousName !== normalize(taxon.sciName)) {
+      renamed.set(code, { previousName, taxon });
+    }
     return;
   }
   const newCode =
@@ -86,7 +96,10 @@ if (fixed.length > 0) {
 
 // 2. Scientific names.
 const names = Object.fromEntries([...codeByName].sort(([a], [b]) => (a < b ? -1 : 1)));
-const synonyms = {};
+const legacyNames = Object.entries(JSON.parse(readFileSync(LEGACY_NAMES_FILE, "utf8")));
+const synonyms = Object.fromEntries(
+  legacyNames.filter(([name, code]) => !(name in names) && taxonByCode.has(code)),
+);
 rows.forEach((row) => {
   const name = normalize(row.ornitho_latin);
   if (name && !(name in names) && taxonByCode.has(row.ebird_species_code)) {
@@ -119,6 +132,24 @@ if (unresolved.length > 0) {
       (row) =>
         `- ${row.id} ${row.ornitho_english} (${row.ornitho_latin}): \`${row.ebird_species_code}\``,
     ),
+  );
+}
+if (renamed.size > 0) {
+  report.push(
+    "",
+    `**${renamed.size} mapped eBird codes have a different scientific name.** Review whether their meaning changed, especially when a species became a broader group:`,
+    ...[...renamed.entries()].map(
+      ([code, { previousName, taxon }]) =>
+        `- \`${code}\`: ${previousName} → ${taxon.sciName} (${taxon.comName})`,
+    ),
+  );
+}
+const staleLegacy = legacyNames.filter(([, code]) => !taxonByCode.has(code));
+if (staleLegacy.length > 0) {
+  report.push(
+    "",
+    `**${staleLegacy.length} legacy names have obsolete codes.** Review their meaning and update \`data/ornitho_legacy_names.json\`:`,
+    ...staleLegacy.map(([name, code]) => `- ${name}: \`${code}\``),
   );
 }
 console.log(report.join("\n"));
